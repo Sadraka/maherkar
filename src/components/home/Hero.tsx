@@ -89,17 +89,24 @@ export default function Hero() {
   
   // تنظیمات مشترک منوی کشویی
   const menuPropsRTL: Partial<MenuProps> = {
-      anchorOrigin: { vertical: "bottom", horizontal: "right" },
-      transformOrigin: { vertical: "top", horizontal: "right" },
+      anchorOrigin: { vertical: "bottom", horizontal: "center" },
+      transformOrigin: { vertical: "top", horizontal: "center" },
       PaperProps: {
         sx: { 
           textAlign: 'center',
           direction: 'rtl',
-          marginTop: '4px', // فاصله کوچک از فیلد
+          marginTop: '8px', // فاصله بیشتر از فیلد
+          width: 'auto', 
+          maxWidth: { xs: '100%', md: 'none' }, // در موبایل حداکثر عرض برابر با والد
+          boxShadow: '0px 5px 15px rgba(0, 0, 0, 0.15)', // سایه بیشتر برای وضوح بهتر
+          borderRadius: '8px', // گرد کردن گوشه‌ها
           '& .MuiMenuItem-root': { 
-            justifyContent: 'center', // وسط‌چین کردن متن آیتم
+            justifyContent: 'center', 
             textAlign: 'center',
             width: '100%',
+            padding: { xs: '12px 16px', md: '8px 16px' }, // پدینگ بیشتر در موبایل
+            fontSize: { xs: '0.95rem', md: '0.875rem' }, // فونت بزرگتر در موبایل
+            minHeight: { xs: '48px', md: '36px' }, // ارتفاع بیشتر آیتم‌ها در موبایل
             '&:hover': {
                 backgroundColor: employerColors.bgVeryLight,
             },
@@ -111,14 +118,20 @@ export default function Hero() {
                     backgroundColor: employerColors.bgLight,
                 }
             }
+          },
+          // استایل مخصوص موبایل
+          [theme.breakpoints.down('sm')]: {
+            width: 'calc(100% - 32px)', // کمی کوچکتر از عرض صفحه
+            left: '16px !important', // فاصله از چپ
+            right: '16px !important', // فاصله از راست
           }
         }
       },
-      slotProps: {
-        paper: { 
-          style: { 
-            minWidth: '150px' // عرض حداقل برای منو
-          }
+      MenuListProps: {
+        style: { 
+          paddingTop: '8px',
+          paddingBottom: '8px',
+          width: '100%' 
         }
       }
   };
@@ -127,7 +140,7 @@ export default function Hero() {
   const textFieldStyles = {
     '& .MuiOutlinedInput-root': {
       borderRadius: '6px', // کمی گردتر
-      height: '48px',
+      height: { xs: '52px', md: '48px' }, // ارتفاع بیشتر در موبایل برای لمس راحت‌تر
       backgroundColor: theme.palette.background.paper,
       transition: 'border-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out',
       direction: 'rtl', // اضافه کردن direction rtl به کل فیلد
@@ -148,7 +161,8 @@ export default function Hero() {
         textAlign: 'center',
         direction: 'rtl',
         paddingLeft: '36px',  // افزایش پدینگ چپ برای آیکون
-        paddingRight: '36px'  // افزایش پدینگ راست برای آیکون
+        paddingRight: '36px',  // افزایش پدینگ راست برای آیکون
+        fontSize: { xs: '0.95rem', md: '0.9rem' } // فونت بزرگتر در موبایل
      },
      // انتقال آیکون دراپ‌داون به سمت چپ
      '& .MuiSelect-icon': {
