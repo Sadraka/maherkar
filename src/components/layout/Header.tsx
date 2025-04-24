@@ -142,10 +142,10 @@ export default function Header() {
   // منوی کارفرما
   const employerMenuItems = [
     { 
-      title: 'مشاهده تمام فریلنسرها', 
+      title: 'مشاهده تمام کارجویان', 
       icon: <FontAwesomeIcon icon={faUsers} size="2x" color={theme.palette.primary.main} />, 
       href: '#',
-      description: 'فریلنسرهای فعال در ماهرکار را مشاهده کرده و براساس مهارت مورد نظر خود انتخاب کنید.'
+      description: 'کارجویان فعال در ماهرکار را مشاهده کرده و براساس مهارت مورد نظر خود انتخاب کنید.'
     },
     { 
       title: 'مشاهده دسته‌بندی‌ها و مهارت‌ها', 
@@ -200,7 +200,7 @@ export default function Header() {
       color: 'candidate', 
       href: '#', 
       variant: 'text', 
-      icon: <FontAwesomeIcon icon={faUserGraduate} />,
+      icon: <FontAwesomeIcon icon={faUserTie} />,
       hasSubmenu: true,
       menuItems: candidateMenuItems,
       menuId: 'candidate-menu',
