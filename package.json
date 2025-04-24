@@ -13,9 +13,11 @@
     "@emotion/styled": "^11.14.0",
     "@mui/icons-material": "^7.0.2",
     "@mui/material": "^7.0.2",
+    "@types/stylis": "^4.2.7",
     "next": "15.3.0",
     "react": "^19.0.0",
-    "react-dom": "^19.0.0"
+    "react-dom": "^19.0.0",
+    "stylis-plugin-rtl": "^2.1.1"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",

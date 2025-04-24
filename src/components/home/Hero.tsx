@@ -1,3 +1,5 @@
+'use client'
+
 import { Box, Container, Typography, Paper, TextField, MenuItem, Button } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 
