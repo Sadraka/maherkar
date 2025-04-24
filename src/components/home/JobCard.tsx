@@ -52,7 +52,7 @@ export default function JobCard({ job }: JobCardProps) {
   return (
     <Card 
       sx={{ 
-        height: '100%', 
+        height: 'auto', 
         display: 'flex', 
         flexDirection: 'column',
         borderRadius: 2,
@@ -73,23 +73,23 @@ export default function JobCard({ job }: JobCardProps) {
         <Box
           sx={{
             position: 'absolute',
-            top: 12,
-            right: 12,
+            top: 8,
+            right: 8,
             bgcolor: 'rgba(211, 47, 47, 0.95)',
             color: '#fff',
-            fontSize: '0.75rem',
+            fontSize: '0.7rem',
             fontWeight: 'bold',
-            px: 1.5,
-            py: 0.6,
+            px: 1.2,
+            py: 0.4,
             borderRadius: '20px',
             display: 'flex',
             alignItems: 'center',
-            gap: 0.5,
+            gap: 0.3,
             zIndex: 2,
             boxShadow: '0 2px 8px rgba(211, 47, 47, 0.3)'
           }}
         >
-          <StarIcon sx={{ fontSize: '0.85rem' }} />
+          <StarIcon sx={{ fontSize: '0.75rem' }} />
           ویژه
         </Box>
       )}
@@ -98,20 +98,20 @@ export default function JobCard({ job }: JobCardProps) {
         <Box
           sx={{
             position: 'absolute',
-            top: 12,
-            right: 12,
-            bgcolor: `rgba(${employerColors.primary.replace('rgb(', '').replace(')', '')}, 0.95)`,
+            top: 8,
+            right: 8,
+            bgcolor: 'rgba(255, 145, 0, 0.9)',
             color: '#fff',
             fontSize: '0.75rem',
             fontWeight: 'bold',
             px: 1.5,
-            py: 0.6,
+            py: 0.5,
             borderRadius: '20px',
             display: 'flex',
             alignItems: 'center',
-            gap: 0.5,
+            gap: 0.4,
             zIndex: 2,
-            boxShadow: `0 2px 8px ${employerColors.bgLight}`
+            boxShadow: '0 3px 10px rgba(255, 145, 0, 0.4)'
           }}
         >
           <LocalFireDepartmentIcon sx={{ fontSize: '0.85rem' }} />
@@ -121,18 +121,19 @@ export default function JobCard({ job }: JobCardProps) {
       
       <CardContent sx={{ 
         flexGrow: 1, 
-        p: 3, 
-        '&:last-child': { pb: 3 }
+        p: 2, 
+        pb: 2,
+        '&:last-child': { pb: 2 }
       }}>
         <Typography 
           variant="h6" 
           component="h3"
           sx={{ 
-            mb: 1, 
+            mb: 0.5, 
             fontWeight: 'bold', 
-            fontSize: '1.1rem',
+            fontSize: '1rem',
             color: theme.palette.text.primary,
-            mt: (job.isPromoted || job.isUrgent) ? 2 : 0,
+            mt: (job.isPromoted || job.isUrgent) ? 1.5 : 0,
           }}
         >
           {job.title}
@@ -140,11 +141,12 @@ export default function JobCard({ job }: JobCardProps) {
         <Typography 
           variant="body2"
           sx={{ 
-            mb: 2,
+            mb: 1.5,
             color: theme.palette.text.secondary,
             display: 'flex',
             alignItems: 'center',
-            gap: 0.5
+            gap: 0.5,
+            fontSize: '0.85rem'
           }}
         >
           <FontAwesomeIcon 
@@ -152,39 +154,39 @@ export default function JobCard({ job }: JobCardProps) {
             style={{ 
               color: employerColors.primary,
               marginLeft: '4px',
-              fontSize: '0.9rem'
+              fontSize: '0.85rem'
             }} 
           />
           {job.company}
         </Typography>
         
         <Box sx={{ 
-          mb: 2,
-          p: 1.5, 
+          mb: 1.5,
+          p: 1.2, 
           bgcolor: employerColors.bgVeryLight, 
           borderRadius: 1.5
         }}>
-          <Stack direction="row" spacing={2} sx={{ mb: 1.5 }}>
+          <Stack direction="row" spacing={1.5} sx={{ mb: 1 }}>
             <Box 
               sx={{ 
                 display: 'flex', 
                 alignItems: 'center', 
                 color: theme.palette.text.secondary,
-                fontSize: '0.875rem'
+                fontSize: '0.8rem'
               }}
             >
               <LocationOnOutlinedIcon 
                 fontSize="small" 
-                sx={{ mr: 0.5, fontSize: '1rem', color: employerColors.primary }} 
+                sx={{ mr: 0.3, fontSize: '0.9rem', color: employerColors.primary }} 
               />
               {job.location}
               {job.isRemote && <Chip 
                 label="دورکاری" 
                 size="small" 
                 sx={{ 
-                  ml: 1, 
-                  fontSize: '0.7rem',
-                  height: 20,
+                  ml: 0.5, 
+                  fontSize: '0.65rem',
+                  height: 18,
                   backgroundColor: 'rgba(255,255,255,0.7)',
                   color: employerColors.primary,
                   borderRadius: '4px',
@@ -198,12 +200,12 @@ export default function JobCard({ job }: JobCardProps) {
                 display: 'flex', 
                 alignItems: 'center', 
                 color: theme.palette.text.secondary,
-                fontSize: '0.875rem'
+                fontSize: '0.8rem'
               }}
             >
               <AccessTimeOutlinedIcon 
                 fontSize="small" 
-                sx={{ mr: 0.5, fontSize: '1rem', color: employerColors.primary }} 
+                sx={{ mr: 0.3, fontSize: '0.9rem', color: employerColors.primary }} 
               />
               {job.timePosted}
             </Box>
@@ -215,12 +217,12 @@ export default function JobCard({ job }: JobCardProps) {
                 display: 'flex', 
                 alignItems: 'center', 
                 color: theme.palette.text.secondary,
-                fontSize: '0.875rem'
+                fontSize: '0.8rem'
               }}
             >
               <WorkOutlineIcon 
                 fontSize="small" 
-                sx={{ mr: 0.5, fontSize: '1rem', color: employerColors.primary }} 
+                sx={{ mr: 0.3, fontSize: '0.9rem', color: employerColors.primary }} 
               />
               {job.jobType}
             </Box>
@@ -230,20 +232,20 @@ export default function JobCard({ job }: JobCardProps) {
                 display: 'flex', 
                 alignItems: 'center', 
                 color: theme.palette.text.secondary,
-                fontSize: '0.875rem'
+                fontSize: '0.8rem'
               }}
             >
               <MonetizationOnOutlinedIcon 
                 fontSize="small" 
-                sx={{ mr: 0.5, fontSize: '1rem', color: employerColors.primary }} 
+                sx={{ mr: 0.3, fontSize: '0.9rem', color: employerColors.primary }} 
               />
               {job.salary}
             </Box>
           </Stack>
         </Box>
         
-        <Box sx={{ mb: 3 }}>
-          <Typography variant="body2" sx={{ mb: 0.75, fontWeight: 600, color: theme.palette.text.secondary }}>
+        <Box sx={{ mb: 2 }}>
+          <Typography variant="body2" sx={{ mb: 0.5, fontWeight: 600, color: theme.palette.text.secondary, fontSize: '0.85rem' }}>
             مهارت‌ها:
           </Typography>
           <Stack direction="row" spacing={0} flexWrap="wrap" gap={0.3}>

@@ -50,7 +50,7 @@ export default function ExpertCard({ expert }: ExpertCardProps) {
   return (
     <Card 
       sx={{ 
-        height: '100%', 
+        height: 'auto', 
         display: 'flex', 
         flexDirection: 'column',
         borderRadius: 2,
@@ -66,15 +66,15 @@ export default function ExpertCard({ expert }: ExpertCardProps) {
         }
       }}
     >
-      <CardContent sx={{ p: 3, position: 'relative' }}>
-        <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', mb: 2, position: 'relative' }}>
-          <Box sx={{ position: 'relative', mb: 1.5 }}>
+      <CardContent sx={{ p: 2, position: 'relative' }}>
+        <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', mb: 1.5, position: 'relative' }}>
+          <Box sx={{ position: 'relative', mb: 1 }}>
             <Avatar 
               src={expert.avatar} 
               alt={expert.name}
               sx={{ 
-                width: 90, 
-                height: 90, 
+                width: 70, 
+                height: 70, 
                 border: 'none',
                 boxShadow: 'none'
               }} 
@@ -89,8 +89,8 @@ export default function ExpertCard({ expert }: ExpertCardProps) {
                   bgcolor: jobSeekerColors.primary,
                   color: 'white', 
                   borderRadius: '50%',
-                  width: 24,
-                  height: 24,
+                  width: 20,
+                  height: 20,
                   display: 'flex',
                   justifyContent: 'center',
                   alignItems: 'center',
@@ -104,21 +104,21 @@ export default function ExpertCard({ expert }: ExpertCardProps) {
                   }
                 }}
               >
-                <CheckIcon sx={{ fontSize: '0.9rem' }} />
+                <CheckIcon sx={{ fontSize: '0.8rem' }} />
               </Box>
             )}
           </Box>
           
           <Box sx={{ textAlign: 'center' }}>
-            <Typography variant="h6" sx={{ fontWeight: 'bold', fontSize: '1.05rem' }}>
+            <Typography variant="h6" sx={{ fontWeight: 'bold', fontSize: '1rem', mb: 0.3 }}>
               {expert.name}
             </Typography>
             
-            <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+            <Typography variant="body2" color="text.secondary" sx={{ mb: 0.7, fontSize: '0.85rem' }}>
               {expert.jobTitle}
             </Typography>
             
-            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', mb: 0.5 }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', mb: 0 }}>
               <Rating 
                 value={expert.rating} 
                 precision={0.1} 
@@ -126,39 +126,42 @@ export default function ExpertCard({ expert }: ExpertCardProps) {
                 size="small" 
                 sx={{ 
                   mr: 0.5,
-                  color: jobSeekerColors.primary
+                  color: jobSeekerColors.primary,
+                  '& .MuiRating-icon': {
+                    fontSize: '0.9rem'
+                  }
                 }} 
               />
-              <Typography variant="body2" sx={{ fontWeight: 'medium' }}>
+              <Typography variant="body2" sx={{ fontWeight: 'medium', fontSize: '0.8rem' }}>
                 {convertToPersianNumber(expert.rating)}
               </Typography>
             </Box>
           </Box>
         </Box>
         
-        <Divider sx={{ my: 1.5, borderColor: jobSeekerColors.bgLight }} />
+        <Divider sx={{ my: 1, borderColor: jobSeekerColors.bgLight }} />
         
-        <Box sx={{ mb: 2, p: 1.5, bgcolor: jobSeekerColors.bgVeryLight, borderRadius: 1.5 }}>
-          <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
-            <LocationOnOutlinedIcon fontSize="small" sx={{ color: jobSeekerColors.primary, fontSize: '1rem', ml: 0.5 }} />
-            <Typography variant="body2" color="text.secondary">
+        <Box sx={{ mb: 1.5, p: 1.2, bgcolor: jobSeekerColors.bgVeryLight, borderRadius: 1.5 }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', mb: 0.7 }}>
+            <LocationOnOutlinedIcon fontSize="small" sx={{ color: jobSeekerColors.primary, fontSize: '0.9rem', ml: 0.3 }} />
+            <Typography variant="body2" color="text.secondary" sx={{ fontSize: '0.8rem' }}>
               {expert.location}
             </Typography>
           </Box>
           
           <Box sx={{ display: 'flex', alignItems: 'center' }}>
-            <WorkOutlineIcon fontSize="small" sx={{ color: jobSeekerColors.primary, fontSize: '1rem', ml: 0.5 }} />
-            <Typography variant="body2" color="text.secondary">
+            <WorkOutlineIcon fontSize="small" sx={{ color: jobSeekerColors.primary, fontSize: '0.9rem', ml: 0.3 }} />
+            <Typography variant="body2" color="text.secondary" sx={{ fontSize: '0.8rem' }}>
               {convertToPersianNumber(expert.completedProjects)} پروژه موفق
             </Typography>
           </Box>
         </Box>
         
-        <Box sx={{ mb: 3 }}>
-          <Typography variant="body2" sx={{ mb: 0.75, fontWeight: 600, color: theme.palette.text.secondary }}>
+        <Box sx={{ mb: 1.5 }}>
+          <Typography variant="body2" sx={{ mb: 0.5, fontWeight: 600, color: theme.palette.text.secondary, fontSize: '0.85rem' }}>
             مهارت‌ها:
           </Typography>
-          <Stack direction="row" spacing={0} flexWrap="wrap" gap={0.3}>
+          <Stack direction="row" spacing={0} flexWrap="wrap" gap={0.2}>
             {expert.skills.map((skill, index) => (
               <Chip 
                 key={index} 
@@ -168,15 +171,15 @@ export default function ExpertCard({ expert }: ExpertCardProps) {
                   bgcolor: 'rgba(0, 128, 0, 0.1)',
                   border: 'none',
                   fontWeight: 500,
-                  fontSize: '0.7rem',
+                  fontSize: '0.65rem',
                   borderRadius: 0.8,
                   color: jobSeekerColors.primary,
                   py: 0.1,
                   px: 0.1,
-                  m: 0.15,
-                  height: '20px',
+                  m: 0.1,
+                  height: '18px',
                   '& .MuiChip-label': {
-                    px: 1
+                    px: 0.8
                   }
                 }}
               />
@@ -184,17 +187,18 @@ export default function ExpertCard({ expert }: ExpertCardProps) {
           </Stack>
         </Box>
         
-        <Divider sx={{ my: 1.5, borderColor: jobSeekerColors.bgLight }} />
+        <Divider sx={{ my: 1, borderColor: jobSeekerColors.bgLight }} />
         
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mt: 2 }}>
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mt: 1.5 }}>
           <Button 
             variant="contained" 
             color="success"
+            size="small"
             sx={{ 
-              py: 1,
+              py: 0.7,
               fontWeight: 'bold',
               borderRadius: 1.5,
-              fontSize: '0.85rem',
+              fontSize: '0.8rem',
               background: `linear-gradient(135deg, ${jobSeekerColors.light} 0%, ${jobSeekerColors.primary} 100%)`,
               boxShadow: `0 4px 8px rgba(0, 112, 60, 0.2)`,
               '&:hover': {
@@ -210,18 +214,18 @@ export default function ExpertCard({ expert }: ExpertCardProps) {
               sx={{ 
                 display: 'flex', 
                 alignItems: 'center', 
-                px: 1.5, 
-                py: 0.5, 
-                borderRadius: 2,
+                px: 1, 
+                py: 0.4, 
+                borderRadius: 1.5,
                 bgcolor: 'rgba(0, 128, 0, 0.08)',
                 border: `1px solid ${jobSeekerColors.bgLight}`
               }}
             >
               <HistoryIcon 
                 sx={{ 
-                  fontSize: '1.1rem', 
+                  fontSize: '1rem', 
                   color: jobSeekerColors.primary, 
-                  mr: 0.5 
+                  mr: 0.3 
                 }} 
               />
               <Typography 
@@ -229,12 +233,12 @@ export default function ExpertCard({ expert }: ExpertCardProps) {
                 sx={{ 
                   fontWeight: 'bold', 
                   color: jobSeekerColors.primary,
-                  fontSize: '0.9rem',
+                  fontSize: '0.8rem',
                   display: 'flex',
                   alignItems: 'center'
                 }}
               >
-                {convertToPersianNumber(expert.experienceYears)} <Box component="span" sx={{ mr: 0.3 }} />سال سابقه
+                {convertToPersianNumber(expert.experienceYears)} <Box component="span" sx={{ mr: 0.2 }} />سال سابقه
               </Typography>
             </Box>
           )}
