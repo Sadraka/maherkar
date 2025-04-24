@@ -1,36 +1,106 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# ماهرکار - پلتفرم کاریابی و استخدام متخصصین
 
-## Getting Started
+این پروژه یک پلتفرم کاریابی مشابه پونیشا است که با استفاده از Next.js و Material-UI (MUI) پیاده‌سازی شده است.
 
-First, run the development server:
+## تکنولوژی‌های استفاده شده
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+- Next.js 15.3.0
+- Material-UI (MUI)
+- TypeScript
+- Tailwind CSS
+
+## ویژگی‌ها
+
+- طراحی ریسپانسیو و مدرن
+- رابط کاربری RTL
+- کامپوننت‌محور و قابل توسعه
+- بهینه‌سازی شده برای SEO
+- پشتیبانی از فونت فارسی (ایران‌سنس)
+
+## ساختار پروژه
+
+```
+src/
+├── app/
+│   ├── layout.tsx      # لایوت اصلی برنامه
+│   ├── page.tsx        # صفحه اصلی
+│   └── globals.css     # استایل‌های سراسری
+├── components/
+│   ├── layout/
+│   │   └── Header.tsx  # هدر سایت
+│   └── home/
+│       └── Hero.tsx    # بخش جستجوی صفحه اصلی
+└── theme/
+    └── theme.ts        # تنظیمات تم MUI
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## نصب و راه‌اندازی
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+1. نصب وابستگی‌ها:
+```bash
+npm install
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+2. اجرای برنامه در محیط توسعه:
+```bash
+npm run dev
+```
 
-## Learn More
+3. ساخت نسخه production:
+```bash
+npm run build
+```
 
-To learn more about Next.js, take a look at the following resources:
+## تاریخچه تغییرات
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+### نسخه 0.1.0
+- راه‌اندازی اولیه پروژه با Next.js
+- اضافه کردن Material-UI و تنظیمات تم
+- پیاده‌سازی هدر سایت
+- پیاده‌سازی بخش جستجوی صفحه اصلی
+- اضافه کردن فونت ایران‌سنس
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## کامیت‌های انجام شده
 
-## Deploy on Vercel
+1. Initial commit - Project setup
+```bash
+git init
+git add .
+git commit -m "Initial commit: Project setup with Next.js and TypeScript"
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+2. Add Material-UI
+```bash
+git add .
+git commit -m "Add Material-UI and theme configuration"
+```
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+3. Add Header component
+```bash
+git add .
+git commit -m "Add responsive header component"
+```
+
+4. Add Hero section
+```bash
+git add .
+git commit -m "Add hero section with search functionality"
+```
+
+5. Add IRANSans font
+```bash
+git add .
+git commit -m "Add IRANSans font and RTL support"
+```
+
+## برنامه‌های آینده
+
+- [ ] اضافه کردن بخش فرصت‌های شغلی جدید
+- [ ] اضافه کردن بخش متخصصین جویای کار
+- [ ] اضافه کردن بخش سوالات متداول
+- [ ] پیاده‌سازی فوتر
+- [ ] اتصال به بک‌اند جنگو
+
+## مشارکت
+
+برای مشارکت در این پروژه، لطفاً ابتدا موضوع را در بخش Issues مطرح کنید.
