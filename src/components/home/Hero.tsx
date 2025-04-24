@@ -23,25 +23,27 @@ const jobCategories = [
 
 const provinces = [
   { value: '', label: 'همه استان‌ها' },
+  { value: 'east-azerbaijan', label: 'آذربایجان شرقی' },
   { value: 'tehran', label: 'تهران' },
   { value: 'isfahan', label: 'اصفهان' },
   { value: 'khorasan-razavi', label: 'خراسان رضوی' },
   { value: 'fars', label: 'فارس' },
-  { value: 'east-azerbaijan', label: 'آذربایجان شرقی' }
+
 ];
 
 const cities = [
   { value: '', label: 'همه شهرها', province: '' },
   { value: 'tehran-city', label: 'تهران', province: 'tehran' },
+  { value: 'tabriz-city', label: 'تبریز', province: 'east-azerbaijan' },
+  { value: 'maragheh', label: 'میانه', province: 'east-azerbaijan' },
   { value: 'karaj', label: 'کرج', province: 'tehran' },
   { value: 'isfahan-city', label: 'اصفهان', province: 'isfahan' },
   { value: 'kashan', label: 'کاشان', province: 'isfahan' },
   { value: 'mashhad-city', label: 'مشهد', province: 'khorasan-razavi' },
   { value: 'neyshabur', label: 'نیشابور', province: 'khorasan-razavi' },
   { value: 'shiraz-city', label: 'شیراز', province: 'fars' },
-  { value: 'marvdasht', label: 'مرودشت', province: 'fars' },
-  { value: 'tabriz-city', label: 'تبریز', province: 'east-azerbaijan' },
-  { value: 'maragheh', label: 'میانه', province: 'east-azerbaijan' }
+  { value: 'marvdasht', label: 'مرودشت', province: 'fars' }
+
 ];
 
 export default function Hero() {
@@ -93,20 +95,31 @@ export default function Hero() {
       transformOrigin: { vertical: "top", horizontal: "center" },
       PaperProps: {
         sx: { 
+          marginTop: '8px',
           textAlign: 'center',
           direction: 'rtl',
-          marginTop: '8px', // فاصله بیشتر از فیلد
-          width: 'auto', 
-          maxWidth: { xs: '100%', md: 'none' }, // در موبایل حداکثر عرض برابر با والد
-          boxShadow: '0px 5px 15px rgba(0, 0, 0, 0.15)', // سایه بیشتر برای وضوح بهتر
-          borderRadius: '8px', // گرد کردن گوشه‌ها
+          width: 'auto',
+          maxHeight: { xs: '250px', sm: '280px', md: '300px' },
+          maxWidth: { xs: '100%', md: 'none' },
+          boxShadow: '0px 5px 15px rgba(0, 0, 0, 0.15)',
+          borderRadius: '8px',
+          overflowY: 'auto',
+          WebkitOverflowScrolling: 'touch',
+          msOverflowStyle: 'none',
+          // در موبایل منو به اندازه کامپوننت Select باشد
+          [theme.breakpoints.down('sm')]: {
+            minWidth: '100%',
+          },
           '& .MuiMenuItem-root': { 
             justifyContent: 'center', 
             textAlign: 'center',
             width: '100%',
-            padding: { xs: '12px 16px', md: '8px 16px' }, // پدینگ بیشتر در موبایل
-            fontSize: { xs: '0.95rem', md: '0.875rem' }, // فونت بزرگتر در موبایل
-            minHeight: { xs: '48px', md: '36px' }, // ارتفاع بیشتر آیتم‌ها در موبایل
+            padding: { xs: '12px 16px', md: '8px 16px' },
+            fontSize: { xs: '0.95rem', md: '0.875rem' },
+            minHeight: { xs: '50px', md: '36px' },
+            whiteSpace: 'normal',
+            wordWrap: 'break-word',
+            lineHeight: '1.4',
             '&:hover': {
                 backgroundColor: employerColors.bgVeryLight,
             },
@@ -119,19 +132,30 @@ export default function Hero() {
                 }
             }
           },
-          // استایل مخصوص موبایل
-          [theme.breakpoints.down('sm')]: {
-            width: 'calc(100% - 32px)', // کمی کوچکتر از عرض صفحه
-            left: '16px !important', // فاصله از چپ
-            right: '16px !important', // فاصله از راست
+          '&::-webkit-scrollbar': {
+            width: '8px',
+          },
+          '&::-webkit-scrollbar-track': {
+            backgroundColor: 'rgba(0,0,0,0.05)',
+            borderRadius: '4px',
+          },
+          '&::-webkit-scrollbar-thumb': {
+            backgroundColor: 'rgba(0,0,0,0.15)',
+            borderRadius: '4px',
+            '&:hover': {
+              backgroundColor: 'rgba(0,0,0,0.25)',
+            },
           }
         }
       },
       MenuListProps: {
-        style: { 
+        sx: { 
           paddingTop: '8px',
           paddingBottom: '8px',
-          width: '100%' 
+          width: '100%',
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '2px'
         }
       }
   };
