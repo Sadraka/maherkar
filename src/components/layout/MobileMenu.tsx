@@ -486,13 +486,16 @@ export default function MobileMenu() {
             boxSizing: 'border-box', 
             width: '100%',
             height: 'auto',
-            maxHeight: 'calc(100% - 70px)',
+            maxHeight: 'calc(100% - 100px)',
             borderTopLeftRadius: 24,
             borderTopRightRadius: 24,
-            bottom: 70,
+            borderBottomLeftRadius: 0,
+            borderBottomRightRadius: 0,
+            bottom: 40,
             top: 'auto',
             boxShadow: '0 -8px 25px rgba(0,0,0,0.1)',
             zIndex: (theme) => theme.zIndex.drawer,
+            pb: 1.5
           },
           '& .MuiBackdrop-root': {
             backgroundColor: 'rgba(0, 0, 0, 0.15)',
@@ -523,6 +526,7 @@ export default function MobileMenu() {
           borderRadius: '24px 24px 0 0',
           overflow: 'hidden',
           boxShadow: '0 -4px 20px rgba(0,0,0,0.1)',
+          bgcolor: 'background.paper',
         }}
       >
         <BottomNavigation

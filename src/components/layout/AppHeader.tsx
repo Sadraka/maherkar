@@ -177,7 +177,8 @@ export default function AppHeader() {
                       </Avatar>}
                       endIcon={
                         (item.menuId === 'employer-menu' && isEmployerHovered) || 
-                        (item.menuId === 'candidate-menu' && isCandidateHovered) ? 
+                        (item.menuId === 'candidate-menu' && isCandidateHovered) ||
+                        (item.menuId === 'help-menu' && isHelpHovered) ? 
                           <FontAwesomeIcon icon={faChevronUp} /> : 
                           <FontAwesomeIcon icon={faChevronDown} />
                       }
@@ -299,75 +300,6 @@ export default function AppHeader() {
                 )}
               </Box>
             ))}
-          </Box>
-
-          {/* دکمه‌های دسکتاپ */}
-          <Box sx={{ display: { xs: 'none', md: 'flex' }, gap: 1 }}>
-            <Button
-              ref={employerButtonRef}
-              onMouseEnter={handleEmployerMouseEnter}
-              onMouseLeave={handleEmployerMouseLeave}
-              variant="contained"
-              color="employer"
-              disableElevation
-              sx={{
-                borderRadius: 2,
-                py: 1.1,
-                px: 2.5,
-                fontWeight: 700,
-                bgcolor: 'employer.main',
-                '&:hover': {
-                  bgcolor: 'employer.dark',
-                }
-              }}
-              startIcon={<FontAwesomeIcon icon={faBuilding} sx={{ fontSize: '1.2rem' }} />}
-            >
-              کارفرما هستم
-            </Button>
-            <Button
-              ref={candidateButtonRef}
-              onMouseEnter={handleCandidateMouseEnter}
-              onMouseLeave={handleCandidateMouseLeave}
-              variant="contained"
-              color="candidate"
-              disableElevation
-              sx={{
-                borderRadius: 2,
-                py: 1.1,
-                px: 2.5,
-                fontWeight: 700,
-                bgcolor: 'candidate.main',
-                '&:hover': {
-                  bgcolor: 'candidate.dark',
-                }
-              }}
-              startIcon={<FontAwesomeIcon icon={faUserTie} sx={{ fontSize: '1.2rem' }} />}
-            >
-              کارجو هستم
-            </Button>
-            <Button
-              ref={helpButtonRef}
-              onMouseEnter={handleHelpMouseEnter}
-              onMouseLeave={handleHelpMouseLeave}
-              variant="outlined"
-              color="primary"
-              sx={{
-                borderRadius: 2,
-                py: 1.1,
-                px: 2.5,
-                fontWeight: 700,
-                borderColor: 'divider',
-                color: 'text.primary',
-                '&:hover': {
-                  bgcolor: 'background.paper',
-                  borderColor: 'primary.main',
-                }
-              }}
-              startIcon={<FontAwesomeIcon icon={faQuestion} sx={{ fontSize: '1.2rem' }} />}
-              endIcon={isHelpHovered ? <FontAwesomeIcon icon={faChevronUp} /> : <FontAwesomeIcon icon={faChevronDown} />}
-            >
-              راهنما
-            </Button>
           </Box>
         </Toolbar>
       </Container>
