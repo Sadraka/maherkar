@@ -474,8 +474,8 @@ export default function MobileMenu() {
             boxShadow: '0 -8px 25px rgba(0,0,0,0.1)',
           },
           '& .MuiBackdrop-root': {
-            backgroundColor: 'rgba(0, 0, 0, 0.3)',
-            backdropFilter: 'blur(4px)' as any,
+            backgroundColor: 'rgba(0, 0, 0, 0.15)',
+            backdropFilter: 'none',
           },
         }}
       >

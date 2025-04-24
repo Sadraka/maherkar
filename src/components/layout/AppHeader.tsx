@@ -28,12 +28,17 @@ export default function AppHeader() {
   const theme = useTheme();
   const { 
     isMobile,
+    mobileOpen,
+    handleDrawerToggle,
     employerButtonRef,
     candidateButtonRef,
+    helpButtonRef,
     handleEmployerMouseEnter,
     handleEmployerMouseLeave,
     handleCandidateMouseEnter,
     handleCandidateMouseLeave,
+    handleHelpMouseEnter,
+    handleHelpMouseLeave,
     isEmployerHovered,
     isCandidateHovered,
   } = useHeaderContext();
@@ -69,7 +74,9 @@ export default function AppHeader() {
       color: 'primary', 
       href: '#', 
       variant: 'text', 
-      hasSubmenu: false,
+      hasSubmenu: true,
+      menuId: 'help-menu',
+      buttonRef: helpButtonRef,
       icon: faQuestion,
       bgColor: alpha(theme.palette.primary.main, 0.15),
       textColor: theme.palette.primary.main
@@ -156,8 +163,8 @@ export default function AppHeader() {
                     <Button 
                       ref={item.buttonRef}
                       variant={item.variant as "text" | "contained" | "outlined"}
-                      onMouseEnter={item.menuId === 'employer-menu' ? handleEmployerMouseEnter : handleCandidateMouseEnter}
-                      onMouseLeave={item.menuId === 'employer-menu' ? handleEmployerMouseLeave : handleCandidateMouseLeave}
+                      onMouseEnter={item.menuId === 'employer-menu' ? handleEmployerMouseEnter : item.menuId === 'candidate-menu' ? handleCandidateMouseEnter : handleHelpMouseEnter}
+                      onMouseLeave={item.menuId === 'employer-menu' ? handleEmployerMouseLeave : item.menuId === 'candidate-menu' ? handleCandidateMouseLeave : handleHelpMouseLeave}
                       color={item.color as any}
                       startIcon={<Avatar sx={{ 
                         width: 24, 
