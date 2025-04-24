@@ -1,11 +1,11 @@
 // تعریف رنگ‌های اصلی پروژه که می‌توانند در کل پروژه استفاده شوند
 
 // رنگ‌های کارجو
-export const JOB_SEEKER_GREEN = '#1e8e3e'; // سبز پررنگ
-export const JOB_SEEKER_LIGHT_GREEN = '#34a853'; // سبز روشن‌تر
-export const JOB_SEEKER_DARK_GREEN = '#137333'; // سبز خیلی تیره
-export const JOB_SEEKER_BG_LIGHT = 'rgba(30, 142, 62, 0.1)'; // سبز با شفافیت کم برای پس‌زمینه
-export const JOB_SEEKER_BG_VERY_LIGHT = 'rgba(30, 142, 62, 0.08)'; // سبز با شفافیت خیلی کم
+export const JOB_SEEKER_GREEN = '#00703c'; // سبز تیره و جذاب
+export const JOB_SEEKER_LIGHT_GREEN = '#008a47'; // سبز روشن‌تر
+export const JOB_SEEKER_DARK_GREEN = '#005530'; // سبز خیلی تیره
+export const JOB_SEEKER_BG_LIGHT = 'rgba(0, 112, 60, 0.1)'; // سبز با شفافیت کم برای پس‌زمینه
+export const JOB_SEEKER_BG_VERY_LIGHT = 'rgba(0, 112, 60, 0.08)'; // سبز با شفافیت خیلی کم
 
 // رنگ‌های کارفرما
 export const EMPLOYER_BLUE = '#0a3b79'; // سرمه‌ای

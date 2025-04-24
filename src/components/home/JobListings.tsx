@@ -168,7 +168,7 @@ export default function JobListings() {
               fontWeight: 700,
               borderRadius: 2,
               fontSize: '1rem',
-              boxShadow: '0 4px 8px rgba(30, 142, 62, 0.2)',
+              boxShadow: '0 4px 8px rgba(0, 112, 60, 0.2)',
             }}
           >
             مشاهده همه آگهی‌ها

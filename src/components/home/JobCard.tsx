@@ -9,15 +9,17 @@ import {
   Stack, 
   Chip, 
   Divider, 
-  useTheme 
+  useTheme,
+  Avatar
 } from '@mui/material';
 import LocationOnOutlinedIcon from '@mui/icons-material/LocationOnOutlined';
 import AccessTimeOutlinedIcon from '@mui/icons-material/AccessTimeOutlined';
 import WorkOutlineIcon from '@mui/icons-material/WorkOutline';
-import BusinessCenterIcon from '@mui/icons-material/BusinessCenter';
 import MonetizationOnOutlinedIcon from '@mui/icons-material/MonetizationOnOutlined';
 import StarIcon from '@mui/icons-material/Star';
 import LocalFireDepartmentIcon from '@mui/icons-material/LocalFireDepartment';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faBuilding } from '@fortawesome/free-solid-svg-icons';
 import { useJobSeekerTheme } from '@/contexts/JobSeekerThemeContext';
 
 // تعریف تایپ جاب
@@ -94,7 +96,7 @@ export default function JobCard({ job }: JobCardProps) {
             position: 'absolute',
             top: 12,
             right: 12,
-            bgcolor: 'rgba(30, 142, 62, 0.95)',
+            bgcolor: 'rgba(0, 112, 60, 0.95)',
             color: '#fff',
             fontSize: '0.75rem',
             fontWeight: 'bold',
@@ -105,7 +107,7 @@ export default function JobCard({ job }: JobCardProps) {
             alignItems: 'center',
             gap: 0.5,
             zIndex: 2,
-            boxShadow: '0 2px 8px rgba(30, 142, 62, 0.3)'
+            boxShadow: '0 2px 8px rgba(0, 112, 60, 0.3)'
           }}
         >
           <LocalFireDepartmentIcon sx={{ fontSize: '0.85rem' }} />
@@ -141,7 +143,14 @@ export default function JobCard({ job }: JobCardProps) {
             gap: 0.5
           }}
         >
-          <BusinessCenterIcon fontSize="small" sx={{ color: jobSeekerColors.primary, opacity: 0.9, fontSize: '1rem' }} />
+          <FontAwesomeIcon 
+            icon={faBuilding} 
+            style={{ 
+              color: jobSeekerColors.primary,
+              marginLeft: '4px',
+              fontSize: '0.9rem'
+            }} 
+          />
           {job.company}
         </Typography>
         
@@ -264,7 +273,7 @@ export default function JobCard({ job }: JobCardProps) {
             fontWeight: 'bold',
             borderRadius: 1.5,
             fontSize: '0.9rem',
-            boxShadow: '0 4px 8px rgba(30, 142, 62, 0.2)',
+            boxShadow: '0 4px 8px rgba(0, 112, 60, 0.2)',
           }}
         >
           درخواست همکاری

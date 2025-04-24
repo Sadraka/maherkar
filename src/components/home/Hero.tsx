@@ -7,6 +7,8 @@ import WorkIcon from '@mui/icons-material/Work';
 import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import { useState, useEffect } from 'react';
+import { useJobSeekerTheme } from '@/contexts/JobSeekerThemeContext';
+import { EMPLOYER_THEME } from '@/constants/colors';
 
 // تعریف داده‌های فارسی برای فیلدهای انتخابی
 const jobCategories = [
@@ -48,6 +50,10 @@ export default function Hero() {
   const [jobCategory, setJobCategory] = useState('');
   const [location, setLocation] = useState('');
   const [city, setCity] = useState('');
+  const jobSeekerColors = useJobSeekerTheme();
+  
+  // رنگ‌های کارفرما برای استفاده در این کامپوننت
+  const employerColors = EMPLOYER_THEME;
 
   // Filtered cities based on selected province
   const [filteredCities, setFilteredCities] = useState(cities);
@@ -93,7 +99,18 @@ export default function Hero() {
           '& .MuiMenuItem-root': { 
             justifyContent: 'center', // وسط‌چین کردن متن آیتم
             textAlign: 'center',
-            width: '100%'
+            width: '100%',
+            '&:hover': {
+                backgroundColor: employerColors.bgVeryLight,
+            },
+            '&.Mui-selected': {
+                backgroundColor: employerColors.bgLight,
+                color: employerColors.primary,
+                fontWeight: 'bold',
+                '&:hover': {
+                    backgroundColor: employerColors.bgLight,
+                }
+            }
           }
         }
       },
@@ -115,15 +132,15 @@ export default function Hero() {
       transition: 'border-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out',
       direction: 'rtl', // اضافه کردن direction rtl به کل فیلد
       '&.Mui-focused .MuiOutlinedInput-notchedOutline': { 
-        borderColor: theme.palette.primary.main,
+        borderColor: employerColors.primary,
         borderWidth: '1px',
-        boxShadow: `0 0 0 2px ${theme.palette.primary.main}33` // اضافه کردن focus ring
+        boxShadow: `0 0 0 2px ${employerColors.primary}33` // اضافه کردن focus ring با رنگ کارفرما
       },
       '&:hover .MuiOutlinedInput-notchedOutline': { 
-         borderColor: theme.palette.grey[500], // پررنگ‌تر در هاور
+         borderColor: employerColors.bgLight, // پررنگ‌تر در هاور
       },
       '.MuiOutlinedInput-notchedOutline': { 
-         borderColor: theme.palette.grey[300],
+         borderColor: employerColors.bgLight,
        }
     },
     // وسط‌چین کردن متن ورودی
@@ -137,7 +154,7 @@ export default function Hero() {
      '& .MuiSelect-icon': {
        right: 'auto',
        left: '7px',
-       color: theme.palette.grey[600]
+       color: employerColors.primary
      },
      '& .MuiSelect-select': {
        textAlign: 'center',
@@ -165,10 +182,7 @@ export default function Hero() {
         pb: { xs: 4, md: 6 },
         backgroundColor: theme.palette.background.default,
         position: 'relative',
-        overflow: 'hidden',
-        mx: 'auto',
-        maxWidth: '1200px',
-        my: 3,
+        overflow: 'hidden'
       }}
     >
       <Container maxWidth="lg">
@@ -192,8 +206,7 @@ export default function Hero() {
         
         <Box
           sx={{
-            maxWidth: '1050px',
-            mx: 'auto',
+            width: '100%',
             display: 'flex',
             flexDirection: { xs: 'column', sm: 'row' },
             alignItems: 'center',
@@ -221,11 +234,11 @@ export default function Hero() {
                 MenuProps={menuPropsRTL}
                 startAdornment={
                   <InputAdornment position="start" sx={{ position: 'absolute', right: '8px' }}>
-                    <WorkIcon fontSize="small" sx={{ color: theme.palette.grey[600] }} />
+                    <WorkIcon fontSize="small" sx={{ color: employerColors.primary }} />
                   </InputAdornment>
                 }
                 IconComponent={(props: any) => (
-                  <KeyboardArrowDownIcon {...props} sx={{ color: theme.palette.grey[600] }} />
+                  <KeyboardArrowDownIcon {...props} sx={{ color: employerColors.primary }} />
                 )}
               >
                 {jobCategories.map((category) => (
@@ -254,11 +267,11 @@ export default function Hero() {
                 MenuProps={menuPropsRTL}
                 startAdornment={
                   <InputAdornment position="start" sx={{ position: 'absolute', right: '8px' }}>
-                    <LocationOnIcon fontSize="small" sx={{ color: theme.palette.grey[600] }} />
+                    <LocationOnIcon fontSize="small" sx={{ color: employerColors.primary }} />
                   </InputAdornment>
                 }
                 IconComponent={(props: any) => (
-                  <KeyboardArrowDownIcon {...props} sx={{ color: theme.palette.grey[600] }} />
+                  <KeyboardArrowDownIcon {...props} sx={{ color: employerColors.primary }} />
                 )}
               >
                 {provinces.map((province) => (
@@ -288,11 +301,11 @@ export default function Hero() {
                 MenuProps={menuPropsRTL}
                 startAdornment={
                   <InputAdornment position="start" sx={{ position: 'absolute', right: '8px' }}>
-                    <LocationOnIcon fontSize="small" sx={{ color: theme.palette.grey[600] }} />
+                    <LocationOnIcon fontSize="small" sx={{ color: employerColors.primary }} />
                   </InputAdornment>
                 }
                 IconComponent={(props: any) => (
-                  <KeyboardArrowDownIcon {...props} sx={{ color: theme.palette.grey[600] }} />
+                  <KeyboardArrowDownIcon {...props} sx={{ color: employerColors.primary }} />
                 )}
               >
                 {filteredCities.map((cityItem) => (
@@ -313,13 +326,13 @@ export default function Hero() {
               sx={{ 
                 height: '48px',
                 borderRadius: '6px',
-                background: `linear-gradient(135deg, ${theme.palette.primary.light} 0%, ${theme.palette.primary.main} 100%)`,
-                 boxShadow: '0px 3px 8px rgba(0, 0, 0, 0.1)',
+                background: `linear-gradient(135deg, ${employerColors.light} 0%, ${employerColors.primary} 100%)`,
+                boxShadow: '0px 3px 8px rgba(0, 0, 0, 0.1)',
                 '&:hover': {
-                   background: `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.primary.dark} 100%)`,
+                   background: `linear-gradient(135deg, ${employerColors.primary} 0%, ${employerColors.dark} 100%)`,
                    boxShadow: '0px 5px 12px rgba(0, 0, 0, 0.15)',
                 },
-                color: theme.palette.primary.contrastText,
+                color: '#fff',
                 fontWeight: 'bold',
                 fontSize: '0.95rem',
                 textTransform: 'none'
