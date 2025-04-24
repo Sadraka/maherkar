@@ -16,15 +16,19 @@ import {
   Tab,
   Tabs,
   TextField,
-  InputAdornment
+  InputAdornment,
+  useTheme
 } from '@mui/material';
 import StarBorderIcon from '@mui/icons-material/StarBorder';
 import StarIcon from '@mui/icons-material/Star';
 import LocationOnOutlinedIcon from '@mui/icons-material/LocationOnOutlined';
 import AccessTimeOutlinedIcon from '@mui/icons-material/AccessTimeOutlined';
+import WorkOutlineIcon from '@mui/icons-material/WorkOutline';
 import SearchIcon from '@mui/icons-material/Search';
 import FilterListIcon from '@mui/icons-material/FilterList';
 import SortIcon from '@mui/icons-material/Sort';
+import BusinessCenterIcon from '@mui/icons-material/BusinessCenter';
+import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
 
 type JobType = {
   id: number;
@@ -41,6 +45,8 @@ type JobType = {
 };
 
 export default function JobListings() {
+  const theme = useTheme();
+  
   const [jobs, setJobs] = useState<JobType[]>([
     {
       id: 1,
@@ -135,23 +141,41 @@ export default function JobListings() {
   };
 
   return (
-    <Box sx={{ py: 6, backgroundColor: '#fff' }}>
+    <Box sx={{ py: { xs: 4, md: 6 }, backgroundColor: theme.palette.background.default }}>
       <Container maxWidth="lg">
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 4 }}>
+        <Box sx={{ 
+          display: 'flex', 
+          flexDirection: { xs: 'column', md: 'row' }, 
+          justifyContent: 'space-between', 
+          alignItems: { xs: 'flex-start', md: 'center' }, 
+          gap: { xs: 2, md: 0 },
+          mb: 4 
+        }}>
           <Typography 
             variant="h4" 
             component="h2" 
-            sx={{ fontWeight: 'bold' }}
+            sx={{ 
+              fontWeight: 700, 
+              fontSize: { xs: '1.6rem', md: '2rem' },
+              color: theme.palette.text.primary
+            }}
           >
             فرصت‌های شغلی
           </Typography>
           
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+          <Box sx={{ 
+            display: 'flex', 
+            alignItems: 'center', 
+            gap: 1,
+            width: { xs: '100%', md: 'auto' },
+            flexWrap: { xs: 'wrap', md: 'nowrap' }
+          }}>
             <TextField
               placeholder="جستجو در مشاغل..."
               size="small"
               sx={{ 
-                minWidth: { xs: 150, md: 250 },
+                flex: { xs: 1, md: 'initial' },
+                minWidth: { xs: 'auto', md: 250 },
                 '& .MuiOutlinedInput-root': {
                   borderRadius: 2
                 }
@@ -171,10 +195,10 @@ export default function JobListings() {
               sx={{ 
                 borderRadius: 2,
                 borderColor: '#e0e0e0',
-                color: 'text.secondary',
+                color: theme.palette.text.secondary,
                 '&:hover': {
-                  borderColor: 'primary.main',
-                  backgroundColor: 'rgba(25, 118, 210, 0.04)'
+                  borderColor: theme.palette.primary.main,
+                  backgroundColor: `${theme.palette.primary.main}0a`
                 }
               }}
             >
@@ -187,10 +211,10 @@ export default function JobListings() {
               sx={{ 
                 borderRadius: 2,
                 borderColor: '#e0e0e0',
-                color: 'text.secondary',
+                color: theme.palette.text.secondary,
                 '&:hover': {
-                  borderColor: 'primary.main',
-                  backgroundColor: 'rgba(25, 118, 210, 0.04)'
+                  borderColor: theme.palette.primary.main,
+                  backgroundColor: `${theme.palette.primary.main}0a`
                 }
               }}
             >
@@ -199,12 +223,24 @@ export default function JobListings() {
           </Box>
         </Box>
 
-        <Box sx={{ borderBottom: 1, borderColor: 'divider', mb: 3 }}>
+        <Box sx={{ mb: 3, overflowX: 'auto', pb: 1 }}>
           <Tabs 
             value={currentTab} 
             onChange={handleTabChange}
+            variant="scrollable"
+            scrollButtons="auto"
             sx={{ 
-              '.MuiTab-root': { fontSize: '0.95rem', fontWeight: 'medium' } 
+              '.MuiTab-root': { 
+                fontSize: '0.9rem', 
+                fontWeight: 500,
+                minWidth: 'auto',
+                px: 2
+              },
+              '.MuiTabs-indicator': {
+                backgroundColor: theme.palette.primary.main,
+                height: 3,
+                borderRadius: '3px 3px 0 0'
+              }
             }}
           >
             <Tab label="همه مشاغل" />
@@ -215,147 +251,205 @@ export default function JobListings() {
           </Tabs>
         </Box>
 
-        <Grid container spacing={3}>
-          {jobs.map((job) => (
-            <Grid item xs={12} sm={6} lg={4} key={job.id}>
-              <Card 
-                variant="outlined" 
+        <Box sx={{ maxWidth: 1200, mx: 'auto' }}>
+          <Grid container spacing={3}>
+            {jobs.map((job) => (
+              <Grid 
+                key={job.id} 
                 sx={{ 
-                  height: '100%', 
-                  display: 'flex', 
-                  flexDirection: 'column',
-                  borderRadius: 2,
-                  boxShadow: '0 2px 10px rgba(0,0,0,0.05)',
-                  transition: 'transform 0.2s, box-shadow 0.2s',
-                  '&:hover': {
-                    transform: 'translateY(-5px)',
-                    boxShadow: '0 5px 15px rgba(0,0,0,0.1)',
-                  }
+                  width: { 
+                    xs: '100%', 
+                    sm: '50%', 
+                    lg: '33.33%' 
+                  },
+                  px: 1.5
                 }}
               >
-                <CardContent sx={{ flexGrow: 1, p: 3, '&:last-child': { pb: 3 } }}>
-                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                    <Box>
-                      <Typography 
-                        variant="h6" 
-                        component="h3"
-                        sx={{ mb: 0.5, fontWeight: 'bold', fontSize: '1.1rem' }}
-                      >
-                        {job.title}
-                      </Typography>
-                      <Typography 
-                        variant="body2" 
-                        color="text.secondary"
-                        sx={{ mb: 1.5 }}
-                      >
-                        {job.company}
-                      </Typography>
-                    </Box>
-                    
-                    <IconButton 
-                      size="small" 
-                      onClick={() => toggleFavorite(job.id)}
-                      sx={{ padding: 0 }}
-                    >
-                      {job.isFavorite ? <StarIcon color="warning" /> : <StarBorderIcon />}
-                    </IconButton>
-                  </Box>
-                  
-                  <Stack direction="row" flexWrap="wrap" spacing={0.5} sx={{ mb: 2 }}>
-                    {job.skills.map((skill, index) => (
-                      <Chip 
-                        key={index} 
-                        label={skill} 
-                        size="small" 
-                        sx={{ 
-                          fontSize: '0.7rem', 
-                          height: 24, 
-                          backgroundColor: 'rgba(25, 118, 210, 0.08)',
-                          color: 'primary.main',
-                          my: 0.5
-                        }} 
-                      />
-                    ))}
-                  </Stack>
-                  
-                  <Divider sx={{ my: 1.5 }} />
-                  
-                  <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                      <LocationOnOutlinedIcon fontSize="small" sx={{ color: 'text.secondary', fontSize: '1rem' }} />
-                      <Typography variant="body2" color="text.secondary">
-                        {job.location} {job.isRemote && '• دورکاری'}
-                      </Typography>
-                    </Box>
-                    
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                      <AccessTimeOutlinedIcon fontSize="small" sx={{ color: 'text.secondary', fontSize: '1rem' }} />
-                      <Typography variant="body2" color="text.secondary">
-                        {job.timePosted} • {job.jobType}
-                      </Typography>
-                    </Box>
-                  </Box>
-                  
-                  <Divider sx={{ my: 1.5 }} />
-                  
-                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mt: 2 }}>
-                    <Button 
-                      variant="contained" 
-                      color="primary"
+                <Box sx={{ p: 1.5 }}>
+                  <Card 
+                    variant="outlined" 
+                    sx={{ 
+                      height: '100%', 
+                      display: 'flex', 
+                      flexDirection: 'column',
+                      borderRadius: 2,
+                      borderColor: 'transparent',
+                      boxShadow: '0 3px 15px rgba(0,0,0,0.08)',
+                      transition: 'transform 0.2s, box-shadow 0.2s',
+                      overflow: 'hidden',
+                      '&:hover': {
+                        transform: 'translateY(-5px)',
+                        boxShadow: '0 8px 25px rgba(0,0,0,0.12)',
+                      }
+                    }}
+                  >
+                    <Box 
                       sx={{ 
-                        backgroundColor: 'var(--primary-color)',
-                        '&:hover': { backgroundColor: '#1565c0' },
-                        fontSize: '0.8rem',
-                        borderRadius: 2,
-                        px: 2,
-                        py: 0.75
+                        height: '6px', 
+                        background: job.isUrgent 
+                          ? `linear-gradient(90deg, ${theme.palette.primary.main}, ${theme.palette.primary.light})` 
+                          : 'transparent' 
                       }}
-                    >
-                      مشاهده و درخواست
-                    </Button>
-                    <Typography variant="body2" sx={{ fontWeight: 'bold', color: 'var(--secondary-color)' }}>
-                      {job.salary}
-                    </Typography>
-                  </Box>
-                  
-                  {job.isUrgent && (
-                    <Chip 
-                      label="استخدام فوری" 
-                      size="small" 
-                      sx={{ 
-                        position: 'absolute',
-                        top: 15,
-                        left: 15,
-                        fontSize: '0.65rem', 
-                        height: 24, 
-                        backgroundColor: 'rgba(211, 47, 47, 0.1)',
-                        color: '#d32f2f',
-                        fontWeight: 'bold'
-                      }} 
                     />
-                  )}
-                </CardContent>
-              </Card>
-            </Grid>
-          ))}
-        </Grid>
-        
-        <Box sx={{ textAlign: 'center', mt: 6 }}>
+                    
+                    <CardContent sx={{ flexGrow: 1, p: 3, '&:last-child': { pb: 3 } }}>
+                      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                        <Box>
+                          <Typography 
+                            variant="h6" 
+                            component="h3"
+                            sx={{ 
+                              mb: 0.5, 
+                              fontWeight: 'bold', 
+                              fontSize: '1.1rem',
+                              color: theme.palette.text.primary
+                            }}
+                          >
+                            {job.title}
+                          </Typography>
+                          <Typography 
+                            variant="body2"
+                            sx={{ 
+                              mb: 1.5,
+                              color: theme.palette.text.secondary,
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: 0.5
+                            }}
+                          >
+                            <BusinessCenterIcon fontSize="small" sx={{ color: theme.palette.primary.main, opacity: 0.8, fontSize: '1rem' }} />
+                            {job.company}
+                          </Typography>
+                        </Box>
+                        
+                        <IconButton 
+                          size="small" 
+                          onClick={() => toggleFavorite(job.id)}
+                          sx={{ color: job.isFavorite ? theme.palette.primary.main : '#bdbdbd' }}
+                        >
+                          {job.isFavorite ? <StarIcon /> : <StarBorderIcon />}
+                        </IconButton>
+                      </Box>
+                      
+                      <Stack direction="row" spacing={2} sx={{ mb: 2 }}>
+                        <Box 
+                          sx={{ 
+                            display: 'flex', 
+                            alignItems: 'center', 
+                            color: theme.palette.text.secondary,
+                            fontSize: '0.875rem'
+                          }}
+                        >
+                          <LocationOnOutlinedIcon fontSize="small" sx={{ mr: 0.5, fontSize: '1rem' }} />
+                          {job.location}
+                          {job.isRemote && <Chip 
+                            label="دورکاری" 
+                            size="small" 
+                            sx={{ 
+                              ml: 1, 
+                              fontSize: '0.7rem',
+                              height: 20,
+                              backgroundColor: `${theme.palette.secondary.main}15`,
+                              color: theme.palette.secondary.main,
+                              borderRadius: '4px',
+                              fontWeight: 'bold'
+                            }} 
+                          />}
+                        </Box>
+                        
+                        <Box 
+                          sx={{ 
+                            display: 'flex', 
+                            alignItems: 'center', 
+                            color: theme.palette.text.secondary,
+                            fontSize: '0.875rem'
+                          }}
+                        >
+                          <AccessTimeOutlinedIcon fontSize="small" sx={{ mr: 0.5, fontSize: '1rem' }} />
+                          {job.timePosted}
+                        </Box>
+                      </Stack>
+                      
+                      <Stack direction="row" spacing={1} sx={{ mb: 2 }}>
+                        <Box 
+                          sx={{ 
+                            display: 'flex', 
+                            alignItems: 'center', 
+                            color: theme.palette.text.secondary,
+                            fontSize: '0.875rem'
+                          }}
+                        >
+                          <WorkOutlineIcon fontSize="small" sx={{ mr: 0.5, fontSize: '1rem' }} />
+                          {job.jobType}
+                        </Box>
+                        
+                        <Box 
+                          sx={{ 
+                            display: 'flex', 
+                            alignItems: 'center', 
+                            color: theme.palette.text.secondary,
+                            fontSize: '0.875rem'
+                          }}
+                        >
+                          <AttachMoneyIcon fontSize="small" sx={{ mr: 0.5, fontSize: '1rem' }} />
+                          {job.salary}
+                        </Box>
+                      </Stack>
+                      
+                      <Divider sx={{ mb: 2 }} />
+                      
+                      <Box sx={{ mb: 2 }}>
+                        <Stack direction="row" spacing={1} flexWrap="wrap" gap={1}>
+                          {job.skills.map((skill, index) => (
+                            <Chip 
+                              key={index} 
+                              label={skill} 
+                              size="small"
+                              sx={{ 
+                                bgcolor: 'rgba(0,0,0,0.04)',
+                                fontWeight: 500,
+                                fontSize: '0.75rem',
+                                borderRadius: 1
+                              }}
+                            />
+                          ))}
+                        </Stack>
+                      </Box>
+                      
+                      <Button 
+                        variant="outlined" 
+                        fullWidth
+                        sx={{ 
+                          borderColor: theme.palette.primary.main,
+                          color: theme.palette.primary.main,
+                          '&:hover': {
+                            backgroundColor: `${theme.palette.primary.main}10`,
+                            borderColor: theme.palette.primary.main,
+                          }
+                        }}
+                      >
+                        مشاهده آگهی
+                      </Button>
+                    </CardContent>
+                  </Card>
+                </Box>
+              </Grid>
+            ))}
+          </Grid>
+        </Box>
+
+        <Box sx={{ mt: 4, textAlign: 'center' }}>
           <Button 
-            variant="outlined" 
+            variant="contained" 
+            color="primary"
             sx={{ 
-              color: 'var(--primary-color)', 
-              borderColor: 'rgba(25, 118, 210, 0.5)',
-              '&:hover': {
-                borderColor: 'var(--primary-color)',
-                backgroundColor: 'rgba(25, 118, 210, 0.04)'
-              },
               px: 4,
               py: 1,
+              fontWeight: 'bold',
               borderRadius: 2
             }}
           >
-            مشاهده همه فرصت‌های شغلی
+            مشاهده همه آگهی‌ها
           </Button>
         </Box>
       </Container>

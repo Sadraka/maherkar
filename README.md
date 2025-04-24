@@ -96,43 +96,6 @@ npm run build
 
 ## کامیت‌های انجام شده
 
-1. Initial commit - Project setup
-```bash
-git init
-git add .
-git commit -m "Initial commit: Project setup with Next.js and TypeScript"
-```
-
-2. Add Material-UI
-```bash
-git add .
-git commit -m "Add Material-UI and theme configuration"
-```
-
-3. Add Header component
-```bash
-git add .
-git commit -m "Add responsive header component"
-```
-
-4. Add Hero section
-```bash
-git add .
-git commit -m "Add hero section with search functionality"
-```
-
-5. Change font to Vazirmatn
-```bash
-git add .
-git commit -m "Change font from IRANSans to Vazirmatn"
-```
-
-6. Update project strategy
-```bash
-git add .
-git commit -m "Update project strategy to simple job board"
-```
-
 ## برنامه‌های آینده
 
 - [ ] ایجاد صفحه ثبت آگهی استخدام
