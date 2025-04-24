@@ -10,11 +10,13 @@ import {
 } from '@mui/material';
 import InfoIcon from '@mui/icons-material/Info';
 import { useJobSeekerTheme } from '@/contexts/JobSeekerThemeContext';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 
 export default function AboutUs() {
   const theme = useTheme();
   const jobSeekerColors = useJobSeekerTheme();
+  const statsRef = useRef<HTMLDivElement>(null);
+  const [isVisible, setIsVisible] = useState(false);
   
   // آمار و ارقام مربوط به وب‌سایت به صورت ساده
   const stats = [
@@ -28,19 +30,53 @@ export default function AboutUs() {
   const [counters, setCounters] = useState<number[]>([0, 0, 0]);
   
   // مدت زمان انیمیشن (میلی‌ثانیه)
-  const animationDuration = 2000;
-  // تعداد مراحل بین 0 تا مقدار نهایی
-  const steps = 50;
+  const animationDuration = 2500;
+  // تعداد مراحل بین 0 تا مقدار نهایی - افزایش برای روان‌تر شدن
+  const steps = 120;
+  
+  // تابع easing برای حرکت طبیعی‌تر
+  const easeOutQuad = (t: number): number => t * (2 - t);
 
+  // تشخیص زمانی که المان در صفحه نمایش وارد می‌شود
   useEffect(() => {
+    const observer = new IntersectionObserver((entries) => {
+      const [entry] = entries;
+      if (entry.isIntersecting) {
+        setIsVisible(true);
+        // وقتی المان مشاهده شد، دیگر نیازی به observe کردن نیست
+        observer.unobserve(entry.target);
+      }
+    }, {
+      // آستانه 0.3 یعنی وقتی 30% المان در صفحه نمایش قابل مشاهده باشد، تریگر می‌شود
+      threshold: 0.3
+    });
+
+    if (statsRef.current) {
+      observer.observe(statsRef.current);
+    }
+
+    return () => {
+      if (statsRef.current) {
+        observer.unobserve(statsRef.current);
+      }
+    };
+  }, []);
+
+  // شروع شمارش وقتی المان در دید کاربر قرار می‌گیرد
+  useEffect(() => {
+    if (!isVisible) return;
+    
     // زمان شروع انیمیشن
     const startTime = Date.now();
     
     const interval = setInterval(() => {
       const elapsedTime = Date.now() - startTime;
-      const progress = Math.min(elapsedTime / animationDuration, 1);
+      const rawProgress = Math.min(elapsedTime / animationDuration, 1);
       
-      if (progress === 1) {
+      // استفاده از تابع easing برای حرکت طبیعی‌تر
+      const progress = easeOutQuad(rawProgress);
+      
+      if (rawProgress === 1) {
         // در پایان انیمیشن، مقادیر نهایی تنظیم شوند
         setCounters([
           stats[0].value as number,
@@ -51,16 +87,16 @@ export default function AboutUs() {
       } else {
         // در طول انیمیشن، مقادیر محاسبه شوند
         setCounters([
-          Math.floor(progress * (stats[0].value as number)),
-          Math.floor(progress * (stats[1].value as number)),
-          Math.floor(progress * (stats[2].value as number))
+          Math.round(progress * (stats[0].value as number)),
+          Math.round(progress * (stats[1].value as number)),
+          Math.round(progress * (stats[2].value as number))
         ]);
       }
     }, animationDuration / steps);
     
     // پاکسازی افکت
     return () => clearInterval(interval);
-  }, []);
+  }, [isVisible]);
 
   return (
     <Box sx={{ py: 6, backgroundColor: '#fff' }}>
@@ -94,7 +130,7 @@ export default function AboutUs() {
           </Typography>
         </Box>
 
-        <Grid container spacing={2} sx={{ mb: 4 }}>
+        <Grid container spacing={2} sx={{ mb: 4 }} ref={statsRef}>
           {stats.map((stat, index) => (
             <Grid size={{ xs: 6, sm: 3 }} key={stat.id}>
               <Box sx={{ 
@@ -114,7 +150,7 @@ export default function AboutUs() {
                 >
                   {stat.isStatic ? stat.value : (
                     <>
-                      {counters[index].toLocaleString('fa-IR')}{stat.suffix}
+                      {(isVisible ? counters[index] : 0).toLocaleString('fa-IR')}{stat.suffix}
                     </>
                   )}
                 </Typography>
