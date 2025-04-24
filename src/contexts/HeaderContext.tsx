@@ -93,14 +93,16 @@ export const HeaderProvider: React.FC<HeaderProviderProps> = ({ children }) => {
 
   const handleEmployerMouseLeave = () => {
     if (isMobile) return;
+    
     setTimeout(() => {
       const employerMenu = document.getElementById('employer-menu-content');
       const isOverEmployerMenu = employerMenu ? employerMenu.matches(':hover') : false;
+      const isOverButton = employerButtonRef.current ? employerButtonRef.current.matches(':hover') : false;
       
-      if (!isOverEmployerMenu && employerButtonRef.current && !employerButtonRef.current.matches(':hover')) {
+      if (!isOverEmployerMenu && !isOverButton) {
         setIsEmployerHovered(false);
       }
-    }, 50);
+    }, 100);
   };
 
   const handleCandidateMouseEnter = () => {
@@ -115,14 +117,16 @@ export const HeaderProvider: React.FC<HeaderProviderProps> = ({ children }) => {
 
   const handleCandidateMouseLeave = () => {
     if (isMobile) return;
+    
     setTimeout(() => {
       const candidateMenu = document.getElementById('candidate-menu-content');
       const isOverCandidateMenu = candidateMenu ? candidateMenu.matches(':hover') : false;
+      const isOverButton = candidateButtonRef.current ? candidateButtonRef.current.matches(':hover') : false;
       
-      if (!isOverCandidateMenu && candidateButtonRef.current && !candidateButtonRef.current.matches(':hover')) {
+      if (!isOverCandidateMenu && !isOverButton) {
         setIsCandidateHovered(false);
       }
-    }, 50);
+    }, 100);
   };
 
   const handleHelpMouseEnter = () => {
@@ -137,14 +141,16 @@ export const HeaderProvider: React.FC<HeaderProviderProps> = ({ children }) => {
 
   const handleHelpMouseLeave = () => {
     if (isMobile) return;
+    
     setTimeout(() => {
       const helpMenu = document.getElementById('help-menu-content');
       const isOverHelpMenu = helpMenu ? helpMenu.matches(':hover') : false;
+      const isOverButton = helpButtonRef.current ? helpButtonRef.current.matches(':hover') : false;
       
-      if (!isOverHelpMenu && helpButtonRef.current && !helpButtonRef.current.matches(':hover')) {
+      if (!isOverHelpMenu && !isOverButton) {
         setIsHelpHovered(false);
       }
-    }, 50);
+    }, 100);
   };
 
   const handlePopoverMouseEnter = (type: 'employer' | 'candidate' | 'help') => {
@@ -171,17 +177,35 @@ export const HeaderProvider: React.FC<HeaderProviderProps> = ({ children }) => {
 
   const handlePopoverMouseLeave = (type: 'employer' | 'candidate' | 'help') => {
     if (type === 'employer') {
-      if (employerButtonRef.current && !employerButtonRef.current.matches(':hover')) {
-        setIsEmployerHovered(false);
-      }
+      setTimeout(() => {
+        const isOverButton = employerButtonRef.current ? employerButtonRef.current.matches(':hover') : false;
+        const employerMenu = document.getElementById('employer-menu-content');
+        const isOverMenu = employerMenu ? employerMenu.matches(':hover') : false;
+
+        if (!isOverButton && !isOverMenu) {
+          setIsEmployerHovered(false);
+        }
+      }, 100);
     } else if (type === 'candidate') {
-      if (candidateButtonRef.current && !candidateButtonRef.current.matches(':hover')) {
-        setIsCandidateHovered(false);
-      }
+      setTimeout(() => {
+        const isOverButton = candidateButtonRef.current ? candidateButtonRef.current.matches(':hover') : false;
+        const candidateMenu = document.getElementById('candidate-menu-content');
+        const isOverMenu = candidateMenu ? candidateMenu.matches(':hover') : false;
+
+        if (!isOverButton && !isOverMenu) {
+          setIsCandidateHovered(false);
+        }
+      }, 100);
     } else {
-      if (helpButtonRef.current && !helpButtonRef.current.matches(':hover')) {
-        setIsHelpHovered(false);
-      }
+      setTimeout(() => {
+        const isOverButton = helpButtonRef.current ? helpButtonRef.current.matches(':hover') : false;
+        const helpMenu = document.getElementById('help-menu-content');
+        const isOverMenu = helpMenu ? helpMenu.matches(':hover') : false;
+
+        if (!isOverButton && !isOverMenu) {
+          setIsHelpHovered(false);
+        }
+      }, 100);
     }
   };
 

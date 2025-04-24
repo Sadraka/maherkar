@@ -35,6 +35,10 @@ import {
   faLightbulb
 } from '@fortawesome/free-solid-svg-icons';
 import { useState, useEffect } from 'react';
+import {
+  EMPLOYER_BLUE,
+  JOB_SEEKER_GREEN
+} from '@/constants/colors';
 
 export default function MobileMenu() {
   const theme = useTheme();
@@ -61,6 +65,11 @@ export default function MobileMenu() {
     setActiveIndex(-1);
   }, [mobileView]);
 
+  // تعریف رنگ‌های اصلی برای هر منو - استفاده از ثابت‌های رنگ تعریف شده
+  const employerColor = EMPLOYER_BLUE; // '#0a3b79' - سرمه‌ای برای کارفرما
+  const candidateColor = JOB_SEEKER_GREEN; // '#00703c' - سبز کارجو
+  const helpColor = '#000000'; // مشکی برای راهنما
+
   // منوی کارفرما
   const employerMenuItems = [
     { 
@@ -68,24 +77,18 @@ export default function MobileMenu() {
       icon: <FontAwesomeIcon icon={faUsers} size="lg" />, 
       href: '#',
       description: 'کارجویان فعال در ماهرکار را مشاهده کرده و براساس مهارت مورد نظر خود انتخاب کنید.',
-      color: '#3949AB',
-      bgColor: '#3949AB15'
     },
     { 
       title: 'مشاهده دسته‌بندی‌ها و مهارت‌ها', 
       icon: <FontAwesomeIcon icon={faProjectDiagram} size="lg" />, 
       href: '#',
       description: 'مهارت مورد نظر را جستجو کرده، پروژه یا نمونه کار را در این دسته‌بندی مشاهده کنید.',
-      color: '#1E88E5',
-      bgColor: '#1E88E515'
     },
     { 
       title: 'ثبت سریع پروژه', 
       icon: <FontAwesomeIcon icon={faPlus} size="lg" />, 
       href: '#',
       description: 'با ایجاد پروژه امکان همکاری با هزاران نیروی متخصص را خواهید داشت.',
-      color: '#5E35B1',
-      bgColor: '#5E35B115'
     }
   ];
 
@@ -96,24 +99,18 @@ export default function MobileMenu() {
       icon: <FontAwesomeIcon icon={faBriefcase} size="lg" />, 
       href: '#',
       description: 'آخرین فرصت‌های شغلی مناسب با تخصص شما',
-      color: '#26A69A',
-      bgColor: '#26A69A15'
     },
     { 
       title: 'ارسال رزومه', 
       icon: <FontAwesomeIcon icon={faFileAlt} size="lg" />, 
       href: '#',
       description: 'رزومه خود را آماده کنید و به کارفرمایان معتبر ارسال کنید',
-      color: '#43A047',
-      bgColor: '#43A04715'
     },
     { 
       title: 'تکمیل پروفایل', 
       icon: <FontAwesomeIcon icon={faUserPlus} size="lg" />, 
       href: '#',
       description: 'پروفایل حرفه‌ای خود را تکمیل کنید تا شانس استخدام افزایش یابد',
-      color: '#7CB342',
-      bgColor: '#7CB34215'
     }
   ];
 
@@ -124,32 +121,24 @@ export default function MobileMenu() {
       icon: <FontAwesomeIcon icon={faBuilding} size="lg" />, 
       href: '#',
       description: 'آموزش کامل نحوه ثبت پروژه و استخدام کارجو',
-      color: '#E53935',
-      bgColor: '#E5393515'
     },
     { 
       title: 'راهنمای کارجویان', 
       icon: <FontAwesomeIcon icon={faUserTie} size="lg" />, 
       href: '#',
       description: 'آموزش کامل نحوه ثبت رزومه و یافتن شغل مناسب',
-      color: '#F4511E',
-      bgColor: '#F4511E15'
     },
     { 
       title: 'سوالات متداول', 
       icon: <FontAwesomeIcon icon={faQuestion} size="lg" />, 
       href: '#',
       description: 'پاسخ به سوالات رایج کاربران',
-      color: '#FB8C00',
-      bgColor: '#FB8C0015'
     },
     { 
       title: 'نکات و ترفندها', 
       icon: <FontAwesomeIcon icon={faLightbulb} size="lg" />, 
       href: '#',
       description: 'نکات مفید برای موفقیت در ماهرکار',
-      color: '#FFB300',
-      bgColor: '#FFB30015'
     }
   ];
 
@@ -160,7 +149,7 @@ export default function MobileMenu() {
         <Box 
           sx={{ 
             p: 3, 
-            background: `linear-gradient(180deg, ${alpha(theme.palette.employer.main, 0.05)} 0%, rgba(255,255,255,0) 100%)`
+            background: `linear-gradient(180deg, ${alpha(employerColor, 0.05)} 0%, rgba(255,255,255,0) 100%)`
           }}
         >
           <Box sx={{ 
@@ -172,24 +161,24 @@ export default function MobileMenu() {
             <Box sx={{ display: 'flex', alignItems: 'center' }}>
               <Avatar 
                 sx={{ 
-                  bgcolor: alpha(theme.palette.employer.main, 0.1), 
-                  color: theme.palette.employer.main,
+                  bgcolor: alpha(employerColor, 0.1), 
+                  color: employerColor,
                   mr: 1.5
                 }}
               >
                 <FontAwesomeIcon icon={faBuilding} />
               </Avatar>
-              <Typography variant="h6" fontWeight={800} color="employer.main">
+              <Typography variant="h6" fontWeight={800} color={employerColor}>
                 کارفرما هستم
               </Typography>
             </Box>
             <IconButton 
               onClick={() => setMobileOpen(false)}
               sx={{ 
-                bgcolor: alpha(theme.palette.employer.main, 0.1),
-                color: theme.palette.employer.main,
+                bgcolor: alpha(employerColor, 0.1),
+                color: employerColor,
                 '&:hover': {
-                  bgcolor: alpha(theme.palette.employer.main, 0.2),
+                  bgcolor: alpha(employerColor, 0.2),
                 }
               }}
             >
@@ -221,9 +210,9 @@ export default function MobileMenu() {
                       p: 2.5,
                       width: '100%',
                       borderRadius: 3,
-                      background: `linear-gradient(135deg, white 0%, ${item.bgColor} 100%)`,
+                      background: `linear-gradient(135deg, white 0%, ${alpha(employerColor, 0.1)} 100%)`,
                       border: '1px solid',
-                      borderColor: activeIndex === index ? item.color : 'divider',
+                      borderColor: activeIndex === index ? employerColor : 'divider',
                       transition: 'all 0.3s ease',
                     }}
                   >
@@ -231,16 +220,16 @@ export default function MobileMenu() {
                       <Avatar
                         sx={{ 
                           mr: 2,
-                          bgcolor: alpha(item.color, 0.15),
-                          color: item.color,
-                          boxShadow: activeIndex === index ? `0 4px 8px ${alpha(item.color, 0.25)}` : 'none',
+                          bgcolor: alpha(employerColor, 0.15),
+                          color: employerColor,
+                          boxShadow: activeIndex === index ? `0 4px 8px ${alpha(employerColor, 0.25)}` : 'none',
                           transition: 'all 0.3s ease',
                         }}
                       >
                         {item.icon}
                       </Avatar>
                       <Box sx={{ flexGrow: 1 }}>
-                        <Typography fontWeight={800} variant="subtitle1" color={item.color} gutterBottom>
+                        <Typography fontWeight={800} variant="subtitle1" color={employerColor} gutterBottom>
                           {item.title}
                         </Typography>
                         <Typography variant="body2" color="text.secondary">
@@ -260,7 +249,7 @@ export default function MobileMenu() {
         <Box 
           sx={{ 
             p: 3, 
-            background: `linear-gradient(180deg, ${alpha(theme.palette.candidate.main, 0.05)} 0%, rgba(255,255,255,0) 100%)`
+            background: `linear-gradient(180deg, ${alpha(candidateColor, 0.05)} 0%, rgba(255,255,255,0) 100%)`
           }}
         >
           <Box sx={{ 
@@ -272,24 +261,24 @@ export default function MobileMenu() {
             <Box sx={{ display: 'flex', alignItems: 'center' }}>
               <Avatar 
                 sx={{ 
-                  bgcolor: alpha(theme.palette.candidate.main, 0.1), 
-                  color: theme.palette.candidate.main,
+                  bgcolor: alpha(candidateColor, 0.1), 
+                  color: candidateColor,
                   mr: 1.5
                 }}
               >
                 <FontAwesomeIcon icon={faUserTie} />
               </Avatar>
-              <Typography variant="h6" fontWeight={800} color="candidate.main">
+              <Typography variant="h6" fontWeight={800} color={candidateColor}>
                 کارجو هستم
               </Typography>
             </Box>
             <IconButton 
               onClick={() => setMobileOpen(false)}
               sx={{ 
-                bgcolor: alpha(theme.palette.candidate.main, 0.1),
-                color: theme.palette.candidate.main,
+                bgcolor: alpha(candidateColor, 0.1),
+                color: candidateColor,
                 '&:hover': {
-                  bgcolor: alpha(theme.palette.candidate.main, 0.2),
+                  bgcolor: alpha(candidateColor, 0.2),
                 }
               }}
             >
@@ -321,9 +310,9 @@ export default function MobileMenu() {
                       p: 2.5,
                       width: '100%',
                       borderRadius: 3,
-                      background: `linear-gradient(135deg, white 0%, ${item.bgColor} 100%)`,
+                      background: `linear-gradient(135deg, white 0%, ${alpha(candidateColor, 0.1)} 100%)`,
                       border: '1px solid',
-                      borderColor: activeIndex === index ? item.color : 'divider',
+                      borderColor: activeIndex === index ? candidateColor : 'divider',
                       transition: 'all 0.3s ease',
                     }}
                   >
@@ -331,16 +320,16 @@ export default function MobileMenu() {
                       <Avatar
                         sx={{ 
                           mr: 2,
-                          bgcolor: alpha(item.color, 0.15),
-                          color: item.color,
-                          boxShadow: activeIndex === index ? `0 4px 8px ${alpha(item.color, 0.25)}` : 'none',
+                          bgcolor: alpha(candidateColor, 0.15),
+                          color: candidateColor,
+                          boxShadow: activeIndex === index ? `0 4px 8px ${alpha(candidateColor, 0.25)}` : 'none',
                           transition: 'all 0.3s ease',
                         }}
                       >
                         {item.icon}
                       </Avatar>
                       <Box sx={{ flexGrow: 1 }}>
-                        <Typography fontWeight={800} variant="subtitle1" color={item.color} gutterBottom>
+                        <Typography fontWeight={800} variant="subtitle1" color={candidateColor} gutterBottom>
                           {item.title}
                         </Typography>
                         <Typography variant="body2" color="text.secondary">
@@ -360,7 +349,7 @@ export default function MobileMenu() {
         <Box 
           sx={{ 
             p: 3, 
-            background: `linear-gradient(180deg, ${alpha(theme.palette.primary.main, 0.05)} 0%, rgba(255,255,255,0) 100%)`
+            background: `linear-gradient(180deg, ${alpha(helpColor, 0.05)} 0%, rgba(255,255,255,0) 100%)`
           }}
         >
           <Box sx={{ 
@@ -372,24 +361,24 @@ export default function MobileMenu() {
             <Box sx={{ display: 'flex', alignItems: 'center' }}>
               <Avatar 
                 sx={{ 
-                  bgcolor: alpha(theme.palette.primary.main, 0.1), 
-                  color: theme.palette.primary.main,
+                  bgcolor: alpha(helpColor, 0.1), 
+                  color: helpColor,
                   mr: 1.5
                 }}
               >
                 <FontAwesomeIcon icon={faQuestion} />
               </Avatar>
-              <Typography variant="h6" fontWeight={800} color="primary.main">
+              <Typography variant="h6" fontWeight={800} color={helpColor}>
                 راهنما
               </Typography>
             </Box>
             <IconButton 
               onClick={() => setMobileOpen(false)}
               sx={{ 
-                bgcolor: alpha(theme.palette.primary.main, 0.1),
-                color: theme.palette.primary.main,
+                bgcolor: alpha(helpColor, 0.1),
+                color: helpColor,
                 '&:hover': {
-                  bgcolor: alpha(theme.palette.primary.main, 0.2),
+                  bgcolor: alpha(helpColor, 0.2),
                 }
               }}
             >
@@ -421,9 +410,9 @@ export default function MobileMenu() {
                       p: 2.5,
                       width: '100%',
                       borderRadius: 3,
-                      background: `linear-gradient(135deg, white 0%, ${item.bgColor} 100%)`,
+                      background: `linear-gradient(135deg, white 0%, ${alpha(helpColor, 0.1)} 100%)`,
                       border: '1px solid',
-                      borderColor: activeIndex === index ? item.color : 'divider',
+                      borderColor: activeIndex === index ? helpColor : 'divider',
                       transition: 'all 0.3s ease',
                     }}
                   >
@@ -431,16 +420,16 @@ export default function MobileMenu() {
                       <Avatar
                         sx={{ 
                           mr: 2,
-                          bgcolor: alpha(item.color, 0.15),
-                          color: item.color,
-                          boxShadow: activeIndex === index ? `0 4px 8px ${alpha(item.color, 0.25)}` : 'none',
+                          bgcolor: alpha(helpColor, 0.15),
+                          color: helpColor,
+                          boxShadow: activeIndex === index ? `0 4px 8px ${alpha(helpColor, 0.25)}` : 'none',
                           transition: 'all 0.3s ease',
                         }}
                       >
                         {item.icon}
                       </Avatar>
                       <Box sx={{ flexGrow: 1 }}>
-                        <Typography fontWeight={800} variant="subtitle1" color={item.color} gutterBottom>
+                        <Typography fontWeight={800} variant="subtitle1" color={helpColor} gutterBottom>
                           {item.title}
                         </Typography>
                         <Typography variant="body2" color="text.secondary">
@@ -557,7 +546,7 @@ export default function MobileMenu() {
                 color="primary"
                 sx={{
                   '& .MuiBadge-badge': {
-                    backgroundColor: theme.palette.employer.main,
+                    backgroundColor: employerColor,
                   }
                 }}
               >
@@ -566,10 +555,10 @@ export default function MobileMenu() {
                     width: 32, 
                     height: 32,
                     bgcolor: navValue === 'employer' 
-                      ? alpha(theme.palette.employer.main, 0.15) 
+                      ? alpha(employerColor, 0.15) 
                       : alpha(theme.palette.text.secondary, 0.05),
                     color: navValue === 'employer' 
-                      ? theme.palette.employer.main 
+                      ? employerColor 
                       : theme.palette.text.secondary,
                     transition: 'all 0.3s ease'
                   }}
@@ -579,7 +568,7 @@ export default function MobileMenu() {
               </Badge>
             }
             sx={{
-              color: navValue === 'employer' ? theme.palette.employer.main : theme.palette.text.secondary,
+              color: navValue === 'employer' ? employerColor : theme.palette.text.secondary,
               fontWeight: 800,
               fontSize: '0.75rem',
               '& .MuiBottomNavigationAction-label': {
@@ -601,7 +590,7 @@ export default function MobileMenu() {
                 color="primary"
                 sx={{
                   '& .MuiBadge-badge': {
-                    backgroundColor: theme.palette.candidate.main,
+                    backgroundColor: candidateColor,
                   }
                 }}
               >
@@ -610,10 +599,10 @@ export default function MobileMenu() {
                     width: 32, 
                     height: 32,
                     bgcolor: navValue === 'candidate' 
-                      ? alpha(theme.palette.candidate.main, 0.15) 
+                      ? alpha(candidateColor, 0.15) 
                       : alpha(theme.palette.text.secondary, 0.05),
                     color: navValue === 'candidate' 
-                      ? theme.palette.candidate.main 
+                      ? candidateColor 
                       : theme.palette.text.secondary,
                     transition: 'all 0.3s ease'
                   }}
@@ -623,7 +612,7 @@ export default function MobileMenu() {
               </Badge>
             }
             sx={{
-              color: navValue === 'candidate' ? '#43A047' : theme.palette.text.secondary,
+              color: navValue === 'candidate' ? candidateColor : theme.palette.text.secondary,
               fontWeight: 800,
               fontSize: '0.75rem',
               '& .MuiBottomNavigationAction-label': {
@@ -643,16 +632,21 @@ export default function MobileMenu() {
                 variant="dot"
                 invisible={navValue !== 'help'}
                 color="primary"
+                sx={{
+                  '& .MuiBadge-badge': {
+                    backgroundColor: helpColor,
+                  }
+                }}
               >
                 <Avatar 
                   sx={{ 
                     width: 32, 
                     height: 32,
                     bgcolor: navValue === 'help' 
-                      ? alpha(theme.palette.primary.main, 0.15) 
+                      ? alpha(helpColor, 0.15) 
                       : alpha(theme.palette.text.secondary, 0.05),
                     color: navValue === 'help' 
-                      ? theme.palette.primary.main 
+                      ? helpColor 
                       : theme.palette.text.secondary,
                     transition: 'all 0.3s ease'
                   }}
@@ -662,7 +656,7 @@ export default function MobileMenu() {
               </Badge>
             }
             sx={{
-              color: navValue === 'help' ? theme.palette.primary.main : theme.palette.text.secondary,
+              color: navValue === 'help' ? helpColor : theme.palette.text.secondary,
               fontWeight: 800,
               fontSize: '0.75rem',
               '& .MuiBottomNavigationAction-label': {

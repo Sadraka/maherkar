@@ -9,7 +9,8 @@ import {
   Avatar,
   Divider,
   IconButton,
-  alpha
+  alpha,
+  GlobalStyles
 } from '@mui/material';
 import { useHeaderContext } from '@/contexts/HeaderContext';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -132,6 +133,24 @@ export default function MenuPopover() {
 
   return (
     <>
+      {/* استایل گلوبال برای غیرفعال‌سازی انیمیشن‌ها */}
+      <GlobalStyles
+        styles={{
+          '.MuiPopover-root': {
+            animation: 'none !important',
+            transition: 'none !important',
+          },
+          '.MuiPopover-paper': {
+            animation: 'none !important',
+            transition: 'none !important',
+          },
+          '.MuiBackdrop-root': {
+            animation: 'none !important',
+            transition: 'none !important',
+          },
+        }}
+      />
+      
       {/* منوی کارفرما */}
       <Popover
         id="employer-menu"
@@ -141,21 +160,21 @@ export default function MenuPopover() {
         disableRestoreFocus
         anchorOrigin={{
           vertical: 'bottom',
-          horizontal: 'left',
+          horizontal: 'center',
         }}
         transformOrigin={{
           vertical: 'top',
-          horizontal: 'left',
+          horizontal: 'center',
         }}
         sx={{ pointerEvents: 'none' }}
-        TransitionProps={{ timeout: 0 }}
+        TransitionProps={{ timeout: { enter: 0, exit: 0 }, style: { transition: 'none !important' } }}
         slotProps={{
           paper: {
             onMouseEnter: () => handlePopoverMouseEnter('employer'),
             onMouseLeave: () => handlePopoverMouseLeave('employer'),
             sx: {
-              mt: 1,
-              boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+              mt: 0,
+              boxShadow: 'none',
               borderRadius: 0,
               minWidth: '100%',
               width: '100vw',
@@ -165,8 +184,9 @@ export default function MenuPopover() {
               overflow: 'visible',
               pointerEvents: 'auto',
               border: 'none',
-              borderTop: '1px solid',
-              borderColor: 'divider',
+              borderTop: '0px solid transparent',
+              marginTop: '0px',
+              zIndex: 1000,
               '&:before': {
                 display: 'none',
               },
@@ -182,16 +202,16 @@ export default function MenuPopover() {
             borderRadius: 0,
             maxWidth: '1200px',
             mx: 'auto',
-            bgcolor: '#FFFFFF'
+            bgcolor: '#FFFFFF',
           }}
           elevation={0}
         >
-          <Box sx={{ p: {xs: 2.5, md: 3.5} }}>
+          <Box sx={{ p: {xs: 3, md: 4.5} }}>
             <Box 
               sx={{ 
                 display: 'grid', 
                 gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, 1fr)', md: 'repeat(3, 1fr)' }, 
-                gap: 2.5
+                gap: 3.5
               }}
             >
               {employerMenuItems.map((item, index) => (
@@ -204,7 +224,7 @@ export default function MenuPopover() {
                   sx={{ 
                     display: 'flex',
                     alignItems: 'flex-start',
-                    p: 2.5,
+                    p: 3,
                     borderRadius: 1.5,
                     bgcolor: activeEmployerIndex === index ? alpha(employerColor, 0.05) : 'transparent',
                     color: 'text.primary',
@@ -227,19 +247,19 @@ export default function MenuPopover() {
                       borderRadius: 1.5,
                       bgcolor: activeEmployerIndex === index ? employerColor : alpha(employerColor, 0.1),
                       color: activeEmployerIndex === index ? 'white' : employerColor,
-                      width: 44,
-                      height: 44,
-                      mr: 2,
+                      width: 52,
+                      height: 52,
+                      mr: 2.5,
                       flexShrink: 0
                     }}
                   >
                     {item.icon}
                   </Box>
                   <Box>
-                    <Typography fontWeight={600} fontSize="1rem" color="text.primary">
+                    <Typography fontWeight={600} fontSize="1.15rem" color="text.primary">
                       {item.title}
                     </Typography>
-                    <Typography variant="body2" color="text.secondary" fontSize="0.85rem">
+                    <Typography variant="body2" color="text.secondary" fontSize="0.9rem" mt={0.5}>
                       {item.description}
                     </Typography>
                   </Box>
@@ -259,20 +279,20 @@ export default function MenuPopover() {
         disableRestoreFocus
         anchorOrigin={{
           vertical: 'bottom',
-          horizontal: 'left',
+          horizontal: 'center',
         }}
         transformOrigin={{
           vertical: 'top',
-          horizontal: 'left',
+          horizontal: 'center',
         }}
         sx={{ pointerEvents: 'none' }}
-        TransitionProps={{ timeout: 0 }}
+        TransitionProps={{ timeout: { enter: 0, exit: 0 }, style: { transition: 'none !important' } }}
         slotProps={{
           paper: {
             onMouseEnter: () => handlePopoverMouseEnter('candidate'),
             onMouseLeave: () => handlePopoverMouseLeave('candidate'),
             sx: {
-              mt: 1,
+              mt: 0,
               boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
               borderRadius: 0,
               minWidth: '100%',
@@ -283,8 +303,9 @@ export default function MenuPopover() {
               overflow: 'visible',
               pointerEvents: 'auto',
               border: 'none',
-              borderTop: '1px solid',
-              borderColor: 'divider',
+              borderTop: '0px solid transparent',
+              marginTop: '0px',
+              zIndex: 1000,
               '&:before': {
                 display: 'none',
               },
@@ -300,16 +321,16 @@ export default function MenuPopover() {
             borderRadius: 0,
             maxWidth: '1200px',
             mx: 'auto',
-            bgcolor: '#FFFFFF'
+            bgcolor: '#FFFFFF',
           }}
           elevation={0}
         >
-          <Box sx={{ p: {xs: 2.5, md: 3.5} }}>
+          <Box sx={{ p: {xs: 3, md: 4.5} }}>
             <Box 
               sx={{ 
                 display: 'grid', 
                 gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, 1fr)', md: 'repeat(3, 1fr)' }, 
-                gap: 2.5
+                gap: 3.5
               }}
             >
               {candidateMenuItems.map((item, index) => (
@@ -322,7 +343,7 @@ export default function MenuPopover() {
                   sx={{ 
                     display: 'flex',
                     alignItems: 'flex-start',
-                    p: 2.5,
+                    p: 3,
                     borderRadius: 1.5,
                     bgcolor: activeCandidateIndex === index ? alpha(candidateColor, 0.05) : 'transparent',
                     color: 'text.primary',
@@ -345,19 +366,19 @@ export default function MenuPopover() {
                       borderRadius: 1.5,
                       bgcolor: activeCandidateIndex === index ? candidateColor : alpha(candidateColor, 0.1),
                       color: activeCandidateIndex === index ? 'white' : candidateColor,
-                      width: 44,
-                      height: 44,
-                      mr: 2,
+                      width: 52,
+                      height: 52,
+                      mr: 2.5,
                       flexShrink: 0
                     }}
                   >
                     {item.icon}
                   </Box>
                   <Box>
-                    <Typography fontWeight={600} fontSize="1rem" color="text.primary">
+                    <Typography fontWeight={600} fontSize="1.15rem" color="text.primary">
                       {item.title}
                     </Typography>
-                    <Typography variant="body2" color="text.secondary" fontSize="0.85rem">
+                    <Typography variant="body2" color="text.secondary" fontSize="0.9rem" mt={0.5}>
                       {item.description}
                     </Typography>
                   </Box>
@@ -377,20 +398,20 @@ export default function MenuPopover() {
         disableRestoreFocus
         anchorOrigin={{
           vertical: 'bottom',
-          horizontal: 'left',
+          horizontal: 'center',
         }}
         transformOrigin={{
           vertical: 'top',
-          horizontal: 'left',
+          horizontal: 'center',
         }}
         sx={{ pointerEvents: 'none' }}
-        TransitionProps={{ timeout: 0 }}
+        TransitionProps={{ timeout: { enter: 0, exit: 0 }, style: { transition: 'none !important' } }}
         slotProps={{
           paper: {
             onMouseEnter: () => handlePopoverMouseEnter('help'),
             onMouseLeave: () => handlePopoverMouseLeave('help'),
             sx: {
-              mt: 1,
+              mt: 0,
               boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
               borderRadius: 0,
               minWidth: '100%',
@@ -401,8 +422,9 @@ export default function MenuPopover() {
               overflow: 'visible',
               pointerEvents: 'auto',
               border: 'none',
-              borderTop: '1px solid',
-              borderColor: 'divider',
+              borderTop: '0px solid transparent',
+              marginTop: '0px',
+              zIndex: 1000,
               '&:before': {
                 display: 'none',
               },
@@ -418,16 +440,16 @@ export default function MenuPopover() {
             borderRadius: 0,
             maxWidth: '1200px',
             mx: 'auto',
-            bgcolor: '#FFFFFF'
+            bgcolor: '#FFFFFF',
           }}
           elevation={0}
         >
-          <Box sx={{ p: {xs: 2.5, md: 3.5} }}>
+          <Box sx={{ p: {xs: 3, md: 4.5} }}>
             <Box 
               sx={{ 
                 display: 'grid', 
                 gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, 1fr)', md: 'repeat(4, 1fr)' }, 
-                gap: 2.5
+                gap: 3.5
               }}
             >
               {helpMenuItems.map((item, index) => (
@@ -440,7 +462,7 @@ export default function MenuPopover() {
                   sx={{ 
                     display: 'flex',
                     alignItems: 'flex-start',
-                    p: 2.5,
+                    p: 3,
                     borderRadius: 1.5,
                     bgcolor: activeHelpIndex === index ? alpha(helpColor, 0.05) : 'transparent',
                     color: 'text.primary',
@@ -463,19 +485,19 @@ export default function MenuPopover() {
                       borderRadius: 1.5,
                       bgcolor: activeHelpIndex === index ? helpColor : alpha(helpColor, 0.1),
                       color: activeHelpIndex === index ? 'white' : helpColor,
-                      width: 44,
-                      height: 44,
-                      mr: 2,
+                      width: 52,
+                      height: 52,
+                      mr: 2.5,
                       flexShrink: 0
                     }}
                   >
                     {item.icon}
                   </Box>
                   <Box>
-                    <Typography fontWeight={600} fontSize="1rem" color="text.primary">
+                    <Typography fontWeight={600} fontSize="1.15rem" color="text.primary">
                       {item.title}
                     </Typography>
-                    <Typography variant="body2" color="text.secondary" fontSize="0.85rem">
+                    <Typography variant="body2" color="text.secondary" fontSize="0.9rem" mt={0.5}>
                       {item.description}
                     </Typography>
                   </Box>

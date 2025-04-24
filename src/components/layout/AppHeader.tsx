@@ -72,7 +72,7 @@ export default function AppHeader() {
     },
     { 
       title: 'راهنما', 
-      color: 'primary', 
+      color: 'black',
       href: '#', 
       variant: 'text', 
       hasSubmenu: true,
@@ -102,6 +102,7 @@ export default function AppHeader() {
         borderBottom: '1px solid',
         borderColor: 'divider',
         boxShadow: '0 2px 10px rgba(0,0,0,0.05)',
+        zIndex: 1100,
         '&.MuiPaper-root': {
           backdropFilter: 'blur(10px)' as any,
           backgroundColor: 'rgba(255, 255, 255, 0.95)',
@@ -154,7 +155,7 @@ export default function AppHeader() {
           <Box sx={{ 
             display: { xs: 'none', md: 'flex' }, 
             alignItems: 'center', 
-            gap: 2.5,
+            gap: 0,
             ml: { md: 2 }
           }}>
             {navItems.map((item, index) => (
@@ -183,44 +184,107 @@ export default function AppHeader() {
                           <FontAwesomeIcon icon={faChevronDown} />
                       }
                       sx={{ 
-                        borderRadius: '10px',
+                        borderRadius: '0px',
                         fontWeight: 800,
                         px: item.variant === 'contained' ? 2.5 : 1.5,
-                        py: item.variant === 'contained' ? 1 : 0.75,
+                        py: 0,
+                        height: '100%',
+                        minHeight: '64px',
                         minWidth: item.variant === 'contained' ? 140 : 'auto',
+                        border: 'none',
+                        position: 'relative',
+                        transition: 'all 0.2s ease',
+                        '&::after': {
+                          content: '""',
+                          position: 'absolute',
+                          bottom: 0,
+                          left: 0,
+                          width: '0%',
+                          height: '3px',
+                          transition: 'width 0.2s ease',
+                          zIndex: 1200,
+                        },
+                        ...(item.title === 'راهنما' 
+                          ? { 
+                              color: '#000000',
+                              '&:hover': {
+                                backgroundColor: 'transparent',
+                                border: 'none',
+                                '&::after': {
+                                  width: '100%',
+                                  backgroundColor: '#000000',
+                                }
+                              },
+                              ...(isHelpHovered ? {
+                                backgroundColor: 'transparent',
+                                border: 'none',
+                                '&::after': {
+                                  width: '100%',
+                                  backgroundColor: '#000000',
+                                }
+                              } : {})
+                            } 
+                          : {}),
                         ...(item.color === 'employer' && item.variant === 'text' 
                           ? { 
                               color: theme.palette.employer.main,
-                              border: '1px solid transparent',
                               '&:hover': {
-                                backgroundColor: alpha(theme.palette.employer.main, 0.1),
-                                border: `1px solid ${alpha(theme.palette.employer.main, 0.3)}`,
-                              }
+                                backgroundColor: 'transparent',
+                                border: 'none',
+                                '&::after': {
+                                  width: '100%',
+                                  backgroundColor: theme.palette.employer.main,
+                                }
+                              },
+                              ...(isEmployerHovered ? {
+                                backgroundColor: 'transparent',
+                                border: 'none',
+                                '&::after': {
+                                  width: '100%',
+                                  backgroundColor: theme.palette.employer.main,
+                                }
+                              } : {})
                             } 
                           : {}),
                         ...(item.color === 'candidate' && item.variant === 'text' 
                           ? { 
                               color: theme.palette.candidate.main,
-                              border: '1px solid transparent',
                               '&:hover': {
-                                backgroundColor: alpha(theme.palette.candidate.main, 0.1),
-                                border: `1px solid ${alpha(theme.palette.candidate.main, 0.3)}`,
-                              }
+                                backgroundColor: 'transparent',
+                                border: 'none',
+                                '&::after': {
+                                  width: '100%',
+                                  backgroundColor: theme.palette.candidate.main,
+                                }
+                              },
+                              ...(isCandidateHovered ? {
+                                backgroundColor: 'transparent',
+                                border: 'none',
+                                '&::after': {
+                                  width: '100%',
+                                  backgroundColor: theme.palette.candidate.main,
+                                }
+                              } : {})
                             } 
                           : {}),
                         ...(item.color === 'primary' && item.variant === 'text' 
                           ? { 
                               color: theme.palette.primary.main,
-                              border: '1px solid transparent',
                               '&:hover': {
-                                backgroundColor: alpha(theme.palette.primary.main, 0.1),
-                                border: `1px solid ${alpha(theme.palette.primary.main, 0.3)}`,
+                                backgroundColor: 'transparent',
+                                border: 'none',
+                                '&::after': {
+                                  width: '100%',
+                                  backgroundColor: theme.palette.primary.main,
+                                }
                               }
                             } 
                           : {}),
                         ...(item.variant === 'contained'
                           ? {
+                              borderRadius: '10px',
                               boxShadow: '0 4px 10px rgba(0,0,0,0.15)',
+                              ml: 2,
                               '&:hover': {
                                 boxShadow: '0 6px 15px rgba(0,0,0,0.2)',
                               }
@@ -253,46 +317,14 @@ export default function AppHeader() {
                       borderRadius: '10px',
                       fontWeight: 800,
                       px: item.variant === 'contained' ? 2.5 : 1.5,
-                      py: item.variant === 'contained' ? 1 : 0.75,
+                      py: 0.75,
+                      height: '42px',
                       minWidth: item.variant === 'contained' ? 140 : 'auto',
-                      ...(item.color === 'employer' && item.variant === 'text' 
-                        ? { 
-                            color: theme.palette.employer.main,
-                            border: '1px solid transparent',
-                            '&:hover': {
-                              backgroundColor: alpha(theme.palette.employer.main, 0.1),
-                              border: `1px solid ${alpha(theme.palette.employer.main, 0.3)}`,
-                            }
-                          } 
-                        : {}),
-                      ...(item.color === 'candidate' && item.variant === 'text' 
-                        ? { 
-                            color: theme.palette.candidate.main,
-                            border: '1px solid transparent',
-                            '&:hover': {
-                              backgroundColor: alpha(theme.palette.candidate.main, 0.1),
-                              border: `1px solid ${alpha(theme.palette.candidate.main, 0.3)}`,
-                            }
-                          } 
-                        : {}),
-                      ...(item.color === 'primary' && item.variant === 'text' 
-                        ? { 
-                            color: theme.palette.primary.main,
-                            border: '1px solid transparent',
-                            '&:hover': {
-                              backgroundColor: alpha(theme.palette.primary.main, 0.1),
-                              border: `1px solid ${alpha(theme.palette.primary.main, 0.3)}`,
-                            }
-                          } 
-                        : {}),
-                      ...(item.variant === 'contained'
-                        ? {
-                            boxShadow: '0 4px 10px rgba(0,0,0,0.15)',
-                            '&:hover': {
-                              boxShadow: '0 6px 15px rgba(0,0,0,0.2)',
-                            }
-                          }
-                        : {})
+                      ml: 2,
+                      boxShadow: '0 4px 10px rgba(0,0,0,0.15)',
+                      '&:hover': {
+                        boxShadow: '0 6px 15px rgba(0,0,0,0.2)',
+                      }
                     }}
                   >
                     {item.title}
