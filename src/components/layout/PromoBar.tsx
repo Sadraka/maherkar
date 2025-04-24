@@ -10,22 +10,31 @@ export default function PromoBar() {
   const theme = useTheme()
   const [isVisible, setIsVisible] = useState(true)
   const [isScrolled, setIsScrolled] = useState(false)
+  const [isMounted, setIsMounted] = useState(false)
 
   // برای بستن دستی نوار تبلیغاتی
   const handleClose = () => {
     setIsVisible(false)
     // ذخیره وضعیت در localStorage برای جلوگیری از نمایش مجدد در بارگذاری‌های بعدی
-    localStorage.setItem('promoBarClosed', 'true')
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('promoBarClosed', 'true')
+    }
   }
 
   useEffect(() => {
-    // بررسی localStorage برای تشخیص اینکه آیا کاربر قبلاً نوار را بسته است
-    const isClosed = localStorage.getItem('promoBarClosed') === 'true'
-    setIsVisible(!isClosed)
+    setIsMounted(true)
+    
+    // برای تست، localStorage را پاک می‌کنیم تا نوار همیشه نمایش داده شود
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem('promoBarClosed')
+    }
+    
+    setIsVisible(true)
 
     // تشخیص اسکرول
     const handleScroll = () => {
-      if (window.scrollY > 100) {
+      // کاهش حساسیت آستانه به 50 پیکسل برای پنهان شدن سریع‌تر نوار
+      if (window.scrollY > 50) {
         setIsScrolled(true)
       } else {
         setIsScrolled(false)
@@ -37,6 +46,10 @@ export default function PromoBar() {
       window.removeEventListener('scroll', handleScroll)
     }
   }, [])
+
+  // قبل از اینکه کامپوننت در سمت کلاینت مانت شود، چیزی نمایش نده
+  // این کار از خطای هیدراسیون جلوگیری می‌کند
+  if (!isMounted) return null
 
   // اگر نوار به صورت دستی بسته شده یا با اسکرول مخفی شده، نمایش ندهید
   if (!isVisible || isScrolled) return null
