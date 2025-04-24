@@ -79,8 +79,8 @@ export default function AppHeader() {
       menuId: 'help-menu',
       buttonRef: helpButtonRef,
       icon: faQuestion,
-      bgColor: alpha(theme.palette.primary.main, 0.15),
-      textColor: theme.palette.primary.main
+      bgColor: alpha('#000000', 0.15),
+      textColor: '#000000'
     },
     { 
       title: 'ورود / ثبت‌نام', 

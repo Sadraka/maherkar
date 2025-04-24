@@ -23,10 +23,15 @@ import {
   faBuilding,
   faUserTie,
   faQuestion,
-  faLightbulb
+  faLightbulb,
+  faChevronLeft
 } from '@fortawesome/free-solid-svg-icons';
 import CloseIcon from '@mui/icons-material/Close';
 import { useState } from 'react';
+import {
+  EMPLOYER_BLUE,
+  JOB_SEEKER_GREEN
+} from '@/constants/colors';
 
 export default function MenuPopover() {
   const theme = useTheme();
@@ -48,31 +53,30 @@ export default function MenuPopover() {
   const [activeCandidateIndex, setActiveCandidateIndex] = useState(-1);
   const [activeHelpIndex, setActiveHelpIndex] = useState(-1);
 
+  // تعریف رنگ‌های اصلی برای هر منو - استفاده از ثابت‌های رنگ تعریف شده در constants/colors.ts
+  const employerColor = EMPLOYER_BLUE; // '#0a3b79' - سرمه‌ای برای کارفرما
+  const candidateColor = JOB_SEEKER_GREEN; // '#00703c' - سبز کارجو
+  const helpColor = '#000000'; // مشکی برای راهنما
+
   // منوی کارفرما
   const employerMenuItems = [
     { 
       title: 'مشاهده تمام کارجویان', 
       icon: <FontAwesomeIcon icon={faUsers} size="lg" />, 
       href: '#',
-      description: 'کارجویان فعال در ماهرکار را مشاهده کرده و براساس مهارت مورد نظر خود انتخاب کنید.',
-      color: '#3949AB',
-      bgColor: '#3949AB15'
+      description: 'جستجو و انتخاب متخصصان مناسب',
     },
     { 
-      title: 'مشاهده دسته‌بندی‌ها و مهارت‌ها', 
+      title: 'مشاهده دسته‌بندی‌ها', 
       icon: <FontAwesomeIcon icon={faProjectDiagram} size="lg" />, 
       href: '#',
-      description: 'مهارت مورد نظر را جستجو کرده، پروژه یا نمونه کار را در این دسته‌بندی مشاهده کنید.',
-      color: '#1E88E5',
-      bgColor: '#1E88E515'
+      description: 'جستجو بر اساس مهارت‌ها و تخصص‌ها',
     },
     { 
       title: 'ثبت سریع پروژه', 
       icon: <FontAwesomeIcon icon={faPlus} size="lg" />, 
       href: '#',
-      description: 'با ایجاد پروژه امکان همکاری با هزاران نیروی متخصص را خواهید داشت.',
-      color: '#5E35B1',
-      bgColor: '#5E35B115'
+      description: 'همکاری با هزاران متخصص در کمترین زمان',
     }
   ];
 
@@ -82,25 +86,19 @@ export default function MenuPopover() {
       title: 'جستجوی فرصت‌های شغلی', 
       icon: <FontAwesomeIcon icon={faBriefcase} size="lg" />, 
       href: '#',
-      description: 'آخرین فرصت‌های شغلی مناسب با تخصص شما',
-      color: '#26A69A',
-      bgColor: '#26A69A15'
+      description: 'مشاهده آخرین پروژه‌ها و فرصت‌ها',
     },
     { 
       title: 'ارسال رزومه', 
       icon: <FontAwesomeIcon icon={faFileAlt} size="lg" />, 
       href: '#',
-      description: 'رزومه خود را آماده کنید و به کارفرمایان معتبر ارسال کنید',
-      color: '#43A047',
-      bgColor: '#43A04715'
+      description: 'معرفی تخصص خود به کارفرمایان',
     },
     { 
       title: 'تکمیل پروفایل', 
       icon: <FontAwesomeIcon icon={faUserPlus} size="lg" />, 
       href: '#',
-      description: 'پروفایل حرفه‌ای خود را تکمیل کنید تا شانس استخدام افزایش یابد',
-      color: '#7CB342',
-      bgColor: '#7CB34215'
+      description: 'افزایش شانس استخدام و همکاری',
     }
   ];
 
@@ -110,33 +108,25 @@ export default function MenuPopover() {
       title: 'راهنمای کارفرمایان', 
       icon: <FontAwesomeIcon icon={faBuilding} size="lg" />, 
       href: '#',
-      description: 'آموزش کامل نحوه ثبت پروژه و استخدام کارجو',
-      color: '#E53935',
-      bgColor: '#E5393515'
+      description: 'نحوه ثبت پروژه و استخدام متخصصان',
     },
     { 
       title: 'راهنمای کارجویان', 
       icon: <FontAwesomeIcon icon={faUserTie} size="lg" />, 
       href: '#',
-      description: 'آموزش کامل نحوه ثبت رزومه و یافتن شغل مناسب',
-      color: '#F4511E',
-      bgColor: '#F4511E15'
+      description: 'نحوه ثبت رزومه و یافتن پروژه مناسب',
     },
     { 
       title: 'سوالات متداول', 
       icon: <FontAwesomeIcon icon={faQuestion} size="lg" />, 
       href: '#',
-      description: 'پاسخ به سوالات رایج کاربران',
-      color: '#FB8C00',
-      bgColor: '#FB8C0015'
+      description: 'پاسخ به پرسش‌های رایج',
     },
     { 
       title: 'نکات و ترفندها', 
       icon: <FontAwesomeIcon icon={faLightbulb} size="lg" />, 
       href: '#',
-      description: 'نکات مفید برای موفقیت در ماهرکار',
-      color: '#FFB300',
-      bgColor: '#FFB30015'
+      description: 'راهنمای موفقیت در ماهرکار',
     }
   ];
 
@@ -151,34 +141,34 @@ export default function MenuPopover() {
         disableRestoreFocus
         anchorOrigin={{
           vertical: 'bottom',
-          horizontal: 'center',
+          horizontal: 'left',
         }}
         transformOrigin={{
           vertical: 'top',
-          horizontal: 'center',
+          horizontal: 'left',
         }}
         sx={{ pointerEvents: 'none' }}
+        TransitionProps={{ timeout: 0 }}
         slotProps={{
           paper: {
             onMouseEnter: () => handlePopoverMouseEnter('employer'),
             onMouseLeave: () => handlePopoverMouseLeave('employer'),
             sx: {
-              mt: 0.5,
-              boxShadow: '0 8px 16px rgba(0,0,0,0.1)',
-              borderRadius: 2,
-              minWidth: 350,
+              mt: 1,
+              boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+              borderRadius: 0,
+              minWidth: '100%',
+              width: '100vw',
+              maxWidth: '100vw',
+              left: '0 !important', 
+              right: '0 !important',
               overflow: 'visible',
               pointerEvents: 'auto',
+              border: 'none',
+              borderTop: '1px solid',
+              borderColor: 'divider',
               '&:before': {
-                content: '""',
-                display: 'block',
-                position: 'absolute',
-                top: -10,
-                left: 0,
-                right: 0,
-                height: 10,
-                backgroundColor: 'transparent',
-                zIndex: 1,
+                display: 'none',
               },
             }
           }
@@ -187,89 +177,75 @@ export default function MenuPopover() {
         <Paper 
           id="employer-menu-content" 
           sx={{ 
-            p: 3, 
-            background: `linear-gradient(180deg, ${alpha(theme.palette.employer?.main || theme.palette.primary.main, 0.05)} 0%, rgba(255,255,255,0) 100%)`
+            p: 0, 
+            overflow: 'hidden',
+            borderRadius: 0,
+            maxWidth: '1200px',
+            mx: 'auto',
+            bgcolor: '#FFFFFF'
           }}
+          elevation={0}
         >
-          <Box sx={{ 
-            display: 'flex', 
-            justifyContent: 'space-between', 
-            alignItems: 'center', 
-            mb: 3
-          }}>
-            <Box sx={{ display: 'flex', alignItems: 'center' }}>
-              <Avatar 
-                sx={{ 
-                  bgcolor: alpha(theme.palette.employer?.main || theme.palette.primary.main, 0.1), 
-                  color: theme.palette.employer?.main || theme.palette.primary.main,
-                  mr: 1.5
-                }}
-              >
-                <FontAwesomeIcon icon={faBuilding} />
-              </Avatar>
-              <Typography variant="h6" fontWeight={800} color="employer.main">
-                کارفرما هستم
-              </Typography>
-            </Box>
-            <IconButton 
-              onClick={() => setIsEmployerHovered(false)}
+          <Box sx={{ p: {xs: 2.5, md: 3.5} }}>
+            <Box 
               sx={{ 
-                bgcolor: alpha(theme.palette.employer?.main || theme.palette.primary.main, 0.1),
-                color: theme.palette.employer?.main || theme.palette.primary.main,
-                '&:hover': {
-                  bgcolor: alpha(theme.palette.employer?.main || theme.palette.primary.main, 0.2),
-                }
+                display: 'grid', 
+                gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, 1fr)', md: 'repeat(3, 1fr)' }, 
+                gap: 2.5
               }}
             >
-              <CloseIcon />
-            </IconButton>
-          </Box>
-          <Divider sx={{ mb: 3 }} />
-          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-            {employerMenuItems.map((item, index) => (
-              <Box 
-                key={index.toString()} 
-                component="a"
-                href={item.href}
-                onMouseEnter={() => setActiveEmployerIndex(index)}
-                onMouseLeave={() => setActiveEmployerIndex(-1)}
-                sx={{ 
-                  display: 'flex',
-                  alignItems: 'center',
-                  p: 2,
-                  borderRadius: 3,
-                  bgcolor: activeEmployerIndex === index ? item.bgColor : 'transparent',
-                  color: 'inherit',
-                  textDecoration: 'none',
-                  transition: 'all 0.3s ease',
-                  transform: activeEmployerIndex === index ? 'scale(0.98)' : 'scale(1)',
-                  '&:hover': {
-                    bgcolor: item.bgColor,
-                  }
-                }}
-              >
-                <Avatar
-                  sx={{
-                    bgcolor: activeEmployerIndex === index ? item.color : alpha(item.color, 0.1),
-                    color: activeEmployerIndex === index ? 'white' : item.color,
-                    width: 42,
-                    height: 42,
-                    mr: 2,
-                    transition: 'all 0.3s ease',
+              {employerMenuItems.map((item, index) => (
+                <Box 
+                  key={index.toString()} 
+                  component="a"
+                  href={item.href}
+                  onMouseEnter={() => setActiveEmployerIndex(index)}
+                  onMouseLeave={() => setActiveEmployerIndex(-1)}
+                  sx={{ 
+                    display: 'flex',
+                    alignItems: 'flex-start',
+                    p: 2.5,
+                    borderRadius: 1.5,
+                    bgcolor: activeEmployerIndex === index ? alpha(employerColor, 0.05) : 'transparent',
+                    color: 'text.primary',
+                    textDecoration: 'none',
+                    border: '1px solid',
+                    borderColor: activeEmployerIndex === index ? alpha(employerColor, 0.15) : 'transparent',
+                    boxShadow: activeEmployerIndex === index ? '0 2px 8px rgba(0,0,0,0.03)' : 'none',
+                    '&:hover': {
+                      bgcolor: alpha(employerColor, 0.05),
+                      borderColor: alpha(employerColor, 0.15),
+                      boxShadow: '0 2px 8px rgba(0,0,0,0.03)',
+                    }
                   }}
                 >
-                  {item.icon}
-                </Avatar>
-                <Box>
-                  <Typography fontWeight="bold" fontSize="1rem">
-                    {item.title}
-                  </Typography>
-                  <Typography variant="body2" color="text.secondary" fontSize="0.85rem">
-                    {item.description}
-                  </Typography>
+                  <Box
+                    sx={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      borderRadius: 1.5,
+                      bgcolor: activeEmployerIndex === index ? employerColor : alpha(employerColor, 0.1),
+                      color: activeEmployerIndex === index ? 'white' : employerColor,
+                      width: 44,
+                      height: 44,
+                      mr: 2,
+                      flexShrink: 0
+                    }}
+                  >
+                    {item.icon}
+                  </Box>
+                  <Box>
+                    <Typography fontWeight={600} fontSize="1rem" color="text.primary">
+                      {item.title}
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary" fontSize="0.85rem">
+                      {item.description}
+                    </Typography>
+                  </Box>
                 </Box>
-              </Box>
-            ))}
+              ))}
+            </Box>
           </Box>
         </Paper>
       </Popover>
@@ -283,34 +259,34 @@ export default function MenuPopover() {
         disableRestoreFocus
         anchorOrigin={{
           vertical: 'bottom',
-          horizontal: 'center',
+          horizontal: 'left',
         }}
         transformOrigin={{
           vertical: 'top',
-          horizontal: 'center',
+          horizontal: 'left',
         }}
         sx={{ pointerEvents: 'none' }}
+        TransitionProps={{ timeout: 0 }}
         slotProps={{
           paper: {
             onMouseEnter: () => handlePopoverMouseEnter('candidate'),
             onMouseLeave: () => handlePopoverMouseLeave('candidate'),
             sx: {
-              mt: 0.5,
-              boxShadow: '0 8px 16px rgba(0,0,0,0.1)',
-              borderRadius: 2,
-              minWidth: 350,
+              mt: 1,
+              boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+              borderRadius: 0,
+              minWidth: '100%',
+              width: '100vw',
+              maxWidth: '100vw',
+              left: '0 !important', 
+              right: '0 !important',
               overflow: 'visible',
               pointerEvents: 'auto',
+              border: 'none',
+              borderTop: '1px solid',
+              borderColor: 'divider',
               '&:before': {
-                content: '""',
-                display: 'block',
-                position: 'absolute',
-                top: -10,
-                left: 0,
-                right: 0,
-                height: 10,
-                backgroundColor: 'transparent',
-                zIndex: 1,
+                display: 'none',
               },
             }
           }
@@ -319,89 +295,75 @@ export default function MenuPopover() {
         <Paper 
           id="candidate-menu-content" 
           sx={{ 
-            p: 3, 
-            background: `linear-gradient(180deg, ${alpha(theme.palette.candidate?.main || theme.palette.secondary.main, 0.05)} 0%, rgba(255,255,255,0) 100%)`
+            p: 0, 
+            overflow: 'hidden',
+            borderRadius: 0,
+            maxWidth: '1200px',
+            mx: 'auto',
+            bgcolor: '#FFFFFF'
           }}
+          elevation={0}
         >
-          <Box sx={{ 
-            display: 'flex', 
-            justifyContent: 'space-between', 
-            alignItems: 'center', 
-            mb: 3
-          }}>
-            <Box sx={{ display: 'flex', alignItems: 'center' }}>
-              <Avatar 
-                sx={{ 
-                  bgcolor: alpha(theme.palette.candidate?.main || theme.palette.secondary.main, 0.1), 
-                  color: theme.palette.candidate?.main || theme.palette.secondary.main,
-                  mr: 1.5
-                }}
-              >
-                <FontAwesomeIcon icon={faUserTie} />
-              </Avatar>
-              <Typography variant="h6" fontWeight={800} color="candidate.main">
-                کارجو هستم
-              </Typography>
-            </Box>
-            <IconButton 
-              onClick={() => setIsCandidateHovered(false)}
+          <Box sx={{ p: {xs: 2.5, md: 3.5} }}>
+            <Box 
               sx={{ 
-                bgcolor: alpha(theme.palette.candidate?.main || theme.palette.secondary.main, 0.1),
-                color: theme.palette.candidate?.main || theme.palette.secondary.main,
-                '&:hover': {
-                  bgcolor: alpha(theme.palette.candidate?.main || theme.palette.secondary.main, 0.2),
-                }
+                display: 'grid', 
+                gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, 1fr)', md: 'repeat(3, 1fr)' }, 
+                gap: 2.5
               }}
             >
-              <CloseIcon />
-            </IconButton>
-          </Box>
-          <Divider sx={{ mb: 3 }} />
-          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-            {candidateMenuItems.map((item, index) => (
-              <Box 
-                key={index.toString()} 
-                component="a"
-                href={item.href}
-                onMouseEnter={() => setActiveCandidateIndex(index)}
-                onMouseLeave={() => setActiveCandidateIndex(-1)}
-                sx={{ 
-                  display: 'flex',
-                  alignItems: 'center',
-                  p: 2,
-                  borderRadius: 3,
-                  bgcolor: activeCandidateIndex === index ? item.bgColor : 'transparent',
-                  color: 'inherit',
-                  textDecoration: 'none',
-                  transition: 'all 0.3s ease',
-                  transform: activeCandidateIndex === index ? 'scale(0.98)' : 'scale(1)',
-                  '&:hover': {
-                    bgcolor: item.bgColor,
-                  }
-                }}
-              >
-                <Avatar
-                  sx={{
-                    bgcolor: activeCandidateIndex === index ? item.color : alpha(item.color, 0.1),
-                    color: activeCandidateIndex === index ? 'white' : item.color,
-                    width: 42,
-                    height: 42,
-                    mr: 2,
-                    transition: 'all 0.3s ease',
+              {candidateMenuItems.map((item, index) => (
+                <Box 
+                  key={index.toString()} 
+                  component="a"
+                  href={item.href}
+                  onMouseEnter={() => setActiveCandidateIndex(index)}
+                  onMouseLeave={() => setActiveCandidateIndex(-1)}
+                  sx={{ 
+                    display: 'flex',
+                    alignItems: 'flex-start',
+                    p: 2.5,
+                    borderRadius: 1.5,
+                    bgcolor: activeCandidateIndex === index ? alpha(candidateColor, 0.05) : 'transparent',
+                    color: 'text.primary',
+                    textDecoration: 'none',
+                    border: '1px solid',
+                    borderColor: activeCandidateIndex === index ? alpha(candidateColor, 0.15) : 'transparent',
+                    boxShadow: activeCandidateIndex === index ? '0 2px 8px rgba(0,0,0,0.03)' : 'none',
+                    '&:hover': {
+                      bgcolor: alpha(candidateColor, 0.05),
+                      borderColor: alpha(candidateColor, 0.15),
+                      boxShadow: '0 2px 8px rgba(0,0,0,0.03)',
+                    }
                   }}
                 >
-                  {item.icon}
-                </Avatar>
-                <Box>
-                  <Typography fontWeight="bold" fontSize="1rem">
-                    {item.title}
-                  </Typography>
-                  <Typography variant="body2" color="text.secondary" fontSize="0.85rem">
-                    {item.description}
-                  </Typography>
+                  <Box
+                    sx={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      borderRadius: 1.5,
+                      bgcolor: activeCandidateIndex === index ? candidateColor : alpha(candidateColor, 0.1),
+                      color: activeCandidateIndex === index ? 'white' : candidateColor,
+                      width: 44,
+                      height: 44,
+                      mr: 2,
+                      flexShrink: 0
+                    }}
+                  >
+                    {item.icon}
+                  </Box>
+                  <Box>
+                    <Typography fontWeight={600} fontSize="1rem" color="text.primary">
+                      {item.title}
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary" fontSize="0.85rem">
+                      {item.description}
+                    </Typography>
+                  </Box>
                 </Box>
-              </Box>
-            ))}
+              ))}
+            </Box>
           </Box>
         </Paper>
       </Popover>
@@ -415,34 +377,34 @@ export default function MenuPopover() {
         disableRestoreFocus
         anchorOrigin={{
           vertical: 'bottom',
-          horizontal: 'center',
+          horizontal: 'left',
         }}
         transformOrigin={{
           vertical: 'top',
-          horizontal: 'center',
+          horizontal: 'left',
         }}
         sx={{ pointerEvents: 'none' }}
+        TransitionProps={{ timeout: 0 }}
         slotProps={{
           paper: {
             onMouseEnter: () => handlePopoverMouseEnter('help'),
             onMouseLeave: () => handlePopoverMouseLeave('help'),
             sx: {
-              mt: 0.5,
-              boxShadow: '0 8px 16px rgba(0,0,0,0.1)',
-              borderRadius: 2,
-              minWidth: 350,
+              mt: 1,
+              boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+              borderRadius: 0,
+              minWidth: '100%',
+              width: '100vw',
+              maxWidth: '100vw',
+              left: '0 !important', 
+              right: '0 !important',
               overflow: 'visible',
               pointerEvents: 'auto',
+              border: 'none',
+              borderTop: '1px solid',
+              borderColor: 'divider',
               '&:before': {
-                content: '""',
-                display: 'block',
-                position: 'absolute',
-                top: -10,
-                left: 0,
-                right: 0,
-                height: 10,
-                backgroundColor: 'transparent',
-                zIndex: 1,
+                display: 'none',
               },
             }
           }
@@ -451,89 +413,75 @@ export default function MenuPopover() {
         <Paper 
           id="help-menu-content" 
           sx={{ 
-            p: 3, 
-            background: `linear-gradient(180deg, ${alpha(theme.palette.info.main, 0.05)} 0%, rgba(255,255,255,0) 100%)`
+            p: 0, 
+            overflow: 'hidden',
+            borderRadius: 0,
+            maxWidth: '1200px',
+            mx: 'auto',
+            bgcolor: '#FFFFFF'
           }}
+          elevation={0}
         >
-          <Box sx={{ 
-            display: 'flex', 
-            justifyContent: 'space-between', 
-            alignItems: 'center', 
-            mb: 3
-          }}>
-            <Box sx={{ display: 'flex', alignItems: 'center' }}>
-              <Avatar 
-                sx={{ 
-                  bgcolor: alpha(theme.palette.info.main, 0.1), 
-                  color: theme.palette.info.main,
-                  mr: 1.5
-                }}
-              >
-                <FontAwesomeIcon icon={faQuestion} />
-              </Avatar>
-              <Typography variant="h6" fontWeight={800} color="info.main">
-                راهنما
-              </Typography>
-            </Box>
-            <IconButton 
-              onClick={() => setIsHelpHovered(false)}
+          <Box sx={{ p: {xs: 2.5, md: 3.5} }}>
+            <Box 
               sx={{ 
-                bgcolor: alpha(theme.palette.info.main, 0.1),
-                color: theme.palette.info.main,
-                '&:hover': {
-                  bgcolor: alpha(theme.palette.info.main, 0.2),
-                }
+                display: 'grid', 
+                gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, 1fr)', md: 'repeat(4, 1fr)' }, 
+                gap: 2.5
               }}
             >
-              <CloseIcon />
-            </IconButton>
-          </Box>
-          <Divider sx={{ mb: 3 }} />
-          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-            {helpMenuItems.map((item, index) => (
-              <Box 
-                key={index.toString()} 
-                component="a"
-                href={item.href}
-                onMouseEnter={() => setActiveHelpIndex(index)}
-                onMouseLeave={() => setActiveHelpIndex(-1)}
-                sx={{ 
-                  display: 'flex',
-                  alignItems: 'center',
-                  p: 2,
-                  borderRadius: 3,
-                  bgcolor: activeHelpIndex === index ? item.bgColor : 'transparent',
-                  color: 'inherit',
-                  textDecoration: 'none',
-                  transition: 'all 0.3s ease',
-                  transform: activeHelpIndex === index ? 'scale(0.98)' : 'scale(1)',
-                  '&:hover': {
-                    bgcolor: item.bgColor,
-                  }
-                }}
-              >
-                <Avatar
-                  sx={{
-                    bgcolor: activeHelpIndex === index ? item.color : alpha(item.color, 0.1),
-                    color: activeHelpIndex === index ? 'white' : item.color,
-                    width: 42,
-                    height: 42,
-                    mr: 2,
-                    transition: 'all 0.3s ease',
+              {helpMenuItems.map((item, index) => (
+                <Box 
+                  key={index.toString()} 
+                  component="a"
+                  href={item.href}
+                  onMouseEnter={() => setActiveHelpIndex(index)}
+                  onMouseLeave={() => setActiveHelpIndex(-1)}
+                  sx={{ 
+                    display: 'flex',
+                    alignItems: 'flex-start',
+                    p: 2.5,
+                    borderRadius: 1.5,
+                    bgcolor: activeHelpIndex === index ? alpha(helpColor, 0.05) : 'transparent',
+                    color: 'text.primary',
+                    textDecoration: 'none',
+                    border: '1px solid',
+                    borderColor: activeHelpIndex === index ? alpha(helpColor, 0.15) : 'transparent',
+                    boxShadow: activeHelpIndex === index ? '0 2px 8px rgba(0,0,0,0.03)' : 'none',
+                    '&:hover': {
+                      bgcolor: alpha(helpColor, 0.05),
+                      borderColor: alpha(helpColor, 0.15),
+                      boxShadow: '0 2px 8px rgba(0,0,0,0.03)',
+                    }
                   }}
                 >
-                  {item.icon}
-                </Avatar>
-                <Box>
-                  <Typography fontWeight="bold" fontSize="1rem">
-                    {item.title}
-                  </Typography>
-                  <Typography variant="body2" color="text.secondary" fontSize="0.85rem">
-                    {item.description}
-                  </Typography>
+                  <Box
+                    sx={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      borderRadius: 1.5,
+                      bgcolor: activeHelpIndex === index ? helpColor : alpha(helpColor, 0.1),
+                      color: activeHelpIndex === index ? 'white' : helpColor,
+                      width: 44,
+                      height: 44,
+                      mr: 2,
+                      flexShrink: 0
+                    }}
+                  >
+                    {item.icon}
+                  </Box>
+                  <Box>
+                    <Typography fontWeight={600} fontSize="1rem" color="text.primary">
+                      {item.title}
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary" fontSize="0.85rem">
+                      {item.description}
+                    </Typography>
+                  </Box>
                 </Box>
-              </Box>
-            ))}
+              ))}
+            </Box>
           </Box>
         </Paper>
       </Popover>
