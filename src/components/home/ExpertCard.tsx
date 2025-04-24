@@ -15,8 +15,14 @@ import {
 } from '@mui/material';
 import LocationOnOutlinedIcon from '@mui/icons-material/LocationOnOutlined';
 import WorkOutlineIcon from '@mui/icons-material/WorkOutline';
-import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
+import VerifiedUserIcon from '@mui/icons-material/VerifiedUser';
 import { useJobSeekerTheme } from '@/contexts/JobSeekerThemeContext';
+
+// تابع تبدیل اعداد انگلیسی به فارسی
+const convertToPersianNumber = (num: number): string => {
+  const persianDigits = ['۰', '۱', '۲', '۳', '۴', '۵', '۶', '۷', '۸', '۹'];
+  return num.toString().replace(/\d/g, (match) => persianDigits[parseInt(match)]);
+};
 
 export type ExpertType = {
   id: number;
@@ -59,7 +65,7 @@ export default function ExpertCard({ expert }: ExpertCardProps) {
       }}
     >
       <CardContent sx={{ p: 3, position: 'relative' }}>
-        <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', mb: 2 }}>
+        <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', mb: 2, position: 'relative' }}>
           <Avatar 
             src={expert.avatar} 
             alt={expert.name}
@@ -72,17 +78,32 @@ export default function ExpertCard({ expert }: ExpertCardProps) {
             }} 
           />
           
-          <Box sx={{ textAlign: 'center' }}>
-            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <Typography variant="h6" sx={{ fontWeight: 'bold', fontSize: '1.05rem' }}>
-                {expert.name}
-              </Typography>
-              {expert.isVerified && (
-                <CheckCircleOutlineIcon 
-                  sx={{ ml: 0.5, color: jobSeekerColors.primary, fontSize: '1rem' }} 
-                />
-              )}
+          {expert.isVerified && (
+            <Box 
+              sx={{ 
+                position: 'absolute',
+                bottom: 16, 
+                right: 'calc(50% - 55px)', 
+                bgcolor: jobSeekerColors.primary,
+                color: 'white', 
+                borderRadius: '50%',
+                width: 24,
+                height: 24,
+                display: 'flex',
+                justifyContent: 'center',
+                alignItems: 'center',
+                border: '2px solid white',
+                boxShadow: '0 1px 4px rgba(0,0,0,0.2)'
+              }}
+            >
+              <VerifiedUserIcon sx={{ fontSize: '0.9rem' }} />
             </Box>
+          )}
+          
+          <Box sx={{ textAlign: 'center' }}>
+            <Typography variant="h6" sx={{ fontWeight: 'bold', fontSize: '1.05rem' }}>
+              {expert.name}
+            </Typography>
             
             <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
               {expert.jobTitle}
@@ -100,7 +121,7 @@ export default function ExpertCard({ expert }: ExpertCardProps) {
                 }} 
               />
               <Typography variant="body2" sx={{ fontWeight: 'medium' }}>
-                {expert.rating}
+                {convertToPersianNumber(expert.rating)}
               </Typography>
             </Box>
           </Box>
@@ -119,13 +140,13 @@ export default function ExpertCard({ expert }: ExpertCardProps) {
           <Box sx={{ display: 'flex', alignItems: 'center' }}>
             <WorkOutlineIcon fontSize="small" sx={{ color: jobSeekerColors.primary, fontSize: '1rem', ml: 0.5 }} />
             <Typography variant="body2" color="text.secondary">
-              {expert.completedProjects} پروژه موفق
+              {convertToPersianNumber(expert.completedProjects)} پروژه موفق
             </Typography>
           </Box>
         </Box>
         
         <Box sx={{ mb: 3 }}>
-          <Typography variant="body2" sx={{ mb: 1, fontWeight: 600, color: theme.palette.text.secondary }}>
+          <Typography variant="body2" sx={{ mb: 1.5, fontWeight: 600, color: theme.palette.text.secondary }}>
             مهارت‌ها:
           </Typography>
           <Stack direction="row" spacing={1} flexWrap="wrap" gap={1}>
@@ -135,13 +156,21 @@ export default function ExpertCard({ expert }: ExpertCardProps) {
                 label={skill}
                 size="small"
                 sx={{ 
-                  bgcolor: 'white',
+                  bgcolor: 'rgba(0, 128, 0, 0.07)',
                   border: `1px solid ${jobSeekerColors.bgLight}`,
-                  fontWeight: 500,
-                  fontSize: '0.75rem',
-                  borderRadius: 1,
-                  color: jobSeekerColors.dark,
-                  boxShadow: '0 1px 3px rgba(0,0,0,0.05)',
+                  fontWeight: 600,
+                  fontSize: '0.8rem',
+                  borderRadius: 1.5,
+                  color: jobSeekerColors.primary,
+                  py: 0.5,
+                  px: 0.3,
+                  boxShadow: '0 2px 4px rgba(0,0,0,0.07)',
+                  transition: 'all 0.2s ease',
+                  '&:hover': {
+                    bgcolor: 'rgba(0, 128, 0, 0.12)',
+                    boxShadow: '0 3px 6px rgba(0,0,0,0.1)',
+                    transform: 'translateY(-2px)'
+                  },
                 }}
               />
             ))}
