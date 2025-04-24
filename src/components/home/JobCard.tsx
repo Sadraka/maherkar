@@ -21,6 +21,7 @@ import LocalFireDepartmentIcon from '@mui/icons-material/LocalFireDepartment';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faBuilding } from '@fortawesome/free-solid-svg-icons';
 import { useJobSeekerTheme } from '@/contexts/JobSeekerThemeContext';
+import { EMPLOYER_THEME } from '@/constants/colors';
 
 // تعریف تایپ جاب
 export type JobType = {
@@ -45,6 +46,9 @@ export default function JobCard({ job }: JobCardProps) {
   const theme = useTheme();
   const jobSeekerColors = useJobSeekerTheme();
   
+  // استفاده از رنگ‌های کارفرما
+  const employerColors = EMPLOYER_THEME;
+  
   return (
     <Card 
       sx={{ 
@@ -52,7 +56,7 @@ export default function JobCard({ job }: JobCardProps) {
         display: 'flex', 
         flexDirection: 'column',
         borderRadius: 2,
-        border: `1px solid ${jobSeekerColors.bgLight}`,
+        border: `1px solid ${employerColors.bgLight}`,
         boxShadow: '0 4px 12px rgba(0,0,0,0.05)',
         overflow: 'hidden',
         position: 'relative',
@@ -96,7 +100,7 @@ export default function JobCard({ job }: JobCardProps) {
             position: 'absolute',
             top: 12,
             right: 12,
-            bgcolor: 'rgba(0, 112, 60, 0.95)',
+            bgcolor: `rgba(${employerColors.primary.replace('rgb(', '').replace(')', '')}, 0.95)`,
             color: '#fff',
             fontSize: '0.75rem',
             fontWeight: 'bold',
@@ -107,7 +111,7 @@ export default function JobCard({ job }: JobCardProps) {
             alignItems: 'center',
             gap: 0.5,
             zIndex: 2,
-            boxShadow: '0 2px 8px rgba(0, 112, 60, 0.3)'
+            boxShadow: `0 2px 8px ${employerColors.bgLight}`
           }}
         >
           <LocalFireDepartmentIcon sx={{ fontSize: '0.85rem' }} />
@@ -146,7 +150,7 @@ export default function JobCard({ job }: JobCardProps) {
           <FontAwesomeIcon 
             icon={faBuilding} 
             style={{ 
-              color: jobSeekerColors.primary,
+              color: employerColors.primary,
               marginLeft: '4px',
               fontSize: '0.9rem'
             }} 
@@ -157,7 +161,7 @@ export default function JobCard({ job }: JobCardProps) {
         <Box sx={{ 
           mb: 2,
           p: 1.5, 
-          bgcolor: jobSeekerColors.bgVeryLight, 
+          bgcolor: employerColors.bgVeryLight, 
           borderRadius: 1.5
         }}>
           <Stack direction="row" spacing={2} sx={{ mb: 1.5 }}>
@@ -171,7 +175,7 @@ export default function JobCard({ job }: JobCardProps) {
             >
               <LocationOnOutlinedIcon 
                 fontSize="small" 
-                sx={{ mr: 0.5, fontSize: '1rem', color: jobSeekerColors.primary }} 
+                sx={{ mr: 0.5, fontSize: '1rem', color: employerColors.primary }} 
               />
               {job.location}
               {job.isRemote && <Chip 
@@ -182,7 +186,7 @@ export default function JobCard({ job }: JobCardProps) {
                   fontSize: '0.7rem',
                   height: 20,
                   backgroundColor: 'rgba(255,255,255,0.7)',
-                  color: jobSeekerColors.primary,
+                  color: employerColors.primary,
                   borderRadius: '4px',
                   fontWeight: 'bold'
                 }} 
@@ -199,7 +203,7 @@ export default function JobCard({ job }: JobCardProps) {
             >
               <AccessTimeOutlinedIcon 
                 fontSize="small" 
-                sx={{ mr: 0.5, fontSize: '1rem', color: jobSeekerColors.primary }} 
+                sx={{ mr: 0.5, fontSize: '1rem', color: employerColors.primary }} 
               />
               {job.timePosted}
             </Box>
@@ -216,7 +220,7 @@ export default function JobCard({ job }: JobCardProps) {
             >
               <WorkOutlineIcon 
                 fontSize="small" 
-                sx={{ mr: 0.5, fontSize: '1rem', color: jobSeekerColors.primary }} 
+                sx={{ mr: 0.5, fontSize: '1rem', color: employerColors.primary }} 
               />
               {job.jobType}
             </Box>
@@ -231,7 +235,7 @@ export default function JobCard({ job }: JobCardProps) {
             >
               <MonetizationOnOutlinedIcon 
                 fontSize="small" 
-                sx={{ mr: 0.5, fontSize: '1rem', color: jobSeekerColors.primary }} 
+                sx={{ mr: 0.5, fontSize: '1rem', color: employerColors.primary }} 
               />
               {job.salary}
             </Box>
@@ -250,11 +254,11 @@ export default function JobCard({ job }: JobCardProps) {
                 size="small"
                 sx={{ 
                   bgcolor: 'white',
-                  border: `1px solid ${jobSeekerColors.bgLight}`,
+                  border: `1px solid ${employerColors.bgLight}`,
                   fontWeight: 500,
                   fontSize: '0.75rem',
                   borderRadius: 1,
-                  color: jobSeekerColors.dark,
+                  color: employerColors.dark,
                   boxShadow: '0 1px 3px rgba(0,0,0,0.05)',
                 }}
               />
@@ -266,14 +270,19 @@ export default function JobCard({ job }: JobCardProps) {
           fullWidth 
           variant="contained" 
           disableElevation
-          color="success"
+          color="primary"
           sx={{ 
             mt: 'auto',
             py: 1.2,
             fontWeight: 'bold',
             borderRadius: 1.5,
             fontSize: '0.9rem',
-            boxShadow: '0 4px 8px rgba(0, 112, 60, 0.2)',
+            background: `linear-gradient(135deg, ${employerColors.light} 0%, ${employerColors.primary} 100%)`,
+            boxShadow: `0 4px 8px ${employerColors.bgLight}`,
+            '&:hover': {
+              background: `linear-gradient(135deg, ${employerColors.primary} 0%, ${employerColors.dark} 100%)`,
+              boxShadow: `0 4px 12px ${employerColors.bgLight}`,
+            }
           }}
         >
           درخواست همکاری

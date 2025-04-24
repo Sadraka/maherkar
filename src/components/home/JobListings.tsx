@@ -11,10 +11,14 @@ import {
 import JobCard, { JobType } from './JobCard';
 import WorkOutlineIcon from '@mui/icons-material/WorkOutline';
 import { useJobSeekerTheme } from '@/contexts/JobSeekerThemeContext';
+import { EMPLOYER_THEME } from '@/constants/colors';
 
 export default function JobListings() {
   const theme = useTheme();
   const jobSeekerColors = useJobSeekerTheme();
+  
+  // استفاده از رنگ‌های کارفرما
+  const employerColors = EMPLOYER_THEME;
   
   const [jobs, setJobs] = useState<JobType[]>([
     {
@@ -124,7 +128,7 @@ export default function JobListings() {
                 position: 'absolute',
                 width: '80px',
                 height: '4px',
-                backgroundColor: jobSeekerColors.primary,
+                backgroundColor: employerColors.primary,
                 bottom: 0,
                 left: 'calc(50% - 40px)',
                 borderRadius: '2px'
@@ -161,14 +165,19 @@ export default function JobListings() {
           <Button 
             variant="contained" 
             disableElevation
-            color="success"
+            color="primary"
             sx={{ 
               px: 4,
               py: 1.2,
               fontWeight: 700,
               borderRadius: 2,
               fontSize: '1rem',
-              boxShadow: '0 4px 8px rgba(0, 112, 60, 0.2)',
+              background: `linear-gradient(135deg, ${employerColors.light} 0%, ${employerColors.primary} 100%)`,
+              boxShadow: `0 4px 8px rgba(10, 59, 121, 0.2)`,
+              '&:hover': {
+                background: `linear-gradient(135deg, ${employerColors.primary} 0%, ${employerColors.dark} 100%)`,
+                boxShadow: `0 6px 10px rgba(10, 59, 121, 0.3)`,
+              }
             }}
           >
             مشاهده همه آگهی‌ها
