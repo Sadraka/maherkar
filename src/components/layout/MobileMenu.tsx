@@ -466,30 +466,25 @@ export default function MobileMenu() {
             boxSizing: 'border-box', 
             width: '100%',
             height: 'auto',
-            maxHeight: 'calc(100% - 65px)',
+            maxHeight: 'calc(100% - 80px)',
             borderTopLeftRadius: 24,
             borderTopRightRadius: 24,
-            bottom: 0,
+            bottom: 65,
             top: 'auto',
             boxShadow: '0 -8px 25px rgba(0,0,0,0.1)',
+            zIndex: (theme) => theme.zIndex.drawer + 1,
           },
           '& .MuiBackdrop-root': {
             backgroundColor: 'rgba(0, 0, 0, 0.15)',
             backdropFilter: 'none',
-          },
-          '& .MuiPaper-root': {
-            transform: 'translateY(0) !important',
-            transition: 'transform 0.3s ease-out !important',
-            '&.MuiDrawer-paperAnchorBottom': {
-              transform: 'translateY(100%) !important',
-            }
           }
         }}
-        transitionDuration={300}
         SlideProps={{
-          appear: true,
           direction: "up",
-          easing: { enter: 'cubic-bezier(0.4, 0, 0.2, 1)', exit: 'cubic-bezier(0.4, 0, 0.2, 1)' }
+          timeout: {
+            enter: 400,
+            exit: 300
+          }
         }}
       >
         {mobileDrawerContent()}
@@ -503,7 +498,7 @@ export default function MobileMenu() {
           bottom: 0,
           left: 0,
           right: 0,
-          zIndex: (theme) => theme.zIndex.drawer - 1,
+          zIndex: (theme) => theme.zIndex.drawer,
           borderRadius: '24px 24px 0 0',
           overflow: 'hidden',
           boxShadow: '0 -4px 20px rgba(0,0,0,0.1)',
