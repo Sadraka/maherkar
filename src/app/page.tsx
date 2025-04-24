@@ -34,6 +34,6 @@ export default function Home() {
       
       {/* فوتر سایت */}
       <Footer />
-    </main>
+      </main>
   );
 }

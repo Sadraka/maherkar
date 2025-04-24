@@ -48,7 +48,8 @@ import {
   faUserPlus,
   faChevronUp, 
   faChevronDown,
-  faUserGraduate
+  faUserGraduate,
+  faUser
 } from '@fortawesome/free-solid-svg-icons';
 
 export default function Header() {
@@ -200,7 +201,7 @@ export default function Header() {
       color: 'candidate', 
       href: '#', 
       variant: 'text', 
-      icon: <FontAwesomeIcon icon={faUserTie} />,
+      icon: <FontAwesomeIcon icon={faUser} />,
       hasSubmenu: true,
       menuItems: candidateMenuItems,
       menuId: 'candidate-menu',
@@ -414,7 +415,7 @@ export default function Header() {
                         : item.color === 'candidate' 
                           ? 'secondary' 
                           : (item.color as any)}
-                      startIcon={item.icon}
+                      startIcon={item.icon && item.title !== 'کارفرما هستم' && item.title !== 'کارجو هستم' ? item.icon : null}
                       endIcon={
                         (item.menuId === 'employer-menu' && isEmployerHovered) || 
                         (item.menuId === 'candidate-menu' && isCandidateHovered) ? 
@@ -423,7 +424,7 @@ export default function Header() {
                       }
                       sx={{ 
                         borderRadius: '10px',
-                        fontWeight: 600,
+                        fontWeight: 800,
                         px: item.variant === 'contained' ? 2.5 : 1.5,
                         py: item.variant === 'contained' ? 1 : 0.75,
                         minWidth: item.variant === 'contained' ? 140 : 'auto',

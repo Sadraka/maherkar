@@ -21,7 +21,7 @@ export default function RootLayout({
         <ThemeRegistry>
           <PromoBar />
           <Header />
-          {children}
+        {children}
         </ThemeRegistry>
       </body>
     </html>
