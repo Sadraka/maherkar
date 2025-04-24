@@ -4,7 +4,7 @@ import { Box, Container, Typography, TextField, MenuItem, Button, useTheme, useM
 import SearchIcon from '@mui/icons-material/Search';
 import LocationOnIcon from '@mui/icons-material/LocationOn';
 import WorkIcon from '@mui/icons-material/Work';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 // تعریف داده‌های فارسی برای فیلدهای انتخابی
 const jobCategories = [
@@ -21,18 +21,23 @@ const provinces = [
   { value: '', label: 'همه استان‌ها' },
   { value: 'tehran', label: 'تهران' },
   { value: 'isfahan', label: 'اصفهان' },
-  { value: 'mashhad', label: 'مشهد' },
-  { value: 'shiraz', label: 'شیراز' },
-  { value: 'tabriz', label: 'تبریز' }
+  { value: 'khorasan-razavi', label: 'خراسان رضوی' },
+  { value: 'fars', label: 'فارس' },
+  { value: 'east-azerbaijan', label: 'آذربایجان شرقی' }
 ];
 
 const cities = [
-  { value: '', label: 'همه' },
-  { value: 'tehran', label: 'تهران' },
-  { value: 'isfahan', label: 'اصفهان' },
-  { value: 'mashhad', label: 'مشهد' },
-  { value: 'shiraz', label: 'شیراز' },
-  { value: 'tabriz', label: 'تبریز' }
+  { value: '', label: 'همه شهرها', province: '' },
+  { value: 'tehran-city', label: 'تهران', province: 'tehran' },
+  { value: 'karaj', label: 'کرج', province: 'tehran' },
+  { value: 'isfahan-city', label: 'اصفهان', province: 'isfahan' },
+  { value: 'kashan', label: 'کاشان', province: 'isfahan' },
+  { value: 'mashhad-city', label: 'مشهد', province: 'khorasan-razavi' },
+  { value: 'neyshabur', label: 'نیشابور', province: 'khorasan-razavi' },
+  { value: 'shiraz-city', label: 'شیراز', province: 'fars' },
+  { value: 'marvdasht', label: 'مرودشت', province: 'fars' },
+  { value: 'tabriz-city', label: 'تبریز', province: 'east-azerbaijan' },
+  { value: 'maragheh', label: 'میانه', province: 'east-azerbaijan' }
 ];
 
 export default function Hero() {
@@ -41,6 +46,22 @@ export default function Hero() {
   const [jobCategory, setJobCategory] = useState('');
   const [location, setLocation] = useState('');
   const [city, setCity] = useState('');
+
+  // Filtered cities based on selected province
+  const [filteredCities, setFilteredCities] = useState(cities);
+
+  // Effect to update filtered cities when province changes
+  useEffect(() => {
+    if (location) {
+      // Filter cities for the selected province, always include "همه شهرها"
+      setFilteredCities(cities.filter(c => c.province === location || c.province === ''));
+    } else {
+      // If no province is selected, show all cities
+      setFilteredCities(cities);
+    }
+    // Reset city selection when province changes
+    setCity(''); 
+  }, [location]); // Rerun effect when location (province) changes
 
   // یافتن برچسب فارسی مناسب برای مقدار انتخاب شده
   const getJobCategoryLabel = () => {
@@ -61,31 +82,33 @@ export default function Hero() {
   return (
     <Box
       sx={{
-        pt: { xs: 4, md: 5 },
-        pb: { xs: 4, md: 5 },
+        pt: { xs: 4, md: 6 },
+        pb: { xs: 4, md: 6 },
         backgroundColor: theme.palette.background.default,
         position: 'relative',
         overflow: 'hidden',
-        border: '1px solid #eee',
-        borderStyle: 'dashed',
         mx: 'auto',
         maxWidth: '1200px',
-        my: 2,
-        borderRadius: `${theme.shape.borderRadius}px`
+        my: 3,
+        borderRadius: `${theme.shape.borderRadius}px`,
       }}
     >
       <Container maxWidth="lg">
-        <Box sx={{ textAlign: 'center', mb: 6 }}>
+        <Box sx={{ textAlign: 'center', mb: 5 }}>
           <Typography 
             variant="h4" 
             component="h1" 
             sx={{ 
               fontWeight: 700, 
-              fontSize: { xs: '1.5rem', sm: '1.8rem', md: '2rem' }, 
-              color: theme.palette.text.primary
+              fontSize: { xs: '1.6rem', sm: '2rem', md: '2.2rem' },
+              color: theme.palette.text.primary,
+              mb: 1
             }}
           >
             هوشمند انتخاب کن، سریع استخدام شو
+          </Typography>
+          <Typography variant="body1" color="text.secondary">
+            بهترین فرصت‌های شغلی و پروژه‌ها در دسترس شماست
           </Typography>
         </Box>
         
@@ -96,7 +119,11 @@ export default function Hero() {
             display: 'flex',
             flexDirection: { xs: 'column', sm: 'row' },
             alignItems: 'center',
-            gap: 2
+            gap: 1.5,
+            backgroundColor: theme.palette.background.paper,
+            p: 1.5,
+            borderRadius: `${theme.shape.borderRadius}px`,
+            boxShadow: '0px 4px 20px rgba(0, 0, 0, 0.05)',
           }}
         >
           <Box sx={{ width: { xs: '100%', sm: '25%' } }}>
@@ -111,7 +138,17 @@ export default function Hero() {
                 '& .MuiOutlinedInput-root': {
                   borderRadius: `${theme.shape.borderRadius}px`,
                   height: '48px',
-                  backgroundColor: theme.palette.background.paper
+                  backgroundColor: theme.palette.background.paper,
+                  '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                    borderColor: theme.palette.primary.main,
+                    borderWidth: '1px',
+                  },
+                  '&:hover .MuiOutlinedInput-notchedOutline': {
+                     borderColor: theme.palette.grey[400],
+                  },
+                  '.MuiOutlinedInput-notchedOutline': {
+                     borderColor: theme.palette.grey[300],
+                   }
                 },
                 '& .MuiInputBase-input': {
                   textAlign: 'right',
@@ -119,12 +156,22 @@ export default function Hero() {
                 },
                 '& .MuiSelect-icon': {
                   right: 'auto',
-                  left: '14px'
+                  left: '7px'
                 }
               }}
               SelectProps={{
                 displayEmpty: true,
                 renderValue: () => getJobCategoryLabel(),
+                MenuProps: {
+                  anchorOrigin: { vertical: "bottom", horizontal: "right" },
+                  transformOrigin: { vertical: "top", horizontal: "right" },
+                  PaperProps: {
+                    sx: { 
+                      textAlign: 'right',
+                      '& .MuiMenuItem-root': { justifyContent: 'flex-end' }
+                    }
+                  }
+                },
                 IconComponent: props => <Box component="span" {...props} sx={{ transform: 'rotate(90deg)', marginLeft: '7px' }}>‹</Box>
               }}
             >
@@ -148,24 +195,45 @@ export default function Hero() {
                 '& .MuiOutlinedInput-root': {
                   borderRadius: `${theme.shape.borderRadius}px`,
                   height: '48px',
-                  backgroundColor: theme.palette.background.paper
+                  backgroundColor: theme.palette.background.paper,
+                  '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                    borderColor: theme.palette.primary.main,
+                    borderWidth: '1px',
+                  },
+                   '&:hover .MuiOutlinedInput-notchedOutline': {
+                     borderColor: theme.palette.grey[400],
+                  },
+                   '.MuiOutlinedInput-notchedOutline': {
+                     borderColor: theme.palette.grey[300],
+                   }
                 },
                 '& .MuiInputBase-input': {
                   textAlign: 'right',
-                  paddingRight: '14px'
+                  paddingRight: '14px',
+                  paddingLeft: '40px'
                 },
                 '& .MuiSelect-icon': {
                   right: 'auto',
-                  left: '14px'
+                  left: '7px'
                 }
               }}
               SelectProps={{
                 displayEmpty: true,
                 renderValue: () => getLocationLabel(),
+                MenuProps: {
+                  anchorOrigin: { vertical: "bottom", horizontal: "right" },
+                  transformOrigin: { vertical: "top", horizontal: "right" },
+                  PaperProps: {
+                    sx: { 
+                      textAlign: 'right',
+                      '& .MuiMenuItem-root': { justifyContent: 'flex-end' }
+                     }
+                  }
+                },
                 IconComponent: props => <Box component="span" {...props} sx={{ transform: 'rotate(90deg)', marginLeft: '7px' }}>‹</Box>
               }}
               InputProps={{
-                startAdornment: <LocationOnIcon fontSize="small" color="action" sx={{ position: 'absolute', right: 'auto', left: '36px', opacity: 0.6 }} />,
+                startAdornment: <LocationOnIcon fontSize="small" color="action" sx={{ position: 'absolute', left: '30px', opacity: 0.6 }} />,
               }}
             >
               {provinces.map((province) => (
@@ -184,33 +252,61 @@ export default function Hero() {
               value={city}
               onChange={(e) => setCity(e.target.value)}
               placeholder="شهر"
+              disabled={!location}
               sx={{
                 '& .MuiOutlinedInput-root': {
                   borderRadius: `${theme.shape.borderRadius}px`,
                   height: '48px',
-                  backgroundColor: theme.palette.background.paper
+                  backgroundColor: theme.palette.background.paper,
+                   '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                    borderColor: theme.palette.primary.main,
+                    borderWidth: '1px',
+                  },
+                   '&:hover .MuiOutlinedInput-notchedOutline': {
+                     borderColor: theme.palette.grey[400],
+                  },
+                   '.MuiOutlinedInput-notchedOutline': {
+                     borderColor: theme.palette.grey[300],
+                   },
+                   '&.Mui-disabled .MuiOutlinedInput-notchedOutline': {
+                      borderColor: theme.palette.grey[200],
+                   },
+                    '&.Mui-disabled': {
+                      backgroundColor: theme.palette.grey[100],
+                   }
                 },
                 '& .MuiInputBase-input': {
                   textAlign: 'right',
-                  paddingRight: '14px'
+                  paddingRight: '14px',
+                  paddingLeft: '40px'
                 },
                 '& .MuiSelect-icon': {
                   right: 'auto',
-                  left: '14px'
+                  left: '7px'
                 }
               }}
               SelectProps={{
                 displayEmpty: true,
                 renderValue: () => getCityLabel(),
+                MenuProps: {
+                  anchorOrigin: { vertical: "bottom", horizontal: "right" },
+                  transformOrigin: { vertical: "top", horizontal: "right" },
+                  PaperProps: {
+                    sx: { 
+                      textAlign: 'right',
+                      '& .MuiMenuItem-root': { justifyContent: 'flex-end' }
+                     }
+                  }
+                },
                 IconComponent: props => <Box component="span" {...props} sx={{ transform: 'rotate(90deg)', marginLeft: '7px' }}>‹</Box>
               }}
               InputProps={{
-                startAdornment: <WorkIcon fontSize="small" color="action" sx={{ position: 'absolute', right: 'auto', left: '36px', opacity: 0.6 }} />,
+                startAdornment: <LocationOnIcon fontSize="small" color="action" sx={{ position: 'absolute', left: '30px', opacity: 0.6 }} />,
               }}
             >
-              {cities.map((city) => (
-                <MenuItem key={city.value} value={city.value}>
-                  {city.label}
+              {filteredCities.map((cityItem) => (
+                <MenuItem key={cityItem.value} value={cityItem.value}>
+                  {cityItem.label}
                 </MenuItem>
               ))}
             </TextField>
@@ -225,12 +321,15 @@ export default function Hero() {
               sx={{ 
                 height: '48px',
                 borderRadius: `${theme.shape.borderRadius}px`,
-                backgroundColor: '#000',
+                background: `linear-gradient(135deg, ${theme.palette.primary.light} 0%, ${theme.palette.primary.main} 100%)`,
+                 boxShadow: '0px 3px 8px rgba(0, 0, 0, 0.1)',
                 '&:hover': {
-                  backgroundColor: '#333'
+                   background: `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.primary.dark} 100%)`,
+                   boxShadow: '0px 5px 12px rgba(0, 0, 0, 0.15)',
                 },
                 color: theme.palette.primary.contrastText,
-                fontWeight: 'bold'
+                fontWeight: 'bold',
+                fontSize: '0.95rem'
               }}
             >
               جستجو در مشاغل
