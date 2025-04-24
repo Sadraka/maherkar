@@ -34,7 +34,7 @@ import {
   faQuestion,
   faLightbulb
 } from '@fortawesome/free-solid-svg-icons';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 export default function MobileMenu() {
   const theme = useTheme();
@@ -43,10 +43,23 @@ export default function MobileMenu() {
     mobileOpen,
     setMobileOpen,
     mobileView,
+    setMobileView,
     handleMobileNavigation,
   } = useHeaderContext();
 
   const [activeIndex, setActiveIndex] = useState(-1);
+
+  // ریست حالت منو هنگام بستن
+  useEffect(() => {
+    if (!mobileOpen) {
+      setActiveIndex(-1);
+    }
+  }, [mobileOpen]);
+
+  // ریست پارامترها هنگام تغییر منو
+  useEffect(() => {
+    setActiveIndex(-1);
+  }, [mobileView]);
 
   // منوی کارفرما
   const employerMenuItems = [
@@ -456,7 +469,10 @@ export default function MobileMenu() {
         anchor="bottom"
         variant="temporary"
         open={mobileOpen}
-        onClose={() => setMobileOpen(false)}
+        onClose={() => {
+          setMobileOpen(false);
+          setActiveIndex(-1);
+        }}
         ModalProps={{
           keepMounted: true,
         }}
@@ -466,17 +482,18 @@ export default function MobileMenu() {
             boxSizing: 'border-box', 
             width: '100%',
             height: 'auto',
-            maxHeight: 'calc(100% - 80px)',
+            maxHeight: 'calc(100% - 70px)',
             borderTopLeftRadius: 24,
             borderTopRightRadius: 24,
-            bottom: 65,
+            bottom: 70,
             top: 'auto',
             boxShadow: '0 -8px 25px rgba(0,0,0,0.1)',
-            zIndex: (theme) => theme.zIndex.drawer + 1,
+            zIndex: (theme) => theme.zIndex.drawer,
           },
           '& .MuiBackdrop-root': {
             backgroundColor: 'rgba(0, 0, 0, 0.15)',
             backdropFilter: 'none',
+            zIndex: (theme) => theme.zIndex.drawer - 1,
           }
         }}
         SlideProps={{
@@ -498,7 +515,7 @@ export default function MobileMenu() {
           bottom: 0,
           left: 0,
           right: 0,
-          zIndex: (theme) => theme.zIndex.drawer,
+          zIndex: (theme) => theme.zIndex.drawer + 1,
           borderRadius: '24px 24px 0 0',
           overflow: 'hidden',
           boxShadow: '0 -4px 20px rgba(0,0,0,0.1)',
@@ -509,7 +526,6 @@ export default function MobileMenu() {
           value={mobileView}
           onChange={(event, newValue) => {
             handleMobileNavigation(newValue);
-            setActiveIndex(-1);
           }}
           sx={{
             height: 70,
@@ -599,7 +615,7 @@ export default function MobileMenu() {
               </Badge>
             }
             sx={{
-              color: mobileView === 'candidate' ? theme.palette.candidate.main : theme.palette.text.secondary,
+              color: mobileView === 'candidate' ? '#43A047' : theme.palette.text.secondary,
               fontWeight: 800,
               fontSize: '0.75rem',
               '& .MuiBottomNavigationAction-label': {

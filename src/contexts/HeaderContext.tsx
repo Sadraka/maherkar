@@ -190,9 +190,13 @@ export const HeaderProvider: React.FC<HeaderProviderProps> = ({ children }) => {
   };
 
   const handleMobileNavigation = (view: string) => {
-    setMobileView(view);
-    if (view !== 'main') {
-      setMobileOpen(true);
+    if (view === mobileView && mobileOpen) {
+      setMobileOpen(false);
+    } else {
+      setMobileView(view);
+      if (view !== 'main') {
+        setMobileOpen(true);
+      }
     }
   };
 
