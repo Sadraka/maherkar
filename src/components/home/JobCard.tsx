@@ -243,23 +243,29 @@ export default function JobCard({ job }: JobCardProps) {
         </Box>
         
         <Box sx={{ mb: 3 }}>
-          <Typography variant="body2" sx={{ mb: 1, fontWeight: 600, color: theme.palette.text.secondary }}>
+          <Typography variant="body2" sx={{ mb: 0.75, fontWeight: 600, color: theme.palette.text.secondary }}>
             مهارت‌ها:
           </Typography>
-          <Stack direction="row" spacing={1} flexWrap="wrap" gap={1}>
+          <Stack direction="row" spacing={0} flexWrap="wrap" gap={0.3}>
             {job.skills.map((skill, index) => (
               <Chip 
                 key={index} 
                 label={skill} 
                 size="small"
                 sx={{ 
-                  bgcolor: 'white',
-                  border: `1px solid ${employerColors.bgLight}`,
+                  bgcolor: 'rgba(25, 118, 210, 0.1)',
+                  border: 'none',
                   fontWeight: 500,
-                  fontSize: '0.75rem',
-                  borderRadius: 1,
-                  color: employerColors.dark,
-                  boxShadow: '0 1px 3px rgba(0,0,0,0.05)',
+                  fontSize: '0.7rem',
+                  borderRadius: 0.8,
+                  color: employerColors.primary,
+                  py: 0.1,
+                  px: 0.1,
+                  m: 0.15,
+                  height: '20px',
+                  '& .MuiChip-label': {
+                    px: 1
+                  }
                 }}
               />
             ))}

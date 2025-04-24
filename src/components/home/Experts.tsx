@@ -18,15 +18,15 @@ export default function Experts() {
   const experts: ExpertType[] = [
     {
       id: 1,
-      name: 'علی محمدی',
+      name: 'علی راد',
       jobTitle: 'توسعه‌دهنده فرانت‌اند ارشد',
       avatar: 'https://randomuser.me/api/portraits/men/32.jpg',
-      location: 'تهران',
+      location: 'تبریز',
       rating: 4.9,
       completedProjects: 48,
       skills: ['React', 'NextJS', 'TypeScript'],
       isVerified: true,
-      hourlyRate: '۲۰۰ هزار تومان'
+      experienceYears: 8
     },
     {
       id: 2,
@@ -38,7 +38,7 @@ export default function Experts() {
       completedProjects: 36,
       skills: ['UI/UX', 'Figma', 'طراحی محصول'],
       isVerified: true,
-      hourlyRate: '۱۸۰ هزار تومان'
+      experienceYears: 6
     },
     {
       id: 3,
@@ -50,7 +50,7 @@ export default function Experts() {
       completedProjects: 29,
       skills: ['Node.js', 'Express', 'MongoDB'],
       isVerified: false,
-      hourlyRate: '۱۹۰ هزار تومان'
+      experienceYears: 5
     },
     {
       id: 4,
@@ -62,7 +62,7 @@ export default function Experts() {
       completedProjects: 22,
       skills: ['SEO', 'گوگل ادز', 'شبکه‌های اجتماعی'],
       isVerified: true,
-      hourlyRate: '۱۷۰ هزار تومان'
+      experienceYears: 4
     },
     {
       id: 5,
@@ -74,7 +74,7 @@ export default function Experts() {
       completedProjects: 41,
       skills: ['Docker', 'Kubernetes', 'AWS'],
       isVerified: true,
-      hourlyRate: '۲۳۰ هزار تومان'
+      experienceYears: 7
     },
     {
       id: 6,
@@ -86,7 +86,7 @@ export default function Experts() {
       completedProjects: 35,
       skills: ['فتوشاپ', 'ایلاستریتور', 'طراحی لوگو'],
       isVerified: false,
-      hourlyRate: '۱۶۰ هزار تومان'
+      experienceYears: 5
     },
   ];
   
@@ -132,13 +132,13 @@ export default function Experts() {
           </Typography>
         </Box>
         
-        <Grid container spacing={3}>
-          {experts.map((expert) => (
-            <Grid key={expert.id} size={{ xs: 12, sm: 6, md: 4 }}>
+        <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 3, justifyContent: 'center' }}>
+          {experts.slice(0, 3).map((expert) => (
+            <Box key={expert.id} sx={{ width: { xs: '100%', sm: 'calc(50% - 24px)', md: 'calc(33.33% - 24px)' } }}>
               <ExpertCard expert={expert} />
-            </Grid>
+            </Box>
           ))}
-        </Grid>
+        </Box>
         
         <Box sx={{ mt: 6, textAlign: 'center' }}>
           <Button 
