@@ -5,28 +5,41 @@
 @tailwind utilities;
 
 @font-face {
-  font-family: 'Vazir';
-  src: url('/fonts/Vazir.woff2') format('woff2'),
-       url('/fonts/Vazir.woff') format('woff');
+  font-family: 'Vazirmatn';
+  src: url('/fonts/Vazirmatn-Regular.woff2') format('woff2');
   font-weight: normal;
   font-style: normal;
   font-display: swap;
 }
 
 @font-face {
-  font-family: 'Vazir';
-  src: url('/fonts/Vazir-Bold.woff2') format('woff2'),
-       url('/fonts/Vazir-Bold.woff') format('woff');
+  font-family: 'Vazirmatn';
+  src: url('/fonts/Vazirmatn-Bold.woff2') format('woff2');
   font-weight: bold;
   font-style: normal;
   font-display: swap;
 }
 
 @font-face {
-  font-family: 'Vazir';
-  src: url('/fonts/Vazir-Light.woff2') format('woff2'),
-       url('/fonts/Vazir-Light.woff') format('woff');
+  font-family: 'Vazirmatn';
+  src: url('/fonts/Vazirmatn-Light.woff2') format('woff2');
   font-weight: 300;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Vazirmatn';
+  src: url('/fonts/Vazirmatn-Medium.woff2') format('woff2');
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Vazirmatn';
+  src: url('/fonts/Vazirmatn-SemiBold.woff2') format('woff2');
+  font-weight: 600;
   font-style: normal;
   font-display: swap;
 }
@@ -35,6 +48,8 @@
   --foreground-rgb: 0, 0, 0;
   --background-start-rgb: 214, 219, 220;
   --background-end-rgb: 255, 255, 255;
+  --primary-color: #1976d2;
+  --secondary-color: #333;
 }
 
 @theme inline {
@@ -54,6 +69,11 @@
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: 'Vazir', sans-serif;
+  font-family: 'Vazirmatn', system-ui, sans-serif;
   direction: rtl;
+}
+
+a {
+  text-decoration: none;
+  color: inherit;
 }
