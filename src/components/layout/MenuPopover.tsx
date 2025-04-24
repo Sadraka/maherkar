@@ -210,13 +210,18 @@ export default function MenuPopover() {
           }}
           elevation={0}
         >
-          <Container maxWidth="lg">
-            <Box sx={{ p: {xs: 3, md: 4.5} }}>
+          <Container maxWidth="lg" sx={{ px: { xs: 2, md: 0 } }}>
+            <Box sx={{ 
+              maxWidth: 1200, 
+              mx: 'auto', 
+              width: '100%',
+              py: {xs: 3, md: 4.5}
+            }}>
               <Box 
                 sx={{ 
                   display: 'grid', 
                   gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, 1fr)', md: 'repeat(3, 1fr)' }, 
-                  gap: 3.5
+                  gap: 3
                 }}
               >
                 {employerMenuItems.map((item, index) => (
@@ -334,13 +339,18 @@ export default function MenuPopover() {
           }}
           elevation={0}
         >
-          <Container maxWidth="lg">
-            <Box sx={{ p: {xs: 3, md: 4.5} }}>
+          <Container maxWidth="lg" sx={{ px: { xs: 2, md: 0 } }}>
+            <Box sx={{ 
+              maxWidth: 1200, 
+              mx: 'auto', 
+              width: '100%',
+              py: {xs: 3, md: 4.5}
+            }}>
               <Box 
                 sx={{ 
                   display: 'grid', 
                   gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, 1fr)', md: 'repeat(3, 1fr)' }, 
-                  gap: 3.5
+                  gap: 3
                 }}
               >
                 {candidateMenuItems.map((item, index) => (
@@ -458,13 +468,18 @@ export default function MenuPopover() {
           }}
           elevation={0}
         >
-          <Container maxWidth="lg">
-            <Box sx={{ p: {xs: 3, md: 4.5} }}>
+          <Container maxWidth="lg" sx={{ px: { xs: 2, md: 0 } }}>
+            <Box sx={{ 
+              maxWidth: 1200, 
+              mx: 'auto', 
+              width: '100%',
+              py: {xs: 3, md: 4.5}
+            }}>
               <Box 
                 sx={{ 
                   display: 'grid', 
                   gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, 1fr)', md: 'repeat(4, 1fr)' }, 
-                  gap: 3.5
+                  gap: 3
                 }}
               >
                 {helpMenuItems.map((item, index) => (

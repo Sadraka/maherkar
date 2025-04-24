@@ -152,181 +152,182 @@ export default function AppHeader() {
       }}
     >
       <Container maxWidth="lg">
-        <Toolbar sx={{ justifyContent: { xs: 'space-between', md: 'space-between' }, px: { xs: 0, sm: 2 } }}>
-          <Typography
-            variant="h5"
-            component="div"
-            sx={{ 
-              fontWeight: 800, 
-              fontSize: { xs: '1.5rem', md: '1.8rem' },
-              backgroundImage: `linear-gradient(45deg, ${theme.palette.primary.main}, ${theme.palette.primary.dark})`,
-              backgroundClip: 'text',
-              textFillColor: 'transparent',
-              display: 'flex',
-              alignItems: 'center',
-            }}
-          >
-            <Link href="/" style={{ textDecoration: 'none', color: 'inherit' }}>
-              ماهرکار
-            </Link>
-          </Typography>
-
-          {/* نمایش دکمه ورود/ثبت‌نام در هدر موبایل */}
-          {isMobile && (
-            <Button 
-              variant="contained"
-              color="primary"
-              href="#"
-              startIcon={<FontAwesomeIcon icon={faSignInAlt} />}
+        <Box sx={{ maxWidth: 1200, mx: 'auto', width: '100%' }}>
+          <Toolbar sx={{ 
+            justifyContent: { xs: 'space-between', md: 'space-between' }, 
+            px: { xs: 1.5, md: 0 },
+            py: { xs: 1, md: 1 },
+            width: '100%',
+          }}>
+            <Typography
+              variant="h5"
+              component="div"
               sx={{ 
-                borderRadius: '10px',
-                fontWeight: 800,
-                px: 2,
-                py: 0.75,
-                boxShadow: '0 4px 10px rgba(0,0,0,0.15)'
+                fontWeight: 800, 
+                fontSize: { xs: '1.5rem', md: '1.8rem' },
+                backgroundImage: `linear-gradient(45deg, ${theme.palette.primary.main}, ${theme.palette.primary.dark})`,
+                backgroundClip: 'text',
+                textFillColor: 'transparent',
+                display: 'flex',
+                alignItems: 'center',
               }}
             >
-              ورود / ثبت‌نام
-            </Button>
-          )}
+              <Link href="/" style={{ textDecoration: 'none', color: 'inherit' }}>
+                ماهرکار
+              </Link>
+            </Typography>
 
-          {/* منوی دسکتاپ */}
-          <Box sx={{ 
-            display: { xs: 'none', md: 'flex' }, 
-            alignItems: 'center', 
-            gap: 0,
-            ml: { md: 2 }
-          }}>
-            {navItems.map((item, index) => (
-              <Box key={index}>
-                {item.hasSubmenu ? (
-                  <Box>
+            {/* نمایش دکمه ورود/ثبت‌نام در هدر موبایل */}
+            {isMobile && (
+              <Button 
+                variant="contained"
+                color="primary"
+                href="#"
+                startIcon={<FontAwesomeIcon icon={faSignInAlt} />}
+                sx={{ 
+                  borderRadius: '10px',
+                  fontWeight: 800,
+                  px: 2,
+                  py: 0.75,
+                  boxShadow: '0 4px 10px rgba(0,0,0,0.15)'
+                }}
+              >
+                ورود / ثبت‌نام
+              </Button>
+            )}
+
+            {/* منوی دسکتاپ */}
+            <Box sx={{ 
+              display: { xs: 'none', md: 'flex' }, 
+              alignItems: 'center', 
+              gap: 0,
+              ml: { md: 2 }
+            }}>
+              {navItems.map((item, index) => (
+                <Box key={index}>
+                  {item.hasSubmenu ? (
+                    <Box>
+                      <Button 
+                        ref={item.buttonRef}
+                        variant={item.variant as "text" | "contained" | "outlined"}
+                        onMouseEnter={item.menuId === 'employer-menu' ? handleEmployerMouseEnter : item.menuId === 'candidate-menu' ? handleCandidateMouseEnter : handleHelpMouseEnter}
+                        onMouseLeave={item.menuId === 'employer-menu' ? handleEmployerMouseLeave : item.menuId === 'candidate-menu' ? handleCandidateMouseLeave : handleHelpMouseLeave}
+                        color={item.color as any}
+                        startIcon={<Avatar sx={{ 
+                          width: 24, 
+                          height: 24, 
+                          bgcolor: item.bgColor,
+                          color: item.textColor,
+                        }}>
+                          <FontAwesomeIcon icon={item.icon} size="sm" />
+                        </Avatar>}
+                        endIcon={
+                          (item.menuId === 'employer-menu' && isEmployerHovered) || 
+                          (item.menuId === 'candidate-menu' && isCandidateHovered) ||
+                          (item.menuId === 'help-menu' && isHelpHovered) ? 
+                            <FontAwesomeIcon icon={faChevronUp} /> : 
+                            <FontAwesomeIcon icon={faChevronDown} />
+                        }
+                        sx={{ 
+                          borderRadius: '0px',
+                          fontWeight: 800,
+                          px: item.variant === 'contained' ? 2.5 : 1.5,
+                          py: 0,
+                          height: '100%',
+                          minHeight: '64px',
+                          minWidth: item.variant === 'contained' ? 140 : 'auto',
+                          border: 'none',
+                          position: 'relative',
+                          '&::after': {
+                            content: '""',
+                            position: 'absolute',
+                            bottom: 0,
+                            right: 0,
+                            width: '0%',
+                            height: '3px',
+                            zIndex: 1200,
+                            backgroundColor: item.color === 'employer' ? theme.palette.employer.main : 
+                                           item.color === 'candidate' ? theme.palette.candidate.main :
+                                           item.color === 'black' ? '#000000' : theme.palette.primary.main,
+                          },
+                          '&:hover': {
+                            backgroundColor: 'transparent',
+                            '&::after': {
+                              width: '100%',
+                            }
+                          },
+                          ...(item.title === 'راهنما' 
+                            ? { 
+                                color: '#000000',
+                              } 
+                            : {}),
+                          ...(item.color === 'employer' && item.variant === 'text' 
+                            ? { 
+                                color: theme.palette.employer.main,
+                              } 
+                            : {}),
+                          ...(item.color === 'candidate' && item.variant === 'text' 
+                            ? { 
+                                color: theme.palette.candidate.main,
+                              } 
+                            : {}),
+                          ...(item.color === 'primary' && item.variant === 'text' 
+                            ? { 
+                                color: theme.palette.primary.main,
+                              } 
+                            : {}),
+                          ...(item.variant === 'contained'
+                            ? {
+                                borderRadius: '10px',
+                                boxShadow: '0 4px 10px rgba(0,0,0,0.15)',
+                                ml: 2,
+                                '&::after': {
+                                  display: 'none'
+                                }
+                              }
+                            : {})
+                        }}
+                      >
+                        {item.title}
+                      </Button>
+                    </Box>
+                  ) : (
                     <Button 
-                      ref={item.buttonRef}
                       variant={item.variant as "text" | "contained" | "outlined"}
-                      onMouseEnter={item.menuId === 'employer-menu' ? handleEmployerMouseEnter : item.menuId === 'candidate-menu' ? handleCandidateMouseEnter : handleHelpMouseEnter}
-                      onMouseLeave={item.menuId === 'employer-menu' ? handleEmployerMouseLeave : item.menuId === 'candidate-menu' ? handleCandidateMouseLeave : handleHelpMouseLeave}
                       color={item.color as any}
-                      startIcon={<Avatar sx={{ 
-                        width: 24, 
-                        height: 24, 
-                        bgcolor: item.bgColor,
-                        color: item.textColor,
-                      }}>
-                        <FontAwesomeIcon icon={item.icon} size="sm" />
-                      </Avatar>}
-                      endIcon={
-                        (item.menuId === 'employer-menu' && isEmployerHovered) || 
-                        (item.menuId === 'candidate-menu' && isCandidateHovered) ||
-                        (item.menuId === 'help-menu' && isHelpHovered) ? 
-                          <FontAwesomeIcon icon={faChevronUp} /> : 
-                          <FontAwesomeIcon icon={faChevronDown} />
+                      component="a"
+                      href={item.href}
+                      startIcon={item.variant === 'contained' ? 
+                        <FontAwesomeIcon icon={item.icon} /> : 
+                        (item.variant === 'text' ? 
+                          <Avatar sx={{ 
+                            width: 24, 
+                            height: 24, 
+                            bgcolor: item.bgColor,
+                            color: item.textColor, 
+                          }}>
+                            <FontAwesomeIcon icon={item.icon} size="sm" />
+                          </Avatar> : undefined)
                       }
                       sx={{ 
-                        borderRadius: '0px',
+                        borderRadius: '10px',
                         fontWeight: 800,
                         px: item.variant === 'contained' ? 2.5 : 1.5,
-                        py: 0,
-                        height: '100%',
-                        minHeight: '64px',
+                        py: 0.75,
+                        height: '42px',
                         minWidth: item.variant === 'contained' ? 140 : 'auto',
-                        border: 'none',
-                        position: 'relative',
-                        '&::after': {
-                          content: '""',
-                          position: 'absolute',
-                          bottom: 0,
-                          right: 0,
-                          width: '0%',
-                          height: '3px',
-                          zIndex: 1200,
-                          backgroundColor: item.color === 'employer' ? theme.palette.employer.main : 
-                                         item.color === 'candidate' ? theme.palette.candidate.main :
-                                         item.color === 'black' ? '#000000' : theme.palette.primary.main,
-                        },
-                        '&:hover': {
-                          backgroundColor: 'transparent',
-                          '&::after': {
-                            width: '100%',
-                          }
-                        },
-                        ...(item.title === 'راهنما' && isHelpHovered
-                          ? { 
-                              '&::after': {
-                                width: '100%',
-                              }
-                            } 
-                          : {}),
-                        ...(item.color === 'employer' && isEmployerHovered
-                          ? { 
-                              '&::after': {
-                                width: '100%',
-                              }
-                            } 
-                          : {}),
-                        ...(item.color === 'candidate' && isCandidateHovered
-                          ? { 
-                              '&::after': {
-                                width: '100%',
-                              }
-                            } 
-                          : {}),
-                        ...(item.color === 'primary' && item.variant === 'text' 
-                          ? { 
-                              color: theme.palette.primary.main,
-                            } 
-                          : {}),
-                        ...(item.variant === 'contained'
-                          ? {
-                              borderRadius: '10px',
-                              boxShadow: '0 4px 10px rgba(0,0,0,0.15)',
-                              ml: 2,
-                              '&::after': {
-                                display: 'none'
-                              }
-                            }
-                          : {})
+                        ml: 2,
+                        boxShadow: '0 4px 10px rgba(0,0,0,0.15)'
                       }}
                     >
                       {item.title}
                     </Button>
-                  </Box>
-                ) : (
-                  <Button 
-                    variant={item.variant as "text" | "contained" | "outlined"}
-                    color={item.color as any}
-                    component="a"
-                    href={item.href}
-                    startIcon={item.variant === 'contained' ? 
-                      <FontAwesomeIcon icon={item.icon} /> : 
-                      (item.variant === 'text' ? 
-                        <Avatar sx={{ 
-                          width: 24, 
-                          height: 24, 
-                          bgcolor: item.bgColor,
-                          color: item.textColor, 
-                        }}>
-                          <FontAwesomeIcon icon={item.icon} size="sm" />
-                        </Avatar> : undefined)
-                    }
-                    sx={{ 
-                      borderRadius: '10px',
-                      fontWeight: 800,
-                      px: item.variant === 'contained' ? 2.5 : 1.5,
-                      py: 0.75,
-                      height: '42px',
-                      minWidth: item.variant === 'contained' ? 140 : 'auto',
-                      ml: 2,
-                      boxShadow: '0 4px 10px rgba(0,0,0,0.15)'
-                    }}
-                  >
-                    {item.title}
-                  </Button>
-                )}
-              </Box>
-            ))}
-          </Box>
-        </Toolbar>
+                  )}
+                </Box>
+              ))}
+            </Box>
+          </Toolbar>
+        </Box>
       </Container>
     </AppBar>
   );
