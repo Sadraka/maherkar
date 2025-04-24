@@ -16,13 +16,17 @@ import {
   ListItemButton,
   Divider,
   useTheme,
-  useMediaQuery
+  useMediaQuery,
+  Badge,
+  Avatar
 } from '@mui/material';
 import MenuIcon from '@mui/icons-material/Menu';
 import CloseIcon from '@mui/icons-material/Close';
 import Link from 'next/link';
-import BusinessCenterIcon from '@mui/icons-material/BusinessCenter';
-import PersonIcon from '@mui/icons-material/Person';
+import WorkOutlineIcon from '@mui/icons-material/WorkOutline';
+import EngineeringIcon from '@mui/icons-material/Engineering';
+import HelpOutlineIcon from '@mui/icons-material/HelpOutline';
+import LoginIcon from '@mui/icons-material/Login';
 
 export default function Header() {
   const theme = useTheme();
@@ -34,16 +38,48 @@ export default function Header() {
   };
 
   const navItems = [
-    { title: 'کارفرما هستم', color: 'employer', href: '#', variant: 'text', icon: <BusinessCenterIcon fontSize="small" /> },
-    { title: 'فریلنسر هستم', color: 'candidate', href: '#', variant: 'text', icon: <PersonIcon fontSize="small" /> },
-    { title: 'راهنما', color: 'inherit', href: '#', variant: 'text', icon: null },
-    { title: 'ورود / ثبت‌نام', color: 'primary', href: '#', variant: 'contained', icon: null }
+    { 
+      title: 'کارفرما هستم', 
+      color: 'employer', 
+      href: '#', 
+      variant: 'text', 
+      icon: <WorkOutlineIcon fontSize="small" />
+    },
+    { 
+      title: 'فریلنسر هستم', 
+      color: 'candidate', 
+      href: '#', 
+      variant: 'text', 
+      icon: <EngineeringIcon fontSize="small" />
+    },
+    { 
+      title: 'راهنما', 
+      color: 'inherit', 
+      href: '#', 
+      variant: 'text', 
+      icon: <HelpOutlineIcon fontSize="small" />
+    },
+    { 
+      title: 'ورود / ثبت‌نام', 
+      color: 'primary', 
+      href: '#', 
+      variant: 'contained', 
+      icon: <LoginIcon fontSize="small" />
+    }
   ];
 
   const drawer = (
     <Box sx={{ textAlign: 'center', pt: 1, pb: 2 }}>
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', px: 2, py: 1 }}>
-        <Typography variant="h5" component="div" sx={{ fontWeight: 800, color: theme.palette.primary.main }}>
+        <Typography variant="h5" component="div" 
+          sx={{ 
+            fontWeight: 800, 
+            color: theme.palette.primary.main,
+            backgroundImage: `linear-gradient(45deg, ${theme.palette.primary.main}, ${theme.palette.primary.dark})`,
+            backgroundClip: 'text',
+            textFillColor: 'transparent'
+          }}
+        >
           ماهرکار
         </Typography>
         <IconButton
@@ -65,6 +101,7 @@ export default function Header() {
               sx={{ 
                 borderRadius: 2,
                 textAlign: 'center',
+                py: 1,
                 ...(item.variant === 'contained' 
                   ? { 
                       bgcolor: item.color === 'primary' 
@@ -103,13 +140,21 @@ export default function Header() {
 
   return (
     <AppBar 
-      position="static" 
+      position="sticky" 
       color="default"
       elevation={0}
       sx={{ 
         bgcolor: 'background.paper',
         borderBottom: '1px solid',
         borderColor: 'divider',
+        boxShadow: '0 2px 10px rgba(0,0,0,0.05)',
+        top: 0,
+        zIndex: (theme) => theme.zIndex.drawer + 1,
+        transition: 'box-shadow 0.3s ease',
+        '&.MuiPaper-root': {
+          backdropFilter: 'blur(10px)',
+          backgroundColor: 'rgba(255, 255, 255, 0.95)',
+        }
       }}
     >
       <Container maxWidth="lg">
@@ -120,7 +165,9 @@ export default function Header() {
             sx={{ 
               fontWeight: 800, 
               fontSize: { xs: '1.5rem', md: '1.8rem' },
-              color: theme.palette.primary.main,
+              backgroundImage: `linear-gradient(45deg, ${theme.palette.primary.main}, ${theme.palette.primary.dark})`,
+              backgroundClip: 'text',
+              textFillColor: 'transparent',
               display: 'flex',
               alignItems: 'center',
               position: { xs: 'absolute', md: 'static' },
@@ -133,7 +180,12 @@ export default function Header() {
             </Link>
           </Typography>
 
-          <Box sx={{ display: { xs: 'none', md: 'flex' }, alignItems: 'center', gap: 1 }}>
+          <Box sx={{ 
+            display: { xs: 'none', md: 'flex' }, 
+            alignItems: 'center', 
+            gap: 2.5,
+            mr: { md: 2 }
+          }}>
             {navItems.map((item, index) => (
               <Button 
                 key={index}
@@ -147,34 +199,51 @@ export default function Header() {
                 href={item.href}
                 startIcon={item.icon}
                 sx={{ 
-                  ml: index === navItems.length - 1 ? 0 : 1,
-                  borderRadius: '8px',
-                  fontWeight: 500,
-                  transition: 'all 0.2s ease',
+                  borderRadius: '10px',
+                  fontWeight: 600,
+                  px: item.variant === 'contained' ? 2.5 : 1.5,
+                  py: item.variant === 'contained' ? 1 : 0.75,
+                  minWidth: item.variant === 'contained' ? 140 : 'auto',
+                  transition: 'all 0.3s ease',
                   ...(item.color === 'employer' && item.variant === 'text' 
                     ? { 
                         color: theme.palette.employer.main,
+                        border: '1px solid transparent',
                         '&:hover': {
-                          backgroundColor: `${theme.palette.employer.main}15`,
-                          transform: 'translateY(-2px)'
+                          backgroundColor: `${theme.palette.employer.main}10`,
+                          transform: 'translateY(-3px)',
+                          border: `1px solid ${theme.palette.employer.main}30`,
                         }
                       } 
                     : {}),
                   ...(item.color === 'candidate' && item.variant === 'text' 
                     ? { 
                         color: theme.palette.candidate.main,
+                        border: '1px solid transparent',
                         '&:hover': {
-                          backgroundColor: `${theme.palette.candidate.main}15`,
-                          transform: 'translateY(-2px)'
+                          backgroundColor: `${theme.palette.candidate.main}10`,
+                          transform: 'translateY(-3px)',
+                          border: `1px solid ${theme.palette.candidate.main}30`,
+                        }
+                      } 
+                    : {}),
+                  ...(item.color === 'inherit' && item.variant === 'text' 
+                    ? { 
+                        color: theme.palette.text.secondary,
+                        border: '1px solid transparent',
+                        '&:hover': {
+                          backgroundColor: `${theme.palette.primary.main}05`,
+                          transform: 'translateY(-3px)',
+                          border: `1px solid ${theme.palette.divider}`,
                         }
                       } 
                     : {}),
                   ...(item.variant === 'contained'
                     ? {
-                        boxShadow: '0 3px 8px rgba(0,0,0,0.15)',
+                        boxShadow: '0 4px 10px rgba(0,0,0,0.15)',
                         '&:hover': {
-                          boxShadow: '0 5px 15px rgba(0,0,0,0.2)',
-                          transform: 'translateY(-2px)'
+                          boxShadow: '0 6px 15px rgba(0,0,0,0.2)',
+                          transform: 'translateY(-3px)'
                         }
                       }
                     : {})
@@ -218,6 +287,7 @@ export default function Header() {
             width: 280,
             borderTopLeftRadius: 16,
             borderBottomLeftRadius: 16,
+            boxShadow: '0 8px 25px rgba(0,0,0,0.1)'
           },
         }}
       >

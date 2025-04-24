@@ -1,6 +1,9 @@
 import type { Metadata } from 'next'
 import ThemeRegistry from '@/components/ThemeRegistry/ThemeRegistry'
+import Header from '@/components/layout/Header'
+import PromoBar from '@/components/layout/PromoBar'
 import "./globals.css"
+import { vazirFont } from '@/lib/fonts'
 
 export const metadata: Metadata = {
   title: "ماهرکار - سامانه کاریابی",
@@ -14,8 +17,10 @@ export default function RootLayout({
 }) {
   return (
     <html lang="fa" dir="rtl">
-      <body>
+      <body className={vazirFont.className}>
         <ThemeRegistry>
+          <PromoBar />
+          <Header />
           {children}
         </ThemeRegistry>
       </body>
