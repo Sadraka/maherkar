@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { 
   AppBar, 
   Toolbar, 
@@ -30,29 +30,35 @@ import {
 import MenuIcon from '@mui/icons-material/Menu';
 import CloseIcon from '@mui/icons-material/Close';
 import Link from 'next/link';
-import WorkOutlineIcon from '@mui/icons-material/WorkOutline';
-import EngineeringIcon from '@mui/icons-material/Engineering';
-import HelpOutlineIcon from '@mui/icons-material/HelpOutline';
-import LoginIcon from '@mui/icons-material/Login';
-import PostAddIcon from '@mui/icons-material/PostAdd';
-import SearchIcon from '@mui/icons-material/Search';
-import SupervisorAccountIcon from '@mui/icons-material/SupervisorAccount';
-import BusinessCenterIcon from '@mui/icons-material/BusinessCenter';
-import WorkIcon from '@mui/icons-material/Work';
-import AssignmentIcon from '@mui/icons-material/Assignment';
-import PersonAddIcon from '@mui/icons-material/PersonAdd';
-import SchoolIcon from '@mui/icons-material/School';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
-import PeopleOutlineIcon from '@mui/icons-material/PeopleOutline';
-import CategoryIcon from '@mui/icons-material/Category';
-import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
+
+// Font Awesome
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { 
+  faUserTie, 
+  faCode, 
+  faQuestionCircle, 
+  faSignInAlt, 
+  faUsers, 
+  faProjectDiagram, 
+  faPlus,
+  faBriefcase,
+  faFileAlt,
+  faUserPlus,
+  faChevronUp, 
+  faChevronDown,
+  faUserGraduate
+} from '@fortawesome/free-solid-svg-icons';
 
 export default function Header() {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   const [mobileOpen, setMobileOpen] = useState(false);
 
+  const employerButtonRef = useRef<HTMLButtonElement>(null);
+  const candidateButtonRef = useRef<HTMLButtonElement>(null);
+  
   const [employerAnchorEl, setEmployerAnchorEl] = useState<null | HTMLElement>(null);
   const [candidateAnchorEl, setCandidateAnchorEl] = useState<null | HTMLElement>(null);
   const [isEmployerHovered, setIsEmployerHovered] = useState(false);
@@ -65,33 +71,53 @@ export default function Header() {
     setExpandedMobileMenu(null);
   };
 
-  const handleEmployerMouseEnter = (event: React.MouseEvent<HTMLElement>) => {
+  const handleEmployerMouseEnter = () => {
+    if (isMobile) return;
     setCandidateAnchorEl(null);
     setIsCandidateHovered(false);
-    setEmployerAnchorEl(event.currentTarget);
+    setEmployerAnchorEl(employerButtonRef.current);
     setIsEmployerHovered(true);
   };
 
   const handleEmployerMouseLeave = () => {
-    setIsEmployerHovered(false);
+    if (isMobile) return;
+    setTimeout(() => {
+      const employerMenu = document.getElementById('employer-menu-content');
+      const isOverEmployerMenu = employerMenu ? employerMenu.matches(':hover') : false;
+      
+      if (!isOverEmployerMenu && employerButtonRef.current && !employerButtonRef.current.matches(':hover')) {
+        setIsEmployerHovered(false);
+      }
+    }, 50);
   };
 
-  const handleCandidateMouseEnter = (event: React.MouseEvent<HTMLElement>) => {
+  const handleCandidateMouseEnter = () => {
+    if (isMobile) return;
     setEmployerAnchorEl(null);
     setIsEmployerHovered(false);
-    setCandidateAnchorEl(event.currentTarget);
+    setCandidateAnchorEl(candidateButtonRef.current);
     setIsCandidateHovered(true);
   };
 
   const handleCandidateMouseLeave = () => {
-    setIsCandidateHovered(false);
+    if (isMobile) return;
+    setTimeout(() => {
+      const candidateMenu = document.getElementById('candidate-menu-content');
+      const isOverCandidateMenu = candidateMenu ? candidateMenu.matches(':hover') : false;
+      
+      if (!isOverCandidateMenu && candidateButtonRef.current && !candidateButtonRef.current.matches(':hover')) {
+        setIsCandidateHovered(false);
+      }
+    }, 50);
   };
 
   const handlePopoverMouseEnter = (type: 'employer' | 'candidate') => {
     if (type === 'employer') {
+      setCandidateAnchorEl(null);
       setIsCandidateHovered(false);
       setIsEmployerHovered(true);
     } else {
+      setEmployerAnchorEl(null);
       setIsEmployerHovered(false);
       setIsCandidateHovered(true);
     }
@@ -99,9 +125,13 @@ export default function Header() {
 
   const handlePopoverMouseLeave = (type: 'employer' | 'candidate') => {
     if (type === 'employer') {
-      setIsEmployerHovered(false);
+      if (employerButtonRef.current && !employerButtonRef.current.matches(':hover')) {
+        setIsEmployerHovered(false);
+      }
     } else {
-      setIsCandidateHovered(false);
+      if (candidateButtonRef.current && !candidateButtonRef.current.matches(':hover')) {
+        setIsCandidateHovered(false);
+      }
     }
   };
 
@@ -113,19 +143,19 @@ export default function Header() {
   const employerMenuItems = [
     { 
       title: 'مشاهده تمام فریلنسرها', 
-      icon: <PeopleOutlineIcon sx={{ fontSize: '2.5rem', color: theme.palette.primary.main }} />, 
+      icon: <FontAwesomeIcon icon={faUsers} size="2x" color={theme.palette.primary.main} />, 
       href: '#',
       description: 'فریلنسرهای فعال در ماهرکار را مشاهده کرده و براساس مهارت مورد نظر خود انتخاب کنید.'
     },
     { 
       title: 'مشاهده دسته‌بندی‌ها و مهارت‌ها', 
-      icon: <CategoryIcon sx={{ fontSize: '2.5rem', color: theme.palette.primary.main }} />, 
+      icon: <FontAwesomeIcon icon={faProjectDiagram} size="2x" color={theme.palette.primary.main} />, 
       href: '#',
       description: 'مهارت مورد نظر را جستجو کرده، پروژه یا نمونه کار را در این دسته‌بندی مشاهده کنید.'
     },
     { 
       title: 'ثبت سریع پروژه', 
-      icon: <AddCircleOutlineIcon sx={{ fontSize: '2.5rem', color: theme.palette.primary.main }} />, 
+      icon: <FontAwesomeIcon icon={faPlus} size="2x" color={theme.palette.primary.main} />, 
       href: '#',
       description: 'با ایجاد پروژه امکان همکاری با هزاران نیروی متخصص را خواهید داشت.'
     }
@@ -135,19 +165,19 @@ export default function Header() {
   const candidateMenuItems = [
     { 
       title: 'جستجوی فرصت‌های شغلی', 
-      icon: <WorkIcon sx={{ fontSize: '2.5rem', color: theme.palette.secondary.main }} />, 
+      icon: <FontAwesomeIcon icon={faBriefcase} size="2x" color={theme.palette.secondary.main} />, 
       href: '#',
       description: 'آخرین فرصت‌های شغلی مناسب با تخصص شما'
     },
     { 
       title: 'ارسال رزومه', 
-      icon: <AssignmentIcon sx={{ fontSize: '2.5rem', color: theme.palette.secondary.main }} />, 
+      icon: <FontAwesomeIcon icon={faFileAlt} size="2x" color={theme.palette.secondary.main} />, 
       href: '#',
       description: 'رزومه خود را آماده کنید و به کارفرمایان معتبر ارسال کنید'
     },
     { 
       title: 'تکمیل پروفایل', 
-      icon: <PersonAddIcon sx={{ fontSize: '2.5rem', color: theme.palette.secondary.main }} />, 
+      icon: <FontAwesomeIcon icon={faUserPlus} size="2x" color={theme.palette.secondary.main} />, 
       href: '#',
       description: 'پروفایل حرفه‌ای خود را تکمیل کنید تا شانس استخدام افزایش یابد'
     }
@@ -159,31 +189,29 @@ export default function Header() {
       color: 'employer', 
       href: '#', 
       variant: 'text', 
-      icon: <WorkOutlineIcon fontSize="small" />,
+      icon: <FontAwesomeIcon icon={faUserTie} />,
       hasSubmenu: true,
-      handleMouseEnter: handleEmployerMouseEnter,
-      handleMouseLeave: handleEmployerMouseLeave,
       menuItems: employerMenuItems,
-      menuId: 'employer-menu'
+      menuId: 'employer-menu',
+      buttonRef: employerButtonRef
     },
     { 
-      title: 'فریلنسر هستم', 
+      title: 'کارجو هستم', 
       color: 'candidate', 
       href: '#', 
       variant: 'text', 
-      icon: <EngineeringIcon fontSize="small" />,
+      icon: <FontAwesomeIcon icon={faUserGraduate} />,
       hasSubmenu: true,
-      handleMouseEnter: handleCandidateMouseEnter,
-      handleMouseLeave: handleCandidateMouseLeave,
       menuItems: candidateMenuItems,
-      menuId: 'candidate-menu'
+      menuId: 'candidate-menu',
+      buttonRef: candidateButtonRef
     },
     { 
       title: 'راهنما', 
       color: 'inherit', 
       href: '#', 
       variant: 'text', 
-      icon: <HelpOutlineIcon fontSize="small" />,
+      icon: <FontAwesomeIcon icon={faQuestionCircle} />,
       hasSubmenu: false
     },
     { 
@@ -191,7 +219,7 @@ export default function Header() {
       color: 'primary', 
       href: '#', 
       variant: 'contained', 
-      icon: <LoginIcon fontSize="small" />,
+      icon: <FontAwesomeIcon icon={faSignInAlt} />,
       hasSubmenu: false
     }
   ];
@@ -377,18 +405,22 @@ export default function Header() {
                 {item.hasSubmenu ? (
                   <Box>
                     <Button 
-                      aria-owns={item.color === 'employer' && isEmployerHovered ? 'employer-menu' : item.color === 'candidate' && isCandidateHovered ? 'candidate-menu' : undefined}
-                      aria-haspopup="true"
+                      ref={item.buttonRef}
                       variant={item.variant as "text" | "contained" | "outlined"}
-                      onMouseEnter={item.handleMouseEnter}
-                      onMouseLeave={item.handleMouseLeave}
+                      onMouseEnter={item.menuId === 'employer-menu' ? handleEmployerMouseEnter : handleCandidateMouseEnter}
+                      onMouseLeave={item.menuId === 'employer-menu' ? handleEmployerMouseLeave : handleCandidateMouseLeave}
                       color={item.color === 'employer' 
                         ? 'primary' 
                         : item.color === 'candidate' 
                           ? 'secondary' 
                           : (item.color as any)}
                       startIcon={item.icon}
-                      endIcon={<KeyboardArrowDownIcon />}
+                      endIcon={
+                        (item.menuId === 'employer-menu' && isEmployerHovered) || 
+                        (item.menuId === 'candidate-menu' && isCandidateHovered) ? 
+                          <FontAwesomeIcon icon={faChevronUp} /> : 
+                          <FontAwesomeIcon icon={faChevronDown} />
+                      }
                       sx={{ 
                         borderRadius: '10px',
                         fontWeight: 600,
@@ -526,6 +558,7 @@ export default function Header() {
         open={isEmployerHovered}
         anchorEl={employerAnchorEl}
         onClose={() => setIsEmployerHovered(false)}
+        disableRestoreFocus
         anchorOrigin={{
           vertical: 'bottom',
           horizontal: 'center',
@@ -534,17 +567,18 @@ export default function Header() {
           vertical: 'top',
           horizontal: 'center',
         }}
+        sx={{ pointerEvents: 'none' }}
         slotProps={{
           paper: {
             onMouseEnter: () => handlePopoverMouseEnter('employer'),
             onMouseLeave: () => handlePopoverMouseLeave('employer'),
             sx: {
-              mt: 1.5,
+              mt: 0.5,
               boxShadow: '0 8px 16px rgba(0,0,0,0.1)',
               borderRadius: 2,
               minWidth: 250,
-              pointerEvents: 'auto',
               overflow: 'visible',
+              pointerEvents: 'auto',
               '&:before': {
                 content: '""',
                 display: 'block',
@@ -553,18 +587,22 @@ export default function Header() {
                 left: 0,
                 right: 0,
                 height: 10,
+                backgroundColor: 'transparent',
+                zIndex: 1,
               },
             }
           }
         }}
       >
-        <Paper sx={{ p: 3, maxWidth: 800 }}>
-          <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2 }}>
+        <Paper id="employer-menu-content" sx={{ p: 4, maxWidth: 800 }}>
+          <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 3 }}>
             {employerMenuItems.map((item, index) => (
               <Box 
-                key={index} 
+                key={index.toString()} 
                 sx={{ 
                   width: { xs: '100%', md: 'calc(33.33% - 16px)' },
+                  display: 'flex',
+                  flexDirection: 'column'
                 }}
               >
                 <Box
@@ -575,21 +613,27 @@ export default function Header() {
                     flexDirection: 'column',
                     textDecoration: 'none',
                     color: 'inherit',
-                    p: 2,
+                    p: 2.5,
                     borderRadius: 2,
                     height: '100%',
+                    border: '1px solid',
+                    borderColor: 'divider',
+                    transition: 'all 0.2s ease',
                     '&:hover': {
-                      backgroundColor: `${theme.palette.primary.main}08`,
+                      backgroundColor: `${theme.palette.primary.main}05`,
+                      borderColor: theme.palette.primary.main,
+                      transform: 'translateY(-3px)',
+                      boxShadow: '0 6px 15px rgba(0,0,0,0.08)',
                     }
                   }}
                 >
-                  <Box sx={{ display: 'flex', alignItems: 'center', mb: 1.5 }}>
-                    <Box sx={{ ml: 2 }}>{item.icon}</Box>
-                    <Typography variant="h6" fontWeight="bold" fontSize="1.1rem">
-                      {item.title}
-                    </Typography>
+                  <Box sx={{ display: 'flex', justifyContent: 'center', mb: 2.5 }}>
+                    {item.icon}
                   </Box>
-                  <Typography variant="body2" color="text.secondary" fontSize="0.85rem">
+                  <Typography variant="h6" align="center" fontWeight="bold" fontSize="1.1rem" mb={1.5}>
+                    {item.title}
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary" fontSize="0.9rem" align="center">
                     {item.description}
                   </Typography>
                 </Box>
@@ -605,6 +649,7 @@ export default function Header() {
         open={isCandidateHovered}
         anchorEl={candidateAnchorEl}
         onClose={() => setIsCandidateHovered(false)}
+        disableRestoreFocus
         anchorOrigin={{
           vertical: 'bottom',
           horizontal: 'center',
@@ -613,17 +658,18 @@ export default function Header() {
           vertical: 'top',
           horizontal: 'center',
         }}
+        sx={{ pointerEvents: 'none' }}
         slotProps={{
           paper: {
             onMouseEnter: () => handlePopoverMouseEnter('candidate'),
             onMouseLeave: () => handlePopoverMouseLeave('candidate'),
             sx: {
-              mt: 1.5,
+              mt: 0.5,
               boxShadow: '0 8px 16px rgba(0,0,0,0.1)',
               borderRadius: 2,
               minWidth: 250,
-              pointerEvents: 'auto',
               overflow: 'visible',
+              pointerEvents: 'auto',
               '&:before': {
                 content: '""',
                 display: 'block',
@@ -632,18 +678,22 @@ export default function Header() {
                 left: 0,
                 right: 0,
                 height: 10,
+                backgroundColor: 'transparent',
+                zIndex: 1,
               },
             }
           }
         }}
       >
-        <Paper sx={{ p: 3, maxWidth: 800 }}>
-          <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2 }}>
+        <Paper id="candidate-menu-content" sx={{ p: 4, maxWidth: 800 }}>
+          <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 3 }}>
             {candidateMenuItems.map((item, index) => (
               <Box 
-                key={index} 
+                key={index.toString()} 
                 sx={{ 
                   width: { xs: '100%', md: 'calc(33.33% - 16px)' },
+                  display: 'flex',
+                  flexDirection: 'column'
                 }}
               >
                 <Box
@@ -654,21 +704,27 @@ export default function Header() {
                     flexDirection: 'column',
                     textDecoration: 'none',
                     color: 'inherit',
-                    p: 2,
+                    p: 2.5,
                     borderRadius: 2,
                     height: '100%',
+                    border: '1px solid',
+                    borderColor: 'divider',
+                    transition: 'all 0.2s ease',
                     '&:hover': {
-                      backgroundColor: `${theme.palette.secondary.main}08`,
+                      backgroundColor: `${theme.palette.secondary.main}05`,
+                      borderColor: theme.palette.secondary.main,
+                      transform: 'translateY(-3px)',
+                      boxShadow: '0 6px 15px rgba(0,0,0,0.08)',
                     }
                   }}
                 >
-                  <Box sx={{ display: 'flex', alignItems: 'center', mb: 1.5 }}>
-                    <Box sx={{ ml: 2 }}>{item.icon}</Box>
-                    <Typography variant="h6" fontWeight="bold" fontSize="1.1rem">
-                      {item.title}
-                    </Typography>
+                  <Box sx={{ display: 'flex', justifyContent: 'center', mb: 2.5 }}>
+                    {item.icon}
                   </Box>
-                  <Typography variant="body2" color="text.secondary" fontSize="0.85rem">
+                  <Typography variant="h6" align="center" fontWeight="bold" fontSize="1.1rem" mb={1.5}>
+                    {item.title}
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary" fontSize="0.9rem" align="center">
                     {item.description}
                   </Typography>
                 </Box>
