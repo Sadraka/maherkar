@@ -8,6 +8,8 @@ import {
   Box, 
   Container,
   useTheme,
+  alpha,
+  Avatar,
 } from '@mui/material';
 import Link from 'next/link';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -15,6 +17,9 @@ import {
   faSignInAlt, 
   faChevronUp, 
   faChevronDown,
+  faQuestion,
+  faBuilding,
+  faUserTie,
 } from '@fortawesome/free-solid-svg-icons';
 import { useHeaderContext } from '@/contexts/HeaderContext';
 
@@ -33,7 +38,7 @@ export default function AppHeader() {
     isCandidateHovered,
   } = useHeaderContext();
 
-  // اطلاعات منوها
+  // اطلاعات منوها - با استایل یکسان با منوی موبایل
   const navItems = [
     { 
       title: 'کارفرما هستم', 
@@ -42,7 +47,10 @@ export default function AppHeader() {
       variant: 'text', 
       hasSubmenu: true,
       menuId: 'employer-menu',
-      buttonRef: employerButtonRef
+      buttonRef: employerButtonRef,
+      icon: faBuilding,
+      bgColor: alpha(theme.palette.employer.main, 0.15),
+      textColor: theme.palette.employer.main
     },
     { 
       title: 'کارجو هستم', 
@@ -51,21 +59,28 @@ export default function AppHeader() {
       variant: 'text', 
       hasSubmenu: true,
       menuId: 'candidate-menu',
-      buttonRef: candidateButtonRef
+      buttonRef: candidateButtonRef,
+      icon: faUserTie,
+      bgColor: alpha(theme.palette.candidate.main, 0.15),
+      textColor: theme.palette.candidate.main
     },
     { 
       title: 'راهنما', 
-      color: 'inherit', 
+      color: 'primary', 
       href: '#', 
       variant: 'text', 
-      hasSubmenu: false
+      hasSubmenu: false,
+      icon: faQuestion,
+      bgColor: alpha(theme.palette.primary.main, 0.15),
+      textColor: theme.palette.primary.main
     },
     { 
       title: 'ورود / ثبت‌نام', 
       color: 'primary', 
       href: '#', 
       variant: 'contained', 
-      hasSubmenu: false
+      hasSubmenu: false,
+      icon: faSignInAlt
     }
   ];
 
@@ -143,11 +158,15 @@ export default function AppHeader() {
                       variant={item.variant as "text" | "contained" | "outlined"}
                       onMouseEnter={item.menuId === 'employer-menu' ? handleEmployerMouseEnter : handleCandidateMouseEnter}
                       onMouseLeave={item.menuId === 'employer-menu' ? handleEmployerMouseLeave : handleCandidateMouseLeave}
-                      color={item.color === 'employer' 
-                        ? 'primary' 
-                        : item.color === 'candidate' 
-                          ? 'secondary' 
-                          : (item.color as any)}
+                      color={item.color as any}
+                      startIcon={<Avatar sx={{ 
+                        width: 24, 
+                        height: 24, 
+                        bgcolor: item.bgColor,
+                        color: item.textColor,
+                      }}>
+                        <FontAwesomeIcon icon={item.icon} size="sm" />
+                      </Avatar>}
                       endIcon={
                         (item.menuId === 'employer-menu' && isEmployerHovered) || 
                         (item.menuId === 'candidate-menu' && isCandidateHovered) ? 
@@ -165,8 +184,8 @@ export default function AppHeader() {
                               color: theme.palette.employer.main,
                               border: '1px solid transparent',
                               '&:hover': {
-                                backgroundColor: `${theme.palette.employer.main}10`,
-                                border: `1px solid ${theme.palette.employer.main}30`,
+                                backgroundColor: alpha(theme.palette.employer.main, 0.1),
+                                border: `1px solid ${alpha(theme.palette.employer.main, 0.3)}`,
                               }
                             } 
                           : {}),
@@ -175,18 +194,18 @@ export default function AppHeader() {
                               color: theme.palette.candidate.main,
                               border: '1px solid transparent',
                               '&:hover': {
-                                backgroundColor: `${theme.palette.candidate.main}10`,
-                                border: `1px solid ${theme.palette.candidate.main}30`,
+                                backgroundColor: alpha(theme.palette.candidate.main, 0.1),
+                                border: `1px solid ${alpha(theme.palette.candidate.main, 0.3)}`,
                               }
                             } 
                           : {}),
-                        ...(item.color === 'inherit' && item.variant === 'text' 
+                        ...(item.color === 'primary' && item.variant === 'text' 
                           ? { 
-                              color: theme.palette.text.secondary,
+                              color: theme.palette.primary.main,
                               border: '1px solid transparent',
                               '&:hover': {
-                                backgroundColor: `${theme.palette.primary.main}05`,
-                                border: `1px solid ${theme.palette.divider}`,
+                                backgroundColor: alpha(theme.palette.primary.main, 0.1),
+                                border: `1px solid ${alpha(theme.palette.primary.main, 0.3)}`,
                               }
                             } 
                           : {}),
@@ -206,13 +225,21 @@ export default function AppHeader() {
                 ) : (
                   <Button 
                     variant={item.variant as "text" | "contained" | "outlined"}
-                    color={item.color === 'employer' 
-                      ? 'primary' 
-                      : item.color === 'candidate' 
-                        ? 'secondary' 
-                        : (item.color as any)}
+                    color={item.color as any}
                     component="a"
                     href={item.href}
+                    startIcon={item.variant === 'contained' ? 
+                      <FontAwesomeIcon icon={item.icon} /> : 
+                      (item.variant === 'text' ? 
+                        <Avatar sx={{ 
+                          width: 24, 
+                          height: 24, 
+                          bgcolor: item.bgColor,
+                          color: item.textColor, 
+                        }}>
+                          <FontAwesomeIcon icon={item.icon} size="sm" />
+                        </Avatar> : undefined)
+                    }
                     sx={{ 
                       borderRadius: '10px',
                       fontWeight: 800,
@@ -224,8 +251,8 @@ export default function AppHeader() {
                             color: theme.palette.employer.main,
                             border: '1px solid transparent',
                             '&:hover': {
-                              backgroundColor: `${theme.palette.employer.main}10`,
-                              border: `1px solid ${theme.palette.employer.main}30`,
+                              backgroundColor: alpha(theme.palette.employer.main, 0.1),
+                              border: `1px solid ${alpha(theme.palette.employer.main, 0.3)}`,
                             }
                           } 
                         : {}),
@@ -234,18 +261,18 @@ export default function AppHeader() {
                             color: theme.palette.candidate.main,
                             border: '1px solid transparent',
                             '&:hover': {
-                              backgroundColor: `${theme.palette.candidate.main}10`,
-                              border: `1px solid ${theme.palette.candidate.main}30`,
+                              backgroundColor: alpha(theme.palette.candidate.main, 0.1),
+                              border: `1px solid ${alpha(theme.palette.candidate.main, 0.3)}`,
                             }
                           } 
                         : {}),
-                      ...(item.color === 'inherit' && item.variant === 'text' 
+                      ...(item.color === 'primary' && item.variant === 'text' 
                         ? { 
-                            color: theme.palette.text.secondary,
+                            color: theme.palette.primary.main,
                             border: '1px solid transparent',
                             '&:hover': {
-                              backgroundColor: `${theme.palette.primary.main}05`,
-                              border: `1px solid ${theme.palette.divider}`,
+                              backgroundColor: alpha(theme.palette.primary.main, 0.1),
+                              border: `1px solid ${alpha(theme.palette.primary.main, 0.3)}`,
                             }
                           } 
                         : {}),
