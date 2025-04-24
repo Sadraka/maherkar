@@ -10,7 +10,8 @@ import {
   Divider,
   IconButton,
   alpha,
-  GlobalStyles
+  GlobalStyles,
+  Container
 } from '@mui/material';
 import { useHeaderContext } from '@/contexts/HeaderContext';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -174,7 +175,7 @@ export default function MenuPopover() {
             onMouseLeave: () => handlePopoverMouseLeave('employer'),
             sx: {
               mt: 0,
-              boxShadow: 'none',
+              boxShadow: '0px 5px 10px rgba(0,0,0,0.1)',
               borderRadius: 0,
               minWidth: '100%',
               width: '100vw',
@@ -186,6 +187,7 @@ export default function MenuPopover() {
               border: 'none',
               borderTop: '0px solid transparent',
               marginTop: '0px',
+              position: 'fixed',
               zIndex: 1000,
               '&:before': {
                 display: 'none',
@@ -200,73 +202,77 @@ export default function MenuPopover() {
             p: 0, 
             overflow: 'hidden',
             borderRadius: 0,
-            maxWidth: '1200px',
-            mx: 'auto',
+            width: '100%',
             bgcolor: '#FFFFFF',
+            boxShadow: '0px 5px 10px rgba(0,0,0,0.1)',
+            borderTop: '1px solid',
+            borderColor: 'divider',
           }}
           elevation={0}
         >
-          <Box sx={{ p: {xs: 3, md: 4.5} }}>
-            <Box 
-              sx={{ 
-                display: 'grid', 
-                gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, 1fr)', md: 'repeat(3, 1fr)' }, 
-                gap: 3.5
-              }}
-            >
-              {employerMenuItems.map((item, index) => (
-                <Box 
-                  key={index.toString()} 
-                  component="a"
-                  href={item.href}
-                  onMouseEnter={() => setActiveEmployerIndex(index)}
-                  onMouseLeave={() => setActiveEmployerIndex(-1)}
-                  sx={{ 
-                    display: 'flex',
-                    alignItems: 'flex-start',
-                    p: 3,
-                    borderRadius: 1.5,
-                    bgcolor: activeEmployerIndex === index ? alpha(employerColor, 0.05) : 'transparent',
-                    color: 'text.primary',
-                    textDecoration: 'none',
-                    border: '1px solid',
-                    borderColor: activeEmployerIndex === index ? alpha(employerColor, 0.15) : 'transparent',
-                    boxShadow: activeEmployerIndex === index ? '0 2px 8px rgba(0,0,0,0.03)' : 'none',
-                    '&:hover': {
-                      bgcolor: alpha(employerColor, 0.05),
-                      borderColor: alpha(employerColor, 0.15),
-                      boxShadow: '0 2px 8px rgba(0,0,0,0.03)',
-                    }
-                  }}
-                >
-                  <Box
-                    sx={{
+          <Container maxWidth="lg">
+            <Box sx={{ p: {xs: 3, md: 4.5} }}>
+              <Box 
+                sx={{ 
+                  display: 'grid', 
+                  gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, 1fr)', md: 'repeat(3, 1fr)' }, 
+                  gap: 3.5
+                }}
+              >
+                {employerMenuItems.map((item, index) => (
+                  <Box 
+                    key={index.toString()} 
+                    component="a"
+                    href={item.href}
+                    onMouseEnter={() => setActiveEmployerIndex(index)}
+                    onMouseLeave={() => setActiveEmployerIndex(-1)}
+                    sx={{ 
                       display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
+                      alignItems: 'flex-start',
+                      p: 3,
                       borderRadius: 1.5,
-                      bgcolor: activeEmployerIndex === index ? employerColor : alpha(employerColor, 0.1),
-                      color: activeEmployerIndex === index ? 'white' : employerColor,
-                      width: 52,
-                      height: 52,
-                      mr: 2.5,
-                      flexShrink: 0
+                      bgcolor: activeEmployerIndex === index ? alpha(employerColor, 0.05) : 'transparent',
+                      color: 'text.primary',
+                      textDecoration: 'none',
+                      border: '1px solid',
+                      borderColor: activeEmployerIndex === index ? alpha(employerColor, 0.15) : 'transparent',
+                      boxShadow: 'none',
+                      '&:hover': {
+                        bgcolor: alpha(employerColor, 0.05),
+                        borderColor: alpha(employerColor, 0.15),
+                        boxShadow: 'none',
+                      }
                     }}
                   >
-                    {item.icon}
+                    <Box
+                      sx={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        borderRadius: 1.5,
+                        bgcolor: activeEmployerIndex === index ? employerColor : alpha(employerColor, 0.1),
+                        color: activeEmployerIndex === index ? 'white' : employerColor,
+                        width: 52,
+                        height: 52,
+                        mr: 2.5,
+                        flexShrink: 0
+                      }}
+                    >
+                      {item.icon}
+                    </Box>
+                    <Box>
+                      <Typography fontWeight={600} fontSize="1.15rem" color="text.primary">
+                        {item.title}
+                      </Typography>
+                      <Typography variant="body2" color="text.secondary" fontSize="0.9rem" mt={0.5}>
+                        {item.description}
+                      </Typography>
+                    </Box>
                   </Box>
-                  <Box>
-                    <Typography fontWeight={600} fontSize="1.15rem" color="text.primary">
-                      {item.title}
-                    </Typography>
-                    <Typography variant="body2" color="text.secondary" fontSize="0.9rem" mt={0.5}>
-                      {item.description}
-                    </Typography>
-                  </Box>
-                </Box>
-              ))}
+                ))}
+              </Box>
             </Box>
-          </Box>
+          </Container>
         </Paper>
       </Popover>
 
@@ -293,7 +299,7 @@ export default function MenuPopover() {
             onMouseLeave: () => handlePopoverMouseLeave('candidate'),
             sx: {
               mt: 0,
-              boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+              boxShadow: '0px 5px 10px rgba(0,0,0,0.1)',
               borderRadius: 0,
               minWidth: '100%',
               width: '100vw',
@@ -305,6 +311,7 @@ export default function MenuPopover() {
               border: 'none',
               borderTop: '0px solid transparent',
               marginTop: '0px',
+              position: 'fixed',
               zIndex: 1000,
               '&:before': {
                 display: 'none',
@@ -319,73 +326,77 @@ export default function MenuPopover() {
             p: 0, 
             overflow: 'hidden',
             borderRadius: 0,
-            maxWidth: '1200px',
-            mx: 'auto',
+            width: '100%',
             bgcolor: '#FFFFFF',
+            boxShadow: '0px 5px 10px rgba(0,0,0,0.1)',
+            borderTop: '1px solid',
+            borderColor: 'divider',
           }}
           elevation={0}
         >
-          <Box sx={{ p: {xs: 3, md: 4.5} }}>
-            <Box 
-              sx={{ 
-                display: 'grid', 
-                gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, 1fr)', md: 'repeat(3, 1fr)' }, 
-                gap: 3.5
-              }}
-            >
-              {candidateMenuItems.map((item, index) => (
-                <Box 
-                  key={index.toString()} 
-                  component="a"
-                  href={item.href}
-                  onMouseEnter={() => setActiveCandidateIndex(index)}
-                  onMouseLeave={() => setActiveCandidateIndex(-1)}
-                  sx={{ 
-                    display: 'flex',
-                    alignItems: 'flex-start',
-                    p: 3,
-                    borderRadius: 1.5,
-                    bgcolor: activeCandidateIndex === index ? alpha(candidateColor, 0.05) : 'transparent',
-                    color: 'text.primary',
-                    textDecoration: 'none',
-                    border: '1px solid',
-                    borderColor: activeCandidateIndex === index ? alpha(candidateColor, 0.15) : 'transparent',
-                    boxShadow: activeCandidateIndex === index ? '0 2px 8px rgba(0,0,0,0.03)' : 'none',
-                    '&:hover': {
-                      bgcolor: alpha(candidateColor, 0.05),
-                      borderColor: alpha(candidateColor, 0.15),
-                      boxShadow: '0 2px 8px rgba(0,0,0,0.03)',
-                    }
-                  }}
-                >
-                  <Box
-                    sx={{
+          <Container maxWidth="lg">
+            <Box sx={{ p: {xs: 3, md: 4.5} }}>
+              <Box 
+                sx={{ 
+                  display: 'grid', 
+                  gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, 1fr)', md: 'repeat(3, 1fr)' }, 
+                  gap: 3.5
+                }}
+              >
+                {candidateMenuItems.map((item, index) => (
+                  <Box 
+                    key={index.toString()} 
+                    component="a"
+                    href={item.href}
+                    onMouseEnter={() => setActiveCandidateIndex(index)}
+                    onMouseLeave={() => setActiveCandidateIndex(-1)}
+                    sx={{ 
                       display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
+                      alignItems: 'flex-start',
+                      p: 3,
                       borderRadius: 1.5,
-                      bgcolor: activeCandidateIndex === index ? candidateColor : alpha(candidateColor, 0.1),
-                      color: activeCandidateIndex === index ? 'white' : candidateColor,
-                      width: 52,
-                      height: 52,
-                      mr: 2.5,
-                      flexShrink: 0
+                      bgcolor: activeCandidateIndex === index ? alpha(candidateColor, 0.05) : 'transparent',
+                      color: 'text.primary',
+                      textDecoration: 'none',
+                      border: '1px solid',
+                      borderColor: activeCandidateIndex === index ? alpha(candidateColor, 0.15) : 'transparent',
+                      boxShadow: 'none',
+                      '&:hover': {
+                        bgcolor: alpha(candidateColor, 0.05),
+                        borderColor: alpha(candidateColor, 0.15),
+                        boxShadow: 'none',
+                      }
                     }}
                   >
-                    {item.icon}
+                    <Box
+                      sx={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        borderRadius: 1.5,
+                        bgcolor: activeCandidateIndex === index ? candidateColor : alpha(candidateColor, 0.1),
+                        color: activeCandidateIndex === index ? 'white' : candidateColor,
+                        width: 52,
+                        height: 52,
+                        mr: 2.5,
+                        flexShrink: 0
+                      }}
+                    >
+                      {item.icon}
+                    </Box>
+                    <Box>
+                      <Typography fontWeight={600} fontSize="1.15rem" color="text.primary">
+                        {item.title}
+                      </Typography>
+                      <Typography variant="body2" color="text.secondary" fontSize="0.9rem" mt={0.5}>
+                        {item.description}
+                      </Typography>
+                    </Box>
                   </Box>
-                  <Box>
-                    <Typography fontWeight={600} fontSize="1.15rem" color="text.primary">
-                      {item.title}
-                    </Typography>
-                    <Typography variant="body2" color="text.secondary" fontSize="0.9rem" mt={0.5}>
-                      {item.description}
-                    </Typography>
-                  </Box>
-                </Box>
-              ))}
+                ))}
+              </Box>
             </Box>
-          </Box>
+          </Container>
         </Paper>
       </Popover>
 
@@ -412,7 +423,7 @@ export default function MenuPopover() {
             onMouseLeave: () => handlePopoverMouseLeave('help'),
             sx: {
               mt: 0,
-              boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+              boxShadow: '0px 5px 10px rgba(0,0,0,0.1)',
               borderRadius: 0,
               minWidth: '100%',
               width: '100vw',
@@ -424,6 +435,7 @@ export default function MenuPopover() {
               border: 'none',
               borderTop: '0px solid transparent',
               marginTop: '0px',
+              position: 'fixed',
               zIndex: 1000,
               '&:before': {
                 display: 'none',
@@ -438,73 +450,77 @@ export default function MenuPopover() {
             p: 0, 
             overflow: 'hidden',
             borderRadius: 0,
-            maxWidth: '1200px',
-            mx: 'auto',
+            width: '100%',
             bgcolor: '#FFFFFF',
+            boxShadow: '0px 5px 10px rgba(0,0,0,0.1)',
+            borderTop: '1px solid',
+            borderColor: 'divider',
           }}
           elevation={0}
         >
-          <Box sx={{ p: {xs: 3, md: 4.5} }}>
-            <Box 
-              sx={{ 
-                display: 'grid', 
-                gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, 1fr)', md: 'repeat(4, 1fr)' }, 
-                gap: 3.5
-              }}
-            >
-              {helpMenuItems.map((item, index) => (
-                <Box 
-                  key={index.toString()} 
-                  component="a"
-                  href={item.href}
-                  onMouseEnter={() => setActiveHelpIndex(index)}
-                  onMouseLeave={() => setActiveHelpIndex(-1)}
-                  sx={{ 
-                    display: 'flex',
-                    alignItems: 'flex-start',
-                    p: 3,
-                    borderRadius: 1.5,
-                    bgcolor: activeHelpIndex === index ? alpha(helpColor, 0.05) : 'transparent',
-                    color: 'text.primary',
-                    textDecoration: 'none',
-                    border: '1px solid',
-                    borderColor: activeHelpIndex === index ? alpha(helpColor, 0.15) : 'transparent',
-                    boxShadow: activeHelpIndex === index ? '0 2px 8px rgba(0,0,0,0.03)' : 'none',
-                    '&:hover': {
-                      bgcolor: alpha(helpColor, 0.05),
-                      borderColor: alpha(helpColor, 0.15),
-                      boxShadow: '0 2px 8px rgba(0,0,0,0.03)',
-                    }
-                  }}
-                >
-                  <Box
-                    sx={{
+          <Container maxWidth="lg">
+            <Box sx={{ p: {xs: 3, md: 4.5} }}>
+              <Box 
+                sx={{ 
+                  display: 'grid', 
+                  gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, 1fr)', md: 'repeat(4, 1fr)' }, 
+                  gap: 3.5
+                }}
+              >
+                {helpMenuItems.map((item, index) => (
+                  <Box 
+                    key={index.toString()} 
+                    component="a"
+                    href={item.href}
+                    onMouseEnter={() => setActiveHelpIndex(index)}
+                    onMouseLeave={() => setActiveHelpIndex(-1)}
+                    sx={{ 
                       display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
+                      alignItems: 'flex-start',
+                      p: 3,
                       borderRadius: 1.5,
-                      bgcolor: activeHelpIndex === index ? helpColor : alpha(helpColor, 0.1),
-                      color: activeHelpIndex === index ? 'white' : helpColor,
-                      width: 52,
-                      height: 52,
-                      mr: 2.5,
-                      flexShrink: 0
+                      bgcolor: activeHelpIndex === index ? alpha(helpColor, 0.05) : 'transparent',
+                      color: 'text.primary',
+                      textDecoration: 'none',
+                      border: '1px solid',
+                      borderColor: activeHelpIndex === index ? alpha(helpColor, 0.15) : 'transparent',
+                      boxShadow: 'none',
+                      '&:hover': {
+                        bgcolor: alpha(helpColor, 0.05),
+                        borderColor: alpha(helpColor, 0.15),
+                        boxShadow: 'none',
+                      }
                     }}
                   >
-                    {item.icon}
+                    <Box
+                      sx={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        borderRadius: 1.5,
+                        bgcolor: activeHelpIndex === index ? helpColor : alpha(helpColor, 0.1),
+                        color: activeHelpIndex === index ? 'white' : helpColor,
+                        width: 52,
+                        height: 52,
+                        mr: 2.5,
+                        flexShrink: 0
+                      }}
+                    >
+                      {item.icon}
+                    </Box>
+                    <Box>
+                      <Typography fontWeight={600} fontSize="1.15rem" color="text.primary">
+                        {item.title}
+                      </Typography>
+                      <Typography variant="body2" color="text.secondary" fontSize="0.9rem" mt={0.5}>
+                        {item.description}
+                      </Typography>
+                    </Box>
                   </Box>
-                  <Box>
-                    <Typography fontWeight={600} fontSize="1.15rem" color="text.primary">
-                      {item.title}
-                    </Typography>
-                    <Typography variant="body2" color="text.secondary" fontSize="0.9rem" mt={0.5}>
-                      {item.description}
-                    </Typography>
-                  </Box>
-                </Box>
-              ))}
+                ))}
+              </Box>
             </Box>
-          </Box>
+          </Container>
         </Paper>
       </Popover>
     </>

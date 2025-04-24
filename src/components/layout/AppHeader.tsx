@@ -10,6 +10,7 @@ import {
   useTheme,
   alpha,
   Avatar,
+  MenuItem,
 } from '@mui/material';
 import Link from 'next/link';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -22,6 +23,9 @@ import {
   faUserTie,
 } from '@fortawesome/free-solid-svg-icons';
 import { useHeaderContext } from '@/contexts/HeaderContext';
+import { styled } from '@mui/material/styles';
+import { useRouter } from 'next/navigation';
+import { useState } from 'react';
 
 // کامپوننت AppBar اصلی
 export default function AppHeader() {
@@ -92,17 +96,55 @@ export default function AppHeader() {
     }
   ];
 
+  const SubMenuItem = styled(MenuItem)(() => ({
+    fontSize: 15,
+    position: 'relative',
+    marginRight: 16,
+    padding: '8px 12px',
+    minWidth: 'unset',
+    color: '#333',
+    '&:hover': {
+      backgroundColor: 'transparent',
+      color: '#000',
+      '&::after': {
+        width: '100%',
+        backgroundColor: alpha(theme.palette.primary.main, 0.8),
+        height: '3px',
+      }
+    },
+    '&::after': {
+      content: '""',
+      position: 'absolute',
+      bottom: 0,
+      right: 0,
+      width: '0%',
+      height: '2px',
+      backgroundColor: alpha(theme.palette.primary.main, 0.7),
+    },
+    '&.active': {
+      fontWeight: 'bold',
+      color: theme.palette.primary.main,
+      '&::after': {
+        width: '100%',
+      }
+    }
+  }));
+
   return (
     <AppBar 
-      position="static" 
+      position="sticky" 
       color="default"
       elevation={0}
       sx={{ 
         backgroundColor: 'background.paper',
         borderBottom: '1px solid',
         borderColor: 'divider',
-        boxShadow: '0 2px 10px rgba(0,0,0,0.05)',
-        zIndex: 1100,
+        boxShadow: '0px 2px 4px rgba(0,0,0,0.05)',
+        zIndex: 1200,
+        top: 0,
+        left: 0,
+        right: 0,
+        width: '100%',
         '&.MuiPaper-root': {
           backdropFilter: 'blur(10px)' as any,
           backgroundColor: 'rgba(255, 255, 255, 0.95)',
@@ -141,10 +183,7 @@ export default function AppHeader() {
                 fontWeight: 800,
                 px: 2,
                 py: 0.75,
-                boxShadow: '0 4px 10px rgba(0,0,0,0.15)',
-                '&:hover': {
-                  boxShadow: '0 6px 15px rgba(0,0,0,0.2)',
-                }
+                boxShadow: '0 4px 10px rgba(0,0,0,0.15)'
               }}
             >
               ورود / ثبت‌نام
@@ -193,91 +232,48 @@ export default function AppHeader() {
                         minWidth: item.variant === 'contained' ? 140 : 'auto',
                         border: 'none',
                         position: 'relative',
-                        transition: 'all 0.2s ease',
                         '&::after': {
                           content: '""',
                           position: 'absolute',
                           bottom: 0,
-                          left: 0,
+                          right: 0,
                           width: '0%',
                           height: '3px',
-                          transition: 'width 0.2s ease',
                           zIndex: 1200,
+                          backgroundColor: item.color === 'employer' ? theme.palette.employer.main : 
+                                         item.color === 'candidate' ? theme.palette.candidate.main :
+                                         item.color === 'black' ? '#000000' : theme.palette.primary.main,
                         },
-                        ...(item.title === 'راهنما' 
+                        '&:hover': {
+                          backgroundColor: 'transparent',
+                          '&::after': {
+                            width: '100%',
+                          }
+                        },
+                        ...(item.title === 'راهنما' && isHelpHovered
                           ? { 
-                              color: '#000000',
-                              '&:hover': {
-                                backgroundColor: 'transparent',
-                                border: 'none',
-                                '&::after': {
-                                  width: '100%',
-                                  backgroundColor: '#000000',
-                                }
-                              },
-                              ...(isHelpHovered ? {
-                                backgroundColor: 'transparent',
-                                border: 'none',
-                                '&::after': {
-                                  width: '100%',
-                                  backgroundColor: '#000000',
-                                }
-                              } : {})
+                              '&::after': {
+                                width: '100%',
+                              }
                             } 
                           : {}),
-                        ...(item.color === 'employer' && item.variant === 'text' 
+                        ...(item.color === 'employer' && isEmployerHovered
                           ? { 
-                              color: theme.palette.employer.main,
-                              '&:hover': {
-                                backgroundColor: 'transparent',
-                                border: 'none',
-                                '&::after': {
-                                  width: '100%',
-                                  backgroundColor: theme.palette.employer.main,
-                                }
-                              },
-                              ...(isEmployerHovered ? {
-                                backgroundColor: 'transparent',
-                                border: 'none',
-                                '&::after': {
-                                  width: '100%',
-                                  backgroundColor: theme.palette.employer.main,
-                                }
-                              } : {})
+                              '&::after': {
+                                width: '100%',
+                              }
                             } 
                           : {}),
-                        ...(item.color === 'candidate' && item.variant === 'text' 
+                        ...(item.color === 'candidate' && isCandidateHovered
                           ? { 
-                              color: theme.palette.candidate.main,
-                              '&:hover': {
-                                backgroundColor: 'transparent',
-                                border: 'none',
-                                '&::after': {
-                                  width: '100%',
-                                  backgroundColor: theme.palette.candidate.main,
-                                }
-                              },
-                              ...(isCandidateHovered ? {
-                                backgroundColor: 'transparent',
-                                border: 'none',
-                                '&::after': {
-                                  width: '100%',
-                                  backgroundColor: theme.palette.candidate.main,
-                                }
-                              } : {})
+                              '&::after': {
+                                width: '100%',
+                              }
                             } 
                           : {}),
                         ...(item.color === 'primary' && item.variant === 'text' 
                           ? { 
                               color: theme.palette.primary.main,
-                              '&:hover': {
-                                backgroundColor: 'transparent',
-                                border: 'none',
-                                '&::after': {
-                                  width: '100%',
-                                  backgroundColor: theme.palette.primary.main,
-                                }
-                              }
                             } 
                           : {}),
                         ...(item.variant === 'contained'
@@ -285,8 +281,8 @@ export default function AppHeader() {
                               borderRadius: '10px',
                               boxShadow: '0 4px 10px rgba(0,0,0,0.15)',
                               ml: 2,
-                              '&:hover': {
-                                boxShadow: '0 6px 15px rgba(0,0,0,0.2)',
+                              '&::after': {
+                                display: 'none'
                               }
                             }
                           : {})
@@ -321,10 +317,7 @@ export default function AppHeader() {
                       height: '42px',
                       minWidth: item.variant === 'contained' ? 140 : 'auto',
                       ml: 2,
-                      boxShadow: '0 4px 10px rgba(0,0,0,0.15)',
-                      '&:hover': {
-                        boxShadow: '0 6px 15px rgba(0,0,0,0.2)',
-                      }
+                      boxShadow: '0 4px 10px rgba(0,0,0,0.15)'
                     }}
                   >
                     {item.title}
