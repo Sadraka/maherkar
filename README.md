@@ -15,7 +15,7 @@
 - رابط کاربری RTL
 - کامپوننت‌محور و قابل توسعه
 - بهینه‌سازی شده برای SEO
-- پشتیبانی از فونت فارسی (ایران‌سنس)
+- پشتیبانی از فونت فارسی (وزیر)
 
 ## ساختار پروژه
 
@@ -41,12 +41,16 @@ src/
 npm install
 ```
 
-2. اجرای برنامه در محیط توسعه:
+2. دانلود و نصب فونت وزیر:
+- فایل‌های فونت را از [صفحه گیت‌هاب فونت وزیر](https://github.com/rastikerdar/vazir-font) دانلود کنید
+- فایل‌های .woff و .woff2 را در پوشه `public/fonts` کپی کنید
+
+3. اجرای برنامه در محیط توسعه:
 ```bash
 npm run dev
 ```
 
-3. ساخت نسخه production:
+4. ساخت نسخه production:
 ```bash
 npm run build
 ```
@@ -58,7 +62,7 @@ npm run build
 - اضافه کردن Material-UI و تنظیمات تم
 - پیاده‌سازی هدر سایت
 - پیاده‌سازی بخش جستجوی صفحه اصلی
-- اضافه کردن فونت ایران‌سنس
+- تغییر فونت به وزیر
 
 ## کامیت‌های انجام شده
 
@@ -87,10 +91,10 @@ git add .
 git commit -m "Add hero section with search functionality"
 ```
 
-5. Add IRANSans font
+5. Change font to Vazir
 ```bash
 git add .
-git commit -m "Add IRANSans font and RTL support"
+git commit -m "Change font from IRANSans to Vazir"
 ```
 
 ## برنامه‌های آینده

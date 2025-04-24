@@ -5,19 +5,28 @@
 @tailwind utilities;
 
 @font-face {
-  font-family: 'IRANSans';
-  src: url('/fonts/IRANSansWeb.woff2') format('woff2'),
-       url('/fonts/IRANSansWeb.woff') format('woff');
+  font-family: 'Vazir';
+  src: url('/fonts/Vazir.woff2') format('woff2'),
+       url('/fonts/Vazir.woff') format('woff');
   font-weight: normal;
   font-style: normal;
   font-display: swap;
 }
 
 @font-face {
-  font-family: 'IRANSans';
-  src: url('/fonts/IRANSansWeb_Bold.woff2') format('woff2'),
-       url('/fonts/IRANSansWeb_Bold.woff') format('woff');
+  font-family: 'Vazir';
+  src: url('/fonts/Vazir-Bold.woff2') format('woff2'),
+       url('/fonts/Vazir-Bold.woff') format('woff');
   font-weight: bold;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Vazir';
+  src: url('/fonts/Vazir-Light.woff2') format('woff2'),
+       url('/fonts/Vazir-Light.woff') format('woff');
+  font-weight: 300;
   font-style: normal;
   font-display: swap;
 }
@@ -45,6 +54,6 @@
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: 'IRANSans', sans-serif;
+  font-family: 'Vazir', sans-serif;
   direction: rtl;
 }

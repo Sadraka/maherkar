@@ -3,7 +3,25 @@ import { createTheme } from '@mui/material/styles';
 const theme = createTheme({
   direction: 'rtl',
   typography: {
-    fontFamily: 'IRANSans, Roboto, Arial',
+    fontFamily: 'Vazir, Roboto, Arial',
+    h1: {
+      fontWeight: 700,
+    },
+    h2: {
+      fontWeight: 700,
+    },
+    h3: {
+      fontWeight: 700,
+    },
+    h4: {
+      fontWeight: 700,
+    },
+    h5: {
+      fontWeight: 700,
+    },
+    h6: {
+      fontWeight: 700,
+    },
   },
   palette: {
     primary: {
@@ -23,6 +41,7 @@ const theme = createTheme({
         root: {
           borderRadius: '8px',
           textTransform: 'none',
+          fontFamily: 'Vazir',
         },
       },
     },
@@ -31,6 +50,19 @@ const theme = createTheme({
         root: {
           borderRadius: '12px',
           boxShadow: '0px 4px 20px rgba(0, 0, 0, 0.05)',
+        },
+      },
+    },
+    MuiTextField: {
+      styleOverrides: {
+        root: {
+          fontFamily: 'Vazir',
+          '& .MuiInputLabel-root': {
+            fontFamily: 'Vazir',
+          },
+          '& .MuiOutlinedInput-root': {
+            fontFamily: 'Vazir',
+          },
         },
       },
     },
