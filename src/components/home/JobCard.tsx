@@ -65,21 +65,21 @@ const FA_ICON_STYLE: CSSProperties = {
   overflow: 'hidden'
 };
 
-// کامپوننت آیکون کنترل شده
+// کامپوننت آیکون کنترل شده - بدون استفاده از Box
 const IconWrapper = ({ children }: { children: React.ReactNode }) => (
-  <Box 
-    sx={{ 
-      display: 'inline-flex', 
-      alignItems: 'center', 
-      justifyContent: 'center', 
-      width: ICON_SIZE, 
-      height: ICON_SIZE, 
+  <span
+    style={{
+      display: 'inline-flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      width: ICON_SIZE,
+      height: ICON_SIZE,
       overflow: 'hidden',
-      mr: 0.5
+      marginRight: '4px'
     }}
   >
     {children}
-  </Box>
+  </span>
 );
 
 export default function JobCard({ job }: JobCardProps) {
@@ -92,7 +92,7 @@ export default function JobCard({ job }: JobCardProps) {
   return (
     <Card 
       sx={{ 
-        height: 'auto', 
+        height: '100%', // ارتفاع کامل برای یکسان بودن ارتفاع تمام کارت‌ها
         display: 'flex', 
         flexDirection: 'column',
         borderRadius: 2,
@@ -108,7 +108,7 @@ export default function JobCard({ job }: JobCardProps) {
         }
       }}
     >
-      {/* نمایش برچسب‌های ویژه و فوری به صورت جذاب‌تر */}
+      {/* نمایش برچسب‌های ویژه و فوری */}
       {job.isPromoted && (
         <Box
           sx={{
@@ -129,9 +129,16 @@ export default function JobCard({ job }: JobCardProps) {
             boxShadow: '0 2px 8px rgba(211, 47, 47, 0.3)'
           }}
         >
-          <Box sx={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: '0.75rem', height: '0.75rem', overflow: 'hidden' }}>
+          <span style={{ 
+            display: 'inline-flex', 
+            alignItems: 'center', 
+            justifyContent: 'center', 
+            width: '0.75rem', 
+            height: '0.75rem', 
+            overflow: 'hidden' 
+          }}>
             <StarIcon sx={{ fontSize: '0.75rem', width: '0.75rem', height: '0.75rem' }} />
-          </Box>
+          </span>
           ویژه
         </Box>
       )}
@@ -156,16 +163,26 @@ export default function JobCard({ job }: JobCardProps) {
             boxShadow: '0 3px 10px rgba(255, 145, 0, 0.4)'
           }}
         >
-          <Box sx={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: '0.85rem', height: '0.85rem', overflow: 'hidden' }}>
+          <span style={{ 
+            display: 'inline-flex', 
+            alignItems: 'center', 
+            justifyContent: 'center', 
+            width: '0.85rem', 
+            height: '0.85rem', 
+            overflow: 'hidden' 
+          }}>
             <LocalFireDepartmentIcon sx={{ fontSize: '0.85rem', width: '0.85rem', height: '0.85rem' }} />
-          </Box>
+          </span>
           فوری
         </Box>
       )}
       
       <CardContent sx={{ 
         flexGrow: 1, 
+        display: 'flex',
+        flexDirection: 'column',
         p: 2, 
+        pt: job.isPromoted || job.isUrgent ? 3 : 2, // فاصله بیشتر از بالا برای کارت‌های دارای برچسب
         pb: 2,
         '&:last-child': { pb: 2 }
       }}>
@@ -176,14 +193,14 @@ export default function JobCard({ job }: JobCardProps) {
             mb: 0.5, 
             fontWeight: 'bold', 
             fontSize: '1rem',
-            color: theme.palette.text.primary,
-            mt: (job.isPromoted || job.isUrgent) ? 1.5 : 0,
+            color: theme.palette.text.primary
           }}
         >
           {job.title}
         </Typography>
         <Typography 
           variant="body2"
+          component="div"
           sx={{ 
             mb: 1.5,
             color: theme.palette.text.secondary,
@@ -213,6 +230,7 @@ export default function JobCard({ job }: JobCardProps) {
         }}>
           <Stack direction="row" spacing={1.5} sx={{ mb: 1 }}>
             <Box 
+              component="div"
               sx={{ 
                 display: 'flex', 
                 alignItems: 'center', 
@@ -246,6 +264,7 @@ export default function JobCard({ job }: JobCardProps) {
             </Box>
             
             <Box 
+              component="div"
               sx={{ 
                 display: 'flex', 
                 alignItems: 'center', 
@@ -268,6 +287,7 @@ export default function JobCard({ job }: JobCardProps) {
           
           <Stack direction="row" spacing={1} sx={{ mb: 0 }}>
             <Box 
+              component="div"
               sx={{ 
                 display: 'flex', 
                 alignItems: 'center', 
@@ -288,6 +308,7 @@ export default function JobCard({ job }: JobCardProps) {
             </Box>
             
             <Box 
+              component="div"
               sx={{ 
                 display: 'flex', 
                 alignItems: 'center', 

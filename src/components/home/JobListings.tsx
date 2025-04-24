@@ -8,7 +8,8 @@ import {
   Button,
   useTheme,
   Skeleton,
-  Card
+  Card,
+  CardContent
 } from '@mui/material';
 import JobCard, { JobType } from './JobCard';
 import WorkOutlineIcon from '@mui/icons-material/WorkOutline';
@@ -123,34 +124,56 @@ export default function JobListings() {
   const JobCardSkeleton = () => (
     <Card
       sx={{ 
-        height: '340px', 
+        height: '100%', 
         display: 'flex', 
         flexDirection: 'column',
         borderRadius: 2,
         border: `1px solid ${employerColors.bgLight}`,
         boxShadow: '0 4px 12px rgba(0,0,0,0.05)',
         overflow: 'hidden',
-        position: 'relative',
-        p: 2
+        position: 'relative'
       }}
     >
-      <Skeleton variant="text" width="80%" height={32} sx={{ mb: 1 }} />
-      <Skeleton variant="text" width="50%" height={24} sx={{ mb: 2 }} />
+      {/* ناحیه برچسب - به صورت مطلق قرار گرفته تا در ارتفاع تاثیر نداشته باشد */}
+      <Box sx={{ 
+        position: 'absolute',
+        top: 8,
+        right: 8,
+        zIndex: 2,
+        borderRadius: '20px',
+        height: 24,
+        width: 60
+      }}>
+        {/* اینجا در زمان لودینگ چیزی نمایش داده نمی‌شود */}
+      </Box>
       
-      <Skeleton variant="rectangular" height={80} sx={{ borderRadius: 1.5, mb: 2 }} />
-      
-      <Box sx={{ mb: 2 }}>
-        <Skeleton variant="text" width="40%" height={24} sx={{ mb: 1 }} />
-        <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
-          <Skeleton variant="rectangular" width={60} height={22} sx={{ borderRadius: 0.8 }} />
-          <Skeleton variant="rectangular" width={80} height={22} sx={{ borderRadius: 0.8 }} />
-          <Skeleton variant="rectangular" width={70} height={22} sx={{ borderRadius: 0.8 }} />
+      <CardContent sx={{ 
+        flexGrow: 1, 
+        display: 'flex',
+        flexDirection: 'column',
+        p: 2, 
+        pt: 2,
+        pb: 2,
+        '&:last-child': { pb: 2 }
+      }}>
+        <Skeleton variant="text" width="80%" height={32} sx={{ mb: 1 }} />
+        <Skeleton variant="text" width="50%" height={24} sx={{ mb: 2 }} />
+        
+        <Skeleton variant="rectangular" height={80} sx={{ borderRadius: 1.5, mb: 2 }} />
+        
+        <Box sx={{ mb: 2 }}>
+          <Skeleton variant="text" width="40%" height={24} sx={{ mb: 1 }} />
+          <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
+            <Skeleton variant="rectangular" width={60} height={22} sx={{ borderRadius: 0.8 }} />
+            <Skeleton variant="rectangular" width={80} height={22} sx={{ borderRadius: 0.8 }} />
+            <Skeleton variant="rectangular" width={70} height={22} sx={{ borderRadius: 0.8 }} />
+          </Box>
         </Box>
-      </Box>
-      
-      <Box sx={{ mt: 'auto' }}>
-        <Skeleton variant="rectangular" height={48} width="100%" sx={{ borderRadius: 1.5 }} />
-      </Box>
+        
+        <Box sx={{ mt: 'auto' }}>
+          <Skeleton variant="rectangular" height={48} width="100%" sx={{ borderRadius: 1.5 }} />
+        </Box>
+      </CardContent>
     </Card>
   );
 
@@ -202,18 +225,27 @@ export default function JobListings() {
         </Box>
 
         <Box sx={{ maxWidth: 1200, mx: 'auto' }}>
-          <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr', md: '1fr 1fr 1fr' }, gap: 3 }}>
+          <Box 
+            sx={{ 
+              display: 'grid', 
+              gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr', md: '1fr 1fr 1fr' }, 
+              gap: 3,
+              '& > div': {
+                height: '100%' // همه کارت‌ها ارتفاع یکسان داشته باشند
+              }
+            }}
+          >
             {loading ? (
               // نمایش Skeleton در حالت بارگذاری
               Array.from(new Array(6)).map((_, index) => (
-                <Box key={index}>
+                <Box key={index} sx={{ height: '100%' }}>
                   <JobCardSkeleton />
                 </Box>
               ))
             ) : (
               // نمایش کارت‌های واقعی بعد از بارگذاری
               sortedJobs.map((job) => (
-                <Box key={job.id}>
+                <Box key={job.id} sx={{ height: '100%' }}>
                   <JobCard job={job} />
                 </Box>
               ))
