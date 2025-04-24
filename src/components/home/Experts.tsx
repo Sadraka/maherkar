@@ -4,34 +4,17 @@ import {
   Box, 
   Typography, 
   Container, 
-  Grid, 
-  Card, 
-  CardContent, 
-  Avatar, 
-  Rating,
-  Chip,
-  Stack,
   Button,
-  Divider
+  useTheme,
+  Grid
 } from '@mui/material';
-import LocationOnOutlinedIcon from '@mui/icons-material/LocationOnOutlined';
-import WorkOutlineIcon from '@mui/icons-material/WorkOutline';
-import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
-
-type ExpertType = {
-  id: number;
-  name: string;
-  jobTitle: string;
-  avatar: string;
-  location: string;
-  rating: number;
-  completedProjects: number;
-  skills: string[];
-  isVerified: boolean;
-  hourlyRate: string;
-};
+import { useJobSeekerTheme } from '@/contexts/JobSeekerThemeContext';
+import ExpertCard, { ExpertType } from './ExpertCard';
 
 export default function Experts() {
+  const theme = useTheme();
+  const jobSeekerColors = useJobSeekerTheme();
+  
   const experts: ExpertType[] = [
     {
       id: 1,
@@ -110,18 +93,40 @@ export default function Experts() {
   return (
     <Box sx={{ py: 6, backgroundColor: '#f5f7fa' }}>
       <Container maxWidth="lg">
-        <Box sx={{ textAlign: 'center', mb: 5 }}>
+        <Box sx={{ textAlign: 'center', mb: 6 }}>
           <Typography 
-            variant="h4" 
+            variant="h3" 
             component="h2" 
-            sx={{ fontWeight: 'bold', mb: 1.5 }}
+            sx={{ 
+              fontWeight: 800, 
+              fontSize: { xs: '1.8rem', md: '2.2rem' },
+              color: theme.palette.text.primary,
+              position: 'relative',
+              display: 'inline-block',
+              pb: 2,
+              '&::after': {
+                content: '""',
+                position: 'absolute',
+                width: '80px',
+                height: '4px',
+                backgroundColor: jobSeekerColors.primary,
+                bottom: 0,
+                left: 'calc(50% - 40px)',
+                borderRadius: '2px'
+              }
+            }}
           >
             متخصصان برتر و زبده ماهرکار
           </Typography>
           <Typography 
             variant="body1" 
             color="text.secondary"
-            sx={{ maxWidth: 650, mx: 'auto' }}
+            sx={{ 
+              mt: 2,
+              fontSize: '1rem',
+              maxWidth: '600px',
+              mx: 'auto'
+            }}
           >
             با بهترین متخصصان در حوزه‌های مختلف آشنا شوید و به راحتی پروژه‌های خود را با اطمینان به آنها بسپارید
           </Typography>
@@ -129,141 +134,29 @@ export default function Experts() {
         
         <Grid container spacing={3}>
           {experts.map((expert) => (
-            <Grid size={{ xs: 12, sm: 6, lg: 4 }} key={expert.id}>
-              <Card 
-                sx={{ 
-                  height: '100%', 
-                  display: 'flex', 
-                  flexDirection: 'column',
-                  borderRadius: 2,
-                  overflow: 'visible',
-                  boxShadow: '0 2px 10px rgba(0,0,0,0.05)',
-                  transition: 'transform 0.2s, box-shadow 0.2s',
-                  '&:hover': {
-                    transform: 'translateY(-5px)',
-                    boxShadow: '0 5px 15px rgba(0,0,0,0.1)',
-                  }
-                }}
-              >
-                <CardContent sx={{ p: 3, position: 'relative' }}>
-                  <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', mb: 2 }}>
-                    <Avatar 
-                      src={expert.avatar} 
-                      alt={expert.name}
-                      sx={{ 
-                        width: 90, 
-                        height: 90, 
-                        mb: 1.5,
-                        border: '3px solid white',
-                        boxShadow: '0 2px 10px rgba(0,0,0,0.1)'
-                      }} 
-                    />
-                    
-                    <Box sx={{ textAlign: 'center' }}>
-                      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                        <Typography variant="h6" sx={{ fontWeight: 'bold', fontSize: '1.05rem' }}>
-                          {expert.name}
-                        </Typography>
-                        {expert.isVerified && (
-                          <CheckCircleOutlineIcon 
-                            sx={{ ml: 0.5, color: 'var(--primary-color)', fontSize: '1rem' }} 
-                          />
-                        )}
-                      </Box>
-                      
-                      <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
-                        {expert.jobTitle}
-                      </Typography>
-                      
-                      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', mb: 0.5 }}>
-                        <Rating 
-                          value={expert.rating} 
-                          precision={0.1} 
-                          readOnly 
-                          size="small" 
-                          sx={{ mr: 0.5 }} 
-                        />
-                        <Typography variant="body2" sx={{ fontWeight: 'medium' }}>
-                          {expert.rating}
-                        </Typography>
-                      </Box>
-                    </Box>
-                  </Box>
-                  
-                  <Divider sx={{ my: 1.5 }} />
-                  
-                  <Box sx={{ mb: 2 }}>
-                    <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
-                      <LocationOnOutlinedIcon fontSize="small" sx={{ color: 'text.secondary', fontSize: '1rem', ml: 0.5 }} />
-                      <Typography variant="body2" color="text.secondary">
-                        {expert.location}
-                      </Typography>
-                    </Box>
-                    
-                    <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                      <WorkOutlineIcon fontSize="small" sx={{ color: 'text.secondary', fontSize: '1rem', ml: 0.5 }} />
-                      <Typography variant="body2" color="text.secondary">
-                        {expert.completedProjects} پروژه موفق
-                      </Typography>
-                    </Box>
-                  </Box>
-                  
-                  <Stack direction="row" spacing={0.5} flexWrap="wrap" sx={{ mb: 2 }}>
-                    {expert.skills.map((skill, index) => (
-                      <Chip 
-                        key={index} 
-                        label={skill} 
-                        size="small" 
-                        sx={{ 
-                          fontSize: '0.7rem', 
-                          height: 24, 
-                          backgroundColor: 'rgba(25, 118, 210, 0.08)',
-                          color: 'primary.main',
-                          my: 0.5
-                        }} 
-                      />
-                    ))}
-                  </Stack>
-                  
-                  <Divider sx={{ my: 1.5 }} />
-                  
-                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mt: 1 }}>
-                    <Button 
-                      variant="contained" 
-                      color="primary"
-                      sx={{ 
-                        backgroundColor: 'var(--primary-color)',
-                        '&:hover': { backgroundColor: '#1565c0' },
-                        fontSize: '0.8rem',
-                        borderRadius: 2,
-                        px: 2
-                      }}
-                    >
-                      استخدام متخصص
-                    </Button>
-                    <Typography variant="body2" sx={{ fontWeight: 'bold', color: 'var(--secondary-color)' }}>
-                      ساعتی {expert.hourlyRate}
-                    </Typography>
-                  </Box>
-                </CardContent>
-              </Card>
+            <Grid key={expert.id} size={{ xs: 12, sm: 6, md: 4 }}>
+              <ExpertCard expert={expert} />
             </Grid>
           ))}
         </Grid>
         
-        <Box sx={{ textAlign: 'center', mt: 5 }}>
+        <Box sx={{ mt: 6, textAlign: 'center' }}>
           <Button 
-            variant="outlined" 
+            variant="contained" 
+            disableElevation
+            color="success"
             sx={{ 
-              color: 'var(--primary-color)', 
-              borderColor: 'rgba(25, 118, 210, 0.5)',
-              '&:hover': {
-                borderColor: 'var(--primary-color)',
-                backgroundColor: 'rgba(25, 118, 210, 0.04)'
-              },
               px: 4,
-              py: 1,
-              borderRadius: 2
+              py: 1.2,
+              fontWeight: 700,
+              borderRadius: 2,
+              fontSize: '1rem',
+              background: `linear-gradient(135deg, ${jobSeekerColors.light} 0%, ${jobSeekerColors.primary} 100%)`,
+              boxShadow: `0 4px 8px rgba(0, 112, 60, 0.2)`,
+              '&:hover': {
+                background: `linear-gradient(135deg, ${jobSeekerColors.primary} 0%, ${jobSeekerColors.dark} 100%)`,
+                boxShadow: `0 6px 10px rgba(0, 112, 60, 0.3)`,
+              }
             }}
           >
             مشاهده همه متخصصان
