@@ -22,6 +22,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faBuilding } from '@fortawesome/free-solid-svg-icons';
 import { useJobSeekerTheme } from '@/contexts/JobSeekerThemeContext';
 import { EMPLOYER_THEME } from '@/constants/colors';
+import { CSSProperties } from 'react';
 
 // تعریف تایپ جاب
 export type JobType = {
@@ -41,6 +42,45 @@ export type JobType = {
 interface JobCardProps {
   job: JobType;
 }
+
+// تعریف ثابت‌ها برای حل مشکل نمایش آیکون‌های SVG
+const ICON_SIZE = '0.9rem';
+const SVG_ICON_STYLE = {
+  width: ICON_SIZE,
+  height: ICON_SIZE,
+  fontSize: ICON_SIZE,
+  display: 'inline-flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  overflow: 'hidden' // جلوگیری از نمایش بیرون زدگی آیکون
+};
+
+// استایل ثابت برای آیکون‌های Font Awesome
+const FA_ICON_STYLE: CSSProperties = {
+  width: '0.85rem',
+  height: '0.85rem',
+  fontSize: '0.85rem',
+  display: 'inline-block',
+  verticalAlign: 'middle',
+  overflow: 'hidden'
+};
+
+// کامپوننت آیکون کنترل شده
+const IconWrapper = ({ children }: { children: React.ReactNode }) => (
+  <Box 
+    sx={{ 
+      display: 'inline-flex', 
+      alignItems: 'center', 
+      justifyContent: 'center', 
+      width: ICON_SIZE, 
+      height: ICON_SIZE, 
+      overflow: 'hidden',
+      mr: 0.5
+    }}
+  >
+    {children}
+  </Box>
+);
 
 export default function JobCard({ job }: JobCardProps) {
   const theme = useTheme();
@@ -89,7 +129,9 @@ export default function JobCard({ job }: JobCardProps) {
             boxShadow: '0 2px 8px rgba(211, 47, 47, 0.3)'
           }}
         >
-          <StarIcon sx={{ fontSize: '0.75rem' }} />
+          <Box sx={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: '0.75rem', height: '0.75rem', overflow: 'hidden' }}>
+            <StarIcon sx={{ fontSize: '0.75rem', width: '0.75rem', height: '0.75rem' }} />
+          </Box>
           ویژه
         </Box>
       )}
@@ -114,7 +156,9 @@ export default function JobCard({ job }: JobCardProps) {
             boxShadow: '0 3px 10px rgba(255, 145, 0, 0.4)'
           }}
         >
-          <LocalFireDepartmentIcon sx={{ fontSize: '0.85rem' }} />
+          <Box sx={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: '0.85rem', height: '0.85rem', overflow: 'hidden' }}>
+            <LocalFireDepartmentIcon sx={{ fontSize: '0.85rem', width: '0.85rem', height: '0.85rem' }} />
+          </Box>
           فوری
         </Box>
       )}
@@ -149,14 +193,15 @@ export default function JobCard({ job }: JobCardProps) {
             fontSize: '0.85rem'
           }}
         >
-          <FontAwesomeIcon 
-            icon={faBuilding} 
-            style={{ 
-              color: employerColors.primary,
-              marginLeft: '4px',
-              fontSize: '0.85rem'
-            }} 
-          />
+          <IconWrapper>
+            <FontAwesomeIcon 
+              icon={faBuilding} 
+              style={{ 
+                color: employerColors.primary,
+                ...FA_ICON_STYLE
+              }} 
+            />
+          </IconWrapper>
           {job.company}
         </Typography>
         
@@ -175,10 +220,15 @@ export default function JobCard({ job }: JobCardProps) {
                 fontSize: '0.8rem'
               }}
             >
-              <LocationOnOutlinedIcon 
-                fontSize="small" 
-                sx={{ mr: 0.3, fontSize: '0.9rem', color: employerColors.primary }} 
-              />
+              <IconWrapper>
+                <LocationOnOutlinedIcon 
+                  fontSize="small" 
+                  sx={{ 
+                    ...SVG_ICON_STYLE,
+                    color: employerColors.primary 
+                  }} 
+                />
+              </IconWrapper>
               {job.location}
               {job.isRemote && <Chip 
                 label="دورکاری" 
@@ -203,10 +253,15 @@ export default function JobCard({ job }: JobCardProps) {
                 fontSize: '0.8rem'
               }}
             >
-              <AccessTimeOutlinedIcon 
-                fontSize="small" 
-                sx={{ mr: 0.3, fontSize: '0.9rem', color: employerColors.primary }} 
-              />
+              <IconWrapper>
+                <AccessTimeOutlinedIcon 
+                  fontSize="small" 
+                  sx={{ 
+                    ...SVG_ICON_STYLE,
+                    color: employerColors.primary 
+                  }} 
+                />
+              </IconWrapper>
               {job.timePosted}
             </Box>
           </Stack>
@@ -220,10 +275,15 @@ export default function JobCard({ job }: JobCardProps) {
                 fontSize: '0.8rem'
               }}
             >
-              <WorkOutlineIcon 
-                fontSize="small" 
-                sx={{ mr: 0.3, fontSize: '0.9rem', color: employerColors.primary }} 
-              />
+              <IconWrapper>
+                <WorkOutlineIcon 
+                  fontSize="small" 
+                  sx={{ 
+                    ...SVG_ICON_STYLE,
+                    color: employerColors.primary 
+                  }} 
+                />
+              </IconWrapper>
               {job.jobType}
             </Box>
             
@@ -235,10 +295,15 @@ export default function JobCard({ job }: JobCardProps) {
                 fontSize: '0.8rem'
               }}
             >
-              <MonetizationOnOutlinedIcon 
-                fontSize="small" 
-                sx={{ mr: 0.3, fontSize: '0.9rem', color: employerColors.primary }} 
-              />
+              <IconWrapper>
+                <MonetizationOnOutlinedIcon 
+                  fontSize="small" 
+                  sx={{ 
+                    ...SVG_ICON_STYLE,
+                    color: employerColors.primary 
+                  }} 
+                />
+              </IconWrapper>
               {job.salary}
             </Box>
           </Stack>
