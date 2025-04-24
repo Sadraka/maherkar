@@ -460,6 +460,9 @@ export default function MobileMenu() {
     return null;
   };
 
+  
+  const navValue = mobileOpen ? mobileView : '';
+
   if (!isMobile) return null;
 
   return (
@@ -472,6 +475,7 @@ export default function MobileMenu() {
         onClose={() => {
           setMobileOpen(false);
           setActiveIndex(-1);
+          setMobileView('');
         }}
         ModalProps={{
           keepMounted: true,
@@ -523,7 +527,7 @@ export default function MobileMenu() {
       >
         <BottomNavigation
           showLabels
-          value={mobileView}
+          value={navValue}
           onChange={(event, newValue) => {
             handleMobileNavigation(newValue);
           }}
@@ -545,7 +549,7 @@ export default function MobileMenu() {
             icon={
               <Badge
                 variant="dot"
-                invisible={mobileView !== 'employer'}
+                invisible={navValue !== 'employer'}
                 color="primary"
                 sx={{
                   '& .MuiBadge-badge': {
@@ -557,10 +561,10 @@ export default function MobileMenu() {
                   sx={{ 
                     width: 32, 
                     height: 32,
-                    bgcolor: mobileView === 'employer' 
+                    bgcolor: navValue === 'employer' 
                       ? alpha(theme.palette.employer.main, 0.15) 
                       : alpha(theme.palette.text.secondary, 0.05),
-                    color: mobileView === 'employer' 
+                    color: navValue === 'employer' 
                       ? theme.palette.employer.main 
                       : theme.palette.text.secondary,
                     transition: 'all 0.3s ease'
@@ -571,15 +575,15 @@ export default function MobileMenu() {
               </Badge>
             }
             sx={{
-              color: mobileView === 'employer' ? theme.palette.employer.main : theme.palette.text.secondary,
+              color: navValue === 'employer' ? theme.palette.employer.main : theme.palette.text.secondary,
               fontWeight: 800,
               fontSize: '0.75rem',
               '& .MuiBottomNavigationAction-label': {
                 fontSize: '0.75rem',
                 fontWeight: 800,
                 transition: 'transform 0.3s ease, opacity 0.3s ease',
-                transform: mobileView === 'employer' ? 'translateY(1px) scale(1.05)' : 'translateY(0) scale(1)',
-                opacity: mobileView === 'employer' ? 1 : 0.7,
+                transform: navValue === 'employer' ? 'translateY(1px) scale(1.05)' : 'translateY(0) scale(1)',
+                opacity: navValue === 'employer' ? 1 : 0.7,
               }
             }}
           />
@@ -589,7 +593,7 @@ export default function MobileMenu() {
             icon={
               <Badge
                 variant="dot"
-                invisible={mobileView !== 'candidate'}
+                invisible={navValue !== 'candidate'}
                 color="primary"
                 sx={{
                   '& .MuiBadge-badge': {
@@ -601,10 +605,10 @@ export default function MobileMenu() {
                   sx={{ 
                     width: 32, 
                     height: 32,
-                    bgcolor: mobileView === 'candidate' 
+                    bgcolor: navValue === 'candidate' 
                       ? alpha(theme.palette.candidate.main, 0.15) 
                       : alpha(theme.palette.text.secondary, 0.05),
-                    color: mobileView === 'candidate' 
+                    color: navValue === 'candidate' 
                       ? theme.palette.candidate.main 
                       : theme.palette.text.secondary,
                     transition: 'all 0.3s ease'
@@ -615,15 +619,15 @@ export default function MobileMenu() {
               </Badge>
             }
             sx={{
-              color: mobileView === 'candidate' ? '#43A047' : theme.palette.text.secondary,
+              color: navValue === 'candidate' ? '#43A047' : theme.palette.text.secondary,
               fontWeight: 800,
               fontSize: '0.75rem',
               '& .MuiBottomNavigationAction-label': {
                 fontSize: '0.75rem',
                 fontWeight: 800,
                 transition: 'transform 0.3s ease, opacity 0.3s ease',
-                transform: mobileView === 'candidate' ? 'translateY(1px) scale(1.05)' : 'translateY(0) scale(1)',
-                opacity: mobileView === 'candidate' ? 1 : 0.7,
+                transform: navValue === 'candidate' ? 'translateY(1px) scale(1.05)' : 'translateY(0) scale(1)',
+                opacity: navValue === 'candidate' ? 1 : 0.7,
               }
             }}
           />
@@ -633,17 +637,17 @@ export default function MobileMenu() {
             icon={
               <Badge
                 variant="dot"
-                invisible={mobileView !== 'help'}
+                invisible={navValue !== 'help'}
                 color="primary"
               >
                 <Avatar 
                   sx={{ 
                     width: 32, 
                     height: 32,
-                    bgcolor: mobileView === 'help' 
+                    bgcolor: navValue === 'help' 
                       ? alpha(theme.palette.primary.main, 0.15) 
                       : alpha(theme.palette.text.secondary, 0.05),
-                    color: mobileView === 'help' 
+                    color: navValue === 'help' 
                       ? theme.palette.primary.main 
                       : theme.palette.text.secondary,
                     transition: 'all 0.3s ease'
@@ -654,15 +658,15 @@ export default function MobileMenu() {
               </Badge>
             }
             sx={{
-              color: mobileView === 'help' ? theme.palette.primary.main : theme.palette.text.secondary,
+              color: navValue === 'help' ? theme.palette.primary.main : theme.palette.text.secondary,
               fontWeight: 800,
               fontSize: '0.75rem',
               '& .MuiBottomNavigationAction-label': {
                 fontSize: '0.75rem',
                 fontWeight: 800,
                 transition: 'transform 0.3s ease, opacity 0.3s ease',
-                transform: mobileView === 'help' ? 'translateY(1px) scale(1.05)' : 'translateY(0) scale(1)',
-                opacity: mobileView === 'help' ? 1 : 0.7,
+                transform: navValue === 'help' ? 'translateY(1px) scale(1.05)' : 'translateY(0) scale(1)',
+                opacity: navValue === 'help' ? 1 : 0.7,
               }
             }}
           />
