@@ -118,13 +118,16 @@ export default function DailyHiring() {
             size="large"
             startIcon={<WorkOutlineIcon />}
             sx={{ 
-              backgroundColor: 'primary.main',
-              '&:hover': { backgroundColor: 'primary.dark' },
+              backgroundColor: employerColors.primary,
+              background: `linear-gradient(135deg, ${employerColors.light} 0%, ${employerColors.primary} 100%)`,
+              '&:hover': { 
+                background: `linear-gradient(135deg, ${employerColors.primary} 0%, ${employerColors.dark} 100%)` 
+              },
               py: 1.2,
               px: 4,
               borderRadius: 2,
               fontWeight: 600,
-              boxShadow: '0 4px 14px rgba(0, 118, 255, 0.25)',
+              boxShadow: `0 4px 14px ${employerColors.bgLight}`,
               transition: 'all 0.3s ease',
               '&:active': { transform: 'translateY(1px)' }
             }}

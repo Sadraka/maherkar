@@ -13,6 +13,7 @@ import {
   Button
 } from '@mui/material';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import { EMPLOYER_THEME } from '@/constants/colors';
 
 type FAQItemType = {
   id: number;
@@ -22,6 +23,7 @@ type FAQItemType = {
 
 export default function FAQ() {
   const [expanded, setExpanded] = useState<number | false>(0);
+  const employerColors = EMPLOYER_THEME;
 
   const handleChange = (panel: number) => (event: React.SyntheticEvent, isExpanded: boolean) => {
     setExpanded(isExpanded ? panel : false);
@@ -153,14 +155,17 @@ export default function FAQ() {
           <Button 
             variant="contained"
             sx={{ 
-              backgroundColor: 'primary.main',
-              '&:hover': { backgroundColor: 'primary.dark' },
+              backgroundColor: employerColors.primary,
+              background: `linear-gradient(135deg, ${employerColors.light} 0%, ${employerColors.primary} 100%)`,
+              '&:hover': { 
+                background: `linear-gradient(135deg, ${employerColors.primary} 0%, ${employerColors.dark} 100%)` 
+              },
               borderRadius: 2,
               px: 4,
               py: 1,
               fontSize: '0.9rem',
               fontWeight: 600,
-              boxShadow: '0 4px 14px rgba(0, 118, 255, 0.25)',
+              boxShadow: `0 4px 14px ${employerColors.bgLight}`,
               transition: 'all 0.3s ease',
               '&:active': { transform: 'translateY(1px)' }
             }}
