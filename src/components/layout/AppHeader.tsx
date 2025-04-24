@@ -16,8 +16,6 @@ import Link from 'next/link';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { 
   faSignInAlt, 
-  faChevronUp, 
-  faChevronDown,
   faQuestion,
   faBuilding,
   faUserTie,
@@ -221,13 +219,6 @@ export default function AppHeader() {
                         }}>
                           <FontAwesomeIcon icon={item.icon} size="sm" />
                         </Avatar>}
-                        endIcon={
-                          (item.menuId === 'employer-menu' && isEmployerHovered) || 
-                          (item.menuId === 'candidate-menu' && isCandidateHovered) ||
-                          (item.menuId === 'help-menu' && isHelpHovered) ? 
-                            <FontAwesomeIcon icon={faChevronUp} /> : 
-                            <FontAwesomeIcon icon={faChevronDown} />
-                        }
                         sx={{ 
                           borderRadius: '0px',
                           fontWeight: 800,

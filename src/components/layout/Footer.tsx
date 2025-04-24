@@ -130,7 +130,7 @@ export default function Footer() {
           }}
         >
           <Typography variant="body2" color="text.secondary">
-            © {new Date().getFullYear()} ماهرکار - تمامی حقوق محفوظ است
+            ماهرکار - تمامی حقوق محفوظ است
           </Typography>
         </Box>
       </Container>
