@@ -4,6 +4,7 @@ import Header from '@/components/layout/Header'
 import PromoBar from '@/components/layout/PromoBar'
 import "./globals.css"
 import { vazirFont } from '@/lib/fonts'
+import { JobSeekerThemeProvider } from '@/contexts/JobSeekerThemeContext'
 
 export const metadata: Metadata = {
   title: "ماهرکار - سامانه کاریابی",
@@ -19,9 +20,11 @@ export default function RootLayout({
     <html lang="fa" dir="rtl">
       <body className={vazirFont.className}>
         <ThemeRegistry>
-          <PromoBar />
-          <Header />
-        {children}
+          <JobSeekerThemeProvider>
+            <PromoBar />
+            <Header />
+            {children}
+          </JobSeekerThemeProvider>
         </ThemeRegistry>
       </body>
     </html>

@@ -1,4 +1,12 @@
 import { createTheme } from '@mui/material/styles';
+import {
+  EMPLOYER_BLUE,
+  EMPLOYER_LIGHT_BLUE,
+  EMPLOYER_DARK_BLUE,
+  JOB_SEEKER_GREEN,
+  JOB_SEEKER_LIGHT_GREEN,
+  JOB_SEEKER_DARK_GREEN
+} from '../constants/colors';
 
 declare module '@mui/material/styles' {
   interface Palette {
@@ -12,12 +20,17 @@ declare module '@mui/material/styles' {
 }
 
 // رنگ‌های اصلی برای استفاده در سایت
-const NAVY_BLUE = '#0a3b79'; // سرمه‌ای برای کارفرما
-const LIGHT_NAVY = '#2957a4'; // سرمه‌ای روشن‌تر
-const DARK_NAVY = '#062758'; // سرمه‌ای تیره‌تر
-const GREEN = '#0a7940'; // سبز برای کارجو
-const LIGHT_GREEN = '#34b96b'; // سبز روشن‌تر
-const DARK_GREEN = '#075e31'; // سبز تیره‌تر
+// const NAVY_BLUE = '#0a3b79'; // سرمه‌ای برای کارفرما
+// const LIGHT_NAVY = '#2957a4'; // سرمه‌ای روشن‌تر
+// const DARK_NAVY = '#062758'; // سرمه‌ای تیره‌تر
+// const GREEN = '#0a7940'; // سبز برای کارجو
+// const LIGHT_GREEN = '#34b96b'; // سبز روشن‌تر
+// const DARK_GREEN = '#075e31'; // سبز تیره‌تر
+
+// رنگ‌های اختصاصی کارجو طبق JobSeekerThemeContext
+// const JOB_SEEKER_GREEN = '#1e8e3e'; // سبز پررنگ
+// const JOB_SEEKER_LIGHT_GREEN = '#34a853'; // سبز روشن‌تر
+// const JOB_SEEKER_DARK_GREEN = '#137333'; // سبز خیلی تیره
 
 const theme = createTheme({
   direction: 'rtl',
@@ -52,28 +65,34 @@ const theme = createTheme({
   },
   palette: {
     primary: {
-      main: NAVY_BLUE,
-      light: LIGHT_NAVY,
-      dark: DARK_NAVY,
+      main: EMPLOYER_BLUE,
+      light: EMPLOYER_LIGHT_BLUE,
+      dark: EMPLOYER_DARK_BLUE,
       contrastText: '#fff',
     },
     secondary: {
-      main: GREEN,
-      light: LIGHT_GREEN,
-      dark: DARK_GREEN,
+      main: JOB_SEEKER_GREEN,
+      light: JOB_SEEKER_LIGHT_GREEN,
+      dark: JOB_SEEKER_DARK_GREEN,
+      contrastText: '#fff',
+    },
+    success: {
+      main: JOB_SEEKER_GREEN,
+      light: JOB_SEEKER_LIGHT_GREEN,
+      dark: JOB_SEEKER_DARK_GREEN,
       contrastText: '#fff',
     },
     // رنگ‌های اختصاصی برای کارفرما و کارجو
     employer: {
-      main: NAVY_BLUE,
-      light: LIGHT_NAVY,
-      dark: DARK_NAVY,
+      main: EMPLOYER_BLUE,
+      light: EMPLOYER_LIGHT_BLUE,
+      dark: EMPLOYER_DARK_BLUE,
       contrastText: '#fff',
     },
     candidate: {
-      main: GREEN,
-      light: LIGHT_GREEN,
-      dark: DARK_GREEN,
+      main: JOB_SEEKER_GREEN,
+      light: JOB_SEEKER_LIGHT_GREEN,
+      dark: JOB_SEEKER_DARK_GREEN,
       contrastText: '#fff',
     },
     background: {
@@ -101,10 +120,16 @@ const theme = createTheme({
           },
         },
         containedPrimary: {
-          background: `linear-gradient(135deg, ${LIGHT_NAVY} 0%, ${NAVY_BLUE} 100%)`,
+          background: `linear-gradient(135deg, ${EMPLOYER_LIGHT_BLUE} 0%, ${EMPLOYER_BLUE} 100%)`,
         },
         containedSecondary: {
-          background: `linear-gradient(135deg, ${LIGHT_GREEN} 0%, ${GREEN} 100%)`,
+          background: `linear-gradient(135deg, ${JOB_SEEKER_LIGHT_GREEN} 0%, ${JOB_SEEKER_GREEN} 100%)`,
+        },
+        containedSuccess: {
+          background: JOB_SEEKER_GREEN,
+          '&:hover': {
+            background: JOB_SEEKER_GREEN,
+          }
         },
       },
     },
@@ -132,7 +157,7 @@ const theme = createTheme({
             fontFamily: 'Vazirmatn',
             borderRadius: '8px',
             '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-              borderColor: NAVY_BLUE,
+              borderColor: EMPLOYER_BLUE,
               borderWidth: '2px',
             },
           },
