@@ -24,7 +24,8 @@ import {
   faUserPlus,
   faRightToBracket,
   faUserCircle,
-  faBell
+  faBell,
+  faHeadset
 } from '@fortawesome/free-solid-svg-icons';
 import { useHeaderContext } from '@/contexts/HeaderContext';
 import { styled } from '@mui/material/styles';
@@ -275,6 +276,72 @@ export default function AppHeader() {
                     ) : null}
                   </Box>
                 ))}
+                
+                {/* ارتباط با پشتیبانی */}
+                <Box>
+                  <Button 
+                    variant="text"
+                    color="primary"
+                    href="/support"
+                    sx={{ 
+                      borderRadius: '0px',
+                      fontWeight: 400,
+                      fontSize: '0.9rem',
+                      px: 1,
+                      py: 0,
+                      height: '100%',
+                      minHeight: '60px',
+                      minWidth: 'auto',
+                      border: 'none',
+                      position: 'relative',
+                      transition: 'all 0.2s ease',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: 1.5,
+                      color: theme.palette.primary.main,
+                      '&::after': {
+                        content: '""',
+                        position: 'absolute',
+                        bottom: 0,
+                        right: 0,
+                        width: '0%',
+                        height: '2px',
+                        zIndex: 1200,
+                        backgroundColor: theme.palette.primary.main,
+                        transition: 'width 0.3s ease',
+                      },
+                      '&:hover': {
+                        backgroundColor: 'transparent',
+                        '&::after': {
+                          width: '100%',
+                        }
+                      }
+                    }}
+                  >
+                    <Box
+                      sx={{
+                        width: '32px',
+                        height: '32px',
+                        borderRadius: '10px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        transition: 'all 0.25s ease',
+                        backgroundColor: alpha(theme.palette.primary.main, 0.1),
+                        boxShadow: `0 2px 6px ${alpha(theme.palette.primary.main, 0.08)}`
+                      }}
+                    >
+                      <FontAwesomeIcon 
+                        icon={faHeadset} 
+                        style={{ 
+                          fontSize: '0.9rem', 
+                          color: theme.palette.primary.main
+                        }} 
+                      />
+                    </Box>
+                    ارتباط با پشتیبانی
+                  </Button>
+                </Box>
               </Box>
             </Box>
 
