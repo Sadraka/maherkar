@@ -12,16 +12,9 @@ import {
   Divider,
   Button,
   Collapse,
-  BottomNavigation,
-  BottomNavigationAction,
   useTheme,
-  Paper,
-  Avatar,
-  Badge,
-  Tooltip,
   alpha
 } from '@mui/material';
-import CloseIcon from '@mui/icons-material/Close';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import ExpandLessIcon from '@mui/icons-material/ExpandLess';
 import { useHeaderContext } from '@/contexts/HeaderContext';
@@ -35,15 +28,9 @@ import {
   faUserPlus,
   faBuilding,
   faUserTie,
-  faLightbulb,
-  faHeadset,
-  faQuestionCircle
+  faHeadset
 } from '@fortawesome/free-solid-svg-icons';
 import { useState, useEffect } from 'react';
-import {
-  EMPLOYER_BLUE,
-  JOB_SEEKER_GREEN
-} from '@/constants/colors';
 
 export default function MobileMenu() {
   const theme = useTheme();
@@ -120,40 +107,6 @@ export default function MobileMenu() {
   const accordionMenu = () => {
     return (
       <Box sx={{ p: 2, pb: 10 }}>
-        <Box sx={{ 
-          display: 'flex', 
-          justifyContent: 'space-between', 
-          alignItems: 'center', 
-          mb: 2,
-          pb: 1,
-          borderBottom: '1px solid',
-          borderColor: 'divider'
-        }}>
-          <Typography 
-            variant="h6" 
-            fontWeight={800}
-            sx={{
-              backgroundImage: `linear-gradient(45deg, ${theme.palette.primary.main}, ${theme.palette.primary.dark})`,
-              backgroundClip: 'text',
-              textFillColor: 'transparent',
-              letterSpacing: '-0.5px',
-            }}
-          >
-            ماهرکار
-          </Typography>
-          <IconButton 
-            onClick={() => setMobileOpen(false)}
-            sx={{
-              backgroundColor: alpha(theme.palette.primary.main, 0.08),
-              '&:hover': {
-                backgroundColor: alpha(theme.palette.primary.main, 0.15),
-              }
-            }}
-          >
-            <CloseIcon />
-          </IconButton>
-        </Box>
-
         {/* کارفرما هستم */}
         <Box sx={{ mb: 1 }}>
           <ListItemButton
@@ -322,7 +275,7 @@ export default function MobileMenu() {
           </Collapse>
         </Box>
 
-        {/* درخواست مشاوره */}
+        {/* ارتباط با پشتیبانی */}
         <Box sx={{ mb: 1 }}>
           <ListItemButton
             component="a"
@@ -356,7 +309,7 @@ export default function MobileMenu() {
                   }} 
                 />
               </Box>
-              <Typography sx={{ flexGrow: 1, fontWeight: 500 }}>درخواست مشاوره</Typography>
+              <Typography sx={{ flexGrow: 1, fontWeight: 500 }}>ارتباط با پشتیبانی</Typography>
             </Box>
           </ListItemButton>
         </Box>
@@ -365,6 +318,9 @@ export default function MobileMenu() {
   };
 
   if (!isMobile) return null;
+
+  // محاسبه ارتفاع مناسب برای منو با توجه به وجود Promobar
+  const headerHeight = { xs: '112px', sm: '120px' }; // ارتفاع هدر + ارتفاع Promobar
 
   return (
     <>
@@ -380,17 +336,18 @@ export default function MobileMenu() {
         SlideProps={{
           timeout: 0
         }}
+        hideBackdrop={false}
         sx={{
           display: { xs: 'block', md: 'none' },
           '& .MuiDrawer-paper': { 
             boxSizing: 'border-box', 
             width: '100%',
-            marginTop: '64px', // ارتفاع هدر
-            height: 'calc(100% - 64px)',
-            overflowY: 'auto',
-          },
-          '& .MuiBackdrop-root': {
-            backgroundColor: 'rgba(0, 0, 0, 0.3)',
+            top: headerHeight,
+            maxHeight: { xs: `calc(100% - ${headerHeight.xs})`, sm: `calc(100% - ${headerHeight.sm})` },
+            boxShadow: 'none',
+            borderTop: '1px solid',
+            borderColor: 'divider',
+            overflowY: 'auto'
           }
         }}
       >

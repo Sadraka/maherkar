@@ -34,7 +34,7 @@ import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 
 // کامپوننت AppBar اصلی
-export default function AppHeader() {
+export default function AppHeaderNew() {
   const theme = useTheme();
   const { 
     isMobile,
@@ -139,17 +139,43 @@ export default function AppHeader() {
         <Box sx={{ maxWidth: 1200, mx: 'auto', width: '100%' }}>
           <Toolbar sx={{ 
             justifyContent: { xs: 'space-between', md: 'space-between' }, 
-            px: { xs: 1.5, md: 0 },
+            px: { xs: 0, md: 0 },
             py: { xs: 1, md: 0.5 },
             width: '100%',
-            position: 'relative',
+            position: 'relative', // برای قرار دادن لوگو در وسط
           }}>
+            {/* لوگوی سایت در موبایل - در وسط */}
+            <Typography
+              variant="h5"
+              component="div"
+              sx={{ 
+                fontWeight: 800,
+                fontSize: '1.4rem',
+                backgroundImage: `linear-gradient(45deg, ${theme.palette.primary.main}, ${theme.palette.primary.dark})`,
+                backgroundClip: 'text',
+                textFillColor: 'transparent',
+                position: 'absolute',
+                left: '50%',
+                top: '50%',
+                transform: 'translate(-50%, -50%)',
+                display: { xs: 'block', md: 'none' },
+                letterSpacing: '-0.5px',
+                textShadow: '0 1px 1px rgba(0,0,0,0.05)',
+                zIndex: 1
+              }}
+            >
+              <Link href="/" style={{ textDecoration: 'none', color: 'inherit' }}>
+                ماهرکار
+              </Link>
+            </Typography>
+            
             {/* لوگو و منوی راست */}
             <Box 
               sx={{ 
                 display: 'flex', 
                 alignItems: 'center',
-                gap: { xs: 2, md: 3 }
+                gap: { xs: 1, md: 3 },
+                zIndex: 2
               }}
             >
               {/* دکمه منو برای موبایل */}
@@ -165,6 +191,7 @@ export default function AppHeader() {
                   padding: { xs: '6px', md: '8px' },
                   height: { xs: 36, md: 40 },
                   width: { xs: 36, md: 40 },
+                  ml: { xs: -0.5, md: 0 },
                   '&:hover': {
                     backgroundColor: alpha(theme.palette.primary.main, 0.12),
                   }
@@ -179,6 +206,7 @@ export default function AppHeader() {
                 />
               </IconButton>
               
+              {/* لوگوی سایت - فقط در دسکتاپ */}
               <Typography
                 variant="h5"
                 component="div"
@@ -303,72 +331,105 @@ export default function AppHeader() {
                           {item.title}
                         </Button>
                       </Box>
-                    ) : null}
+                    ) : (
+                      <Button 
+                        variant={item.variant as "text" | "contained" | "outlined"}
+                        color={item.color as any}
+                        href={item.href}
+                        sx={{ 
+                          borderRadius: '8px',
+                          minWidth: 'auto',
+                          fontWeight: 400,
+                          fontSize: '0.9rem',
+                          py: 0.5,
+                          px: 1.5,
+                          transition: 'all 0.2s ease',
+                          ...(item.color === 'primary' && item.variant === 'text' 
+                            ? { 
+                                color: theme.palette.primary.main,
+                              } 
+                            : {}),
+                          ...(item.variant === 'contained'
+                            ? {
+                                boxShadow: 'none',
+                                ml: 2
+                              }
+                            : {})
+                        }}
+                      >
+                        {item.title}
+                      </Button>
+                    )}
                   </Box>
                 ))}
               </Box>
             </Box>
 
             {/* آیکون‌های سمت چپ */}
-            <Box sx={{ 
-              display: 'flex', 
-              alignItems: 'center', 
-              gap: { xs: 1, md: 2 }
-            }}>
-              {/* ارتباط با پشتیبانی */}
+            <Box 
+              sx={{ 
+                display: 'flex', 
+                alignItems: 'center', 
+                gap: { xs: 1, md: 2 },
+                mr: { xs: -0.5, md: 0 },
+                zIndex: 2
+              }}
+            >
+              {/* درخواست مشاوره - فقط در دسکتاپ */}
               <Box sx={{ display: { xs: 'none', md: 'block' } }}>
                 <Box
-                  component="a"
+                  component={Button}
+                  variant="text"
                   href="/support"
-                  sx={{ 
-                    textDecoration: 'none',
-                    borderRadius: '0px',
+                  startIcon={
+                    <Box
+                      sx={{
+                        width: '28px',
+                        height: '28px',
+                        borderRadius: '10px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        backgroundColor: alpha(theme.palette.primary.main, 0.15),
+                        boxShadow: `0 2px 6px ${alpha(theme.palette.primary.main, 0.1)}`,
+                        mr: 0.5
+                      }}
+                    >
+                      <FontAwesomeIcon 
+                        icon={faHeadset} 
+                        style={{ 
+                          fontSize: '0.9rem', 
+                          color: theme.palette.primary.main
+                        }} 
+                      />
+                    </Box>
+                  }
+                  sx={{
+                    borderRadius: '20px',
                     fontWeight: 400,
-                    fontSize: '0.9rem',
-                    px: 1,
-                    py: 0,
-                    height: '100%',
-                    minHeight: '60px',
-                    minWidth: 'auto',
-                    border: 'none',
-                    position: 'relative',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: 1.5,
+                    fontSize: '0.85rem',
+                    padding: '5px 15px',
+                    border: `1px solid ${alpha(theme.palette.primary.main, 0.3)}`,
                     color: theme.palette.primary.main,
-                    cursor: 'pointer',
-                    transition: 'transform 0.2s ease',
+                    transition: 'all 0.25s ease',
+                    textTransform: 'none',
                     '&:hover': {
-                      backgroundColor: 'transparent',
-                      transform: 'translateY(-2px)'
-                    },
-                    '&:focus': {
-                      outline: 'none',
-                      backgroundColor: 'transparent'
+                      backgroundColor: alpha(theme.palette.primary.main, 0.08),
+                      borderColor: alpha(theme.palette.primary.main, 0.5),
+                      transform: 'translateY(-2px)',
+                      boxShadow: `0 5px 10px ${alpha(theme.palette.primary.main, 0.15)}`,
                     }
                   }}
                 >
                   <Box
                     sx={{
-                      width: '32px',
-                      height: '32px',
-                      borderRadius: '10px',
                       display: 'flex',
                       alignItems: 'center',
-                      justifyContent: 'center',
-                      backgroundColor: alpha(theme.palette.primary.main, 0.15),
-                      boxShadow: `0 2px 6px ${alpha(theme.palette.primary.main, 0.1)}`
+                      gap: 0.5
                     }}
                   >
-                    <FontAwesomeIcon 
-                      icon={faHeadset} 
-                      style={{ 
-                        fontSize: '0.9rem', 
-                        color: theme.palette.primary.main
-                      }} 
-                    />
+                    ارتباط با پشتیبانی
                   </Box>
-                  ارتباط با پشتیبانی
                 </Box>
               </Box>
               
@@ -378,8 +439,8 @@ export default function AppHeader() {
                   component="a"
                   href="#"
                   sx={{
-                    width: { xs: '38px', md: '42px' },
-                    height: { xs: '38px', md: '42px' },
+                    width: { xs: '34px', md: '42px' },
+                    height: { xs: '34px', md: '42px' },
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
@@ -416,7 +477,7 @@ export default function AppHeader() {
                       icon={faBell} 
                       className="icon"
                       style={{ 
-                        fontSize: '1.2rem',
+                        fontSize: '0.9rem',
                         color: theme.palette.primary.main,
                         transition: 'all 0.25s ease'
                       }} 
@@ -431,8 +492,8 @@ export default function AppHeader() {
                   component="a"
                   href="/login"
                   sx={{
-                    width: { xs: '42px', md: '46px' },
-                    height: { xs: '42px', md: '46px' },
+                    width: { xs: '36px', md: '46px' },
+                    height: { xs: '36px', md: '46px' },
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
@@ -469,7 +530,7 @@ export default function AppHeader() {
                       icon={faUser} 
                       className="icon"
                       style={{ 
-                        fontSize: '1.3rem',
+                        fontSize: '1rem',
                         color: theme.palette.primary.main,
                         transition: 'all 0.25s ease'
                       }} 

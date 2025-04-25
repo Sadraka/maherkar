@@ -4,24 +4,13 @@ import {
   Drawer,
   Box,
   Typography,
-  IconButton,
   List,
-  ListItem,
   ListItemButton,
   ListItemText,
-  Divider,
-  Button,
   Collapse,
-  BottomNavigation,
-  BottomNavigationAction,
   useTheme,
-  Paper,
-  Avatar,
-  Badge,
-  Tooltip,
   alpha
 } from '@mui/material';
-import CloseIcon from '@mui/icons-material/Close';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import ExpandLessIcon from '@mui/icons-material/ExpandLess';
 import { useHeaderContext } from '@/contexts/HeaderContext';
@@ -35,26 +24,22 @@ import {
   faUserPlus,
   faBuilding,
   faUserTie,
-  faLightbulb,
-  faHeadset,
-  faQuestionCircle
+  faHeadset
 } from '@fortawesome/free-solid-svg-icons';
-import { useState, useEffect } from 'react';
-import {
-  EMPLOYER_BLUE,
-  JOB_SEEKER_GREEN
-} from '@/constants/colors';
+import { useState, useEffect, useRef } from 'react';
 
-export default function MobileMenu() {
+export default function MobileMenuV2() {
   const theme = useTheme();
   const { 
     isMobile,
     mobileOpen,
     setMobileOpen,
-    handleDrawerToggle,
   } = useHeaderContext();
 
-  // حالت‌های آکاردئون
+  // رفرنس به هدر برای محاسبه ارتفاع
+  const [headerHeight, setHeaderHeight] = useState<number>(60);
+  
+  // وضعیت باز و بسته شدن منوها
   const [expandedMenus, setExpandedMenus] = useState<{[key: string]: boolean}>({
     employer: false,
     candidate: false,
@@ -67,6 +52,42 @@ export default function MobileMenu() {
       [menu]: !prev[menu]
     }));
   };
+
+  // محاسبه ارتفاع واقعی هدر شامل PromoBar
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const calculateHeaderHeight = () => {
+        // پیدا کردن هدر و محاسبه ارتفاع کل
+        const header = document.querySelector('header') || document.querySelector('.MuiAppBar-root');
+        if (header) {
+          const headerRect = header.getBoundingClientRect();
+          const totalHeight = headerRect.bottom;
+          setHeaderHeight(totalHeight);
+        }
+      };
+
+      // محاسبه اولیه
+      calculateHeaderHeight();
+      
+      // هنگام اسکرول مجدداً محاسبه کنید
+      const handleScroll = () => {
+        calculateHeaderHeight();
+      };
+
+      // هنگام تغییر اندازه پنجره مجدداً محاسبه کنید
+      const handleResize = () => {
+        calculateHeaderHeight();
+      };
+
+      window.addEventListener('scroll', handleScroll, { passive: true });
+      window.addEventListener('resize', handleResize);
+
+      return () => {
+        window.removeEventListener('scroll', handleScroll);
+        window.removeEventListener('resize', handleResize);
+      };
+    }
+  }, [mobileOpen]);
 
   // ریست حالت منو هنگام بستن
   useEffect(() => {
@@ -120,40 +141,6 @@ export default function MobileMenu() {
   const accordionMenu = () => {
     return (
       <Box sx={{ p: 2, pb: 10 }}>
-        <Box sx={{ 
-          display: 'flex', 
-          justifyContent: 'space-between', 
-          alignItems: 'center', 
-          mb: 2,
-          pb: 1,
-          borderBottom: '1px solid',
-          borderColor: 'divider'
-        }}>
-          <Typography 
-            variant="h6" 
-            fontWeight={800}
-            sx={{
-              backgroundImage: `linear-gradient(45deg, ${theme.palette.primary.main}, ${theme.palette.primary.dark})`,
-              backgroundClip: 'text',
-              textFillColor: 'transparent',
-              letterSpacing: '-0.5px',
-            }}
-          >
-            ماهرکار
-          </Typography>
-          <IconButton 
-            onClick={() => setMobileOpen(false)}
-            sx={{
-              backgroundColor: alpha(theme.palette.primary.main, 0.08),
-              '&:hover': {
-                backgroundColor: alpha(theme.palette.primary.main, 0.15),
-              }
-            }}
-          >
-            <CloseIcon />
-          </IconButton>
-        </Box>
-
         {/* کارفرما هستم */}
         <Box sx={{ mb: 1 }}>
           <ListItemButton
@@ -322,7 +309,7 @@ export default function MobileMenu() {
           </Collapse>
         </Box>
 
-        {/* درخواست مشاوره */}
+        {/* ارتباط با پشتیبانی */}
         <Box sx={{ mb: 1 }}>
           <ListItemButton
             component="a"
@@ -356,7 +343,7 @@ export default function MobileMenu() {
                   }} 
                 />
               </Box>
-              <Typography sx={{ flexGrow: 1, fontWeight: 500 }}>درخواست مشاوره</Typography>
+              <Typography sx={{ flexGrow: 1, fontWeight: 500 }}>ارتباط با پشتیبانی</Typography>
             </Box>
           </ListItemButton>
         </Box>
@@ -380,17 +367,25 @@ export default function MobileMenu() {
         SlideProps={{
           timeout: 0
         }}
+        hideBackdrop={false}
         sx={{
           display: { xs: 'block', md: 'none' },
+          zIndex: 1099,
           '& .MuiDrawer-paper': { 
             boxSizing: 'border-box', 
             width: '100%',
-            marginTop: '64px', // ارتفاع هدر
-            height: 'calc(100% - 64px)',
-            overflowY: 'auto',
+            position: 'fixed',
+            top: `${headerHeight}px`,
+            height: `calc(100vh - ${headerHeight}px)`,
+            maxHeight: 'none',
+            boxShadow: 'none',
+            borderTop: '1px solid',
+            borderColor: 'divider',
+            overflowY: 'auto'
           },
           '& .MuiBackdrop-root': {
             backgroundColor: 'rgba(0, 0, 0, 0.3)',
+            marginTop: `${headerHeight}px`,
           }
         }}
       >
