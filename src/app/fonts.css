@@ -1,0 +1,26 @@
+/* تعریف فونت ایران‌سنس */
+@font-face {
+  font-family: 'IRANSansX';
+  src: url('/fonts/IRANSansX-Regular.woff2') format('woff2'),
+       url('/fonts/IRANSansX-Regular.woff') format('woff');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'IRANSansX';
+  src: url('/fonts/IRANSansX-Bold.woff2') format('woff2'),
+       url('/fonts/IRANSansX-Bold.woff') format('woff');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+:root {
+  --font-family-primary: 'IRANSansX', system-ui, -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, sans-serif;
+}
+
+html, body, button, input, textarea, select {
+  font-family: var(--font-family-primary) !important;
+} 
