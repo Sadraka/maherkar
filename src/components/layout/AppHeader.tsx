@@ -276,72 +276,6 @@ export default function AppHeader() {
                     ) : null}
                   </Box>
                 ))}
-                
-                {/* ارتباط با پشتیبانی */}
-                <Box>
-                  <Button 
-                    variant="text"
-                    color="primary"
-                    href="/support"
-                    sx={{ 
-                      borderRadius: '0px',
-                      fontWeight: 400,
-                      fontSize: '0.9rem',
-                      px: 1,
-                      py: 0,
-                      height: '100%',
-                      minHeight: '60px',
-                      minWidth: 'auto',
-                      border: 'none',
-                      position: 'relative',
-                      transition: 'all 0.2s ease',
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: 1.5,
-                      color: theme.palette.primary.main,
-                      '&::after': {
-                        content: '""',
-                        position: 'absolute',
-                        bottom: 0,
-                        right: 0,
-                        width: '0%',
-                        height: '2px',
-                        zIndex: 1200,
-                        backgroundColor: theme.palette.primary.main,
-                        transition: 'width 0.3s ease',
-                      },
-                      '&:hover': {
-                        backgroundColor: 'transparent',
-                        '&::after': {
-                          width: '100%',
-                        }
-                      }
-                    }}
-                  >
-                    <Box
-                      sx={{
-                        width: '32px',
-                        height: '32px',
-                        borderRadius: '10px',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        transition: 'all 0.25s ease',
-                        backgroundColor: alpha(theme.palette.primary.main, 0.1),
-                        boxShadow: `0 2px 6px ${alpha(theme.palette.primary.main, 0.08)}`
-                      }}
-                    >
-                      <FontAwesomeIcon 
-                        icon={faHeadset} 
-                        style={{ 
-                          fontSize: '0.9rem', 
-                          color: theme.palette.primary.main
-                        }} 
-                      />
-                    </Box>
-                    ارتباط با پشتیبانی
-                  </Button>
-                </Box>
               </Box>
             </Box>
 
@@ -351,6 +285,61 @@ export default function AppHeader() {
               alignItems: 'center', 
               gap: { xs: 1, md: 2 }
             }}>
+              {/* ارتباط با پشتیبانی */}
+              <Box sx={{ display: { xs: 'none', md: 'block' } }}>
+                <Box
+                  component="a"
+                  href="/support"
+                  sx={{ 
+                    textDecoration: 'none',
+                    borderRadius: '0px',
+                    fontWeight: 400,
+                    fontSize: '0.9rem',
+                    px: 1,
+                    py: 0,
+                    height: '100%',
+                    minHeight: '60px',
+                    minWidth: 'auto',
+                    border: 'none',
+                    position: 'relative',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 1.5,
+                    color: theme.palette.primary.main,
+                    cursor: 'default',
+                    '&:hover': {
+                      backgroundColor: 'transparent'
+                    },
+                    '&:focus': {
+                      outline: 'none',
+                      backgroundColor: 'transparent'
+                    }
+                  }}
+                >
+                  <Box
+                    sx={{
+                      width: '32px',
+                      height: '32px',
+                      borderRadius: '10px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      backgroundColor: alpha(theme.palette.primary.main, 0.15),
+                      boxShadow: `0 2px 6px ${alpha(theme.palette.primary.main, 0.1)}`
+                    }}
+                  >
+                    <FontAwesomeIcon 
+                      icon={faHeadset} 
+                      style={{ 
+                        fontSize: '0.9rem', 
+                        color: theme.palette.primary.main
+                      }} 
+                    />
+                  </Box>
+                  ارتباط با پشتیبانی
+                </Box>
+              </Box>
+              
               {/* آیکون اعلان‌ها (زنگوله) */}
               <Tooltip title="اعلان‌ها" arrow>
                 <Box
