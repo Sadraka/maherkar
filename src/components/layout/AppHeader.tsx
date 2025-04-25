@@ -16,7 +16,6 @@ import Link from 'next/link';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { 
   faSignInAlt, 
-  faQuestion,
   faBuilding,
   faUserTie,
 } from '@fortawesome/free-solid-svg-icons';
@@ -34,16 +33,12 @@ export default function AppHeader() {
     handleDrawerToggle,
     employerButtonRef,
     candidateButtonRef,
-    helpButtonRef,
     handleEmployerMouseEnter,
     handleEmployerMouseLeave,
     handleCandidateMouseEnter,
     handleCandidateMouseLeave,
-    handleHelpMouseEnter,
-    handleHelpMouseLeave,
     isEmployerHovered,
     isCandidateHovered,
-    isHelpHovered,
   } = useHeaderContext();
 
   // اطلاعات منوها - با استایل یکسان با منوی موبایل
@@ -71,18 +66,6 @@ export default function AppHeader() {
       icon: faUserTie,
       bgColor: alpha(theme.palette.candidate.main, 0.15),
       textColor: theme.palette.candidate.main
-    },
-    { 
-      title: 'راهنما', 
-      color: 'black',
-      href: '#', 
-      variant: 'text', 
-      hasSubmenu: true,
-      menuId: 'help-menu',
-      buttonRef: helpButtonRef,
-      icon: faQuestion,
-      bgColor: alpha('#000000', 0.15),
-      textColor: '#000000'
     },
     { 
       title: 'ورود / ثبت‌نام', 
@@ -208,8 +191,8 @@ export default function AppHeader() {
                       <Button 
                         ref={item.buttonRef}
                         variant={item.variant as "text" | "contained" | "outlined"}
-                        onMouseEnter={item.menuId === 'employer-menu' ? handleEmployerMouseEnter : item.menuId === 'candidate-menu' ? handleCandidateMouseEnter : handleHelpMouseEnter}
-                        onMouseLeave={item.menuId === 'employer-menu' ? handleEmployerMouseLeave : item.menuId === 'candidate-menu' ? handleCandidateMouseLeave : handleHelpMouseLeave}
+                        onMouseEnter={item.menuId === 'employer-menu' ? handleEmployerMouseEnter : handleCandidateMouseEnter}
+                        onMouseLeave={item.menuId === 'employer-menu' ? handleEmployerMouseLeave : handleCandidateMouseLeave}
                         color={item.color as any}
                         startIcon={<Avatar sx={{ 
                           width: 24, 
@@ -247,11 +230,6 @@ export default function AppHeader() {
                               width: '100%',
                             }
                           },
-                          ...(item.title === 'راهنما' 
-                            ? { 
-                                color: '#000000',
-                              } 
-                            : {}),
                           ...(item.color === 'employer' && item.variant === 'text' 
                             ? { 
                                 color: theme.palette.employer.main,

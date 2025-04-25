@@ -31,7 +31,6 @@ import {
   faUserPlus,
   faBuilding,
   faUserTie,
-  faQuestion,
   faLightbulb
 } from '@fortawesome/free-solid-svg-icons';
 import { useState, useEffect } from 'react';
@@ -68,7 +67,6 @@ export default function MobileMenu() {
   // تعریف رنگ‌های اصلی برای هر منو - استفاده از ثابت‌های رنگ تعریف شده
   const employerColor = EMPLOYER_BLUE; // '#0a3b79' - سرمه‌ای برای کارفرما
   const candidateColor = JOB_SEEKER_GREEN; // '#00703c' - سبز کارجو
-  const helpColor = '#000000'; // مشکی برای راهنما
 
   // منوی کارفرما
   const employerMenuItems = [
@@ -111,34 +109,6 @@ export default function MobileMenu() {
       icon: <FontAwesomeIcon icon={faUserPlus} size="lg" />, 
       href: '#',
       description: 'پروفایل حرفه‌ای خود را تکمیل کنید تا شانس استخدام افزایش یابد',
-    }
-  ];
-
-  // منوی راهنما
-  const helpMenuItems = [
-    { 
-      title: 'راهنمای کارفرمایان', 
-      icon: <FontAwesomeIcon icon={faBuilding} size="lg" />, 
-      href: '#',
-      description: 'آموزش کامل نحوه ثبت پروژه و استخدام کارجو',
-    },
-    { 
-      title: 'راهنمای کارجویان', 
-      icon: <FontAwesomeIcon icon={faUserTie} size="lg" />, 
-      href: '#',
-      description: 'آموزش کامل نحوه ثبت رزومه و یافتن شغل مناسب',
-    },
-    { 
-      title: 'سوالات متداول', 
-      icon: <FontAwesomeIcon icon={faQuestion} size="lg" />, 
-      href: '#',
-      description: 'پاسخ به سوالات رایج کاربران',
-    },
-    { 
-      title: 'نکات و ترفندها', 
-      icon: <FontAwesomeIcon icon={faLightbulb} size="lg" />, 
-      href: '#',
-      description: 'نکات مفید برای موفقیت در ماهرکار',
     }
   ];
 
@@ -344,106 +314,6 @@ export default function MobileMenu() {
           </List>
         </Box>
       );
-    } else if (mobileView === 'help') {
-      return (
-        <Box 
-          sx={{ 
-            p: 3, 
-            background: `linear-gradient(180deg, ${alpha(helpColor, 0.05)} 0%, rgba(255,255,255,0) 100%)`
-          }}
-        >
-          <Box sx={{ 
-            display: 'flex', 
-            justifyContent: 'space-between', 
-            alignItems: 'center', 
-            mb: 3
-          }}>
-            <Box sx={{ display: 'flex', alignItems: 'center' }}>
-              <Avatar 
-                sx={{ 
-                  bgcolor: alpha(helpColor, 0.1), 
-                  color: helpColor,
-                  mr: 1.5
-                }}
-              >
-                <FontAwesomeIcon icon={faQuestion} />
-              </Avatar>
-              <Typography variant="h6" fontWeight={800} color={helpColor}>
-                راهنما
-              </Typography>
-            </Box>
-            <IconButton 
-              onClick={() => setMobileOpen(false)}
-              sx={{ 
-                bgcolor: alpha(helpColor, 0.1),
-                color: helpColor,
-                '&:hover': {
-                  bgcolor: alpha(helpColor, 0.2),
-                }
-              }}
-            >
-              <CloseIcon />
-            </IconButton>
-          </Box>
-          <Divider sx={{ mb: 3 }} />
-          <List sx={{ px: 0 }}>
-            {helpMenuItems.map((item, index) => (
-              <ListItem key={index} disablePadding sx={{ mb: 2 }}>
-                <ListItemButton 
-                  component="a" 
-                  href={item.href}
-                  onClick={() => setActiveIndex(index)}
-                  sx={{ 
-                    p: 0,
-                    borderRadius: 3,
-                    overflow: 'hidden',
-                    transition: 'all 0.3s ease',
-                    transform: activeIndex === index ? 'scale(0.98)' : 'scale(1)',
-                    '&:active': {
-                      transform: 'scale(0.97)',
-                    }
-                  }}
-                >
-                  <Paper
-                    elevation={activeIndex === index ? 4 : 1}
-                    sx={{ 
-                      p: 2.5,
-                      width: '100%',
-                      borderRadius: 3,
-                      background: `linear-gradient(135deg, white 0%, ${alpha(helpColor, 0.1)} 100%)`,
-                      border: '1px solid',
-                      borderColor: activeIndex === index ? helpColor : 'divider',
-                      transition: 'all 0.3s ease',
-                    }}
-                  >
-                    <Box sx={{ display: 'flex', alignItems: 'flex-start' }}>
-                      <Avatar
-                        sx={{ 
-                          mr: 2,
-                          bgcolor: alpha(helpColor, 0.15),
-                          color: helpColor,
-                          boxShadow: activeIndex === index ? `0 4px 8px ${alpha(helpColor, 0.25)}` : 'none',
-                          transition: 'all 0.3s ease',
-                        }}
-                      >
-                        {item.icon}
-                      </Avatar>
-                      <Box sx={{ flexGrow: 1 }}>
-                        <Typography fontWeight={800} variant="subtitle1" color={helpColor} gutterBottom>
-                          {item.title}
-                        </Typography>
-                        <Typography variant="body2" color="text.secondary">
-                          {item.description}
-                        </Typography>
-                      </Box>
-                    </Box>
-                  </Paper>
-                </ListItemButton>
-              </ListItem>
-            ))}
-          </List>
-        </Box>
-      );
     }
     
     return null;
@@ -621,50 +491,6 @@ export default function MobileMenu() {
                 transition: 'transform 0.3s ease, opacity 0.3s ease',
                 transform: navValue === 'candidate' ? 'translateY(1px) scale(1.05)' : 'translateY(0) scale(1)',
                 opacity: navValue === 'candidate' ? 1 : 0.7,
-              }
-            }}
-          />
-          <BottomNavigationAction
-            label="راهنما"
-            value="help"
-            icon={
-              <Badge
-                variant="dot"
-                invisible={navValue !== 'help'}
-                color="primary"
-                sx={{
-                  '& .MuiBadge-badge': {
-                    backgroundColor: helpColor,
-                  }
-                }}
-              >
-                <Avatar 
-                  sx={{ 
-                    width: 32, 
-                    height: 32,
-                    bgcolor: navValue === 'help' 
-                      ? alpha(helpColor, 0.15) 
-                      : alpha(theme.palette.text.secondary, 0.05),
-                    color: navValue === 'help' 
-                      ? helpColor 
-                      : theme.palette.text.secondary,
-                    transition: 'all 0.3s ease'
-                  }}
-                >
-                  <FontAwesomeIcon icon={faQuestion} size="sm" />
-                </Avatar>
-              </Badge>
-            }
-            sx={{
-              color: navValue === 'help' ? helpColor : theme.palette.text.secondary,
-              fontWeight: 800,
-              fontSize: '0.75rem',
-              '& .MuiBottomNavigationAction-label': {
-                fontSize: '0.75rem',
-                fontWeight: 800,
-                transition: 'transform 0.3s ease, opacity 0.3s ease',
-                transform: navValue === 'help' ? 'translateY(1px) scale(1.05)' : 'translateY(0) scale(1)',
-                opacity: navValue === 'help' ? 1 : 0.7,
               }
             }}
           />

@@ -108,81 +108,91 @@ export default function JobCard({ job }: JobCardProps) {
         }
       }}
     >
-      {/* نمایش برچسب‌های ویژه و فوری */}
-      {job.isPromoted && (
-        <Box
-          sx={{
-            position: 'absolute',
-            top: 8,
-            right: 8,
-            bgcolor: 'rgba(211, 47, 47, 0.95)',
-            color: '#fff',
-            fontSize: '0.7rem',
-            fontWeight: 'bold',
-            px: 1.2,
-            py: 0.4,
-            borderRadius: '20px',
-            display: 'flex',
-            alignItems: 'center',
-            gap: 0.3,
-            zIndex: 2,
-            boxShadow: '0 2px 8px rgba(211, 47, 47, 0.3)'
-          }}
-        >
-          <span style={{ 
-            display: 'inline-flex', 
-            alignItems: 'center', 
-            justifyContent: 'center', 
-            width: '0.75rem', 
-            height: '0.75rem', 
-            overflow: 'hidden' 
-          }}>
-            <StarIcon sx={{ fontSize: '0.75rem', width: '0.75rem', height: '0.75rem' }} />
-          </span>
-          ویژه
-        </Box>
-      )}
-      
-      {job.isUrgent && !job.isPromoted && (
-        <Box
-          sx={{
-            position: 'absolute',
-            top: 8,
-            right: 8,
-            bgcolor: 'rgba(255, 145, 0, 0.9)',
-            color: '#fff',
-            fontSize: '0.75rem',
-            fontWeight: 'bold',
-            px: 1.5,
-            py: 0.5,
-            borderRadius: '20px',
-            display: 'flex',
-            alignItems: 'center',
-            gap: 0.4,
-            zIndex: 2,
-            boxShadow: '0 3px 10px rgba(255, 145, 0, 0.4)'
-          }}
-        >
-          <span style={{ 
-            display: 'inline-flex', 
-            alignItems: 'center', 
-            justifyContent: 'center', 
-            width: '0.85rem', 
-            height: '0.85rem', 
-            overflow: 'hidden' 
-          }}>
-            <LocalFireDepartmentIcon sx={{ fontSize: '0.85rem', width: '0.85rem', height: '0.85rem' }} />
-          </span>
-          فوری
-        </Box>
-      )}
+      {/* نمایش برچسب‌های ویژه و فوری - استفاده از یک wrapper ثابت */}
+      <Box sx={{ 
+        position: 'absolute',
+        top: 0,
+        right: 0,
+        width: '100%',
+        height: 'auto',
+        zIndex: 2,
+        pointerEvents: 'none' // اجازه کلیک روی محتوای زیرین
+      }}>
+        {job.isPromoted && (
+          <Box
+            sx={{
+              position: 'absolute',
+              top: 8,
+              right: 8,
+              bgcolor: 'rgba(211, 47, 47, 0.95)',
+              color: '#fff',
+              fontSize: '0.7rem',
+              fontWeight: 'bold',
+              px: 1.2,
+              py: 0.4,
+              borderRadius: '20px',
+              display: 'flex',
+              alignItems: 'center',
+              gap: 0.3,
+              boxShadow: '0 2px 8px rgba(211, 47, 47, 0.3)',
+              pointerEvents: 'auto' // برگرداندن قابلیت کلیک
+            }}
+          >
+            <span style={{ 
+              display: 'inline-flex', 
+              alignItems: 'center', 
+              justifyContent: 'center', 
+              width: '0.75rem', 
+              height: '0.75rem', 
+              overflow: 'hidden' 
+            }}>
+              <StarIcon sx={{ fontSize: '0.75rem', width: '0.75rem', height: '0.75rem' }} />
+            </span>
+            ویژه
+          </Box>
+        )}
+        
+        {job.isUrgent && !job.isPromoted && (
+          <Box
+            sx={{
+              position: 'absolute',
+              top: 8,
+              right: 8,
+              bgcolor: 'rgba(255, 145, 0, 0.9)',
+              color: '#fff',
+              fontSize: '0.75rem',
+              fontWeight: 'bold',
+              px: 1.5,
+              py: 0.5,
+              borderRadius: '20px',
+              display: 'flex',
+              alignItems: 'center',
+              gap: 0.4,
+              boxShadow: '0 3px 10px rgba(255, 145, 0, 0.4)',
+              pointerEvents: 'auto' // برگرداندن قابلیت کلیک
+            }}
+          >
+            <span style={{ 
+              display: 'inline-flex', 
+              alignItems: 'center', 
+              justifyContent: 'center', 
+              width: '0.85rem', 
+              height: '0.85rem', 
+              overflow: 'hidden' 
+            }}>
+              <LocalFireDepartmentIcon sx={{ fontSize: '0.85rem', width: '0.85rem', height: '0.85rem' }} />
+            </span>
+            فوری
+          </Box>
+        )}
+      </Box>
       
       <CardContent sx={{ 
         flexGrow: 1, 
         display: 'flex',
         flexDirection: 'column',
         p: 2, 
-        pt: job.isPromoted || job.isUrgent ? 3 : 2, // فاصله بیشتر از بالا برای کارت‌های دارای برچسب
+        pt: 2, // مقدار ثابت برای تمام کارت‌ها
         pb: 2,
         '&:last-child': { pb: 2 }
       }}>

@@ -24,7 +24,6 @@ import {
   faUserPlus,
   faBuilding,
   faUserTie,
-  faQuestion,
   faLightbulb,
   faChevronLeft
 } from '@fortawesome/free-solid-svg-icons';
@@ -40,25 +39,20 @@ export default function MenuPopover() {
   const { 
     employerAnchorEl,
     candidateAnchorEl,
-    helpAnchorEl,
     isEmployerHovered,
     isCandidateHovered,
-    isHelpHovered,
     setIsEmployerHovered,
     setIsCandidateHovered,
-    setIsHelpHovered,
     handlePopoverMouseEnter,
     handlePopoverMouseLeave,
   } = useHeaderContext();
 
   const [activeEmployerIndex, setActiveEmployerIndex] = useState(-1);
   const [activeCandidateIndex, setActiveCandidateIndex] = useState(-1);
-  const [activeHelpIndex, setActiveHelpIndex] = useState(-1);
 
   // تعریف رنگ‌های اصلی برای هر منو - استفاده از ثابت‌های رنگ تعریف شده در constants/colors.ts
   const employerColor = EMPLOYER_BLUE; // '#0a3b79' - سرمه‌ای برای کارفرما
   const candidateColor = JOB_SEEKER_GREEN; // '#00703c' - سبز کارجو
-  const helpColor = '#000000'; // مشکی برای راهنما
 
   // منوی کارفرما
   const employerMenuItems = [
@@ -101,34 +95,6 @@ export default function MenuPopover() {
       icon: <FontAwesomeIcon icon={faUserPlus} size="lg" />, 
       href: '#',
       description: 'افزایش شانس استخدام و همکاری',
-    }
-  ];
-
-  // منوی راهنما
-  const helpMenuItems = [
-    { 
-      title: 'راهنمای کارفرمایان', 
-      icon: <FontAwesomeIcon icon={faBuilding} size="lg" />, 
-      href: '#',
-      description: 'نحوه ثبت پروژه و استخدام متخصصان',
-    },
-    { 
-      title: 'راهنمای کارجویان', 
-      icon: <FontAwesomeIcon icon={faUserTie} size="lg" />, 
-      href: '#',
-      description: 'نحوه ثبت رزومه و یافتن پروژه مناسب',
-    },
-    { 
-      title: 'سوالات متداول', 
-      icon: <FontAwesomeIcon icon={faQuestion} size="lg" />, 
-      href: '#',
-      description: 'پاسخ به پرسش‌های رایج',
-    },
-    { 
-      title: 'نکات و ترفندها', 
-      icon: <FontAwesomeIcon icon={faLightbulb} size="lg" />, 
-      href: '#',
-      description: 'راهنمای موفقیت در ماهرکار',
     }
   ];
 
@@ -386,135 +352,6 @@ export default function MenuPopover() {
                         borderRadius: 1.5,
                         bgcolor: activeCandidateIndex === index ? candidateColor : alpha(candidateColor, 0.1),
                         color: activeCandidateIndex === index ? 'white' : candidateColor,
-                        width: 52,
-                        height: 52,
-                        mr: 2.5,
-                        flexShrink: 0
-                      }}
-                    >
-                      {item.icon}
-                    </Box>
-                    <Box>
-                      <Typography fontWeight={600} fontSize="1.15rem" color="text.primary">
-                        {item.title}
-                      </Typography>
-                      <Typography variant="body2" color="text.secondary" fontSize="0.9rem" mt={0.5}>
-                        {item.description}
-                      </Typography>
-                    </Box>
-                  </Box>
-                ))}
-              </Box>
-            </Box>
-          </Container>
-        </Paper>
-      </Popover>
-
-      {/* منوی راهنما */}
-      <Popover
-        id="help-menu"
-        open={isHelpHovered}
-        anchorEl={helpAnchorEl}
-        onClose={() => setIsHelpHovered(false)}
-        disableRestoreFocus
-        anchorOrigin={{
-          vertical: 'bottom',
-          horizontal: 'center',
-        }}
-        transformOrigin={{
-          vertical: 'top',
-          horizontal: 'center',
-        }}
-        sx={{ pointerEvents: 'none' }}
-        TransitionProps={{ timeout: { enter: 0, exit: 0 }, style: { transition: 'none !important' } }}
-        slotProps={{
-          paper: {
-            onMouseEnter: () => handlePopoverMouseEnter('help'),
-            onMouseLeave: () => handlePopoverMouseLeave('help'),
-            sx: {
-              mt: 0,
-              boxShadow: '0px 5px 10px rgba(0,0,0,0.1)',
-              borderRadius: 0,
-              minWidth: '100%',
-              width: '100vw',
-              maxWidth: '100vw',
-              left: '0 !important', 
-              right: '0 !important',
-              overflow: 'visible',
-              pointerEvents: 'auto',
-              border: 'none',
-              borderTop: '0px solid transparent',
-              marginTop: '0px',
-              position: 'fixed',
-              zIndex: 1000,
-              '&:before': {
-                display: 'none',
-              },
-            }
-          }
-        }}
-      >
-        <Paper 
-          id="help-menu-content" 
-          sx={{ 
-            p: 0, 
-            overflow: 'hidden',
-            borderRadius: 0,
-            width: '100%',
-            bgcolor: '#FFFFFF',
-            boxShadow: '0px 5px 10px rgba(0,0,0,0.1)',
-            borderTop: '1px solid',
-            borderColor: 'divider',
-          }}
-          elevation={0}
-        >
-          <Container maxWidth="lg" sx={{ px: { xs: 2, md: 0 } }}>
-            <Box sx={{ 
-              maxWidth: 1200, 
-              mx: 'auto', 
-              width: '100%',
-              py: {xs: 3, md: 4.5}
-            }}>
-              <Box 
-                sx={{ 
-                  display: 'grid', 
-                  gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, 1fr)', md: 'repeat(4, 1fr)' }, 
-                  gap: 3
-                }}
-              >
-                {helpMenuItems.map((item, index) => (
-                  <Box 
-                    key={index.toString()} 
-                    component="a"
-                    href={item.href}
-                    onMouseEnter={() => setActiveHelpIndex(index)}
-                    onMouseLeave={() => setActiveHelpIndex(-1)}
-                    sx={{ 
-                      display: 'flex',
-                      alignItems: 'flex-start',
-                      p: 3,
-                      borderRadius: 1.5,
-                      bgcolor: activeHelpIndex === index ? alpha(helpColor, 0.05) : 'transparent',
-                      color: 'text.primary',
-                      textDecoration: 'none',
-                      border: '1px solid',
-                      borderColor: activeHelpIndex === index ? alpha(helpColor, 0.15) : 'transparent',
-                      boxShadow: 'none',
-                      '&:hover': {
-                        bgcolor: alpha(helpColor, 0.05),
-                        borderColor: alpha(helpColor, 0.15),
-                        boxShadow: 'none',
-                      }
-                    }}
-                  >
-                    <Box
-                      sx={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        borderRadius: 1.5,
-                        bgcolor: activeHelpIndex === index ? helpColor : alpha(helpColor, 0.1),
-                        color: activeHelpIndex === index ? 'white' : helpColor,
                         width: 52,
                         height: 52,
                         mr: 2.5,

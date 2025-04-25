@@ -134,17 +134,27 @@ export default function JobListings() {
         position: 'relative'
       }}
     >
-      {/* ناحیه برچسب - به صورت مطلق قرار گرفته تا در ارتفاع تاثیر نداشته باشد */}
+      {/* ناحیه برچسب - در wrapper مطلق قرار می‌گیرد */}
       <Box sx={{ 
         position: 'absolute',
-        top: 8,
-        right: 8,
-        zIndex: 2,
-        borderRadius: '20px',
-        height: 24,
-        width: 60
+        top: 0,
+        right: 0,
+        width: '100%',
+        height: 'auto',
+        zIndex: 2
       }}>
-        {/* اینجا در زمان لودینگ چیزی نمایش داده نمی‌شود */}
+        {/* اسکلتون برچسب فوری یا ویژه */}
+        <Skeleton 
+          variant="rectangular" 
+          width={60} 
+          height={24} 
+          sx={{ 
+            position: 'absolute',
+            top: 8,
+            right: 8,
+            borderRadius: '20px'
+          }} 
+        />
       </Box>
       
       <CardContent sx={{ 

@@ -28,23 +28,14 @@ export interface HeaderContextType {
   isCandidateHovered: boolean;
   setIsCandidateHovered: React.Dispatch<React.SetStateAction<boolean>>;
   
-  // منوی راهنما
-  helpButtonRef: React.RefObject<HTMLButtonElement | null>;
-  helpAnchorEl: HTMLElement | null;
-  setHelpAnchorEl: React.Dispatch<React.SetStateAction<HTMLElement | null>>;
-  isHelpHovered: boolean;
-  setIsHelpHovered: React.Dispatch<React.SetStateAction<boolean>>;
-  
   // توابع مدیریت رویدادها
   handleDrawerToggle: () => void;
   handleEmployerMouseEnter: () => void;
   handleEmployerMouseLeave: () => void;
   handleCandidateMouseEnter: () => void;
   handleCandidateMouseLeave: () => void;
-  handleHelpMouseEnter: () => void;
-  handleHelpMouseLeave: () => void;
-  handlePopoverMouseEnter: (type: 'employer' | 'candidate' | 'help') => void;
-  handlePopoverMouseLeave: (type: 'employer' | 'candidate' | 'help') => void;
+  handlePopoverMouseEnter: (type: 'employer' | 'candidate') => void;
+  handlePopoverMouseLeave: (type: 'employer' | 'candidate') => void;
   toggleMobileMenu: (menuName: string) => void;
   handleMobileNavigation: (view: string) => void;
 }
@@ -65,14 +56,11 @@ export const HeaderProvider: React.FC<HeaderProviderProps> = ({ children }) => {
 
   const employerButtonRef = useRef<HTMLButtonElement>(null);
   const candidateButtonRef = useRef<HTMLButtonElement>(null);
-  const helpButtonRef = useRef<HTMLButtonElement>(null);
   
   const [employerAnchorEl, setEmployerAnchorEl] = useState<null | HTMLElement>(null);
   const [candidateAnchorEl, setCandidateAnchorEl] = useState<null | HTMLElement>(null);
-  const [helpAnchorEl, setHelpAnchorEl] = useState<null | HTMLElement>(null);
   const [isEmployerHovered, setIsEmployerHovered] = useState(false);
   const [isCandidateHovered, setIsCandidateHovered] = useState(false);
-  const [isHelpHovered, setIsHelpHovered] = useState(false);
   
   const [expandedMobileMenu, setExpandedMobileMenu] = useState<string | null>(null);
 
@@ -85,8 +73,6 @@ export const HeaderProvider: React.FC<HeaderProviderProps> = ({ children }) => {
     if (isMobile) return;
     setCandidateAnchorEl(null);
     setIsCandidateHovered(false);
-    setHelpAnchorEl(null);
-    setIsHelpHovered(false);
     setEmployerAnchorEl(employerButtonRef.current);
     setIsEmployerHovered(true);
   };
@@ -109,8 +95,6 @@ export const HeaderProvider: React.FC<HeaderProviderProps> = ({ children }) => {
     if (isMobile) return;
     setEmployerAnchorEl(null);
     setIsEmployerHovered(false);
-    setHelpAnchorEl(null);
-    setIsHelpHovered(false);
     setCandidateAnchorEl(candidateButtonRef.current);
     setIsCandidateHovered(true);
   };
@@ -129,53 +113,19 @@ export const HeaderProvider: React.FC<HeaderProviderProps> = ({ children }) => {
     }, 100);
   };
 
-  const handleHelpMouseEnter = () => {
-    if (isMobile) return;
-    setEmployerAnchorEl(null);
-    setIsEmployerHovered(false);
-    setCandidateAnchorEl(null);
-    setIsCandidateHovered(false);
-    setHelpAnchorEl(helpButtonRef.current);
-    setIsHelpHovered(true);
-  };
-
-  const handleHelpMouseLeave = () => {
-    if (isMobile) return;
-    
-    setTimeout(() => {
-      const helpMenu = document.getElementById('help-menu-content');
-      const isOverHelpMenu = helpMenu ? helpMenu.matches(':hover') : false;
-      const isOverButton = helpButtonRef.current ? helpButtonRef.current.matches(':hover') : false;
-      
-      if (!isOverHelpMenu && !isOverButton) {
-        setIsHelpHovered(false);
-      }
-    }, 100);
-  };
-
-  const handlePopoverMouseEnter = (type: 'employer' | 'candidate' | 'help') => {
+  const handlePopoverMouseEnter = (type: 'employer' | 'candidate') => {
     if (type === 'employer') {
       setCandidateAnchorEl(null);
       setIsCandidateHovered(false);
-      setHelpAnchorEl(null);
-      setIsHelpHovered(false);
       setIsEmployerHovered(true);
-    } else if (type === 'candidate') {
-      setEmployerAnchorEl(null);
-      setIsEmployerHovered(false);
-      setHelpAnchorEl(null);
-      setIsHelpHovered(false);
-      setIsCandidateHovered(true);
     } else {
       setEmployerAnchorEl(null);
       setIsEmployerHovered(false);
-      setCandidateAnchorEl(null);
-      setIsCandidateHovered(false);
-      setIsHelpHovered(true);
+      setIsCandidateHovered(true);
     }
   };
 
-  const handlePopoverMouseLeave = (type: 'employer' | 'candidate' | 'help') => {
+  const handlePopoverMouseLeave = (type: 'employer' | 'candidate') => {
     if (type === 'employer') {
       setTimeout(() => {
         const isOverButton = employerButtonRef.current ? employerButtonRef.current.matches(':hover') : false;
@@ -186,7 +136,7 @@ export const HeaderProvider: React.FC<HeaderProviderProps> = ({ children }) => {
           setIsEmployerHovered(false);
         }
       }, 100);
-    } else if (type === 'candidate') {
+    } else {
       setTimeout(() => {
         const isOverButton = candidateButtonRef.current ? candidateButtonRef.current.matches(':hover') : false;
         const candidateMenu = document.getElementById('candidate-menu-content');
@@ -194,16 +144,6 @@ export const HeaderProvider: React.FC<HeaderProviderProps> = ({ children }) => {
 
         if (!isOverButton && !isOverMenu) {
           setIsCandidateHovered(false);
-        }
-      }, 100);
-    } else {
-      setTimeout(() => {
-        const isOverButton = helpButtonRef.current ? helpButtonRef.current.matches(':hover') : false;
-        const helpMenu = document.getElementById('help-menu-content');
-        const isOverMenu = helpMenu ? helpMenu.matches(':hover') : false;
-
-        if (!isOverButton && !isOverMenu) {
-          setIsHelpHovered(false);
         }
       }, 100);
     }
@@ -242,18 +182,11 @@ export const HeaderProvider: React.FC<HeaderProviderProps> = ({ children }) => {
     setCandidateAnchorEl,
     isCandidateHovered,
     setIsCandidateHovered,
-    helpButtonRef,
-    helpAnchorEl,
-    setHelpAnchorEl,
-    isHelpHovered,
-    setIsHelpHovered,
     handleDrawerToggle,
     handleEmployerMouseEnter,
     handleEmployerMouseLeave,
     handleCandidateMouseEnter,
     handleCandidateMouseLeave,
-    handleHelpMouseEnter,
-    handleHelpMouseLeave,
     handlePopoverMouseEnter,
     handlePopoverMouseLeave,
     toggleMobileMenu,
