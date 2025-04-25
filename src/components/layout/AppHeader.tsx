@@ -68,10 +68,10 @@ export default function AppHeader() {
       textColor: theme.palette.candidate.main
     },
     { 
-      title: 'ورود / ثبت‌نام', 
+      title: '',
       color: 'primary', 
       href: '#', 
-      variant: 'contained', 
+      variant: 'text',
       hasSubmenu: false,
       icon: faSignInAlt
     }
@@ -144,8 +144,8 @@ export default function AppHeader() {
               variant="h5"
               component="div"
               sx={{ 
-                fontWeight: 800, 
-                fontSize: { xs: '1.5rem', md: '1.8rem' },
+                fontWeight: 600,
+                fontSize: { xs: '1.3rem', md: '1.6rem' },
                 backgroundImage: `linear-gradient(45deg, ${theme.palette.primary.main}, ${theme.palette.primary.dark})`,
                 backgroundClip: 'text',
                 textFillColor: 'transparent',
@@ -158,22 +158,24 @@ export default function AppHeader() {
               </Link>
             </Typography>
 
-            {/* نمایش دکمه ورود/ثبت‌نام در هدر موبایل */}
+            {/* نمایش دکمه ورود/ثبت‌نام در هدر موبایل - فقط آیکون */}
             {isMobile && (
               <Button 
-                variant="contained"
+                variant="text"
                 color="primary"
                 href="#"
-                startIcon={<FontAwesomeIcon icon={faSignInAlt} />}
                 sx={{ 
-                  borderRadius: '10px',
-                  fontWeight: 800,
-                  px: 2,
-                  py: 0.75,
-                  boxShadow: '0 4px 10px rgba(0,0,0,0.15)'
+                  minWidth: 'auto',
+                  borderRadius: '50%',
+                  p: 1,
+                  height: 40,
+                  width: 40,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center'
                 }}
               >
-                ورود / ثبت‌نام
+                <FontAwesomeIcon icon={faSignInAlt} size="lg" />
               </Button>
             )}
 
@@ -195,20 +197,21 @@ export default function AppHeader() {
                         onMouseLeave={item.menuId === 'employer-menu' ? handleEmployerMouseLeave : handleCandidateMouseLeave}
                         color={item.color as any}
                         startIcon={<Avatar sx={{ 
-                          width: 24, 
-                          height: 24, 
+                          width: 20,
+                          height: 20,
                           bgcolor: item.bgColor,
                           color: item.textColor,
                         }}>
-                          <FontAwesomeIcon icon={item.icon} size="sm" />
+                          <FontAwesomeIcon icon={item.icon} size="xs" />
                         </Avatar>}
                         sx={{ 
                           borderRadius: '0px',
-                          fontWeight: 800,
-                          px: item.variant === 'contained' ? 2.5 : 1.5,
+                          fontWeight: 400,
+                          fontSize: '0.9rem',
+                          px: item.variant === 'contained' ? 2 : 1,
                           py: 0,
                           height: '100%',
-                          minHeight: '64px',
+                          minHeight: '60px',
                           minWidth: item.variant === 'contained' ? 140 : 'auto',
                           border: 'none',
                           position: 'relative',
@@ -218,7 +221,7 @@ export default function AppHeader() {
                             bottom: 0,
                             right: 0,
                             width: '0%',
-                            height: '3px',
+                            height: '2px',
                             zIndex: 1200,
                             backgroundColor: item.color === 'employer' ? theme.palette.employer.main : 
                                            item.color === 'candidate' ? theme.palette.candidate.main :
@@ -247,8 +250,8 @@ export default function AppHeader() {
                             : {}),
                           ...(item.variant === 'contained'
                             ? {
-                                borderRadius: '10px',
-                                boxShadow: '0 4px 10px rgba(0,0,0,0.15)',
+                                borderRadius: '8px',
+                                boxShadow: 'none',
                                 ml: 2,
                                 '&::after': {
                                   display: 'none'
@@ -266,30 +269,20 @@ export default function AppHeader() {
                       color={item.color as any}
                       component="a"
                       href={item.href}
-                      startIcon={item.variant === 'contained' ? 
-                        <FontAwesomeIcon icon={item.icon} /> : 
-                        (item.variant === 'text' ? 
-                          <Avatar sx={{ 
-                            width: 24, 
-                            height: 24, 
-                            bgcolor: item.bgColor,
-                            color: item.textColor, 
-                          }}>
-                            <FontAwesomeIcon icon={item.icon} size="sm" />
-                          </Avatar> : undefined)
-                      }
                       sx={{ 
-                        borderRadius: '10px',
-                        fontWeight: 800,
-                        px: item.variant === 'contained' ? 2.5 : 1.5,
-                        py: 0.75,
-                        height: '42px',
-                        minWidth: item.variant === 'contained' ? 140 : 'auto',
+                        minWidth: 'auto',
+                        borderRadius: '50%',
+                        p: 1,
+                        height: 40,
+                        width: 40,
                         ml: 2,
-                        boxShadow: '0 4px 10px rgba(0,0,0,0.15)'
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        boxShadow: 'none'
                       }}
                     >
-                      {item.title}
+                      <FontAwesomeIcon icon={item.icon} size="lg" />
                     </Button>
                   )}
                 </Box>

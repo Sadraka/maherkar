@@ -35,7 +35,7 @@ declare module '@mui/material/styles' {
 const theme = createTheme({
   direction: 'rtl',
   typography: {
-    fontFamily: 'Vazirmatn, Roboto, Arial',
+    fontFamily: 'IRANSansX, Roboto, Arial',
     h1: {
       fontWeight: 700,
     },
@@ -110,7 +110,7 @@ const theme = createTheme({
         root: {
           borderRadius: '8px',
           textTransform: 'none',
-          fontFamily: 'Vazirmatn',
+          fontFamily: 'IRANSansX',
           fontSize: '0.95rem',
           fontWeight: 500,
           padding: '8px 16px',
@@ -149,12 +149,12 @@ const theme = createTheme({
     MuiTextField: {
       styleOverrides: {
         root: {
-          fontFamily: 'Vazirmatn',
+          fontFamily: 'IRANSansX',
           '& .MuiInputLabel-root': {
-            fontFamily: 'Vazirmatn',
+            fontFamily: 'IRANSansX',
           },
           '& .MuiOutlinedInput-root': {
-            fontFamily: 'Vazirmatn',
+            fontFamily: 'IRANSansX',
             borderRadius: '8px',
             '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
               borderColor: EMPLOYER_BLUE,
@@ -174,14 +174,14 @@ const theme = createTheme({
     MuiMenuItem: {
       styleOverrides: {
         root: {
-          fontFamily: 'Vazirmatn',
+          fontFamily: 'IRANSansX',
         },
       },
     },
     MuiTab: {
       styleOverrides: {
         root: {
-          fontFamily: 'Vazirmatn',
+          fontFamily: 'IRANSansX',
           textTransform: 'none',
           fontWeight: 500,
         },
@@ -190,7 +190,7 @@ const theme = createTheme({
     MuiChip: {
       styleOverrides: {
         root: {
-          fontFamily: 'Vazirmatn',
+          fontFamily: 'IRANSansX',
         },
       },
     },

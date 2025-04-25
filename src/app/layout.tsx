@@ -3,7 +3,7 @@ import ThemeRegistry from '@/components/ThemeRegistry/ThemeRegistry'
 import Header from '@/components/layout/Header'
 import PromoBar from '@/components/layout/PromoBar'
 import "./globals.css"
-import { vazirFont } from '@/lib/fonts'
+import { iranSansFont } from '@/lib/fonts'
 import { JobSeekerThemeProvider } from '@/contexts/JobSeekerThemeContext'
 
 export const metadata: Metadata = {
@@ -18,7 +18,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="fa" dir="rtl">
-      <body className={vazirFont.className}>
+      <body className={iranSansFont.className}>
         <ThemeRegistry>
           <JobSeekerThemeProvider>
             <PromoBar />
