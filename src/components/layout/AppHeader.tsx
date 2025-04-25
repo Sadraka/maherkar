@@ -1,37 +1,35 @@
 'use client'
 
-import React, { useContext, useState } from 'react';
-import { useTheme } from '@mui/material/styles';
-import {
-  AppBar,
-  Toolbar,
-  Typography,
-  Button,
-  Box,
-  IconButton,
-  Menu,
-  MenuItem,
+import { 
+  AppBar, 
+  Toolbar, 
+  Typography, 
+  Button, 
+  Box, 
   Container,
-  Badge,
-  Tooltip,
+  useTheme,
+  alpha,
   Avatar,
-  useMediaQuery
+  MenuItem,
+  IconButton,
+  Tooltip,
 } from '@mui/material';
-import Image from 'next/image';
+import Link from 'next/link';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { 
-  faSignInAlt, 
-  faQuestion, 
-  faBuilding, 
-  faUserTie
+  faUser,
+  faBuilding,
+  faUserTie,
+  faSignInAlt,
+  faUserPlus,
+  faRightToBracket,
+  faUserCircle,
+  faBell
 } from '@fortawesome/free-solid-svg-icons';
-import { useRouter } from 'next/router';
-import { HeaderContext } from '@/contexts/HeaderContext';
-import NotificationsIcon from '@mui/icons-material/Notifications';
-import PersonIcon from '@mui/icons-material/Person';
-import LoginIcon from '@mui/icons-material/Login';
-import HowToRegIcon from '@mui/icons-material/HowToReg';
+import { useHeaderContext } from '@/contexts/HeaderContext';
 import { styled } from '@mui/material/styles';
+import { useRouter } from 'next/navigation';
+import { useState } from 'react';
 
 // کامپوننت AppBar اصلی
 export default function AppHeader() {
@@ -48,14 +46,7 @@ export default function AppHeader() {
     handleCandidateMouseLeave,
     isEmployerHovered,
     isCandidateHovered,
-    isAuthenticated,
-    user,
-    userMenuAnchorEl,
-    handleUserMenuOpen,
-    handleUserMenuClose,
-    handleLogout,
   } = useHeaderContext();
-  const router = useRouter();
 
   // اطلاعات منوها - با استایل یکسان با منوی موبایل
   const navItems = [
@@ -82,14 +73,6 @@ export default function AppHeader() {
       icon: faUserTie,
       bgColor: alpha(theme.palette.candidate.main, 0.15),
       textColor: theme.palette.candidate.main
-    },
-    { 
-      title: '',
-      color: 'primary', 
-      href: '#', 
-      variant: 'text',
-      hasSubmenu: false,
-      icon: faSignInAlt
     }
   ];
 
@@ -100,6 +83,7 @@ export default function AppHeader() {
     padding: '8px 12px',
     minWidth: 'unset',
     color: '#333',
+    fontWeight: 400,
     '&:hover': {
       backgroundColor: 'transparent',
       color: '#000',
@@ -119,7 +103,7 @@ export default function AppHeader() {
       backgroundColor: alpha(theme.palette.primary.main, 0.7),
     },
     '&.active': {
-      fontWeight: 'bold',
+      fontWeight: 500,
       color: theme.palette.primary.main,
       '&::after': {
         width: '100%',
@@ -128,219 +112,286 @@ export default function AppHeader() {
   }));
 
   return (
-    <AppBar
-      position="static"
-      sx={{
-        color: 'common.black',
-        backgroundColor: 'common.white',
-        boxShadow: '0px 4px 10px rgba(0, 0, 0, 0.05)',
+    <AppBar 
+      position="sticky" 
+      color="default"
+      elevation={0}
+      sx={{ 
+        backgroundColor: 'background.paper',
+        borderBottom: '1px solid',
+        borderColor: 'divider',
+        boxShadow: '0px 2px 8px rgba(0,0,0,0.04)',
+        zIndex: 1200,
+        top: 0,
+        left: 0,
+        right: 0,
+        width: '100%',
+        '&.MuiPaper-root': {
+          backdropFilter: 'blur(15px)' as any,
+          backgroundColor: 'rgba(255, 255, 255, 0.98)',
+        }
       }}
     >
-      <Container maxWidth="xl">
-        <Toolbar
-          disableGutters
-          sx={{
-            height: 70,
-            px: { xs: 1, md: 2 },
-            justifyContent: 'space-between',
-          }}
-        >
-          {/* Logo and Site Title */}
-          <Box
-            sx={{
-              display: 'flex',
-              alignItems: 'center',
-              cursor: 'pointer',
-            }}
-            onClick={() => router.push('/')}
-          >
-            <Image
-              src="/assets/images/logo.svg"
-              alt="ماهرکار"
-              width={40}
-              height={40}
-              style={{ marginLeft: '10px' }}
-            />
-            <Typography
-              variant="h6"
-              component="div"
-              sx={{
-                fontWeight: 700,
-                fontSize: { xs: '1.1rem', md: '1.3rem' },
-                color: (theme) => theme.palette.primary.main,
-                display: { xs: 'none', sm: 'block' },
+      <Container maxWidth="lg">
+        <Box sx={{ maxWidth: 1200, mx: 'auto', width: '100%' }}>
+          <Toolbar sx={{ 
+            justifyContent: { xs: 'space-between', md: 'space-between' }, 
+            px: { xs: 1.5, md: 0 },
+            py: { xs: 1, md: 0.5 },
+            width: '100%',
+          }}>
+            {/* لوگو و منوی راست */}
+            <Box 
+              sx={{ 
+                display: 'flex', 
+                alignItems: 'center',
+                gap: { xs: 2, md: 3 }
               }}
             >
-              ماهرکار
-            </Typography>
-          </Box>
-
-          {/* Navigation Links - Desktop */}
-          <Box sx={{ display: { xs: 'none', md: 'flex' }, gap: 1 }}>
-            {navItems.map((item) => (
-              <Button
-                key={item.id}
-                sx={{
-                  color: 'text.primary',
-                  mx: 0.5,
-                  '&:hover': {
-                    backgroundColor: 'rgba(0, 0, 0, 0.04)',
-                  },
+              <Typography
+                variant="h5"
+                component="div"
+                sx={{ 
+                  fontWeight: 800,
+                  fontSize: { xs: '1.5rem', md: '1.8rem' },
+                  backgroundImage: `linear-gradient(45deg, ${theme.palette.primary.main}, ${theme.palette.primary.dark})`,
+                  backgroundClip: 'text',
+                  textFillColor: 'transparent',
+                  display: 'flex',
+                  alignItems: 'center',
+                  letterSpacing: '-0.5px',
+                  textShadow: '0 1px 1px rgba(0,0,0,0.05)'
                 }}
-                onMouseEnter={item.hasSubmenu ? () => handleOpenMenu(item.id) : undefined}
-                onClick={!item.hasSubmenu ? () => router.push(item.route) : undefined}
               >
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                  <FontAwesomeIcon icon={item.icon} size="sm" />
-                  <Typography
-                    variant="body2"
-                    component="span"
-                    sx={{ fontWeight: 500, fontSize: '0.9rem' }}
-                  >
-                    {item.label}
-                  </Typography>
-                </Box>
-              </Button>
-            ))}
-          </Box>
+                <Link href="/" style={{ textDecoration: 'none', color: 'inherit' }}>
+                  ماهرکار
+                </Link>
+              </Typography>
 
-          {/* Mobile Menu Trigger */}
-          <Box sx={{ display: { xs: 'flex', md: 'none' } }}>
-            <IconButton
-              size="large"
-              edge="start"
-              color="inherit"
-              aria-label="menu"
-              onClick={handleMobileMenuOpen}
-              sx={{ p: 1 }}
-            >
-              <Box
-                component="img"
-                src="/assets/images/icons/menu.svg"
-                alt="menu"
-                sx={{ width: 24, height: 24 }}
-              />
-            </IconButton>
-          </Box>
+              {/* آیتم‌های منو برای دسکتاپ - کارفرما/کارجو */}
+              <Box sx={{ 
+                display: { xs: 'none', md: 'flex' }, 
+                alignItems: 'center', 
+                gap: 2
+              }}>
+                {navItems.map((item, index) => (
+                  <Box key={index}>
+                    {item.hasSubmenu ? (
+                      <Box>
+                        <Button 
+                          ref={item.buttonRef}
+                          variant={item.variant as "text" | "contained" | "outlined"}
+                          onMouseEnter={item.menuId === 'employer-menu' ? handleEmployerMouseEnter : handleCandidateMouseEnter}
+                          onMouseLeave={item.menuId === 'employer-menu' ? handleEmployerMouseLeave : handleCandidateMouseLeave}
+                          color={item.color as any}
+                          sx={{ 
+                            borderRadius: '0px',
+                            fontWeight: 400,
+                            fontSize: '0.9rem',
+                            px: 1,
+                            py: 0,
+                            height: '100%',
+                            minHeight: '60px',
+                            minWidth: 'auto',
+                            border: 'none',
+                            position: 'relative',
+                            transition: 'all 0.2s ease',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: 1.5,
+                            '&::after': {
+                              content: '""',
+                              position: 'absolute',
+                              bottom: 0,
+                              right: 0,
+                              width: '0%',
+                              height: '2px',
+                              zIndex: 1200,
+                              backgroundColor: item.color === 'employer' ? theme.palette.employer.main : 
+                                             item.color === 'candidate' ? theme.palette.candidate.main :
+                                             item.color === 'black' ? '#000000' : theme.palette.primary.main,
+                              transition: 'width 0.3s ease',
+                            },
+                            '&:hover': {
+                              backgroundColor: 'transparent',
+                              '&::after': {
+                                width: '100%',
+                              }
+                            },
+                            ...(item.color === 'employer' && item.variant === 'text' 
+                              ? { 
+                                  color: theme.palette.employer.main,
+                                } 
+                              : {}),
+                            ...(item.color === 'candidate' && item.variant === 'text' 
+                              ? { 
+                                  color: theme.palette.candidate.main,
+                                } 
+                              : {}),
+                            ...(item.color === 'primary' && item.variant === 'text' 
+                              ? { 
+                                  color: theme.palette.primary.main,
+                                } 
+                              : {}),
+                            ...(item.variant === 'contained'
+                              ? {
+                                  borderRadius: '8px',
+                                  boxShadow: 'none',
+                                  ml: 2,
+                                  '&::after': {
+                                    display: 'none'
+                                  }
+                                }
+                              : {})
+                          }}
+                        >
+                          <Box
+                            sx={{
+                              width: '32px',
+                              height: '32px',
+                              borderRadius: '10px',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              transition: 'all 0.25s ease',
+                              backgroundColor: item.bgColor,
+                              boxShadow: `0 2px 6px ${alpha(
+                                item.color === 'employer' ? theme.palette.employer.main : theme.palette.candidate.main, 
+                                0.1
+                              )}`
+                            }}
+                          >
+                            <FontAwesomeIcon 
+                              icon={item.icon} 
+                              style={{ 
+                                fontSize: '0.9rem', 
+                                color: item.textColor
+                              }} 
+                            />
+                          </Box>
+                          {item.title}
+                        </Button>
+                      </Box>
+                    ) : null}
+                  </Box>
+                ))}
+              </Box>
+            </Box>
 
-          {/* Right side buttons */}
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: { xs: 0.5, md: 1 } }}>
-            {/* Authentication Buttons or User Profile */}
-            {isAuthenticated ? (
-              <>
-                {/* Notification Bell for logged in users */}
-                <Tooltip title="اعلان‌ها">
-                  <IconButton 
-                    color="default" 
-                    sx={{ 
-                      mr: 1,
-                      transition: 'all 0.2s',
-                      '&:hover': { color: 'primary.main' }
-                    }}
-                  >
-                    <Badge badgeContent={3} color="error">
-                      <NotificationsIcon />
-                    </Badge>
-                  </IconButton>
-                </Tooltip>
-                
-                {/* User Avatar */}
-                <Tooltip title="پروفایل کاربری">
-                  <IconButton
-                    onClick={handleUserMenuOpen}
+            {/* آیکون‌های سمت چپ */}
+            <Box sx={{ 
+              display: 'flex', 
+              alignItems: 'center', 
+              gap: { xs: 1, md: 2 }
+            }}>
+              {/* آیکون اعلان‌ها (زنگوله) */}
+              <Tooltip title="اعلان‌ها" arrow>
+                <Box
+                  component="a"
+                  href="#"
+                  sx={{
+                    width: { xs: '38px', md: '42px' },
+                    height: { xs: '38px', md: '42px' },
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    cursor: 'pointer',
+                    transition: 'all 0.25s ease',
+                    position: 'relative',
+                    '&:hover': {
+                      transform: 'translateY(-2px)',
+                      '& .icon-container': {
+                        backgroundColor: alpha(theme.palette.primary.main, 0.18),
+                        boxShadow: `0 4px 12px ${alpha(theme.palette.primary.main, 0.2)}`
+                      },
+                      '& .icon': {
+                        color: '#fff'
+                      }
+                    }
+                  }}
+                >
+                  <Box
+                    className="icon-container"
                     sx={{
-                      p: 0,
-                      border: '2px solid',
-                      borderColor: 'primary.light',
-                      transition: 'all 0.2s',
+                      width: '100%',
+                      height: '100%',
+                      borderRadius: '12px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      transition: 'all 0.25s ease',
+                      backgroundColor: alpha(theme.palette.primary.main, 0.1),
+                      boxShadow: `0 2px 8px ${alpha(theme.palette.primary.main, 0.08)}`
                     }}
                   >
-                    <Avatar alt="user" src={user?.avatar || ''} sx={{ width: 35, height: 35 }}>
-                      {!user?.avatar && <PersonIcon />}
-                    </Avatar>
-                  </IconButton>
-                </Tooltip>
-                
-                {/* User Menu */}
-                <Menu
-                  anchorEl={userMenuAnchorEl}
-                  open={Boolean(userMenuAnchorEl)}
-                  onClose={handleUserMenuClose}
-                  sx={{ mt: '45px' }}
-                >
-                  <MenuItem onClick={() => router.push('/dashboard')}>داشبورد</MenuItem>
-                  <MenuItem onClick={() => router.push('/profile')}>پروفایل</MenuItem>
-                  <MenuItem onClick={handleLogout}>خروج</MenuItem>
-                </Menu>
-              </>
-            ) : (
-              <>
-                <Button
-                  variant="text"
-                  onClick={() => router.push('/login')}
-                  sx={{
-                    color: 'text.primary',
-                    display: { xs: 'none', sm: 'flex' },
-                    alignItems: 'center',
-                    gap: 0.5,
-                    '&:hover': { color: 'primary.main' },
-                  }}
-                  startIcon={<LoginIcon />}
-                >
-                  ورود
-                </Button>
-                <Button
-                  variant="text"
-                  onClick={() => router.push('/register')}
-                  sx={{
-                    color: 'text.primary',
-                    display: { xs: 'none', sm: 'flex' },
-                    alignItems: 'center',
-                    gap: 0.5,
-                    '&:hover': { color: 'primary.main' },
-                  }}
-                  startIcon={<HowToRegIcon />}
-                >
-                  ثبت‌نام
-                </Button>
-                
-                {/* Mobile Authentication Icon */}
-                <Box sx={{ display: { xs: 'block', sm: 'none' } }}>
-                  <IconButton
-                    color="inherit"
-                    onClick={() => router.push('/login')}
-                    sx={{ '&:hover': { color: 'primary.main' } }}
-                  >
-                    <LoginIcon />
-                  </IconButton>
+                    <FontAwesomeIcon 
+                      icon={faBell} 
+                      className="icon"
+                      style={{ 
+                        fontSize: '1.2rem',
+                        color: theme.palette.primary.main,
+                        transition: 'all 0.25s ease'
+                      }} 
+                    />
+                  </Box>
                 </Box>
-              </>
-            )}
-            
-            {/* Post Ad Button */}
-            <Button
-              variant="contained"
-              color="primary"
-              onClick={() => router.push('/post-job')}
-              sx={{
-                borderRadius: '8px',
-                py: { xs: 0.5, md: 0.8 },
-                px: { xs: 1, md: 2 },
-                fontSize: { xs: '0.75rem', md: '0.85rem' },
-                fontWeight: 600,
-                boxShadow: '0 4px 8px rgba(0, 112, 244, 0.25)',
-                whiteSpace: 'nowrap',
-                '&:hover': {
-                  boxShadow: '0 6px 12px rgba(0, 112, 244, 0.35)',
-                  transform: 'translateY(-2px)',
-                },
-                transition: 'all 0.2s',
-              }}
-            >
-              ثبت آگهی
-            </Button>
-          </Box>
-        </Toolbar>
+              </Tooltip>
+              
+              {/* آیکون ورود/ثبت‌نام */}
+              <Tooltip title="ورود/ثبت‌نام" arrow>
+                <Box
+                  component="a"
+                  href="/login"
+                  sx={{
+                    width: { xs: '42px', md: '46px' },
+                    height: { xs: '42px', md: '46px' },
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    cursor: 'pointer',
+                    transition: 'all 0.25s ease',
+                    position: 'relative',
+                    '&:hover': {
+                      transform: 'translateY(-2px)',
+                      '& .icon-container': {
+                        backgroundColor: alpha(theme.palette.primary.main, 0.18),
+                        boxShadow: `0 4px 12px ${alpha(theme.palette.primary.main, 0.2)}`
+                      },
+                      '& .icon': {
+                        color: '#fff'
+                      }
+                    }
+                  }}
+                >
+                  <Box
+                    className="icon-container"
+                    sx={{
+                      width: '100%',
+                      height: '100%',
+                      borderRadius: '12px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      transition: 'all 0.25s ease',
+                      backgroundColor: alpha(theme.palette.primary.main, 0.12),
+                      boxShadow: `0 2px 8px ${alpha(theme.palette.primary.main, 0.1)}`
+                    }}
+                  >
+                    <FontAwesomeIcon 
+                      icon={faUser} 
+                      className="icon"
+                      style={{ 
+                        fontSize: '1.3rem',
+                        color: theme.palette.primary.main,
+                        transition: 'all 0.25s ease'
+                      }} 
+                    />
+                  </Box>
+                </Box>
+              </Tooltip>
+            </Box>
+          </Toolbar>
+        </Box>
       </Container>
     </AppBar>
   );
