@@ -230,14 +230,22 @@ export default function Hero() {
             component="h1" 
             sx={{ 
               fontWeight: 700, 
-              fontSize: { xs: '1.6rem', sm: '2rem', md: '2.2rem' },
+              fontSize: { xs: '1.4rem', sm: '1.7rem', md: '1.9rem' },
               color: theme.palette.text.primary,
               mb: 1
             }}
           >
             هوشمند انتخاب کن، سریع استخدام شو
           </Typography>
-          <Typography variant="body1" color="text.secondary">
+          <Typography 
+            variant="body1" 
+            color="text.secondary"
+            sx={{
+              fontSize: { xs: '0.85rem', sm: '0.9rem', md: '1rem' },
+              maxWidth: '90%',
+              mx: 'auto'
+            }}
+          >
             بهترین فرصت‌های شغلی و پروژه‌ها در دسترس شماست
           </Typography>
         </Box>

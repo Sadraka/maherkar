@@ -186,21 +186,24 @@ export default function AppHeaderNew() {
                 onClick={handleDrawerToggle}
                 sx={{ 
                   display: { xs: 'flex', md: 'none' },
-                  backgroundColor: alpha(theme.palette.primary.main, 0.08),
+                  backgroundColor: 'transparent',
                   borderRadius: '10px',
                   padding: { xs: '6px', md: '8px' },
                   height: { xs: 36, md: 40 },
                   width: { xs: 36, md: 40 },
                   ml: { xs: -0.5, md: 0 },
+                  overflow: 'hidden',
                   '&:hover': {
-                    backgroundColor: alpha(theme.palette.primary.main, 0.12),
+                    backgroundColor: 'transparent',
                   }
                 }}
               >
                 <FontAwesomeIcon 
                   icon={faBars} 
                   style={{ 
-                    fontSize: '1rem',
+                    fontSize: '1.2rem',
+                    width: '20px',
+                    height: '20px',
                     color: theme.palette.primary.main
                   }} 
                 />
@@ -257,7 +260,7 @@ export default function AppHeaderNew() {
                             transition: 'all 0.2s ease',
                             display: 'flex',
                             alignItems: 'center',
-                            gap: 1.5,
+                            gap: 0.5,
                             '&::after': {
                               content: '""',
                               position: 'absolute',
@@ -304,30 +307,16 @@ export default function AppHeaderNew() {
                               : {})
                           }}
                         >
-                          <Box
-                            sx={{
-                              width: '32px',
-                              height: '32px',
-                              borderRadius: '10px',
-                              display: 'flex',
-                              alignItems: 'center',
-                              justifyContent: 'center',
-                              transition: 'all 0.25s ease',
-                              backgroundColor: item.bgColor,
-                              boxShadow: `0 2px 6px ${alpha(
-                                item.color === 'employer' ? theme.palette.employer.main : theme.palette.candidate.main, 
-                                0.1
-                              )}`
-                            }}
-                          >
-                            <FontAwesomeIcon 
-                              icon={item.icon} 
-                              style={{ 
-                                fontSize: '0.9rem', 
-                                color: item.textColor
-                              }} 
-                            />
-                          </Box>
+                          <FontAwesomeIcon 
+                            icon={item.icon} 
+                            style={{ 
+                              fontSize: '1.2rem',
+                              width: '22px',
+                              height: '22px',
+                              color: item.textColor,
+                              marginLeft: '4px'
+                            }} 
+                          />
                           {item.title}
                         </Button>
                       </Box>
@@ -381,55 +370,37 @@ export default function AppHeaderNew() {
                   component={Button}
                   variant="text"
                   href="/support"
-                  startIcon={
-                    <Box
-                      sx={{
-                        width: '28px',
-                        height: '28px',
-                        borderRadius: '10px',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        backgroundColor: alpha(theme.palette.primary.main, 0.15),
-                        boxShadow: `0 2px 6px ${alpha(theme.palette.primary.main, 0.1)}`,
-                        mr: 0.5
-                      }}
-                    >
-                      <FontAwesomeIcon 
-                        icon={faHeadset} 
-                        style={{ 
-                          fontSize: '0.9rem', 
-                          color: theme.palette.primary.main
-                        }} 
-                      />
-                    </Box>
-                  }
                   sx={{
-                    borderRadius: '20px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 1,
+                    borderRadius: '8px',
                     fontWeight: 400,
-                    fontSize: '0.85rem',
-                    padding: '5px 15px',
-                    border: `1px solid ${alpha(theme.palette.primary.main, 0.3)}`,
+                    fontSize: '0.9rem',
+                    padding: '6px 16px',
                     color: theme.palette.primary.main,
                     transition: 'all 0.25s ease',
                     textTransform: 'none',
+                    border: 'none',
+                    backgroundColor: 'transparent',
                     '&:hover': {
-                      backgroundColor: alpha(theme.palette.primary.main, 0.08),
-                      borderColor: alpha(theme.palette.primary.main, 0.5),
+                      backgroundColor: 'transparent',
                       transform: 'translateY(-2px)',
-                      boxShadow: `0 5px 10px ${alpha(theme.palette.primary.main, 0.15)}`,
+                      color: theme.palette.primary.dark,
                     }
                   }}
                 >
-                  <Box
-                    sx={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: 0.5
-                    }}
-                  >
-                    ارتباط با پشتیبانی
-                  </Box>
+                  <FontAwesomeIcon 
+                    icon={faHeadset} 
+                    style={{ 
+                      fontSize: '1.2rem',
+                      width: '22px',
+                      height: '22px',
+                      color: 'inherit',
+                      transition: 'all 0.25s ease'
+                    }} 
+                  />
+                  ارتباط با پشتیبانی
                 </Box>
               </Box>
               
@@ -447,42 +418,26 @@ export default function AppHeaderNew() {
                     cursor: 'pointer',
                     transition: 'all 0.25s ease',
                     position: 'relative',
+                    overflow: 'hidden',
                     '&:hover': {
                       transform: 'translateY(-2px)',
-                      '& .icon-container': {
-                        backgroundColor: alpha(theme.palette.primary.main, 0.18),
-                        boxShadow: `0 4px 12px ${alpha(theme.palette.primary.main, 0.2)}`
-                      },
                       '& .icon': {
-                        color: '#fff'
+                        color: theme.palette.primary.dark
                       }
                     }
                   }}
                 >
-                  <Box
-                    className="icon-container"
-                    sx={{
-                      width: '100%',
-                      height: '100%',
-                      borderRadius: '12px',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      transition: 'all 0.25s ease',
-                      backgroundColor: alpha(theme.palette.primary.main, 0.1),
-                      boxShadow: `0 2px 8px ${alpha(theme.palette.primary.main, 0.08)}`
-                    }}
-                  >
-                    <FontAwesomeIcon 
-                      icon={faBell} 
-                      className="icon"
-                      style={{ 
-                        fontSize: '0.9rem',
-                        color: theme.palette.primary.main,
-                        transition: 'all 0.25s ease'
-                      }} 
-                    />
-                  </Box>
+                  <FontAwesomeIcon 
+                    icon={faBell} 
+                    className="icon"
+                    style={{ 
+                      fontSize: '1.2rem',
+                      width: '20px',
+                      height: '20px',
+                      color: theme.palette.primary.main,
+                      transition: 'all 0.25s ease'
+                    }} 
+                  />
                 </Box>
               </Tooltip>
               
@@ -492,50 +447,34 @@ export default function AppHeaderNew() {
                   component="a"
                   href="/login"
                   sx={{
-                    width: { xs: '36px', md: '46px' },
-                    height: { xs: '36px', md: '46px' },
+                    width: { xs: '34px', md: '42px' },
+                    height: { xs: '34px', md: '42px' },
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
                     cursor: 'pointer',
                     transition: 'all 0.25s ease',
                     position: 'relative',
+                    overflow: 'hidden',
                     '&:hover': {
                       transform: 'translateY(-2px)',
-                      '& .icon-container': {
-                        backgroundColor: alpha(theme.palette.primary.main, 0.18),
-                        boxShadow: `0 4px 12px ${alpha(theme.palette.primary.main, 0.2)}`
-                      },
                       '& .icon': {
-                        color: '#fff'
+                        color: theme.palette.primary.dark
                       }
                     }
                   }}
                 >
-                  <Box
-                    className="icon-container"
-                    sx={{
-                      width: '100%',
-                      height: '100%',
-                      borderRadius: '12px',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      transition: 'all 0.25s ease',
-                      backgroundColor: alpha(theme.palette.primary.main, 0.12),
-                      boxShadow: `0 2px 8px ${alpha(theme.palette.primary.main, 0.1)}`
-                    }}
-                  >
-                    <FontAwesomeIcon 
-                      icon={faUser} 
-                      className="icon"
-                      style={{ 
-                        fontSize: '1rem',
-                        color: theme.palette.primary.main,
-                        transition: 'all 0.25s ease'
-                      }} 
-                    />
-                  </Box>
+                  <FontAwesomeIcon 
+                    icon={faUser} 
+                    className="icon"
+                    style={{ 
+                      fontSize: '1.3rem',
+                      width: '22px',
+                      height: '22px',
+                      color: theme.palette.primary.main,
+                      transition: 'all 0.25s ease'
+                    }} 
+                  />
                 </Box>
               </Tooltip>
             </Box>
