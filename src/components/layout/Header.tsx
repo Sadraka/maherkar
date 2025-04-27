@@ -3,7 +3,7 @@
 import { Box } from '@mui/material';
 import { HeaderProvider } from '@/contexts/HeaderContext';
 import AppHeaderNew from './AppHeaderNew';
-import MobileMenuV2 from './MobileMenuV2';
+import MobileMenu from './MobileMenu';
 import MenuPopover from './MenuPopover';
 
 export default function Header() {
@@ -13,7 +13,7 @@ export default function Header() {
         <AppHeaderNew />
         <MenuPopover />
       </Box>
-      <MobileMenuV2 />
+      <MobileMenu />
     </HeaderProvider>
   );
 } 

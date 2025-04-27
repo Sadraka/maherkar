@@ -33,6 +33,7 @@ import {
   EMPLOYER_BLUE,
   JOB_SEEKER_GREEN
 } from '@/constants/colors';
+import React from 'react';
 
 export default function MenuPopover() {
   const theme = useTheme();
@@ -69,7 +70,7 @@ export default function MenuPopover() {
       description: 'جستجو بر اساس مهارت‌ها و تخصص‌ها',
     },
     { 
-      title: 'ثبت سریع پروژه', 
+      title: 'ثبت سریع آگهی', 
       icon: <FontAwesomeIcon icon={faPlus} size="lg" />, 
       href: '#',
       description: 'همکاری با هزاران متخصص در کمترین زمان',
@@ -220,16 +221,21 @@ export default function MenuPopover() {
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
-                        borderRadius: 1.5,
-                        bgcolor: activeEmployerIndex === index ? employerColor : alpha(employerColor, 0.1),
-                        color: activeEmployerIndex === index ? 'white' : employerColor,
-                        width: 52,
-                        height: 52,
                         mr: 2.5,
                         flexShrink: 0
                       }}
                     >
-                      {item.icon}
+                      {item.icon && 
+                        React.cloneElement(item.icon, {
+                          style: {
+                            fontSize: '1.5rem',
+                            width: '28px',
+                            height: '28px',
+                            color: employerColor,
+                            transition: 'all 0.25s ease'
+                          }
+                        })
+                      }
                     </Box>
                     <Box>
                       <Typography fontWeight={600} fontSize="1.15rem" color="text.primary">
@@ -349,16 +355,21 @@ export default function MenuPopover() {
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
-                        borderRadius: 1.5,
-                        bgcolor: activeCandidateIndex === index ? candidateColor : alpha(candidateColor, 0.1),
-                        color: activeCandidateIndex === index ? 'white' : candidateColor,
-                        width: 52,
-                        height: 52,
                         mr: 2.5,
                         flexShrink: 0
                       }}
                     >
-                      {item.icon}
+                      {item.icon && 
+                        React.cloneElement(item.icon, {
+                          style: {
+                            fontSize: '1.5rem',
+                            width: '28px',
+                            height: '28px',
+                            color: candidateColor,
+                            transition: 'all 0.25s ease'
+                          }
+                        })
+                      }
                     </Box>
                     <Box>
                       <Typography fontWeight={600} fontSize="1.15rem" color="text.primary">
