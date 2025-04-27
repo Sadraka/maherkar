@@ -111,6 +111,38 @@ export default function PromoBar() {
           transition: 'transform 0.3s ease',
           visibility: isScrolled ? 'hidden' : 'visible',
           opacity: isScrolled ? 0 : 1,
+          backgroundImage: `
+            linear-gradient(135deg, ${theme.palette.primary.main}, ${theme.palette.primary.dark})
+          `,
+          backgroundSize: 'cover',
+          overflow: 'hidden',
+          '&::before': {
+            content: '""',
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundImage: `
+              url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='30' height='30' viewBox='0 0 30 30'%3E%3Cpath d='M15 5C9.5 5 5 9.5 5 15s4.5 10 10 10 10-4.5 10-10S20.5 5 15 5zm0 18c-4.4 0-8-3.6-8-8s3.6-8 8-8 8 3.6 8 8-3.6 8-8 8z' fill='rgba(255,255,255,0.07)'/%3E%3Cpath d='M15 10c-2.8 0-5 2.2-5 5s2.2 5 5 5 5-2.2 5-5-2.2-5-5-5zm0 8c-1.7 0-3-1.3-3-3s1.3-3 3-3 3 1.3 3 3-1.3 3-3 3z' fill='rgba(255,255,255,0.12)'/%3E%3C/svg%3E"),
+              url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'%3E%3Ctext x='1' y='17' font-family='Arial' font-size='15' font-weight='bold' fill='rgba(255,255,255,0.1)'%3Eم%3C/text%3E%3C/svg%3E")
+            `,
+            backgroundPosition: '0 0, 15px 15px',
+            backgroundSize: '30px 30px, 24px 24px',
+            backgroundRepeat: 'repeat, repeat',
+            opacity: 1,
+          },
+          '&::after': {
+            content: '""',
+            position: 'absolute',
+            top: '50%',
+            left: '10%',
+            right: '10%',
+            height: '1px',
+            background: 'linear-gradient(to right, transparent, rgba(255,255,255,0.2), transparent)',
+            transform: 'translateY(-50%)',
+            pointerEvents: 'none',
+          }
         }}
       >
         <Container maxWidth="lg">

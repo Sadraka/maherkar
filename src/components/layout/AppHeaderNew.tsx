@@ -169,12 +169,12 @@ export default function AppHeaderNew() {
               </Link>
             </Typography>
             
-            {/* لوگو و منوی راست */}
+            {/* آیکون‌های سمت راست */}
             <Box 
               sx={{ 
                 display: 'flex', 
                 alignItems: 'center',
-                gap: { xs: 1, md: 3 },
+                gap: { xs: 1.5, md: 3 }, // افزایش فاصله آیکون‌ها در موبایل
                 zIndex: 2
               }}
             >
@@ -188,10 +188,10 @@ export default function AppHeaderNew() {
                   display: { xs: 'flex', md: 'none' },
                   backgroundColor: 'transparent',
                   borderRadius: '10px',
-                  padding: { xs: '6px', md: '8px' },
-                  height: { xs: 36, md: 40 },
-                  width: { xs: 36, md: 40 },
-                  ml: { xs: -0.5, md: 0 },
+                  padding: 0,
+                  height: { xs: 34, md: 40 }, // اندازه یکسان با سایر آیکون‌ها
+                  width: { xs: 34, md: 40 }, // اندازه یکسان با سایر آیکون‌ها
+                  ml: { xs: 0, md: 0 },
                   overflow: 'hidden',
                   '&:hover': {
                     backgroundColor: 'transparent',
@@ -359,8 +359,8 @@ export default function AppHeaderNew() {
               sx={{ 
                 display: 'flex', 
                 alignItems: 'center', 
-                gap: { xs: 1, md: 2 },
-                mr: { xs: -0.5, md: 0 },
+                gap: { xs: 1.5, md: 2 }, // افزایش فاصله آیکون‌ها در موبایل
+                mr: { xs: 0, md: 0 },
                 zIndex: 2
               }}
             >
