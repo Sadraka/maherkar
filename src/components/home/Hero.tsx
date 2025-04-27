@@ -230,7 +230,7 @@ export default function Hero() {
             component="h1" 
             sx={{ 
               fontWeight: 700, 
-              fontSize: { xs: '1.4rem', sm: '1.7rem', md: '1.9rem' },
+              fontSize: { xs: '1.2rem', sm: '1.7rem', md: '1.9rem' },
               color: theme.palette.text.primary,
               mb: 1
             }}
@@ -241,9 +241,10 @@ export default function Hero() {
             variant="body1" 
             color="text.secondary"
             sx={{
-              fontSize: { xs: '0.85rem', sm: '0.9rem', md: '1rem' },
-              maxWidth: '90%',
-              mx: 'auto'
+              fontSize: { xs: '0.75rem', sm: '0.9rem', md: '1rem' },
+              maxWidth: { xs: '95%', sm: '90%' },
+              mx: 'auto',
+              lineHeight: { xs: 1.5, md: 1.6 }
             }}
           >
             بهترین فرصت‌های شغلی و پروژه‌ها در دسترس شماست
