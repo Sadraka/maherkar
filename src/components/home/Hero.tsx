@@ -230,9 +230,21 @@ export default function Hero() {
             position: 'relative',
             borderRadius: '12px',
             overflow: 'hidden',
-            backgroundColor: '#3366cc',
-            p: { xs: 3, md: 4 },
+            background: 'linear-gradient(135deg, #3366cc 0%, #4477dd 100%)',
+            p: { xs: 4, md: 5 },
             mb: 4,
+            boxShadow: '0 10px 30px rgba(0, 0, 0, 0.15), 0 5px 15px rgba(0, 0, 0, 0.1)',
+            '&::after': {
+              content: '""',
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              right: 0,
+              height: '40%',
+              background: 'linear-gradient(180deg, rgba(255, 255, 255, 0.15) 0%, rgba(255, 255, 255, 0) 100%)',
+              pointerEvents: 'none',
+              zIndex: 0
+            },
             '&::before': {  // پس‌زمینه با اندازه دقیق کادر
               content: '""',
               position: 'absolute',
@@ -244,20 +256,20 @@ export default function Hero() {
               backgroundSize: '35%', // تنظیم دقیق سایز الگو به 35 درصد
               backgroundPosition: 'center',
               backgroundRepeat: 'repeat',
-              opacity: 0.8,
+              opacity: 0.4, // کاهش شفافیت
               zIndex: 0
             }
           }}
         >
-          <Box sx={{ textAlign: 'center', mb: 4, position: 'relative', zIndex: 1 }}>
+          <Box sx={{ textAlign: 'center', mb: { xs: 5, md: 6 }, position: 'relative', zIndex: 1 }}>
             <Typography 
               variant="h4" 
               component="h1" 
               sx={{ 
                 fontWeight: 700, 
-                fontSize: { xs: '1.2rem', sm: '1.7rem', md: '1.9rem' },
+                fontSize: { xs: '1.3rem', sm: '1.8rem', md: '2.1rem' },
                 color: '#ffffff',
-                mb: 1
+                mb: 2
               }}
             >
               هوشمند انتخاب کن، سریع استخدام شو
@@ -265,10 +277,10 @@ export default function Hero() {
             <Typography 
               variant="body1" 
               sx={{
-                fontSize: { xs: '0.75rem', sm: '0.9rem', md: '1rem' },
+                fontSize: { xs: '0.85rem', sm: '1rem', md: '1.1rem' },
                 maxWidth: { xs: '95%', sm: '90%' },
                 mx: 'auto',
-                lineHeight: { xs: 1.5, md: 1.6 },
+                lineHeight: { xs: 1.6, md: 1.8 },
                 color: 'rgba(255, 255, 255, 0.9)'
               }}
             >
@@ -288,7 +300,8 @@ export default function Hero() {
               borderRadius: '8px',
               boxShadow: '0px 5px 25px rgba(0, 0, 0, 0.1)',
               position: 'relative',
-              zIndex: 1
+              zIndex: 1,
+              mb: { xs: 3, md: 4 }
             }}
           >
             <Box sx={{ width: { xs: '100%', sm: '25%' } }}>
@@ -398,7 +411,7 @@ export default function Hero() {
                 startIcon={<SearchIcon sx={{ ml: 0.5 }} />}
                 fullWidth
                 sx={{ 
-                  height: '48px',
+                  height: { xs: '52px', md: '48px' }, // ارتفاع یکسان با سلکت‌ها
                   borderRadius: '6px',
                   background: `linear-gradient(135deg, ${employerColors.light} 0%, ${employerColors.primary} 100%)`,
                   boxShadow: '0px 3px 8px rgba(0, 0, 0, 0.1)',
@@ -414,6 +427,61 @@ export default function Hero() {
               >
                 جستجو در مشاغل
               </Button>
+            </Box>
+          </Box>
+          
+          {/* بخش کلمات پرجستجو */}
+          <Box 
+            sx={{ 
+              position: 'relative', 
+              zIndex: 1, 
+              textAlign: 'center',
+              mt: 2 
+            }}
+          >
+            <Box 
+              sx={{ 
+                display: 'flex', 
+                flexWrap: 'wrap', 
+                justifyContent: 'center',
+                gap: { xs: 1, md: 1.5 } 
+              }}
+            >
+              {['کارآموزی', 'طراح وب', 'برنامه‌نویس React', 'مترجم انگلیسی', 'گرافیست', 'دورکاری', 'پاره‌وقت', 'حسابدار', 'مدیر فروش', 'متخصص دیجیتال مارکتینگ', 'تولید محتوا'].map((keyword, idx) => {
+                return (
+                  <Button 
+                    key={idx}
+                    variant="outlined"
+                    size="small"
+                    sx={{
+                      color: '#ffffff',
+                      borderColor: 'rgba(255, 255, 255, 0.5)',
+                      backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                      fontSize: { xs: '0.75rem', md: '0.85rem' },
+                      py: { xs: 0.5, md: 0.7 },
+                      px: { xs: 1.5, md: 2 },
+                      minWidth: 'unset',
+                      textTransform: 'none',
+                      borderRadius: '4px',
+                      fontWeight: 'medium',
+                      transition: 'all 0.2s ease-in-out',
+                      boxShadow: '0 2px 4px rgba(0, 0, 0, 0.08)',
+                      '&:hover': {
+                        backgroundColor: 'rgba(255, 255, 255, 0.2)',
+                        borderColor: 'rgba(255, 255, 255, 0.7)',
+                        transform: 'translateY(-2px)',
+                        boxShadow: '0 4px 8px rgba(0, 0, 0, 0.12)',
+                      },
+                      '&:active': {
+                        transform: 'translateY(0)',
+                        boxShadow: '0 1px 2px rgba(0, 0, 0, 0.1)',
+                      }
+                    }}
+                  >
+                    {keyword}
+                  </Button>
+                );
+              })}
             </Box>
           </Box>
         </Box>
