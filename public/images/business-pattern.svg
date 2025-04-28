@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="900" height="600" viewBox="0 0 900 600" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <pattern id="business-icons" x="0" y="0" width="100" height="100" patternUnits="userSpaceOnUse">
+      <!-- Briefcase -->
+      <rect x="15" y="20" width="20" height="15" rx="2" stroke="rgba(255,255,255,0.12)" stroke-width="1.5" fill="none" />
+      <rect x="20" y="15" width="10" height="5" rx="1" stroke="rgba(255,255,255,0.12)" stroke-width="1.5" fill="none" />
+      
+      <!-- Document -->
+      <rect x="70" y="20" width="15" height="20" rx="1" stroke="rgba(255,255,255,0.12)" stroke-width="1.5" fill="none" />
+      <line x1="73" y1="25" x2="82" y2="25" stroke="rgba(255,255,255,0.12)" stroke-width="1" />
+      <line x1="73" y1="30" x2="82" y2="30" stroke="rgba(255,255,255,0.12)" stroke-width="1" />
+      <line x1="73" y1="35" x2="79" y2="35" stroke="rgba(255,255,255,0.12)" stroke-width="1" />
+      
+      <!-- Building/Office -->
+      <rect x="20" y="60" width="25" height="20" stroke="rgba(255,255,255,0.12)" stroke-width="1.5" fill="none" />
+      <line x1="27.5" y1="60" x2="27.5" y2="80" stroke="rgba(255,255,255,0.12)" stroke-width="1" />
+      <line x1="37.5" y1="60" x2="37.5" y2="80" stroke="rgba(255,255,255,0.12)" stroke-width="1" />
+      <rect x="28" y="75" width="9" height="5" stroke="rgba(255,255,255,0.12)" stroke-width="1" fill="none" />
+      
+      <!-- Chart -->
+      <rect x="65" y="60" width="20" height="15" stroke="rgba(255,255,255,0.12)" stroke-width="1.5" fill="none" />
+      <line x1="67" y1="65" x2="67" y2="75" stroke="rgba(255,255,255,0.12)" stroke-width="1" />
+      <line x1="67" y1="75" x2="83" y2="75" stroke="rgba(255,255,255,0.12)" stroke-width="1" />
+      <path d="M69,73 L72,68 L75,71 L79,65 L82,69" stroke="rgba(255,255,255,0.12)" stroke-width="1" fill="none" />
+      
+      <!-- Handshake -->
+      <path d="M45,45 C47,42 50,42 52,43 C54,44 57,44 59,43" stroke="rgba(255,255,255,0.12)" stroke-width="1.5" fill="none" />
+      
+      <!-- Gear -->
+      <circle cx="80" cy="45" r="5" stroke="rgba(255,255,255,0.12)" stroke-width="1.5" fill="none" />
+      <path d="M80,38 L80,40 M85,40 L87,38 M85,50 L87,52 M80,50 L80,52 M75,50 L73,52 M75,40 L73,38" stroke="rgba(255,255,255,0.12)" stroke-width="1" />
+      
+      <!-- Money/Coin -->
+      <circle cx="40" cy="45" r="6" stroke="rgba(255,255,255,0.12)" stroke-width="1.5" fill="none" />
+      <line x1="40" y1="41" x2="40" y2="49" stroke="rgba(255,255,255,0.12)" stroke-width="1.5" />
+      <line x1="38" y1="43" x2="42" y2="43" stroke="rgba(255,255,255,0.12)" stroke-width="1" />
+      <line x1="38" y1="47" x2="42" y2="47" stroke="rgba(255,255,255,0.12)" stroke-width="1" />
+    </pattern>
+  </defs>
+  <rect width="100%" height="100%" fill="#3366cc" />
+  <rect width="100%" height="100%" fill="url(#business-icons)" />
+</svg>

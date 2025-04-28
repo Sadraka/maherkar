@@ -9,6 +9,7 @@ import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import { useState, useEffect } from 'react';
 import { useJobSeekerTheme } from '@/contexts/JobSeekerThemeContext';
 import { EMPLOYER_THEME } from '@/constants/colors';
+import Image from 'next/image';
 
 // تعریف داده‌های فارسی برای فیلدهای انتخابی
 const jobCategories = [
@@ -224,169 +225,196 @@ export default function Hero() {
       }}
     >
       <Container maxWidth="lg">
-        <Box sx={{ textAlign: 'center', mb: 4 }}>
-          <Typography 
-            variant="h4" 
-            component="h1" 
-            sx={{ 
-              fontWeight: 700, 
-              fontSize: { xs: '1.2rem', sm: '1.7rem', md: '1.9rem' },
-              color: theme.palette.text.primary,
-              mb: 1
-            }}
-          >
-            هوشمند انتخاب کن، سریع استخدام شو
-          </Typography>
-          <Typography 
-            variant="body1" 
-            color="text.secondary"
-            sx={{
-              fontSize: { xs: '0.75rem', sm: '0.9rem', md: '1rem' },
-              maxWidth: { xs: '95%', sm: '90%' },
-              mx: 'auto',
-              lineHeight: { xs: 1.5, md: 1.6 }
-            }}
-          >
-            بهترین فرصت‌های شغلی و پروژه‌ها در دسترس شماست
-          </Typography>
-        </Box>
-        
         <Box
           sx={{
-            width: '100%',
-            display: 'flex',
-            flexDirection: { xs: 'column', sm: 'row' },
-            alignItems: 'center',
-            gap: { xs: 1.5, sm: 1 },
-            backgroundColor: theme.palette.background.paper,
-            p: 1.5,
-            borderRadius: '8px',
-            boxShadow: '0px 5px 25px rgba(0, 0, 0, 0.07)',
+            position: 'relative',
+            borderRadius: '12px',
+            overflow: 'hidden',
+            backgroundColor: '#3366cc',
+            p: { xs: 3, md: 4 },
+            mb: 4,
+            '&::before': {  // پس‌زمینه با اندازه دقیق کادر
+              content: '""',
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              backgroundImage: 'url(/images/circuit-board-white-smaller.svg)',
+              backgroundSize: '35%', // تنظیم دقیق سایز الگو به 35 درصد
+              backgroundPosition: 'center',
+              backgroundRepeat: 'repeat',
+              opacity: 0.8,
+              zIndex: 0
+            }
           }}
         >
-          <Box sx={{ width: { xs: '100%', sm: '25%' } }}>
-            <FormControl fullWidth>
-              <Select
-                displayEmpty
-                value={jobCategory}
-                onChange={(e: SelectChangeEvent<string>) => setJobCategory(e.target.value)}
-                input={<OutlinedInput sx={textFieldStyles} />}
-                renderValue={() => {
-                  return (
-                    <Box component="div" sx={{ display: 'flex', justifyContent: 'center', width: '100%' }}>
-                      {getJobCategoryLabel()}
-                    </Box>
-                  );
-                }}
-                MenuProps={menuPropsRTL}
-                startAdornment={
-                  <InputAdornment position="start" sx={{ position: 'absolute', right: '8px' }}>
-                    <WorkIcon fontSize="small" sx={{ color: employerColors.primary }} />
-                  </InputAdornment>
-                }
-                IconComponent={(props: any) => (
-                  <KeyboardArrowDownIcon {...props} sx={{ color: employerColors.primary }} />
-                )}
-              >
-                {jobCategories.map((category) => (
-                  <MenuItem key={category.value} value={category.value}>
-                    {category.label}
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
-          </Box>
-
-          <Box sx={{ width: { xs: '100%', sm: '25%' } }}>
-            <FormControl fullWidth>
-              <Select
-                displayEmpty
-                value={location}
-                onChange={(e: SelectChangeEvent<string>) => setLocation(e.target.value)}
-                input={<OutlinedInput sx={textFieldStyles} />}
-                renderValue={() => {
-                  return (
-                    <Box component="div" sx={{ display: 'flex', justifyContent: 'center', width: '100%' }}>
-                      {getLocationLabel()}
-                    </Box>
-                  );
-                }}
-                MenuProps={menuPropsRTL}
-                startAdornment={
-                  <InputAdornment position="start" sx={{ position: 'absolute', right: '8px' }}>
-                    <LocationOnIcon fontSize="small" sx={{ color: employerColors.primary }} />
-                  </InputAdornment>
-                }
-                IconComponent={(props: any) => (
-                  <KeyboardArrowDownIcon {...props} sx={{ color: employerColors.primary }} />
-                )}
-              >
-                {provinces.map((province) => (
-                  <MenuItem key={province.value} value={province.value}>
-                    {province.label}
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
-          </Box>
-
-          <Box sx={{ width: { xs: '100%', sm: '25%' } }}>
-            <FormControl fullWidth>
-              <Select
-                displayEmpty
-                value={city}
-                onChange={(e: SelectChangeEvent<string>) => setCity(e.target.value)}
-                disabled={filteredCities.length === 0}
-                input={<OutlinedInput sx={textFieldStyles} />}
-                renderValue={() => {
-                  return (
-                    <Box component="div" sx={{ display: 'flex', justifyContent: 'center', width: '100%' }}>
-                      {getCityLabel()}
-                    </Box>
-                  );
-                }}
-                MenuProps={menuPropsRTL}
-                startAdornment={
-                  <InputAdornment position="start" sx={{ position: 'absolute', right: '8px' }}>
-                    <LocationOnIcon fontSize="small" sx={{ color: employerColors.primary }} />
-                  </InputAdornment>
-                }
-                IconComponent={(props: any) => (
-                  <KeyboardArrowDownIcon {...props} sx={{ color: employerColors.primary }} />
-                )}
-              >
-                {filteredCities.map((cityItem) => (
-                  <MenuItem key={cityItem.value} value={cityItem.value}>
-                    {cityItem.label}
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
-          </Box>
-
-          <Box sx={{ width: { xs: '100%', sm: '25%' } }}>
-            <Button
-              variant="contained"
-              color="primary"
-              startIcon={<SearchIcon sx={{ ml: 0.5 }} />}
-              fullWidth
+          <Box sx={{ textAlign: 'center', mb: 4, position: 'relative', zIndex: 1 }}>
+            <Typography 
+              variant="h4" 
+              component="h1" 
               sx={{ 
-                height: '48px',
-                borderRadius: '6px',
-                background: `linear-gradient(135deg, ${employerColors.light} 0%, ${employerColors.primary} 100%)`,
-                boxShadow: '0px 3px 8px rgba(0, 0, 0, 0.1)',
-                '&:hover': {
-                   background: `linear-gradient(135deg, ${employerColors.primary} 0%, ${employerColors.dark} 100%)`,
-                   boxShadow: '0px 5px 12px rgba(0, 0, 0, 0.15)',
-                },
-                color: '#fff',
-                fontWeight: 'bold',
-                fontSize: '0.95rem',
-                textTransform: 'none'
+                fontWeight: 700, 
+                fontSize: { xs: '1.2rem', sm: '1.7rem', md: '1.9rem' },
+                color: '#ffffff',
+                mb: 1
               }}
             >
-              جستجو در مشاغل
-            </Button>
+              هوشمند انتخاب کن، سریع استخدام شو
+            </Typography>
+            <Typography 
+              variant="body1" 
+              sx={{
+                fontSize: { xs: '0.75rem', sm: '0.9rem', md: '1rem' },
+                maxWidth: { xs: '95%', sm: '90%' },
+                mx: 'auto',
+                lineHeight: { xs: 1.5, md: 1.6 },
+                color: 'rgba(255, 255, 255, 0.9)'
+              }}
+            >
+              بهترین فرصت‌های شغلی و پروژه‌ها در دسترس شماست
+            </Typography>
+          </Box>
+          
+          <Box
+            sx={{
+              width: '100%',
+              display: 'flex',
+              flexDirection: { xs: 'column', sm: 'row' },
+              alignItems: 'center',
+              gap: { xs: 1.5, sm: 1 },
+              backgroundColor: theme.palette.background.paper,
+              p: { xs: 2, md: 1.5 },
+              borderRadius: '8px',
+              boxShadow: '0px 5px 25px rgba(0, 0, 0, 0.1)',
+              position: 'relative',
+              zIndex: 1
+            }}
+          >
+            <Box sx={{ width: { xs: '100%', sm: '25%' } }}>
+              <FormControl fullWidth>
+                <Select
+                  displayEmpty
+                  value={jobCategory}
+                  onChange={(e: SelectChangeEvent<string>) => setJobCategory(e.target.value)}
+                  input={<OutlinedInput sx={textFieldStyles} />}
+                  renderValue={() => {
+                    return (
+                      <Box component="div" sx={{ display: 'flex', justifyContent: 'center', width: '100%' }}>
+                        {getJobCategoryLabel()}
+                      </Box>
+                    );
+                  }}
+                  MenuProps={menuPropsRTL}
+                  startAdornment={
+                    <InputAdornment position="start" sx={{ position: 'absolute', right: '8px' }}>
+                      <WorkIcon fontSize="small" sx={{ color: employerColors.primary }} />
+                    </InputAdornment>
+                  }
+                  IconComponent={(props: any) => (
+                    <KeyboardArrowDownIcon {...props} sx={{ color: employerColors.primary }} />
+                  )}
+                >
+                  {jobCategories.map((category) => (
+                    <MenuItem key={category.value} value={category.value}>
+                      {category.label}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+            </Box>
+
+            <Box sx={{ width: { xs: '100%', sm: '25%' } }}>
+              <FormControl fullWidth>
+                <Select
+                  displayEmpty
+                  value={location}
+                  onChange={(e: SelectChangeEvent<string>) => setLocation(e.target.value)}
+                  input={<OutlinedInput sx={textFieldStyles} />}
+                  renderValue={() => {
+                    return (
+                      <Box component="div" sx={{ display: 'flex', justifyContent: 'center', width: '100%' }}>
+                        {getLocationLabel()}
+                      </Box>
+                    );
+                  }}
+                  MenuProps={menuPropsRTL}
+                  startAdornment={
+                    <InputAdornment position="start" sx={{ position: 'absolute', right: '8px' }}>
+                      <LocationOnIcon fontSize="small" sx={{ color: employerColors.primary }} />
+                    </InputAdornment>
+                  }
+                  IconComponent={(props: any) => (
+                    <KeyboardArrowDownIcon {...props} sx={{ color: employerColors.primary }} />
+                  )}
+                >
+                  {provinces.map((province) => (
+                    <MenuItem key={province.value} value={province.value}>
+                      {province.label}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+            </Box>
+
+            <Box sx={{ width: { xs: '100%', sm: '25%' } }}>
+              <FormControl fullWidth>
+                <Select
+                  displayEmpty
+                  value={city}
+                  onChange={(e: SelectChangeEvent<string>) => setCity(e.target.value)}
+                  disabled={filteredCities.length === 0}
+                  input={<OutlinedInput sx={textFieldStyles} />}
+                  renderValue={() => {
+                    return (
+                      <Box component="div" sx={{ display: 'flex', justifyContent: 'center', width: '100%' }}>
+                        {getCityLabel()}
+                      </Box>
+                    );
+                  }}
+                  MenuProps={menuPropsRTL}
+                  startAdornment={
+                    <InputAdornment position="start" sx={{ position: 'absolute', right: '8px' }}>
+                      <LocationOnIcon fontSize="small" sx={{ color: employerColors.primary }} />
+                    </InputAdornment>
+                  }
+                  IconComponent={(props: any) => (
+                    <KeyboardArrowDownIcon {...props} sx={{ color: employerColors.primary }} />
+                  )}
+                >
+                  {filteredCities.map((cityItem) => (
+                    <MenuItem key={cityItem.value} value={cityItem.value}>
+                      {cityItem.label}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+            </Box>
+
+            <Box sx={{ width: { xs: '100%', sm: '25%' } }}>
+              <Button
+                variant="contained"
+                color="primary"
+                startIcon={<SearchIcon sx={{ ml: 0.5 }} />}
+                fullWidth
+                sx={{ 
+                  height: '48px',
+                  borderRadius: '6px',
+                  background: `linear-gradient(135deg, ${employerColors.light} 0%, ${employerColors.primary} 100%)`,
+                  boxShadow: '0px 3px 8px rgba(0, 0, 0, 0.1)',
+                  '&:hover': {
+                     background: `linear-gradient(135deg, ${employerColors.primary} 0%, ${employerColors.dark} 100%)`,
+                     boxShadow: '0px 5px 12px rgba(0, 0, 0, 0.15)',
+                  },
+                  color: '#fff',
+                  fontWeight: 'bold',
+                  fontSize: '0.95rem',
+                  textTransform: 'none'
+                }}
+              >
+                جستجو در مشاغل
+              </Button>
+            </Box>
           </Box>
         </Box>
       </Container>
