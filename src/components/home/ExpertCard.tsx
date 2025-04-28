@@ -31,12 +31,12 @@ export type ExpertType = {
   jobTitle: string;
   avatar: string;
   location: string;
-  rating: number;
-  completedProjects: number;
   skills: string[];
   isVerified: boolean;
-  hourlyRate?: string;
   experienceYears?: number;
+  preferredJobType?: string;
+  expectedSalary?: string;
+  degree?: string;
 };
 
 interface ExpertCardProps {
@@ -48,10 +48,10 @@ export default function ExpertCard({ expert }: ExpertCardProps) {
   const jobSeekerColors = useJobSeekerTheme();
 
   return (
-    <Card 
-      sx={{ 
-        height: 'auto', 
-        display: 'flex', 
+    <Card
+      sx={{
+        height: 'auto',
+        display: 'flex',
         flexDirection: 'column',
         borderRadius: 2,
         border: `1px solid ${jobSeekerColors.bgLight}`,
@@ -69,25 +69,25 @@ export default function ExpertCard({ expert }: ExpertCardProps) {
       <CardContent sx={{ p: 2, position: 'relative' }}>
         <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', mb: 1.5, position: 'relative' }}>
           <Box sx={{ position: 'relative', mb: 1 }}>
-            <Avatar 
-              src={expert.avatar} 
+            <Avatar
+              src={expert.avatar}
               alt={expert.name}
-              sx={{ 
-                width: 70, 
-                height: 70, 
+              sx={{
+                width: 70,
+                height: 70,
                 border: 'none',
                 boxShadow: 'none'
-              }} 
+              }}
             />
-            
+
             {expert.isVerified && (
-              <Box 
-                sx={{ 
+              <Box
+                sx={{
                   position: 'absolute',
-                  bottom: 0, 
-                  right: 0, 
+                  bottom: 0,
+                  right: 0,
                   bgcolor: jobSeekerColors.primary,
-                  color: 'white', 
+                  color: 'white',
                   borderRadius: '50%',
                   width: 20,
                   height: 20,
@@ -108,39 +108,20 @@ export default function ExpertCard({ expert }: ExpertCardProps) {
               </Box>
             )}
           </Box>
-          
+
           <Box sx={{ textAlign: 'center' }}>
             <Typography variant="h6" sx={{ fontWeight: 'bold', fontSize: '1rem', mb: 0.3 }}>
               {expert.name}
             </Typography>
-            
+
             <Typography variant="body2" color="text.secondary" sx={{ mb: 0.7, fontSize: '0.85rem' }}>
               {expert.jobTitle}
             </Typography>
-            
-            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', mb: 0 }}>
-              <Rating 
-                value={expert.rating} 
-                precision={0.1} 
-                readOnly 
-                size="small" 
-                sx={{ 
-                  mr: 0.5,
-                  color: jobSeekerColors.primary,
-                  '& .MuiRating-icon': {
-                    fontSize: '0.9rem'
-                  }
-                }} 
-              />
-              <Typography variant="body2" sx={{ fontWeight: 'medium', fontSize: '0.8rem' }}>
-                {convertToPersianNumber(expert.rating)}
-              </Typography>
-            </Box>
           </Box>
         </Box>
-        
+
         <Divider sx={{ my: 1, borderColor: jobSeekerColors.bgLight }} />
-        
+
         <Box sx={{ mb: 1.5, p: 1.2, bgcolor: jobSeekerColors.bgVeryLight, borderRadius: 1.5 }}>
           <Box sx={{ display: 'flex', alignItems: 'center', mb: 0.7 }}>
             <LocationOnOutlinedIcon fontSize="small" sx={{ color: jobSeekerColors.primary, fontSize: '0.9rem', ml: 0.3 }} />
@@ -148,26 +129,35 @@ export default function ExpertCard({ expert }: ExpertCardProps) {
               {expert.location}
             </Typography>
           </Box>
-          
-          <Box sx={{ display: 'flex', alignItems: 'center' }}>
+
+          <Box sx={{ display: 'flex', alignItems: 'center', mb: 0.7 }}>
             <WorkOutlineIcon fontSize="small" sx={{ color: jobSeekerColors.primary, fontSize: '0.9rem', ml: 0.3 }} />
             <Typography variant="body2" color="text.secondary" sx={{ fontSize: '0.8rem' }}>
-              {convertToPersianNumber(expert.completedProjects)} پروژه موفق
+              {expert.preferredJobType || "تمام وقت"}
             </Typography>
           </Box>
+
+          {expert.experienceYears && (
+            <Box sx={{ display: 'flex', alignItems: 'center' }}>
+              <HistoryIcon fontSize="small" sx={{ color: jobSeekerColors.primary, fontSize: '0.9rem', ml: 0.3 }} />
+              <Typography variant="body2" color="text.secondary" sx={{ fontSize: '0.8rem' }}>
+                {convertToPersianNumber(expert.experienceYears)} سال سابقه
+              </Typography>
+            </Box>
+          )}
         </Box>
-        
+
         <Box sx={{ mb: 1.5 }}>
           <Typography variant="body2" sx={{ mb: 0.5, fontWeight: 600, color: theme.palette.text.secondary, fontSize: '0.85rem' }}>
             مهارت‌ها:
           </Typography>
           <Stack direction="row" spacing={0} flexWrap="wrap" gap={0.2}>
             {expert.skills.map((skill, index) => (
-              <Chip 
-                key={index} 
+              <Chip
+                key={index}
                 label={skill}
                 size="small"
-                sx={{ 
+                sx={{
                   bgcolor: 'rgba(0, 128, 0, 0.1)',
                   border: 'none',
                   fontWeight: 500,
@@ -186,19 +176,33 @@ export default function ExpertCard({ expert }: ExpertCardProps) {
             ))}
           </Stack>
         </Box>
-        
+
+        <Box sx={{ mb: 1, p: 1, bgcolor: 'rgba(0, 128, 0, 0.05)', borderRadius: 1, border: `1px dashed ${jobSeekerColors.bgLight}` }}>
+          {expert.expectedSalary && (
+            <Typography variant="body2" sx={{ fontSize: '0.75rem', color: jobSeekerColors.primary, fontWeight: 500 }}>
+              <Box component="span" sx={{ fontWeight: 600 }}>حقوق درخواستی:</Box> {expert.expectedSalary}
+            </Typography>
+          )}
+          {expert.degree && (
+            <Typography variant="body2" sx={{ fontSize: '0.75rem', color: jobSeekerColors.primary, fontWeight: 500, mt: 0.5 }}>
+              <Box component="span" sx={{ fontWeight: 600 }}>تحصیلات:</Box> {expert.degree}
+            </Typography>
+          )}
+        </Box>
+
         <Divider sx={{ my: 1, borderColor: jobSeekerColors.bgLight }} />
-        
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mt: 1.5 }}>
-          <Button 
-            variant="contained" 
+
+        <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', mt: 1.5 }}>
+          <Button
+            variant="contained"
             color="success"
-            size="small"
-            sx={{ 
-              py: 0.7,
+            fullWidth
+            sx={{
+              py: 1.2,
               fontWeight: 'bold',
-              borderRadius: 1.5,
-              fontSize: '0.8rem',
+              borderRadius: 2,
+              fontSize: '0.9rem',
+              height: '42px',
               background: `linear-gradient(135deg, ${jobSeekerColors.light} 0%, ${jobSeekerColors.primary} 100%)`,
               boxShadow: `0 4px 8px rgba(0, 112, 60, 0.2)`,
               '&:hover': {
@@ -207,41 +211,8 @@ export default function ExpertCard({ expert }: ExpertCardProps) {
               }
             }}
           >
-            استخدام متخصص
+            مشاهده رزومه
           </Button>
-          {expert.experienceYears && (
-            <Box 
-              sx={{ 
-                display: 'flex', 
-                alignItems: 'center', 
-                px: 1, 
-                py: 0.4, 
-                borderRadius: 1.5,
-                bgcolor: 'rgba(0, 128, 0, 0.08)',
-                border: `1px solid ${jobSeekerColors.bgLight}`
-              }}
-            >
-              <HistoryIcon 
-                sx={{ 
-                  fontSize: '1rem', 
-                  color: jobSeekerColors.primary, 
-                  mr: 0.3 
-                }} 
-              />
-              <Typography 
-                variant="body2" 
-                sx={{ 
-                  fontWeight: 'bold', 
-                  color: jobSeekerColors.primary,
-                  fontSize: '0.8rem',
-                  display: 'flex',
-                  alignItems: 'center'
-                }}
-              >
-                {convertToPersianNumber(expert.experienceYears)} <Box component="span" sx={{ mr: 0.2 }} />سال سابقه
-              </Typography>
-            </Box>
-          )}
         </Box>
       </CardContent>
     </Card>

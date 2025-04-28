@@ -1,9 +1,9 @@
 'use client'
 
-import { 
-  Box, 
-  Typography, 
-  Container, 
+import {
+  Box,
+  Typography,
+  Container,
   Button,
   useTheme,
   Grid
@@ -14,7 +14,7 @@ import ExpertCard, { ExpertType } from './ExpertCard';
 export default function Experts() {
   const theme = useTheme();
   const jobSeekerColors = useJobSeekerTheme();
-  
+
   const experts: ExpertType[] = [
     {
       id: 1,
@@ -22,11 +22,12 @@ export default function Experts() {
       jobTitle: 'توسعه‌دهنده فرانت‌اند ارشد',
       avatar: 'https://randomuser.me/api/portraits/men/32.jpg',
       location: 'تبریز',
-      rating: 4.9,
-      completedProjects: 48,
       skills: ['React', 'NextJS', 'TypeScript'],
       isVerified: true,
-      experienceYears: 8
+      experienceYears: 8,
+      preferredJobType: 'تمام وقت',
+      expectedSalary: '20 تا 30 میلیون تومان',
+      degree: 'کارشناسی ارشد مهندسی نرم‌افزار'
     },
     {
       id: 2,
@@ -34,11 +35,12 @@ export default function Experts() {
       jobTitle: 'طراح رابط کاربری و تجربه کاربری',
       avatar: 'https://randomuser.me/api/portraits/women/44.jpg',
       location: 'اصفهان',
-      rating: 4.8,
-      completedProjects: 36,
       skills: ['UI/UX', 'Figma', 'طراحی محصول'],
       isVerified: true,
-      experienceYears: 6
+      experienceYears: 6,
+      preferredJobType: 'دورکاری',
+      expectedSalary: '15 تا 20 میلیون تومان',
+      degree: 'کارشناسی طراحی گرافیک'
     },
     {
       id: 3,
@@ -46,11 +48,12 @@ export default function Experts() {
       jobTitle: 'برنامه‌نویس بک‌اند',
       avatar: 'https://randomuser.me/api/portraits/men/22.jpg',
       location: 'شیراز',
-      rating: 4.7,
-      completedProjects: 29,
       skills: ['Node.js', 'Express', 'MongoDB'],
       isVerified: false,
-      experienceYears: 5
+      experienceYears: 5,
+      preferredJobType: 'تمام وقت',
+      expectedSalary: 'توافقی',
+      degree: 'کارشناسی مهندسی کامپیوتر'
     },
     {
       id: 4,
@@ -58,11 +61,12 @@ export default function Experts() {
       jobTitle: 'متخصص دیجیتال مارکتینگ',
       avatar: 'https://randomuser.me/api/portraits/women/62.jpg',
       location: 'مشهد',
-      rating: 4.6,
-      completedProjects: 22,
       skills: ['SEO', 'گوگل ادز', 'شبکه‌های اجتماعی'],
       isVerified: true,
-      experienceYears: 4
+      experienceYears: 4,
+      preferredJobType: 'پاره وقت',
+      expectedSalary: '10 تا 15 میلیون تومان',
+      degree: 'کارشناسی بازاریابی'
     },
     {
       id: 5,
@@ -70,11 +74,12 @@ export default function Experts() {
       jobTitle: 'مهندس DevOps',
       avatar: 'https://randomuser.me/api/portraits/men/42.jpg',
       location: 'تهران',
-      rating: 4.9,
-      completedProjects: 41,
       skills: ['Docker', 'Kubernetes', 'AWS'],
       isVerified: true,
-      experienceYears: 7
+      experienceYears: 7,
+      preferredJobType: 'پروژه‌ای',
+      expectedSalary: '30 تا 50 میلیون تومان',
+      degree: 'کارشناسی ارشد مهندسی کامپیوتر'
     },
     {
       id: 6,
@@ -82,23 +87,24 @@ export default function Experts() {
       jobTitle: 'گرافیست و طراح',
       avatar: 'https://randomuser.me/api/portraits/women/24.jpg',
       location: 'تبریز',
-      rating: 4.8,
-      completedProjects: 35,
       skills: ['فتوشاپ', 'ایلاستریتور', 'طراحی لوگو'],
       isVerified: false,
-      experienceYears: 5
+      experienceYears: 5,
+      preferredJobType: 'دورکاری',
+      expectedSalary: 'توافقی',
+      degree: 'کارشناسی هنرهای تجسمی'
     },
   ];
-  
+
   return (
     <Box sx={{ py: 6, backgroundColor: '#f5f7fa' }}>
       <Container maxWidth="lg">
         <Box sx={{ textAlign: 'center', mb: 6 }}>
-          <Typography 
-            variant="h3" 
-            component="h2" 
-            sx={{ 
-              fontWeight: 800, 
+          <Typography
+            variant="h3"
+            component="h2"
+            sx={{
+              fontWeight: 800,
               fontSize: { xs: '1.8rem', md: '2.2rem' },
               color: theme.palette.text.primary,
               position: 'relative',
@@ -116,22 +122,22 @@ export default function Experts() {
               }
             }}
           >
-            متخصصان برتر و زبده ماهرکار
+            متخصصین جویای کار
           </Typography>
-          <Typography 
-            variant="body1" 
+          <Typography
+            variant="body1"
             color="text.secondary"
-            sx={{ 
+            sx={{
               mt: 2,
               fontSize: '1rem',
               maxWidth: '600px',
               mx: 'auto'
             }}
           >
-            با بهترین متخصصان در حوزه‌های مختلف آشنا شوید و به راحتی پروژه‌های خود را با اطمینان به آنها بسپارید
+            مجموعه‌ای از متخصصین حرفه‌ای و کارآزموده در زمینه‌های مختلف که آماده همکاری با کارفرمایان محترم هستند
           </Typography>
         </Box>
-        
+
         <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 3, justifyContent: 'center' }}>
           {experts.slice(0, 3).map((expert) => (
             <Box key={expert.id} sx={{ width: { xs: '100%', sm: 'calc(50% - 24px)', md: 'calc(33.33% - 24px)' } }}>
@@ -139,13 +145,13 @@ export default function Experts() {
             </Box>
           ))}
         </Box>
-        
+
         <Box sx={{ mt: 6, textAlign: 'center' }}>
-          <Button 
-            variant="contained" 
+          <Button
+            variant="contained"
             disableElevation
             color="success"
-            sx={{ 
+            sx={{
               px: 4,
               py: 1.2,
               fontWeight: 700,
@@ -159,7 +165,7 @@ export default function Experts() {
               }
             }}
           >
-            مشاهده همه متخصصان
+            مشاهده همه متخصصین جویای کار
           </Button>
         </Box>
       </Container>

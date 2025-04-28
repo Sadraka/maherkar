@@ -1,10 +1,10 @@
 'use client'
 
 import { useState, useEffect } from 'react';
-import { 
-  Box, 
-  Typography, 
-  Container, 
+import {
+  Box,
+  Typography,
+  Container,
   Button,
   useTheme,
   Skeleton,
@@ -19,13 +19,13 @@ import { EMPLOYER_THEME } from '@/constants/colors';
 export default function JobListings() {
   const theme = useTheme();
   const jobSeekerColors = useJobSeekerTheme();
-  
+
   // استفاده از رنگ‌های کارفرما
   const employerColors = EMPLOYER_THEME;
-  
+
   // اضافه کردن وضعیت بارگذاری
   const [loading, setLoading] = useState(true);
-  
+
   const [jobs, setJobs] = useState<JobType[]>([
     {
       id: 1,
@@ -109,7 +109,7 @@ export default function JobListings() {
     const timer = setTimeout(() => {
       setLoading(false);
     }, 800);
-    
+
     return () => clearTimeout(timer);
   }, []);
 
@@ -123,9 +123,9 @@ export default function JobListings() {
   // کامپوننت نمایش‌دهنده Skeleton
   const JobCardSkeleton = () => (
     <Card
-      sx={{ 
-        height: '100%', 
-        display: 'flex', 
+      sx={{
+        height: '100%',
+        display: 'flex',
         flexDirection: 'column',
         borderRadius: 2,
         border: `1px solid ${employerColors.bgLight}`,
@@ -135,7 +135,7 @@ export default function JobListings() {
       }}
     >
       {/* ناحیه برچسب - در wrapper مطلق قرار می‌گیرد */}
-      <Box sx={{ 
+      <Box sx={{
         position: 'absolute',
         top: 0,
         right: 0,
@@ -144,33 +144,33 @@ export default function JobListings() {
         zIndex: 2
       }}>
         {/* اسکلتون برچسب فوری یا ویژه */}
-        <Skeleton 
-          variant="rectangular" 
-          width={60} 
-          height={24} 
-          sx={{ 
+        <Skeleton
+          variant="rectangular"
+          width={60}
+          height={24}
+          sx={{
             position: 'absolute',
             top: 8,
             right: 8,
             borderRadius: '20px'
-          }} 
+          }}
         />
       </Box>
-      
-      <CardContent sx={{ 
-        flexGrow: 1, 
+
+      <CardContent sx={{
+        flexGrow: 1,
         display: 'flex',
         flexDirection: 'column',
-        p: 2, 
+        p: 2,
         pt: 2,
         pb: 2,
         '&:last-child': { pb: 2 }
       }}>
         <Skeleton variant="text" width="80%" height={32} sx={{ mb: 1 }} />
         <Skeleton variant="text" width="50%" height={24} sx={{ mb: 2 }} />
-        
+
         <Skeleton variant="rectangular" height={80} sx={{ borderRadius: 1.5, mb: 2 }} />
-        
+
         <Box sx={{ mb: 2 }}>
           <Skeleton variant="text" width="40%" height={24} sx={{ mb: 1 }} />
           <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
@@ -179,7 +179,7 @@ export default function JobListings() {
             <Skeleton variant="rectangular" width={70} height={22} sx={{ borderRadius: 0.8 }} />
           </Box>
         </Box>
-        
+
         <Box sx={{ mt: 'auto' }}>
           <Skeleton variant="rectangular" height={48} width="100%" sx={{ borderRadius: 1.5 }} />
         </Box>
@@ -188,8 +188,8 @@ export default function JobListings() {
   );
 
   return (
-    <Box 
-      sx={{ 
+    <Box
+      sx={{
         pt: 3,
         pb: 6,
         backgroundColor: '#ffffff'
@@ -197,11 +197,11 @@ export default function JobListings() {
     >
       <Container maxWidth="lg">
         <Box sx={{ mb: 6, textAlign: 'center' }}>
-          <Typography 
-            variant="h3" 
-            component="h2" 
-            sx={{ 
-              fontWeight: 800, 
+          <Typography
+            variant="h3"
+            component="h2"
+            sx={{
+              fontWeight: 800,
               fontSize: { xs: '1.8rem', md: '2.2rem' },
               color: theme.palette.text.primary,
               position: 'relative',
@@ -221,9 +221,9 @@ export default function JobListings() {
           >
             فرصت‌های شغلی
           </Typography>
-          <Typography 
+          <Typography
             variant="body1"
-            sx={{ 
+            sx={{
               mt: 2,
               color: theme.palette.text.secondary,
               fontSize: '1rem',
@@ -236,10 +236,10 @@ export default function JobListings() {
         </Box>
 
         <Box sx={{ maxWidth: 1200, mx: 'auto' }}>
-          <Box 
-            sx={{ 
-              display: 'grid', 
-              gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr', md: '1fr 1fr 1fr' }, 
+          <Box
+            sx={{
+              display: 'grid',
+              gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr', md: '1fr 1fr 1fr' },
               gap: 3,
               '& > div': {
                 height: '100%' // همه کارت‌ها ارتفاع یکسان داشته باشند
@@ -265,11 +265,11 @@ export default function JobListings() {
         </Box>
 
         <Box sx={{ mt: 6, textAlign: 'center' }}>
-          <Button 
-            variant="contained" 
+          <Button
+            variant="contained"
             disableElevation
             color="primary"
-            sx={{ 
+            sx={{
               px: 4,
               py: 1.2,
               fontWeight: 700,
