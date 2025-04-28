@@ -16,11 +16,10 @@ import {
 import LocationOnOutlinedIcon from '@mui/icons-material/LocationOnOutlined';
 import AccessTimeOutlinedIcon from '@mui/icons-material/AccessTimeOutlined';
 import WorkOutlineIcon from '@mui/icons-material/WorkOutline';
-import MonetizationOnOutlinedIcon from '@mui/icons-material/MonetizationOnOutlined';
 import StarIcon from '@mui/icons-material/Star';
 import LocalFireDepartmentIcon from '@mui/icons-material/LocalFireDepartment';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faBuilding } from '@fortawesome/free-solid-svg-icons';
+import { faBuilding, faMoneyBill, faMoneyBillWave } from '@fortawesome/free-solid-svg-icons';
 import { useJobSeekerTheme } from '@/contexts/JobSeekerThemeContext';
 import { EMPLOYER_THEME } from '@/constants/colors';
 import { CSSProperties } from 'react';
@@ -105,7 +104,6 @@ export default function JobCard({ job }: JobCardProps) {
         backgroundColor: theme.palette.background.paper,
         transition: 'all 0.25s ease-in-out',
         p: 2,
-        // direction: 'rtl', // تنظیم جهت به راست چین
         '&:hover': {
           transform: 'translateY(-5px)',
           boxShadow: '0 10px 25px rgba(0,0,0,0.15)',
@@ -113,87 +111,6 @@ export default function JobCard({ job }: JobCardProps) {
         }
       }}
     >
-      {/* نمایش برچسب‌های ویژه و فوری - استفاده از یک wrapper ثابت */}
-      <Box sx={{
-        position: 'absolute',
-        top: 0,
-        right: 0,
-        width: '100%',
-        height: 'auto',
-        zIndex: 2,
-        pointerEvents: 'none' // اجازه کلیک روی محتوای زیرین
-      }}>
-        {job.isPromoted && (
-          <Box
-            sx={{
-              position: 'absolute',
-              top: 12,
-              right: 12,
-              bgcolor: 'rgba(211, 47, 47, 0.95)',
-              color: '#fff',
-              fontSize: '0.7rem',
-              fontWeight: 'bold',
-              px: 1.2,
-              py: 0.4,
-              borderRadius: '20px',
-              display: 'flex',
-              alignItems: 'center',
-              gap: 0.3,
-              boxShadow: '0 2px 8px rgba(211, 47, 47, 0.3)',
-              pointerEvents: 'auto' // برگرداندن قابلیت کلیک
-            }}
-          >
-            <span style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              width: '0.75rem',
-              height: '0.75rem',
-              overflow: 'hidden',
-              marginLeft: '4px'
-            }}>
-              <StarIcon sx={{ fontSize: '0.75rem', width: '0.75rem', height: '0.75rem' }} />
-            </span>
-            ویژه
-          </Box>
-        )}
-
-        {job.isUrgent && !job.isPromoted && (
-          <Box
-            sx={{
-              position: 'absolute',
-              top: 12,
-              right: 12,
-              bgcolor: 'rgba(255, 145, 0, 0.9)',
-              color: '#fff',
-              fontSize: '0.75rem',
-              fontWeight: 'bold',
-              px: 1.5,
-              py: 0.5,
-              borderRadius: '20px',
-              display: 'flex',
-              alignItems: 'center',
-              gap: 0.4,
-              boxShadow: '0 3px 10px rgba(255, 145, 0, 0.4)',
-              pointerEvents: 'auto' // برگرداندن قابلیت کلیک
-            }}
-          >
-            <span style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              width: '0.85rem',
-              height: '0.85rem',
-              overflow: 'hidden',
-              marginLeft: '4px'
-            }}>
-              <LocalFireDepartmentIcon sx={{ fontSize: '0.85rem', width: '0.85rem', height: '0.85rem' }} />
-            </span>
-            فوری
-          </Box>
-        )}
-      </Box>
-
       {/* عنوان شغل در بالای کارت */}
       <Box sx={{ mb: 2, px: 1 }}>
         <Typography
@@ -359,26 +276,82 @@ export default function JobCard({ job }: JobCardProps) {
         )}
       </Box>
 
-      {/* نمایش حقوق در خارج کادر داخلی */}
+      {/* نمایش حقوق به همراه برچسب‌های فوری و ویژه در خارج کادر داخلی */}
       <Box
         sx={{
           display: 'flex',
           alignItems: 'center',
+          justifyContent: 'space-between',
           mb: 2,
           px: 1
         }}
       >
-        <MonetizationOnOutlinedIcon sx={{ color: employerColors.primary, ml: 1, fontSize: '1.2rem' }} />
-        <Typography
-          variant="body2"
-          sx={{
-            fontWeight: 'bold',
-            color: employerColors.dark,
-            fontSize: '0.95rem'
-          }}
-        >
-          {job.salary}
-        </Typography>
+        <Box sx={{ display: 'flex', alignItems: 'center' }}>
+          {job.isUrgent && (
+            <Box
+              component="span"
+              sx={{
+                bgcolor: 'rgba(255, 145, 0, 0.9)',
+                color: '#fff',
+                fontSize: '0.7rem',
+                fontWeight: 'bold',
+                px: 1,
+                py: 0.3,
+                borderRadius: 1,
+                display: 'flex',
+                alignItems: 'center',
+                ml: 1,
+                boxShadow: '0 2px 5px rgba(255, 145, 0, 0.3)',
+              }}
+            >
+              <LocalFireDepartmentIcon sx={{ fontSize: '0.75rem', mr: 0.5 }} />
+              فوری
+            </Box>
+          )}
+
+          {job.isPromoted && (
+            <Box
+              component="span"
+              sx={{
+                bgcolor: 'rgba(211, 47, 47, 0.9)',
+                color: '#fff',
+                fontSize: '0.7rem',
+                fontWeight: 'bold',
+                px: 1,
+                py: 0.3,
+                borderRadius: 1,
+                display: 'flex',
+                alignItems: 'center',
+                ml: 1,
+                boxShadow: '0 2px 5px rgba(211, 47, 47, 0.3)',
+              }}
+            >
+              <StarIcon sx={{ fontSize: '0.75rem', mr: 0.5 }} />
+              ویژه
+            </Box>
+          )}
+        </Box>
+
+        <Box sx={{ display: 'flex', alignItems: 'center' }}>
+          <Box sx={{ ml: 1, color: employerColors.primary }}>
+            <FontAwesomeIcon
+              icon={faMoneyBillWave}
+              style={{
+                fontSize: '1.2rem',
+                color: employerColors.primary
+              }}
+            />
+          </Box>
+          <Typography
+            variant="body2"
+            sx={{
+              color: employerColors.dark,
+              fontSize: '0.9rem'
+            }}
+          >
+            {job.salary}
+          </Typography>
+        </Box>
       </Box>
 
       {/* دکمه در پایین کارت */}
