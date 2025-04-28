@@ -163,26 +163,32 @@ export default function Hero() {
 
   // استایل مشترک برای فیلدها
   const textFieldStyles = {
+    width: '100%',
+    height: '100%',
     '& .MuiOutlinedInput-root': {
+      width: '100%',
+      height: '100%',
       borderRadius: '6px', // کمی گردتر
-      height: { xs: '52px', md: '48px' }, // ارتفاع بیشتر در موبایل برای لمس راحت‌تر
+      boxSizing: 'border-box',
       backgroundColor: theme.palette.background.paper,
       transition: 'border-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out',
       direction: 'rtl', // اضافه کردن direction rtl به کل فیلد
       '&.Mui-focused .MuiOutlinedInput-notchedOutline': { 
-        borderColor: employerColors.primary,
-        borderWidth: '1px',
-        boxShadow: `0 0 0 2px ${employerColors.primary}33` // اضافه کردن focus ring با رنگ کارفرما
+        borderColor: 'transparent', // حذف border در حالت focus
+        borderWidth: 0,
+        boxShadow: `0 0 0 2px ${employerColors.primary}20` // سایه نامحسوس در زمان focus
       },
       '&:hover .MuiOutlinedInput-notchedOutline': { 
-         borderColor: employerColors.bgLight, // پررنگ‌تر در هاور
+         borderColor: 'transparent', // حذف border در حالت hover
       },
       '.MuiOutlinedInput-notchedOutline': { 
-         borderColor: employerColors.bgLight,
+         borderColor: 'transparent', // حذف border در حالت عادی
+         borderWidth: 0
        }
     },
     // وسط‌چین کردن متن ورودی
     '& .MuiInputBase-input': {
+        height: '100%',
         textAlign: 'center',
         direction: 'rtl',
         paddingLeft: '36px',  // افزایش پدینگ چپ برای آیکون
@@ -196,6 +202,10 @@ export default function Hero() {
        color: employerColors.primary
      },
      '& .MuiSelect-select': {
+       height: '100%',
+       display: 'flex',
+       alignItems: 'center',
+       justifyContent: 'center',
        textAlign: 'center',
        paddingRight: '28px',
        paddingLeft: '28px',
@@ -304,8 +314,9 @@ export default function Hero() {
               mb: { xs: 3, md: 4 }
             }}
           >
-            <Box sx={{ width: { xs: '100%', sm: '25%' } }}>
-              <FormControl fullWidth>
+            {/* گروه شغلی */}
+            <Box sx={{ width: { xs: '100%', sm: '25%' }, height: { xs: '52px', md: '48px' }, display: 'flex', alignItems: 'center' }}>
+              <FormControl fullWidth sx={{ height: '100%' }}>
                 <Select
                   displayEmpty
                   value={jobCategory}
@@ -337,8 +348,9 @@ export default function Hero() {
               </FormControl>
             </Box>
 
-            <Box sx={{ width: { xs: '100%', sm: '25%' } }}>
-              <FormControl fullWidth>
+            {/* استان */}
+            <Box sx={{ width: { xs: '100%', sm: '25%' }, height: { xs: '52px', md: '48px' }, display: 'flex', alignItems: 'center' }}>
+              <FormControl fullWidth sx={{ height: '100%' }}>
                 <Select
                   displayEmpty
                   value={location}
@@ -370,8 +382,9 @@ export default function Hero() {
               </FormControl>
             </Box>
 
-            <Box sx={{ width: { xs: '100%', sm: '25%' } }}>
-              <FormControl fullWidth>
+            {/* شهر */}
+            <Box sx={{ width: { xs: '100%', sm: '25%' }, height: { xs: '52px', md: '48px' }, display: 'flex', alignItems: 'center' }}>
+              <FormControl fullWidth sx={{ height: '100%' }}>
                 <Select
                   displayEmpty
                   value={city}
@@ -404,25 +417,41 @@ export default function Hero() {
               </FormControl>
             </Box>
 
-            <Box sx={{ width: { xs: '100%', sm: '25%' } }}>
+            {/* دکمه جستجو */}
+            <Box 
+              sx={{ 
+                width: { xs: '100%', sm: '25%' }, 
+                height: { xs: '52px', md: '48px' },
+                display: 'flex',
+                alignItems: 'center'
+              }}
+            >
               <Button
                 variant="contained"
                 color="primary"
                 startIcon={<SearchIcon sx={{ ml: 0.5 }} />}
                 fullWidth
+                disableElevation
                 sx={{ 
-                  height: { xs: '52px', md: '48px' }, // ارتفاع یکسان با سلکت‌ها
+                  height: '100%',
+                  minHeight: '100%',
+                  boxSizing: 'border-box',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  padding: '0 16px',
                   borderRadius: '6px',
                   background: `linear-gradient(135deg, ${employerColors.light} 0%, ${employerColors.primary} 100%)`,
-                  boxShadow: '0px 3px 8px rgba(0, 0, 0, 0.1)',
+                  boxShadow: 'none',
                   '&:hover': {
-                     background: `linear-gradient(135deg, ${employerColors.primary} 0%, ${employerColors.dark} 100%)`,
-                     boxShadow: '0px 5px 12px rgba(0, 0, 0, 0.15)',
+                    background: `linear-gradient(135deg, ${employerColors.primary} 0%, ${employerColors.dark} 100%)`,
+                    boxShadow: '0px 2px 5px rgba(0, 0, 0, 0.1)',
                   },
                   color: '#fff',
                   fontWeight: 'bold',
                   fontSize: '0.95rem',
-                  textTransform: 'none'
+                  textTransform: 'none',
+                  border: 'none'
                 }}
               >
                 جستجو در مشاغل
