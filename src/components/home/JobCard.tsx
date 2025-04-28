@@ -1,16 +1,17 @@
 'use client'
 
-import { 
-  Box, 
-  Typography, 
-  Card, 
-  CardContent, 
-  Button, 
-  Stack, 
-  Chip, 
-  Divider, 
+import {
+  Box,
+  Typography,
+  Card,
+  CardContent,
+  Button,
+  Stack,
+  Chip,
+  Divider,
   useTheme,
-  Avatar
+  Avatar,
+  Paper
 } from '@mui/material';
 import LocationOnOutlinedIcon from '@mui/icons-material/LocationOnOutlined';
 import AccessTimeOutlinedIcon from '@mui/icons-material/AccessTimeOutlined';
@@ -36,6 +37,7 @@ export type JobType = {
   isPromoted?: boolean; // آگهی نردبان شده یا پرومت شده
   timePosted: string;
   company: string;
+  companyLogo?: string; // لوگوی شرکت (اختیاری)
   jobType: string;
 };
 
@@ -75,7 +77,7 @@ const IconWrapper = ({ children }: { children: React.ReactNode }) => (
       width: ICON_SIZE,
       height: ICON_SIZE,
       overflow: 'hidden',
-      marginRight: '4px'
+      marginLeft: '4px' // تغییر از راست به چپ برای زبان فارسی
     }}
   >
     {children}
@@ -85,31 +87,34 @@ const IconWrapper = ({ children }: { children: React.ReactNode }) => (
 export default function JobCard({ job }: JobCardProps) {
   const theme = useTheme();
   const jobSeekerColors = useJobSeekerTheme();
-  
+
   // استفاده از رنگ‌های کارفرما
   const employerColors = EMPLOYER_THEME;
-  
+
   return (
-    <Card 
-      sx={{ 
+    <Card
+      sx={{
         height: '100%', // ارتفاع کامل برای یکسان بودن ارتفاع تمام کارت‌ها
-        display: 'flex', 
+        display: 'flex',
         flexDirection: 'column',
-        borderRadius: 4,
-        border: `1px solid rgba(0, 0, 0, 0.04)`,
-        boxShadow: '0 2px 8px rgba(0,0,0,0.02)',
+        borderRadius: 2,
+        border: `2px solid ${employerColors.bgLight}`, // افزودن حاشیه برای مشخص‌تر شدن
+        boxShadow: '0 6px 16px rgba(0,0,0,0.1)',
         overflow: 'hidden',
         position: 'relative',
         backgroundColor: theme.palette.background.paper,
-        transition: 'transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out',
+        transition: 'all 0.25s ease-in-out',
+        p: 2,
+        // direction: 'rtl', // تنظیم جهت به راست چین
         '&:hover': {
-          transform: 'translateY(-4px)',
-          boxShadow: '0 6px 20px rgba(0,0,0,0.06)',
+          transform: 'translateY(-5px)',
+          boxShadow: '0 10px 25px rgba(0,0,0,0.15)',
+          border: `2px solid ${employerColors.primary}`,
         }
       }}
     >
       {/* نمایش برچسب‌های ویژه و فوری - استفاده از یک wrapper ثابت */}
-      <Box sx={{ 
+      <Box sx={{
         position: 'absolute',
         top: 0,
         right: 0,
@@ -138,20 +143,21 @@ export default function JobCard({ job }: JobCardProps) {
               pointerEvents: 'auto' // برگرداندن قابلیت کلیک
             }}
           >
-            <span style={{ 
-              display: 'inline-flex', 
-              alignItems: 'center', 
-              justifyContent: 'center', 
-              width: '0.75rem', 
-              height: '0.75rem', 
-              overflow: 'hidden' 
+            <span style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              width: '0.75rem',
+              height: '0.75rem',
+              overflow: 'hidden',
+              marginLeft: '4px'
             }}>
               <StarIcon sx={{ fontSize: '0.75rem', width: '0.75rem', height: '0.75rem' }} />
             </span>
             ویژه
           </Box>
         )}
-        
+
         {job.isUrgent && !job.isPromoted && (
           <Box
             sx={{
@@ -172,13 +178,14 @@ export default function JobCard({ job }: JobCardProps) {
               pointerEvents: 'auto' // برگرداندن قابلیت کلیک
             }}
           >
-            <span style={{ 
-              display: 'inline-flex', 
-              alignItems: 'center', 
-              justifyContent: 'center', 
-              width: '0.85rem', 
-              height: '0.85rem', 
-              overflow: 'hidden' 
+            <span style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              width: '0.85rem',
+              height: '0.85rem',
+              overflow: 'hidden',
+              marginLeft: '4px'
             }}>
               <LocalFireDepartmentIcon sx={{ fontSize: '0.85rem', width: '0.85rem', height: '0.85rem' }} />
             </span>
@@ -186,191 +193,215 @@ export default function JobCard({ job }: JobCardProps) {
           </Box>
         )}
       </Box>
-      
-      <CardContent sx={{ 
-        flexGrow: 1, 
-        display: 'flex',
-        flexDirection: 'column',
-        p: 2.5, 
-        pt: 2.5, 
-        pb: 2.5,
-        '&:last-child': { pb: 2.5 }
-      }}>
-        <Typography 
-          variant="h6" 
+
+      {/* عنوان شغل در بالای کارت */}
+      <Box sx={{ mb: 2, px: 1 }}>
+        <Typography
+          variant="h6"
           component="h3"
-          sx={{ 
-            mb: 1.5, 
-            fontWeight: 'bold', 
-            fontSize: '1.1rem',
-            color: theme.palette.text.primary,
-            textAlign: 'center'
+          sx={{
+            fontWeight: 'bold',
+            fontSize: '1rem',
+            color: 'text.primary',
+            display: 'flex',
+            alignItems: 'center',
           }}
         >
+          <WorkOutlineIcon sx={{ ml: 1, fontSize: '1.1rem', color: employerColors.primary }} />
           {job.title}
         </Typography>
-        
-        <Box sx={{ 
+      </Box>
+
+      {/* کادر درونی با حاشیه آبی */}
+      <Box
+        sx={{
           mb: 2,
-          p: 1.8, 
-          bgcolor: 'rgba(0, 0, 0, 0.02)', 
-          borderRadius: 3,
-          border: '1px solid rgba(0, 0, 0, 0.03)'
-        }}>
-          <Stack direction="row" spacing={1.5} sx={{ mb: 1 }}>
-            <Box 
-              component="div"
-              sx={{ 
-                display: 'flex', 
-                alignItems: 'center', 
-                color: theme.palette.text.secondary,
-                fontSize: '0.8rem'
+          p: 2,
+          borderRadius: 2,
+          border: `1.5px solid ${employerColors.primary}`,
+          backgroundColor: 'white',
+          boxShadow: '0 2px 8px rgba(0,0,0,0.05)'
+        }}
+      >
+        {/* اطلاعات موقعیت */}
+        <Box sx={{ mb: 2 }}>
+          <Box
+            sx={{
+              display: 'flex',
+              alignItems: 'flex-start',
+              mb: 1.5
+            }}
+          >
+            <LocationOnOutlinedIcon
+              sx={{
+                color: employerColors.primary,
+                fontSize: '1.2rem',
+                ml: 1,
+                mt: 0.3
+              }}
+            />
+            <Typography
+              variant="body2"
+              sx={{
+                color: 'text.primary',
+                fontSize: '0.85rem',
+                lineHeight: 1.5
               }}
             >
-              <IconWrapper>
-                <LocationOnOutlinedIcon 
-                  fontSize="small" 
-                  sx={{ 
-                    ...SVG_ICON_STYLE,
-                    color: '#4477dd' 
-                  }} 
-                />
-              </IconWrapper>
               {job.location}
-              {job.isRemote && <Chip 
-                label="دورکاری" 
-                size="small" 
-                sx={{ 
-                  ml: 0.5, 
-                  fontSize: '0.65rem',
-                  height: 18,
-                  backgroundColor: 'rgba(68, 119, 221, 0.08)',
-                  color: '#4477dd',
-                  borderRadius: '12px',
-                  fontWeight: 'bold'
-                }} 
-              />}
-            </Box>
-            
-            <Box 
-              component="div"
-              sx={{ 
-                display: 'flex', 
-                alignItems: 'center', 
-                color: theme.palette.text.secondary,
-                fontSize: '0.8rem'
+              {job.isRemote &&
+                <Chip
+                  label="دورکاری"
+                  size="small"
+                  sx={{
+                    fontSize: '0.65rem',
+                    height: 18,
+                    mr: 1,
+                    backgroundColor: employerColors.bgVeryLight,
+                    color: employerColors.dark,
+                    borderRadius: '12px',
+                    fontWeight: 'bold'
+                  }}
+                />
+              }
+            </Typography>
+          </Box>
+
+          <Box
+            sx={{
+              display: 'flex',
+              alignItems: 'center',
+              mb: 1.5
+            }}
+          >
+            <AccessTimeOutlinedIcon
+              sx={{
+                color: employerColors.primary,
+                fontSize: '1.2rem',
+                ml: 1
+              }}
+            />
+            <Typography
+              variant="body2"
+              sx={{
+                color: 'text.secondary',
+                fontSize: '0.85rem'
               }}
             >
-              <IconWrapper>
-                <AccessTimeOutlinedIcon 
-                  fontSize="small" 
-                  sx={{ 
-                    ...SVG_ICON_STYLE,
-                    color: '#4477dd' 
-                  }} 
-                />
-              </IconWrapper>
               {job.timePosted}
-            </Box>
-          </Stack>
-          
-          <Stack direction="row" spacing={1} sx={{ mb: 0 }}>
-            <Box 
-              component="div"
-              sx={{ 
-                display: 'flex', 
-                alignItems: 'center', 
-                color: theme.palette.text.secondary,
-                fontSize: '0.8rem'
+            </Typography>
+          </Box>
+
+          <Box
+            sx={{
+              display: 'flex',
+              alignItems: 'center'
+            }}
+          >
+            <WorkOutlineIcon
+              sx={{
+                color: employerColors.primary,
+                fontSize: '1.2rem',
+                ml: 1
+              }}
+            />
+            <Typography
+              variant="body2"
+              sx={{
+                color: 'text.secondary',
+                fontSize: '0.85rem'
               }}
             >
-              <IconWrapper>
-                <WorkOutlineIcon 
-                  fontSize="small" 
-                  sx={{ 
-                    ...SVG_ICON_STYLE,
-                    color: '#4477dd' 
-                  }} 
-                />
-              </IconWrapper>
               {job.jobType}
-            </Box>
-            
-            <Box 
-              component="div"
-              sx={{ 
-                display: 'flex', 
-                alignItems: 'center', 
-                color: theme.palette.text.secondary,
-                fontSize: '0.8rem'
-              }}
-            >
-              <IconWrapper>
-                <MonetizationOnOutlinedIcon 
-                  fontSize="small" 
-                  sx={{ 
-                    ...SVG_ICON_STYLE,
-                    color: '#4477dd' 
-                  }} 
-                />
-              </IconWrapper>
-              {job.salary}
-            </Box>
-          </Stack>
+            </Typography>
+          </Box>
         </Box>
-        
-        <Box sx={{ mb: 2.5 }}>
-          <Typography variant="body2" sx={{ mb: 1, fontWeight: 600, color: theme.palette.text.secondary, fontSize: '0.85rem', textAlign: 'center' }}>
-            مهارت‌ها:
-          </Typography>
-          <Stack direction="row" spacing={0} flexWrap="wrap" gap={0.5} justifyContent="center">
-            {job.skills.map((skill, index) => (
-              <Chip 
-                key={index} 
-                label={skill} 
-                size="small"
-                sx={{ 
-                  bgcolor: 'rgba(68, 119, 221, 0.05)',
-                  border: '1px solid rgba(68, 119, 221, 0.1)',
-                  fontWeight: 500,
-                  fontSize: '0.75rem',
-                  borderRadius: 3,
-                  color: '#4477dd',
-                  py: 0.1,
-                  px: 0.1,
-                  m: 0.2,
-                  height: '24px',
-                  '& .MuiChip-label': {
-                    px: 1.2
-                  }
+
+        {/* مهارت‌ها */}
+        {job.skills.length > 0 && (
+          <Box>
+            <Box sx={{ mb: 1 }}>
+              <Typography
+                variant="body2"
+                sx={{
+                  fontWeight: 600,
+                  color: 'text.secondary',
+                  fontSize: '0.85rem'
                 }}
-              />
-            ))}
-          </Stack>
-        </Box>
-        
-        <Button 
-          fullWidth 
-          variant="contained" 
-          disableElevation
-          color="primary"
-          sx={{ 
-            mt: 'auto',
-            py: 1.4,
+              >
+                مهارت‌های مورد نیاز:
+              </Typography>
+            </Box>
+            <Stack direction="row" spacing={0} flexWrap="wrap" gap={0.7}>
+              {job.skills.map((skill, index) => (
+                <Chip
+                  key={index}
+                  label={skill}
+                  size="small"
+                  sx={{
+                    bgcolor: employerColors.bgVeryLight,
+                    border: `1px solid ${employerColors.bgLight}`,
+                    fontWeight: 500,
+                    fontSize: '0.75rem',
+                    borderRadius: 2,
+                    color: employerColors.dark,
+                    py: 0.1,
+                    px: 0.1,
+                    height: '22px',
+                    '& .MuiChip-label': {
+                      px: 1
+                    }
+                  }}
+                />
+              ))}
+            </Stack>
+          </Box>
+        )}
+      </Box>
+
+      {/* نمایش حقوق در خارج کادر داخلی */}
+      <Box
+        sx={{
+          display: 'flex',
+          alignItems: 'center',
+          mb: 2,
+          px: 1
+        }}
+      >
+        <MonetizationOnOutlinedIcon sx={{ color: employerColors.primary, ml: 1, fontSize: '1.2rem' }} />
+        <Typography
+          variant="body2"
+          sx={{
             fontWeight: 'bold',
-            borderRadius: 3,
-            fontSize: '0.95rem',
-            background: `linear-gradient(135deg, #3366cc 0%, #4477dd 100%)`,
-            boxShadow: 'none',
-            '&:hover': {
-              background: `linear-gradient(135deg, #4477dd 0%, #3366cc 100%)`,
-              boxShadow: '0 4px 8px rgba(68, 119, 221, 0.2)',
-            }
+            color: employerColors.dark,
+            fontSize: '0.95rem'
           }}
         >
-          مشاهده آگهی
-        </Button>
-      </CardContent>
+          {job.salary}
+        </Typography>
+      </Box>
+
+      {/* دکمه در پایین کارت */}
+      <Button
+        fullWidth
+        variant="contained"
+        disableElevation
+        sx={{
+          mt: 'auto',
+          py: 1.2,
+          fontWeight: 'bold',
+          borderRadius: 2,
+          fontSize: '0.9rem',
+          backgroundColor: employerColors.primary,
+          boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+          '&:hover': {
+            backgroundColor: employerColors.dark,
+            boxShadow: `0 5px 15px ${employerColors.bgLight}`,
+          }
+        }}
+      >
+        مشاهده آگهی
+      </Button>
     </Card>
   );
 } 
