@@ -95,16 +95,16 @@ export default function JobCard({ job }: JobCardProps) {
         height: '100%', // ارتفاع کامل برای یکسان بودن ارتفاع تمام کارت‌ها
         display: 'flex', 
         flexDirection: 'column',
-        borderRadius: 2,
-        border: `1px solid ${employerColors.bgLight}`,
-        boxShadow: '0 4px 12px rgba(0,0,0,0.05)',
+        borderRadius: 4,
+        border: `1px solid rgba(0, 0, 0, 0.04)`,
+        boxShadow: '0 2px 8px rgba(0,0,0,0.02)',
         overflow: 'hidden',
         position: 'relative',
         backgroundColor: theme.palette.background.paper,
         transition: 'transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out',
         '&:hover': {
           transform: 'translateY(-4px)',
-          boxShadow: '0 8px 24px rgba(0,0,0,0.1)',
+          boxShadow: '0 6px 20px rgba(0,0,0,0.06)',
         }
       }}
     >
@@ -122,8 +122,8 @@ export default function JobCard({ job }: JobCardProps) {
           <Box
             sx={{
               position: 'absolute',
-              top: 8,
-              right: 8,
+              top: 12,
+              right: 12,
               bgcolor: 'rgba(211, 47, 47, 0.95)',
               color: '#fff',
               fontSize: '0.7rem',
@@ -156,8 +156,8 @@ export default function JobCard({ job }: JobCardProps) {
           <Box
             sx={{
               position: 'absolute',
-              top: 8,
-              right: 8,
+              top: 12,
+              right: 12,
               bgcolor: 'rgba(255, 145, 0, 0.9)',
               color: '#fff',
               fontSize: '0.75rem',
@@ -191,52 +191,31 @@ export default function JobCard({ job }: JobCardProps) {
         flexGrow: 1, 
         display: 'flex',
         flexDirection: 'column',
-        p: 2, 
-        pt: 2, // مقدار ثابت برای تمام کارت‌ها
-        pb: 2,
-        '&:last-child': { pb: 2 }
+        p: 2.5, 
+        pt: 2.5, 
+        pb: 2.5,
+        '&:last-child': { pb: 2.5 }
       }}>
         <Typography 
           variant="h6" 
           component="h3"
           sx={{ 
-            mb: 0.5, 
+            mb: 1.5, 
             fontWeight: 'bold', 
-            fontSize: '1rem',
-            color: theme.palette.text.primary
+            fontSize: '1.1rem',
+            color: theme.palette.text.primary,
+            textAlign: 'center'
           }}
         >
           {job.title}
         </Typography>
-        <Typography 
-          variant="body2"
-          component="div"
-          sx={{ 
-            mb: 1.5,
-            color: theme.palette.text.secondary,
-            display: 'flex',
-            alignItems: 'center',
-            gap: 0.5,
-            fontSize: '0.85rem'
-          }}
-        >
-          <IconWrapper>
-            <FontAwesomeIcon 
-              icon={faBuilding} 
-              style={{ 
-                color: employerColors.primary,
-                ...FA_ICON_STYLE
-              }} 
-            />
-          </IconWrapper>
-          {job.company}
-        </Typography>
         
         <Box sx={{ 
-          mb: 1.5,
-          p: 1.2, 
-          bgcolor: employerColors.bgVeryLight, 
-          borderRadius: 1.5
+          mb: 2,
+          p: 1.8, 
+          bgcolor: 'rgba(0, 0, 0, 0.02)', 
+          borderRadius: 3,
+          border: '1px solid rgba(0, 0, 0, 0.03)'
         }}>
           <Stack direction="row" spacing={1.5} sx={{ mb: 1 }}>
             <Box 
@@ -253,7 +232,7 @@ export default function JobCard({ job }: JobCardProps) {
                   fontSize="small" 
                   sx={{ 
                     ...SVG_ICON_STYLE,
-                    color: employerColors.primary 
+                    color: '#4477dd' 
                   }} 
                 />
               </IconWrapper>
@@ -265,9 +244,9 @@ export default function JobCard({ job }: JobCardProps) {
                   ml: 0.5, 
                   fontSize: '0.65rem',
                   height: 18,
-                  backgroundColor: 'rgba(255,255,255,0.7)',
-                  color: employerColors.primary,
-                  borderRadius: '4px',
+                  backgroundColor: 'rgba(68, 119, 221, 0.08)',
+                  color: '#4477dd',
+                  borderRadius: '12px',
                   fontWeight: 'bold'
                 }} 
               />}
@@ -287,7 +266,7 @@ export default function JobCard({ job }: JobCardProps) {
                   fontSize="small" 
                   sx={{ 
                     ...SVG_ICON_STYLE,
-                    color: employerColors.primary 
+                    color: '#4477dd' 
                   }} 
                 />
               </IconWrapper>
@@ -310,7 +289,7 @@ export default function JobCard({ job }: JobCardProps) {
                   fontSize="small" 
                   sx={{ 
                     ...SVG_ICON_STYLE,
-                    color: employerColors.primary 
+                    color: '#4477dd' 
                   }} 
                 />
               </IconWrapper>
@@ -331,7 +310,7 @@ export default function JobCard({ job }: JobCardProps) {
                   fontSize="small" 
                   sx={{ 
                     ...SVG_ICON_STYLE,
-                    color: employerColors.primary 
+                    color: '#4477dd' 
                   }} 
                 />
               </IconWrapper>
@@ -340,29 +319,29 @@ export default function JobCard({ job }: JobCardProps) {
           </Stack>
         </Box>
         
-        <Box sx={{ mb: 2 }}>
-          <Typography variant="body2" sx={{ mb: 0.5, fontWeight: 600, color: theme.palette.text.secondary, fontSize: '0.85rem' }}>
+        <Box sx={{ mb: 2.5 }}>
+          <Typography variant="body2" sx={{ mb: 1, fontWeight: 600, color: theme.palette.text.secondary, fontSize: '0.85rem', textAlign: 'center' }}>
             مهارت‌ها:
           </Typography>
-          <Stack direction="row" spacing={0} flexWrap="wrap" gap={0.3}>
+          <Stack direction="row" spacing={0} flexWrap="wrap" gap={0.5} justifyContent="center">
             {job.skills.map((skill, index) => (
               <Chip 
                 key={index} 
                 label={skill} 
                 size="small"
                 sx={{ 
-                  bgcolor: 'rgba(25, 118, 210, 0.1)',
-                  border: 'none',
+                  bgcolor: 'rgba(68, 119, 221, 0.05)',
+                  border: '1px solid rgba(68, 119, 221, 0.1)',
                   fontWeight: 500,
-                  fontSize: '0.7rem',
-                  borderRadius: 0.8,
-                  color: employerColors.primary,
+                  fontSize: '0.75rem',
+                  borderRadius: 3,
+                  color: '#4477dd',
                   py: 0.1,
                   px: 0.1,
-                  m: 0.15,
-                  height: '20px',
+                  m: 0.2,
+                  height: '24px',
                   '& .MuiChip-label': {
-                    px: 1
+                    px: 1.2
                   }
                 }}
               />
@@ -377,19 +356,19 @@ export default function JobCard({ job }: JobCardProps) {
           color="primary"
           sx={{ 
             mt: 'auto',
-            py: 1.2,
+            py: 1.4,
             fontWeight: 'bold',
-            borderRadius: 1.5,
-            fontSize: '0.9rem',
-            background: `linear-gradient(135deg, ${employerColors.light} 0%, ${employerColors.primary} 100%)`,
-            boxShadow: `0 4px 8px ${employerColors.bgLight}`,
+            borderRadius: 3,
+            fontSize: '0.95rem',
+            background: `linear-gradient(135deg, #3366cc 0%, #4477dd 100%)`,
+            boxShadow: 'none',
             '&:hover': {
-              background: `linear-gradient(135deg, ${employerColors.primary} 0%, ${employerColors.dark} 100%)`,
-              boxShadow: `0 4px 12px ${employerColors.bgLight}`,
+              background: `linear-gradient(135deg, #4477dd 0%, #3366cc 100%)`,
+              boxShadow: '0 4px 8px rgba(68, 119, 221, 0.2)',
             }
           }}
         >
-          درخواست همکاری
+          مشاهده آگهی
         </Button>
       </CardContent>
     </Card>

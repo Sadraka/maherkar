@@ -228,7 +228,7 @@ export default function Hero() {
     <Box
       sx={{
         pt: { xs: 4, md: 6 },
-        pb: { xs: 4, md: 6 },
+        pb: { xs: 2, md: 3 },
         backgroundColor: theme.palette.background.default,
         position: 'relative',
         overflow: 'hidden'
@@ -279,19 +279,96 @@ export default function Hero() {
                 fontWeight: 700, 
                 fontSize: { xs: '1.3rem', sm: '1.8rem', md: '2.1rem' },
                 color: '#ffffff',
-                mb: 2
+                mb: 2,
+                display: { xs: 'none', sm: 'block' } // نمایش فقط در حالت دسکتاپ و تبلت
               }}
             >
-              هوشمند انتخاب کن، سریع استخدام شو
+              هوشمند انتخاب کن، <Box 
+                component="span" 
+                sx={{ 
+                  color: '#FFDA3E', 
+                  position: 'relative',
+                  display: 'inline-block',
+                  '&::after': {
+                    content: '""',
+                    position: 'absolute',
+                    bottom: '-8px',
+                    left: 0,
+                    width: '100%',
+                    height: '8px',
+                    backgroundImage: 'url(/images/underline-yellow.svg)',
+                    backgroundRepeat: 'no-repeat',
+                    backgroundSize: '100% 100%',
+                    backgroundPosition: 'center bottom',
+                  }
+                }}
+              >
+                سریع
+              </Box> استخدام شو
             </Typography>
+            
+            {/* نمایش عنوان در حالت موبایل به صورت دو سطری */}
+            <Box sx={{ display: { xs: 'block', sm: 'none' }, mb: 2 }}>
+              <Typography 
+                variant="h4" 
+                component="h1" 
+                sx={{ 
+                  fontWeight: 700, 
+                  fontSize: '1.3rem',
+                  color: '#ffffff',
+                  mb: 0.5,
+                  lineHeight: 1.3
+                }}
+              >
+                هوشمند انتخاب کن،
+              </Typography>
+              <Typography 
+                variant="h4" 
+                component="span" 
+                sx={{ 
+                  fontWeight: 700, 
+                  fontSize: '1.3rem',
+                  color: '#ffffff',
+                  lineHeight: 1.3,
+                  position: 'relative'
+                }}
+              >
+                <Box 
+                  component="span" 
+                  sx={{ 
+                    color: '#FFDA3E', 
+                    position: 'relative',
+                    display: 'inline-block',
+                    '&::after': {
+                      content: '""',
+                      position: 'absolute',
+                      bottom: '-8px',
+                      left: 0,
+                      width: '100%',
+                      height: '8px',
+                      backgroundImage: 'url(/images/underline-yellow.svg)',
+                      backgroundRepeat: 'no-repeat',
+                      backgroundSize: '100% 100%',
+                      backgroundPosition: 'center bottom',
+                    }
+                  }}
+                >
+                  سریع
+                </Box> استخدام شو
+              </Typography>
+            </Box>
+            
             <Typography 
               variant="body1" 
               sx={{
                 fontSize: { xs: '0.85rem', sm: '1rem', md: '1.1rem' },
                 maxWidth: { xs: '95%', sm: '90%' },
                 mx: 'auto',
-                lineHeight: { xs: 1.6, md: 1.8 },
-                color: 'rgba(255, 255, 255, 0.9)'
+                lineHeight: 1.6,
+                color: 'rgba(255, 255, 255, 0.9)',
+                whiteSpace: 'nowrap', // مطمئن می‌شویم که همیشه یک خطی نمایش داده شود
+                overflow: 'hidden',
+                textOverflow: 'ellipsis' // اگر متن طولانی باشد، با سه نقطه نمایش داده می‌شود
               }}
             >
               بهترین فرصت‌های شغلی و پروژه‌ها در دسترس شماست

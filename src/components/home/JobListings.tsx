@@ -190,7 +190,8 @@ export default function JobListings() {
   return (
     <Box 
       sx={{ 
-        py: 6, 
+        pt: 3,
+        pb: 6,
         backgroundColor: '#ffffff'
       }}
     >
