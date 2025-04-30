@@ -87,9 +87,9 @@ export default function ExpertCard({ expert }: ExpertCardProps) {
         position: 'relative',
         backgroundColor: theme.palette.background.paper,
         transition: 'transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out',
-        width: { xs: '100%', sm: '100%', md: '230px' },
+        width: { xs: '100%', sm: '100%', md: '100%' },
         mx: 'auto',
-        height: '340px', // سایز ثابت برای همه کارت‌ها
+        height: '100%', // مثل JobCard
         '&:hover': {
           transform: 'translateY(-4px)',
           boxShadow: '0 6px 16px rgba(0,0,0,0.1)',
@@ -98,7 +98,14 @@ export default function ExpertCard({ expert }: ExpertCardProps) {
     >
       <CardContent sx={{ p: 2, pb: "8px !important", display: 'flex', flexDirection: 'column', height: '100%' }}>
         {/* هدر کارت - آواتار و نام */}
-        <Box sx={{ display: 'flex', alignItems: 'center', mb: 1.5 }}>
+        <Box sx={{
+          display: 'flex',
+          alignItems: 'center',
+          mb: 1.5,
+          minHeight: { xs: 45, sm: 50 },  // همانند JobCard
+          borderBottom: `1px solid ${theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.05)'}`,
+          pb: 0.8
+        }}>
           <Box sx={{ position: 'relative', mr: 1.5 }}>
             <Avatar
               src={expert.avatar}
@@ -224,27 +231,27 @@ export default function ExpertCard({ expert }: ExpertCardProps) {
         <Box sx={{ flexGrow: 1 }} />
 
         {/* دکمه مشاهده رزومه */}
-        <Button
-          variant="contained"
-          color="success"
-          fullWidth
-          sx={{
-            py: 0.8,
-            fontWeight: 'bold',
-            borderRadius: 1.5,
-            fontSize: '0.85rem',
-            height: '38px',
-            mt: 1,
-            background: `linear-gradient(135deg, ${jobSeekerColors.light} 0%, ${jobSeekerColors.primary} 100%)`,
-            boxShadow: `0 3px 6px rgba(0, 112, 60, 0.2)`,
-            '&:hover': {
-              background: `linear-gradient(135deg, ${jobSeekerColors.primary} 0%, ${jobSeekerColors.dark} 100%)`,
-              boxShadow: `0 3px 8px rgba(0, 112, 60, 0.3)`,
-            }
-          }}
-        >
-          مشاهده رزومه
-        </Button>
+        <Box sx={{ pt: 0.5, pb: { xs: 1.2, sm: 1.5 } }}>  {/* مطابق با استایل JobCard */}
+          <Button
+            variant="contained"
+            color="success"
+            fullWidth
+            sx={{
+              py: { xs: 0.8, sm: 1 },  // مطابق با استایل JobCard
+              fontWeight: 'bold',
+              borderRadius: 1.5,
+              fontSize: { xs: '0.85rem', sm: '0.9rem' },  // مطابق با استایل JobCard
+              background: `linear-gradient(135deg, ${jobSeekerColors.light} 0%, ${jobSeekerColors.primary} 100%)`,
+              boxShadow: `0 3px 6px rgba(0, 112, 60, 0.2)`,
+              '&:hover': {
+                background: `linear-gradient(135deg, ${jobSeekerColors.primary} 0%, ${jobSeekerColors.dark} 100%)`,
+                boxShadow: `0 3px 8px rgba(0, 112, 60, 0.3)`,
+              }
+            }}
+          >
+            مشاهده رزومه
+          </Button>
+        </Box>
       </CardContent>
     </Card>
   );
