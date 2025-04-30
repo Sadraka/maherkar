@@ -1,11 +1,11 @@
 'use client'
 
-import { 
-  AppBar, 
-  Toolbar, 
-  Typography, 
-  Button, 
-  Box, 
+import {
+  AppBar,
+  Toolbar,
+  Typography,
+  Button,
+  Box,
   Container,
   useTheme,
   alpha,
@@ -16,7 +16,7 @@ import {
 } from '@mui/material';
 import Link from 'next/link';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { 
+import {
   faUser,
   faBuilding,
   faUserTie,
@@ -36,7 +36,7 @@ import { useState } from 'react';
 // کامپوننت AppBar اصلی
 export default function AppHeaderNew() {
   const theme = useTheme();
-  const { 
+  const {
     isMobile,
     mobileOpen,
     setMobileOpen,
@@ -53,11 +53,11 @@ export default function AppHeaderNew() {
 
   // اطلاعات منوها - با استایل یکسان با منوی موبایل
   const navItems = [
-    { 
-      title: 'کارفرما هستم', 
-      color: 'employer', 
-      href: '#', 
-      variant: 'text', 
+    {
+      title: 'کارفرما هستم',
+      color: 'employer',
+      href: '#',
+      variant: 'text',
       hasSubmenu: true,
       menuId: 'employer-menu',
       buttonRef: employerButtonRef,
@@ -65,11 +65,11 @@ export default function AppHeaderNew() {
       bgColor: alpha(theme.palette.employer.main, 0.15),
       textColor: theme.palette.employer.main
     },
-    { 
-      title: 'کارجو هستم', 
-      color: 'candidate', 
-      href: '#', 
-      variant: 'text', 
+    {
+      title: 'کارجو هستم',
+      color: 'candidate',
+      href: '#',
+      variant: 'text',
       hasSubmenu: true,
       menuId: 'candidate-menu',
       buttonRef: candidateButtonRef,
@@ -115,11 +115,11 @@ export default function AppHeaderNew() {
   }));
 
   return (
-    <AppBar 
-      position="sticky" 
+    <AppBar
+      position="sticky"
       color="default"
       elevation={0}
-      sx={{ 
+      sx={{
         backgroundColor: 'background.paper',
         borderBottom: '1px solid',
         borderColor: 'divider',
@@ -137,8 +137,8 @@ export default function AppHeaderNew() {
     >
       <Container maxWidth="lg">
         <Box sx={{ maxWidth: 1200, mx: 'auto', width: '100%' }}>
-          <Toolbar sx={{ 
-            justifyContent: { xs: 'space-between', md: 'space-between' }, 
+          <Toolbar sx={{
+            justifyContent: { xs: 'space-between', md: 'space-between' },
             px: { xs: 0, md: 0 },
             py: { xs: 1, md: 0.5 },
             width: '100%',
@@ -148,7 +148,7 @@ export default function AppHeaderNew() {
             <Typography
               variant="h5"
               component="div"
-              sx={{ 
+              sx={{
                 fontWeight: 800,
                 fontSize: '1.4rem',
                 backgroundImage: `linear-gradient(45deg, ${theme.palette.primary.main}, ${theme.palette.primary.dark})`,
@@ -168,11 +168,11 @@ export default function AppHeaderNew() {
                 ماهرکار
               </Link>
             </Typography>
-            
+
             {/* آیکون‌های سمت راست */}
-            <Box 
-              sx={{ 
-                display: 'flex', 
+            <Box
+              sx={{
+                display: 'flex',
                 alignItems: 'center',
                 gap: { xs: 1.5, md: 3 }, // افزایش فاصله آیکون‌ها در موبایل
                 zIndex: 2
@@ -184,7 +184,7 @@ export default function AppHeaderNew() {
                 aria-label="open drawer"
                 edge="start"
                 onClick={handleDrawerToggle}
-                sx={{ 
+                sx={{
                   display: { xs: 'flex', md: 'none' },
                   backgroundColor: 'transparent',
                   borderRadius: '10px',
@@ -198,22 +198,22 @@ export default function AppHeaderNew() {
                   }
                 }}
               >
-                <FontAwesomeIcon 
-                  icon={faBars} 
-                  style={{ 
+                <FontAwesomeIcon
+                  icon={faBars}
+                  style={{
                     fontSize: '1.2rem',
                     width: '20px',
                     height: '20px',
                     color: theme.palette.primary.main
-                  }} 
+                  }}
                 />
               </IconButton>
-              
+
               {/* لوگوی سایت - فقط در دسکتاپ */}
               <Typography
                 variant="h5"
                 component="div"
-                sx={{ 
+                sx={{
                   fontWeight: 800,
                   fontSize: { xs: '1.5rem', md: '1.8rem' },
                   backgroundImage: `linear-gradient(45deg, ${theme.palette.primary.main}, ${theme.palette.primary.dark})`,
@@ -231,22 +231,22 @@ export default function AppHeaderNew() {
               </Typography>
 
               {/* آیتم‌های منو برای دسکتاپ - کارفرما/کارجو */}
-              <Box sx={{ 
-                display: { xs: 'none', md: 'flex' }, 
-                alignItems: 'center', 
+              <Box sx={{
+                display: { xs: 'none', md: 'flex' },
+                alignItems: 'center',
                 gap: 2
               }}>
                 {navItems.map((item, index) => (
                   <Box key={index}>
                     {item.hasSubmenu ? (
                       <Box>
-                        <Button 
+                        <Button
                           ref={item.buttonRef}
                           variant={item.variant as "text" | "contained" | "outlined"}
                           onMouseEnter={item.menuId === 'employer-menu' ? handleEmployerMouseEnter : handleCandidateMouseEnter}
                           onMouseLeave={item.menuId === 'employer-menu' ? handleEmployerMouseLeave : handleCandidateMouseLeave}
                           color={item.color as any}
-                          sx={{ 
+                          sx={{
                             borderRadius: '0px',
                             fontWeight: 400,
                             fontSize: '0.9rem',
@@ -269,9 +269,9 @@ export default function AppHeaderNew() {
                               width: '0%',
                               height: '2px',
                               zIndex: 1200,
-                              backgroundColor: item.color === 'employer' ? theme.palette.employer.main : 
-                                             item.color === 'candidate' ? theme.palette.candidate.main :
-                                             item.color === 'black' ? '#000000' : theme.palette.primary.main,
+                              backgroundColor: item.color === 'employer' ? theme.palette.employer.main :
+                                item.color === 'candidate' ? theme.palette.candidate.main :
+                                  item.color === 'black' ? '#000000' : theme.palette.primary.main,
                               transition: 'width 0.3s ease',
                             },
                             '&:hover': {
@@ -280,52 +280,52 @@ export default function AppHeaderNew() {
                                 width: '100%',
                               }
                             },
-                            ...(item.color === 'employer' && item.variant === 'text' 
-                              ? { 
-                                  color: theme.palette.employer.main,
-                                } 
+                            ...(item.color === 'employer' && item.variant === 'text'
+                              ? {
+                                color: theme.palette.employer.main,
+                              }
                               : {}),
-                            ...(item.color === 'candidate' && item.variant === 'text' 
-                              ? { 
-                                  color: theme.palette.candidate.main,
-                                } 
+                            ...(item.color === 'candidate' && item.variant === 'text'
+                              ? {
+                                color: theme.palette.candidate.main,
+                              }
                               : {}),
-                            ...(item.color === 'primary' && item.variant === 'text' 
-                              ? { 
-                                  color: theme.palette.primary.main,
-                                } 
+                            ...(item.color === 'primary' && item.variant === 'text'
+                              ? {
+                                color: theme.palette.primary.main,
+                              }
                               : {}),
                             ...(item.variant === 'contained'
                               ? {
-                                  borderRadius: '8px',
-                                  boxShadow: 'none',
-                                  ml: 2,
-                                  '&::after': {
-                                    display: 'none'
-                                  }
+                                borderRadius: '8px',
+                                boxShadow: 'none',
+                                ml: 2,
+                                '&::after': {
+                                  display: 'none'
                                 }
+                              }
                               : {})
                           }}
                         >
-                          <FontAwesomeIcon 
-                            icon={item.icon} 
-                            style={{ 
+                          <FontAwesomeIcon
+                            icon={item.icon}
+                            style={{
                               fontSize: '1.2rem',
                               width: '22px',
                               height: '22px',
                               color: item.textColor,
                               marginLeft: '4px'
-                            }} 
+                            }}
                           />
                           {item.title}
                         </Button>
                       </Box>
                     ) : (
-                      <Button 
+                      <Button
                         variant={item.variant as "text" | "contained" | "outlined"}
                         color={item.color as any}
                         href={item.href}
-                        sx={{ 
+                        sx={{
                           borderRadius: '8px',
                           minWidth: 'auto',
                           fontWeight: 400,
@@ -333,16 +333,16 @@ export default function AppHeaderNew() {
                           py: 0.5,
                           px: 1.5,
                           transition: 'all 0.2s ease',
-                          ...(item.color === 'primary' && item.variant === 'text' 
-                            ? { 
-                                color: theme.palette.primary.main,
-                              } 
+                          ...(item.color === 'primary' && item.variant === 'text'
+                            ? {
+                              color: theme.palette.primary.main,
+                            }
                             : {}),
                           ...(item.variant === 'contained'
                             ? {
-                                boxShadow: 'none',
-                                ml: 2
-                              }
+                              boxShadow: 'none',
+                              ml: 2
+                            }
                             : {})
                         }}
                       >
@@ -355,10 +355,10 @@ export default function AppHeaderNew() {
             </Box>
 
             {/* آیکون‌های سمت چپ */}
-            <Box 
-              sx={{ 
-                display: 'flex', 
-                alignItems: 'center', 
+            <Box
+              sx={{
+                display: 'flex',
+                alignItems: 'center',
                 gap: { xs: 1.5, md: 2 }, // افزایش فاصله آیکون‌ها در موبایل
                 mr: { xs: 0, md: 0 },
                 zIndex: 2
@@ -390,20 +390,20 @@ export default function AppHeaderNew() {
                     }
                   }}
                 >
-                  <FontAwesomeIcon 
-                    icon={faHeadset} 
-                    style={{ 
+                  <FontAwesomeIcon
+                    icon={faHeadset}
+                    style={{
                       fontSize: '1.2rem',
                       width: '22px',
                       height: '22px',
                       color: 'inherit',
                       transition: 'all 0.25s ease'
-                    }} 
+                    }}
                   />
                   ارتباط با پشتیبانی
                 </Box>
               </Box>
-              
+
               {/* آیکون اعلان‌ها (زنگوله) */}
               <Tooltip title="اعلان‌ها" arrow>
                 <Box
@@ -427,20 +427,20 @@ export default function AppHeaderNew() {
                     }
                   }}
                 >
-                  <FontAwesomeIcon 
-                    icon={faBell} 
+                  <FontAwesomeIcon
+                    icon={faBell}
                     className="icon"
-                    style={{ 
+                    style={{
                       fontSize: '1.2rem',
                       width: '20px',
                       height: '20px',
                       color: theme.palette.primary.main,
                       transition: 'all 0.25s ease'
-                    }} 
+                    }}
                   />
                 </Box>
               </Tooltip>
-              
+
               {/* آیکون ورود/ثبت‌نام */}
               <Tooltip title="ورود/ثبت‌نام" arrow>
                 <Box
@@ -464,16 +464,16 @@ export default function AppHeaderNew() {
                     }
                   }}
                 >
-                  <FontAwesomeIcon 
-                    icon={faUser} 
+                  <FontAwesomeIcon
+                    icon={faUser}
                     className="icon"
-                    style={{ 
+                    style={{
                       fontSize: '1.3rem',
                       width: '22px',
                       height: '22px',
                       color: theme.palette.primary.main,
                       transition: 'all 0.25s ease'
-                    }} 
+                    }}
                   />
                 </Box>
               </Tooltip>

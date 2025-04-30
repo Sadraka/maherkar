@@ -6,6 +6,8 @@ import "./globals.css"
 import "./fonts.css"
 import { iranSansFont } from '@/lib/fonts'
 import { JobSeekerThemeProvider } from '@/contexts/JobSeekerThemeContext'
+import { AuthProvider } from '@/contexts/AuthContext'
+import { Toaster } from 'react-hot-toast'
 
 export const metadata: Metadata = {
   title: "ماهرکار - سامانه کاریابی",
@@ -31,9 +33,12 @@ export default function RootLayout({
       <body className={iranSansFont.className}>
         <ThemeRegistry>
           <JobSeekerThemeProvider>
-            <PromoBar />
-            <Header />
-            {children}
+            <AuthProvider>
+              <Toaster position="top-center" />
+              <PromoBar />
+              <Header />
+              {children}
+            </AuthProvider>
           </JobSeekerThemeProvider>
         </ThemeRegistry>
       </body>
