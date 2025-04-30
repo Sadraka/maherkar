@@ -160,27 +160,27 @@ export default function Experts() {
   ];
 
   return (
-    <Box sx={{ py: 6, backgroundColor: '#f5f7fa' }}>
+    <Box sx={{ py: { xs: 4, sm: 5, md: 6 }, backgroundColor: '#f5f7fa' }}>
       <Container maxWidth="lg">
-        <Box sx={{ textAlign: 'center', mb: 6 }}>
+        <Box sx={{ textAlign: 'center', mb: { xs: 3, sm: 4, md: 6 } }}>
           <Typography
             variant="h3"
             component="h2"
             sx={{
               fontWeight: 800,
-              fontSize: { xs: '1.8rem', md: '2.2rem' },
+              fontSize: { xs: '1.5rem', sm: '1.8rem', md: '2.2rem' },
               color: theme.palette.text.primary,
               position: 'relative',
               display: 'inline-block',
-              pb: 2,
+              pb: { xs: 1.5, sm: 2 },
               '&::after': {
                 content: '""',
                 position: 'absolute',
-                width: '80px',
-                height: '4px',
+                width: { xs: '60px', sm: '80px' },
+                height: { xs: '3px', sm: '4px' },
                 backgroundColor: jobSeekerColors.primary,
                 bottom: 0,
-                left: 'calc(50% - 40px)',
+                left: { xs: 'calc(50% - 30px)', sm: 'calc(50% - 40px)' },
                 borderRadius: '2px'
               }
             }}
@@ -191,41 +191,53 @@ export default function Experts() {
             variant="body1"
             color="text.secondary"
             sx={{
-              mt: 2,
-              fontSize: '1rem',
-              maxWidth: '600px',
-              mx: 'auto'
+              mt: { xs: 1.5, sm: 2 },
+              fontSize: { xs: '0.85rem', sm: '0.9rem', md: '1rem' },
+              maxWidth: { xs: '95%', sm: '85%', md: '600px' },
+              mx: 'auto',
+              lineHeight: 1.6
             }}
           >
             مجموعه‌ای از متخصصین حرفه‌ای و کارآزموده در زمینه‌های مختلف که آماده همکاری با کارفرمایان محترم هستند
           </Typography>
         </Box>
 
-        <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 3, justifyContent: 'center' }}>
+        <Box sx={{
+          display: 'flex',
+          flexWrap: 'wrap',
+          gap: { xs: 2, sm: 2.5, md: 3 },
+          justifyContent: 'center',
+          px: { xs: 1, sm: 2, md: 0 }
+        }}>
           {experts
             .filter(expert => expert.isVerified)
             .slice(0, 4)
             .map((expert) => (
               <Box key={expert.id} sx={{
-                width: { xs: '100%', sm: 'calc(50% - 24px)', md: 'calc(25% - 24px)' },
-                height: '345px'
+                width: {
+                  xs: '100%',
+                  sm: 'calc(50% - 20px)',
+                  md: 'calc(33.33% - 24px)',
+                  lg: 'calc(25% - 24px)'
+                },
+                height: { xs: 'auto', sm: '345px' }
               }}>
                 <ExpertCard expert={expert} />
               </Box>
             ))}
         </Box>
 
-        <Box sx={{ mt: 6, textAlign: 'center' }}>
+        <Box sx={{ mt: { xs: 4, sm: 5, md: 6 }, textAlign: 'center' }}>
           <Button
             variant="contained"
             disableElevation
             color="success"
             sx={{
-              px: 4,
-              py: 1.2,
+              px: { xs: 3, sm: 4 },
+              py: { xs: 1, sm: 1.2 },
               fontWeight: 700,
               borderRadius: 2,
-              fontSize: '1rem',
+              fontSize: { xs: '0.9rem', sm: '1rem' },
               background: `linear-gradient(135deg, ${jobSeekerColors.light} 0%, ${jobSeekerColors.primary} 100%)`,
               boxShadow: `0 4px 8px rgba(0, 112, 60, 0.2)`,
               '&:hover': {
