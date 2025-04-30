@@ -79,9 +79,22 @@ const cities = [
 
 export default function Hero() {
   const theme = useTheme();
-  const isMobile = useMediaQuery('(max-width:600px)');
-  const isTablet = useMediaQuery('(min-width:601px) and (max-width:1148px)');
-  const isDesktop = useMediaQuery('(min-width:1149px)');
+  // استفاده از noSsr و مقدار پیش‌فرض برای دسکتاپ
+  const [hasMounted, setHasMounted] = useState(false);
+  const matchesMobile = useMediaQuery('(max-width:600px)');
+  const matchesTablet = useMediaQuery('(min-width:601px) and (max-width:1148px)');
+  const matchesDesktop = useMediaQuery('(min-width:1149px)');
+
+  // مقادیر پیش‌فرض برای حالت اولیه (قبل از لود کامل)
+  const isMobile = hasMounted ? matchesMobile : false;
+  const isTablet = hasMounted ? matchesTablet : false;
+  const isDesktop = hasMounted ? matchesDesktop : true; // پیش‌فرض: حالت دسکتاپ
+
+  // بررسی وضعیت mount شدن کامپوننت
+  useEffect(() => {
+    setHasMounted(true);
+  }, []);
+
   const [jobCategory, setJobCategory] = useState('');
   const [jobSubCategory, setJobSubCategory] = useState('');
   const [location, setLocation] = useState('');

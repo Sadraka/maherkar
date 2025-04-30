@@ -155,61 +155,142 @@ export default function JobListings() {
         height: '100%',
         display: 'flex',
         flexDirection: 'column',
-        borderRadius: 2,
-        border: `1px solid ${employerColors.bgLight}`,
-        boxShadow: '0 4px 12px rgba(0,0,0,0.05)',
+        borderRadius: { xs: 2, sm: 2.5, md: 3 },
+        border: `1px solid #E0E0E0`,
+        boxShadow: '0 2px 8px rgba(0,0,0,0.05)',
         overflow: 'hidden',
-        position: 'relative'
+        position: 'relative',
+        backgroundColor: theme.palette.background.paper,
+        transition: 'all 0.25s ease-in-out',
+        p: 0,
+        width: '100%',
+        mx: 'auto',
       }}
     >
-      {/* ناحیه برچسب - در wrapper مطلق قرار می‌گیرد */}
-      <Box sx={{
-        position: 'absolute',
-        top: 0,
-        right: 0,
-        width: '100%',
-        height: 'auto',
-        zIndex: 2
-      }}>
-        {/* اسکلتون برچسب فوری یا ویژه */}
-        <Skeleton
-          variant="rectangular"
-          width={60}
-          height={24}
+      <CardContent sx={{ p: 0, pb: "0px !important" }}>
+        {/* هدر کارت با نمایش عنوان و برچسب نردبان */}
+        <Box
           sx={{
-            position: 'absolute',
-            top: 8,
-            right: 8,
-            borderRadius: '20px'
+            p: 1.2,
+            pb: 0.8,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            borderBottom: `1px solid ${theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.05)'}`,
+            minHeight: { xs: 45, sm: 50 },
+            px: { xs: 1, sm: 1.2 },
           }}
-        />
-      </Box>
+        >
+          <Skeleton
+            variant="text"
+            width="70%"
+            height={32}
+            sx={{
+              borderRadius: 1
+            }}
+          />
 
-      <CardContent sx={{
-        flexGrow: 1,
-        display: 'flex',
-        flexDirection: 'column',
-        p: 2,
-        pt: 2,
-        pb: 2,
-        '&:last-child': { pb: 2 }
-      }}>
-        <Skeleton variant="text" width="80%" height={32} sx={{ mb: 1 }} />
-        <Skeleton variant="text" width="50%" height={24} sx={{ mb: 2 }} />
+          {/* اسکلتون برچسب نردبان */}
+          <Skeleton
+            variant="rectangular"
+            width={45}
+            height={22}
+            sx={{
+              borderRadius: '4px'
+            }}
+          />
+        </Box>
 
-        <Skeleton variant="rectangular" height={80} sx={{ borderRadius: 1.5, mb: 2 }} />
+        {/* بدنه کارت - اطلاعات شغلی با فاصله کمتر */}
+        <Box sx={{ px: { xs: 1, sm: 1.2 }, py: { xs: 0.8, sm: 1 }, flex: 1, display: 'flex', flexDirection: 'column' }}>
+          <Box sx={{ display: 'grid', gap: { xs: 1, sm: 1.2 } }}>
+            {/* محل کار */}
+            <Box sx={{ display: 'flex', alignItems: 'center' }}>
+              <Skeleton
+                variant="circular"
+                width={32}
+                height={32}
+                sx={{
+                  mr: { xs: 0.8, sm: 1 },
+                  ml: 0.5
+                }}
+              />
+              <Skeleton
+                variant="text"
+                width="60%"
+                height={24}
+              />
+            </Box>
 
-        <Box sx={{ mb: 2 }}>
-          <Skeleton variant="text" width="40%" height={24} sx={{ mb: 1 }} />
-          <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
-            <Skeleton variant="rectangular" width={60} height={22} sx={{ borderRadius: 0.8 }} />
-            <Skeleton variant="rectangular" width={80} height={22} sx={{ borderRadius: 0.8 }} />
-            <Skeleton variant="rectangular" width={70} height={22} sx={{ borderRadius: 0.8 }} />
+            {/* زمان انتشار */}
+            <Box sx={{ display: 'flex', alignItems: 'center' }}>
+              <Skeleton
+                variant="circular"
+                width={32}
+                height={32}
+                sx={{
+                  mr: { xs: 0.8, sm: 1 },
+                  ml: 0.5
+                }}
+              />
+              <Skeleton
+                variant="text"
+                width="40%"
+                height={24}
+              />
+            </Box>
+
+            {/* نوع کار */}
+            <Box sx={{ display: 'flex', alignItems: 'center' }}>
+              <Skeleton
+                variant="circular"
+                width={32}
+                height={32}
+                sx={{
+                  mr: { xs: 0.8, sm: 1 },
+                  ml: 0.5
+                }}
+              />
+              <Skeleton
+                variant="text"
+                width="50%"
+                height={24}
+              />
+            </Box>
+
+            {/* حقوق */}
+            <Box sx={{ display: 'flex', alignItems: 'center' }}>
+              <Skeleton
+                variant="circular"
+                width={32}
+                height={32}
+                sx={{
+                  mr: { xs: 0.8, sm: 1 },
+                  ml: 0.5
+                }}
+              />
+              <Skeleton
+                variant="text"
+                width="70%"
+                height={24}
+                sx={{
+                  borderRadius: 1
+                }}
+              />
+            </Box>
           </Box>
         </Box>
 
-        <Box sx={{ mt: 'auto' }}>
-          <Skeleton variant="rectangular" height={48} width="100%" sx={{ borderRadius: 1.5 }} />
+        {/* دکمه مشاهده آگهی */}
+        <Box sx={{ px: { xs: 1, sm: 1.2 }, pb: { xs: 1.2, sm: 1.5 }, pt: 0.5 }}>
+          <Skeleton
+            variant="rectangular"
+            height={44}
+            width="100%"
+            sx={{
+              borderRadius: 1.5
+            }}
+          />
         </Box>
       </CardContent>
     </Card>
