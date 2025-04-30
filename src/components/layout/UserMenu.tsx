@@ -24,6 +24,7 @@ import {
     faBriefcase,
     faUserCircle
 } from '@fortawesome/free-solid-svg-icons';
+import { useAuth } from '@/contexts/AuthContext';
 
 // تایپ‌های مورد نیاز
 interface UserMenuProps {
@@ -39,6 +40,7 @@ interface UserMenuProps {
 export default function UserMenu({ user, isLoggedIn }: UserMenuProps) {
     const theme = useTheme();
     const router = useRouter();
+    const { logout: authLogout } = useAuth();
     const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
     const open = Boolean(anchorEl);
 
@@ -53,10 +55,9 @@ export default function UserMenu({ user, isLoggedIn }: UserMenuProps) {
 
     // مدیریت خروج از حساب کاربری
     const handleLogout = () => {
-        // اینجا منطق لاگ‌اوت را پیاده‌سازی کنید
-        // مثلاً: clearAuth(), removeToken() و غیره
+        // استفاده از تابع logout از AuthContext
+        authLogout();
         handleClose();
-        router.push('/login');
     };
 
     // اگر کاربر لاگین نکرده باشد، آیکون ورود نمایش داده می‌شود
