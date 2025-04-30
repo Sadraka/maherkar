@@ -202,14 +202,17 @@ export default function Experts() {
         </Box>
 
         <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 3, justifyContent: 'center' }}>
-          {experts.slice(0, 4).map((expert) => (
-            <Box key={expert.id} sx={{
-              width: { xs: '100%', sm: 'calc(50% - 24px)', md: 'calc(25% - 24px)' },
-              height: '345px'
-            }}>
-              <ExpertCard expert={expert} />
-            </Box>
-          ))}
+          {experts
+            .filter(expert => expert.isVerified)
+            .slice(0, 4)
+            .map((expert) => (
+              <Box key={expert.id} sx={{
+                width: { xs: '100%', sm: 'calc(50% - 24px)', md: 'calc(25% - 24px)' },
+                height: '345px'
+              }}>
+                <ExpertCard expert={expert} />
+              </Box>
+            ))}
         </Box>
 
         <Box sx={{ mt: 6, textAlign: 'center' }}>

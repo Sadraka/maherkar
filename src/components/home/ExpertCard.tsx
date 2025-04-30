@@ -15,7 +15,6 @@ import {
 } from '@mui/material';
 import LocationOnOutlinedIcon from '@mui/icons-material/LocationOnOutlined';
 import WorkOutlineIcon from '@mui/icons-material/WorkOutline';
-import CheckIcon from '@mui/icons-material/Check';
 import HistoryIcon from '@mui/icons-material/History';
 import { useJobSeekerTheme } from '@/contexts/JobSeekerThemeContext';
 
@@ -116,27 +115,6 @@ export default function ExpertCard({ expert }: ExpertCardProps) {
                 border: 'none',
               }}
             />
-            {expert.isVerified && (
-              <Box
-                sx={{
-                  position: 'absolute',
-                  bottom: -2,
-                  right: -2,
-                  bgcolor: jobSeekerColors.primary,
-                  color: 'white',
-                  borderRadius: '50%',
-                  width: 18,
-                  height: 18,
-                  display: 'flex',
-                  justifyContent: 'center',
-                  alignItems: 'center',
-                  border: '1.5px solid white',
-                  zIndex: 1,
-                }}
-              >
-                <CheckIcon sx={{ fontSize: '0.8rem' }} />
-              </Box>
-            )}
           </Box>
           <Box>
             <Typography variant="h6" sx={{ fontWeight: 'bold', fontSize: '0.95rem', mb: 0.2, lineHeight: 1.2 }}>
