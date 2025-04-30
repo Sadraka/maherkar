@@ -32,10 +32,13 @@ import { useHeaderContext } from '@/contexts/HeaderContext';
 import { styled } from '@mui/material/styles';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
+import UserMenu from './UserMenu';
+import { useAuth } from '@/contexts/AuthContext';
 
 // کامپوننت AppBar اصلی
 export default function AppHeaderNew() {
   const theme = useTheme();
+  const { isAuthenticated, user } = useAuth();
   const {
     isMobile,
     mobileOpen,
@@ -441,42 +444,15 @@ export default function AppHeaderNew() {
                 </Box>
               </Tooltip>
 
-              {/* آیکون ورود/ثبت‌نام */}
-              <Tooltip title="ورود/ثبت‌نام" arrow>
-                <Box
-                  component="a"
-                  href="/login"
-                  sx={{
-                    width: { xs: '34px', md: '42px' },
-                    height: { xs: '34px', md: '42px' },
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    cursor: 'pointer',
-                    transition: 'all 0.25s ease',
-                    position: 'relative',
-                    overflow: 'hidden',
-                    '&:hover': {
-                      transform: 'translateY(-2px)',
-                      '& .icon': {
-                        color: theme.palette.primary.dark
-                      }
-                    }
-                  }}
-                >
-                  <FontAwesomeIcon
-                    icon={faUser}
-                    className="icon"
-                    style={{
-                      fontSize: '1.3rem',
-                      width: '22px',
-                      height: '22px',
-                      color: theme.palette.primary.main,
-                      transition: 'all 0.25s ease'
-                    }}
-                  />
-                </Box>
-              </Tooltip>
+              {/* کامپوننت منوی کاربر */}
+              <UserMenu
+                isLoggedIn={isAuthenticated}
+                user={user ? {
+                  name: user.full_name,
+                  email: user.email,
+                  role: user.user_type === 'JS' ? 'candidate' : 'employer'
+                } : undefined}
+              />
             </Box>
           </Toolbar>
         </Box>
