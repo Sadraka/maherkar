@@ -10,30 +10,31 @@ import DailyHiring from '@/components/home/DailyHiring';
 import FAQ from '@/components/home/FAQ';
 import AboutUs from '@/components/home/AboutUs';
 import Footer from '@/components/layout/Footer';
+import CombinedInfo from '@/components/home/CombinedInfo';
 
 export default function Home() {
   return (
     <main>
       {/* بخش جستجوی صفحه اصلی */}
       <Hero />
-      
+
       {/* بخش نمایش آگهی‌های شغلی */}
       <JobListings />
-      
+
       {/* بخش نمایش متخصصین */}
       <Experts />
-      
-      {/* بخش استخدام روزانه */}
-      <DailyHiring />
-      
-      {/* سوالات متداول */}
-      <FAQ />
-      
-      {/* درباره ما */}
-      <AboutUs />
-      
+
+      {/* بخش ترکیبی استخدام روزانه و درباره ما */}
+      <CombinedInfo />
+
+      {/* سوالات متداول - غیرفعال شده */}
+      {/* <FAQ /> */}
+
+      {/* درباره ما - غیرفعال شده */}
+      {/* <AboutUs /> */}
+
       {/* فوتر سایت */}
       <Footer />
-      </main>
+    </main>
   );
 }

@@ -191,8 +191,8 @@ export default function Experts() {
 
   return (
     <Box sx={{
-      pt: { xs: 1.5, sm: 2, md: 3 },
-      pb: { xs: 1.5, sm: 2, md: 3 },
+      pt: { xs: 5, sm: 6, md: 7 },
+      pb: { xs: 3, sm: 4, md: 5 },
       backgroundColor: '#f5f7fa'
     }}>
       <Container maxWidth="lg" sx={{ px: { xs: 1.5, sm: 2, md: 3 } }}>

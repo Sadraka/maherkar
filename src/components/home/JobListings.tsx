@@ -229,13 +229,11 @@ export default function JobListings() {
   };
 
   return (
-    <Box
-      sx={{
-        pt: { xs: 1.5, sm: 2, md: 3 },
-        pb: { xs: 1.5, sm: 2, md: 3 },
-        backgroundColor: '#ffffff'
-      }}
-    >
+    <Box sx={{
+      pt: { xs: 5, sm: 6, md: 7 },
+      pb: { xs: 3, sm: 4, md: 5 },
+      backgroundColor: theme.palette.background.default
+    }}>
       <Container maxWidth="lg" sx={{ px: { xs: 1.5, sm: 2, md: 3 } }}>
         <Box sx={{ mb: { xs: 3, sm: 3, md: 3 }, textAlign: 'center' }}>
           <Typography
