@@ -6,14 +6,17 @@ import {
   Container,
   Button,
   useTheme,
-  Grid
+  Grid,
+  useMediaQuery
 } from '@mui/material';
 import { useJobSeekerTheme } from '@/contexts/JobSeekerThemeContext';
 import ExpertCard, { ExpertType } from './ExpertCard';
+import AddResumeCard from './AddResumeCard';
 
 export default function Experts() {
   const theme = useTheme();
   const jobSeekerColors = useJobSeekerTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
   const experts: ExpertType[] = [
     {
@@ -74,7 +77,7 @@ export default function Experts() {
       bio: 'برنامه‌نویس بک‌اند با تسلط به Node.js و Express',
       location: 'شیراز',
       skills: ['Node.js', 'Express', 'MongoDB'],
-      isVerified: false,
+      isVerified: true,
       industry: 'فناوری اطلاعات',
       experienceYears: 5,
       preferredJobType: 'تمام وقت',
@@ -145,7 +148,7 @@ export default function Experts() {
       bio: 'گرافیست با تجربه در طراحی لوگو و هویت بصری',
       location: 'تبریز',
       skills: ['فتوشاپ', 'ایلاستریتور', 'طراحی لوگو'],
-      isVerified: false,
+      isVerified: true,
       industry: 'طراحی و هنر',
       experienceYears: 5,
       preferredJobType: 'دورکاری',
@@ -157,7 +160,34 @@ export default function Experts() {
       createdAt: '2024-02-10',
       updatedAt: '2024-05-28',
     },
+    {
+      id: 7,
+      name: 'امیر حسینی',
+      username: 'amir_h',
+      email: 'amir.hosseini@example.com',
+      phone: '09123456783',
+      jobTitle: 'مدیر محصول دیجیتال',
+      avatar: 'https://randomuser.me/api/portraits/men/55.jpg',
+      bio: 'مدیر محصول با 5 سال تجربه در تیم‌های چابک و توسعه محصولات نرم‌افزاری',
+      location: 'تهران',
+      skills: ['مدیریت محصول', 'اسکرام', 'تحلیل کسب و کار'],
+      isVerified: true,
+      industry: 'فناوری اطلاعات',
+      experienceYears: 5,
+      preferredJobType: 'تمام وقت',
+      expectedSalary: '25 تا 35 میلیون تومان',
+      degree: 'کارشناسی ارشد MBA',
+      gender: 'مرد',
+      soldierStatus: 'پایان خدمت',
+      availability: 'فوری',
+      experience: '3 تا 6 سال',
+      createdAt: '2023-11-18',
+      updatedAt: '2024-06-05',
+    },
   ];
+
+  // تعداد کارت‌های نمایشی بر اساس سایز صفحه
+  const visibleExperts = isMobile ? 4 : 7;
 
   return (
     <Box sx={{
@@ -213,12 +243,12 @@ export default function Experts() {
           display: 'flex',
           flexWrap: 'wrap',
           gap: { xs: 2, sm: 2.5, md: 3 },
-          justifyContent: 'center',
+          justifyContent: 'flex-start',
           px: { xs: 1, sm: 2, md: 0 }
         }}>
           {experts
             .filter(expert => expert.isVerified)
-            .slice(0, 4)
+            .slice(0, visibleExperts)
             .map((expert) => (
               <Box key={expert.id} sx={{
                 width: {
@@ -232,6 +262,19 @@ export default function Experts() {
                 <ExpertCard expert={expert} />
               </Box>
             ))}
+
+          {/* کارت ثبت رزومه - همیشه آخرین کارت */}
+          <Box sx={{
+            width: {
+              xs: '100%',
+              sm: 'calc(50% - 20px)',
+              md: 'calc(33.33% - 24px)',
+              lg: 'calc(25% - 24px)'
+            },
+            height: { xs: 'auto', sm: '345px' }
+          }}>
+            <AddResumeCard onClick={() => console.log('ثبت رزومه جدید')} />
+          </Box>
         </Box>
 
         <Box sx={{ mt: { xs: 4, sm: 5, md: 6 }, textAlign: 'center' }}>
