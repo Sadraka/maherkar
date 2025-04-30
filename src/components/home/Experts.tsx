@@ -202,8 +202,8 @@ export default function Experts() {
         </Box>
 
         <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 3, justifyContent: 'center' }}>
-          {experts.slice(0, 3).map((expert) => (
-            <Box key={expert.id} sx={{ width: { xs: '100%', sm: 'calc(50% - 24px)', md: 'calc(33.33% - 24px)' } }}>
+          {experts.slice(0, 4).map((expert) => (
+            <Box key={expert.id} sx={{ width: { xs: '100%', sm: 'calc(50% - 24px)', md: 'calc(25% - 24px)' } }}>
               <ExpertCard expert={expert} />
             </Box>
           ))}
