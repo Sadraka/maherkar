@@ -66,7 +66,7 @@ export default function FAQ() {
     <Box sx={{
       pt: { xs: 1.5, sm: 2, md: 3 },
       pb: { xs: 1.5, sm: 2, md: 3 },
-      backgroundColor: '#fff'
+      backgroundColor: '#f5f7fa'
     }}>
       <Container maxWidth="lg" sx={{ px: { xs: 1.5, sm: 2, md: 3 } }}>
         <Box sx={{ textAlign: 'center', mb: { xs: 3, sm: 3, md: 3 } }}>

@@ -290,8 +290,8 @@ export default function Hero() {
   return (
     <Box
       sx={{
-        pt: { xs: 1.5, sm: 2, md: 3 },
-        pb: { xs: 1.5, sm: 2, md: 3 },
+        pt: { xs: 2, sm: 3, md: 4 },
+        pb: { xs: 2, sm: 3, md: 4 },
         backgroundColor: theme.palette.background.default,
         position: 'relative',
         overflow: 'hidden',
@@ -302,10 +302,10 @@ export default function Hero() {
         <Box
           sx={{
             position: 'relative',
-            borderRadius: { xs: '8px', sm: '12px' },
+            borderRadius: { xs: '10px', sm: '12px', md: '16px' },
             overflow: 'hidden',
             background: 'linear-gradient(135deg, #3366cc 0%, #4477dd 100%)',
-            p: { xs: 2, sm: 2.5, md: 3.5 },
+            p: { xs: 2.5, sm: 3, md: 4 },
             mb: { xs: 0, sm: 0 },
             boxShadow: '0 10px 30px rgba(0, 0, 0, 0.15), 0 5px 15px rgba(0, 0, 0, 0.1)',
             '&::after': {
@@ -319,7 +319,7 @@ export default function Hero() {
               pointerEvents: 'none',
               zIndex: 0
             },
-            '&::before': {  // پس‌زمینه با اندازه دقیق کادر
+            '&::before': {
               content: '""',
               position: 'absolute',
               top: 0,
@@ -327,24 +327,24 @@ export default function Hero() {
               right: 0,
               bottom: 0,
               backgroundImage: 'url(/images/circuit-board-white-smaller.svg)',
-              backgroundSize: '35%', // تنظیم دقیق سایز الگو به 35 درصد
+              backgroundSize: { xs: '45%', sm: '40%', md: '35%' },
               backgroundPosition: 'center',
               backgroundRepeat: 'repeat',
-              opacity: 0.4, // کاهش شفافیت
+              opacity: 0.4,
               zIndex: 0
             }
           }}
         >
-          <Box sx={{ textAlign: 'center', mb: { xs: 3, md: 4 }, position: 'relative', zIndex: 1 }}>
+          <Box sx={{ textAlign: 'center', mb: { xs: 3, sm: 3.5, md: 4 }, position: 'relative', zIndex: 1 }}>
             <Typography
               variant="h4"
               component="h1"
               sx={{
                 fontWeight: 700,
-                fontSize: { xs: '1.3rem', sm: '1.8rem', md: '2.1rem' },
+                fontSize: { xs: '1.5rem', sm: '1.8rem', md: '2.2rem' },
                 color: '#ffffff',
-                mb: { xs: 0, sm: 0 }, // حذف مارجین پایین چون دیگر متن توضیحی وجود ندارد
-                display: { xs: 'none', sm: 'block' } // نمایش فقط در حالت دسکتاپ و تبلت
+                mb: { xs: 0, sm: 0 },
+                display: { xs: 'none', sm: 'block' }
               }}
             >
               هوشمند انتخاب کن، <Box
@@ -356,10 +356,10 @@ export default function Hero() {
                   '&::after': {
                     content: '""',
                     position: 'absolute',
-                    bottom: '-8px',
+                    bottom: { xs: '-6px', sm: '-8px' },
                     left: 0,
                     width: '100%',
-                    height: '8px',
+                    height: { xs: '6px', sm: '8px' },
                     backgroundImage: 'url(/images/underline-yellow.svg)',
                     backgroundRepeat: 'no-repeat',
                     backgroundSize: '100% 100%',
@@ -378,10 +378,10 @@ export default function Hero() {
                 component="h1"
                 sx={{
                   fontWeight: 700,
-                  fontSize: '1.3rem',
+                  fontSize: '1.4rem',
                   color: '#ffffff',
                   mb: 0.5,
-                  lineHeight: 1.3
+                  lineHeight: 1.4
                 }}
               >
                 هوشمند انتخاب کن،
@@ -391,9 +391,9 @@ export default function Hero() {
                 component="span"
                 sx={{
                   fontWeight: 700,
-                  fontSize: '1.3rem',
+                  fontSize: '1.4rem',
                   color: '#ffffff',
-                  lineHeight: 1.3,
+                  lineHeight: 1.4,
                   position: 'relative'
                 }}
               >
@@ -406,10 +406,10 @@ export default function Hero() {
                     '&::after': {
                       content: '""',
                       position: 'absolute',
-                      bottom: '-8px',
+                      bottom: '-6px',
                       left: 0,
                       width: '100%',
-                      height: '8px',
+                      height: '6px',
                       backgroundImage: 'url(/images/underline-yellow.svg)',
                       backgroundRepeat: 'no-repeat',
                       backgroundSize: '100% 100%',
@@ -429,18 +429,18 @@ export default function Hero() {
               display: 'flex',
               flexDirection: { xs: 'column', sm: 'row' },
               alignItems: 'center',
-              gap: { xs: 0.75, sm: 0.5 },
+              gap: { xs: 1.25, sm: 1, md: 1 },
               backgroundColor: theme.palette.background.paper,
-              p: { xs: 1, sm: 1.5, md: 1 },
-              borderRadius: { xs: '6px', sm: '8px' },
+              p: { xs: 1.5, sm: 1.5, md: 1.5 },
+              borderRadius: { xs: '8px', sm: '10px', md: '12px' },
               boxShadow: '0px 5px 25px rgba(0, 0, 0, 0.1)',
               position: 'relative',
               zIndex: 1,
-              mb: { xs: 1.5, sm: 2, md: 3 }
+              mb: { xs: 2, sm: 2.5, md: 3 }
             }}
           >
             {/* گروه کاری */}
-            <Box sx={{ width: { xs: '100%', sm: '20%' }, height: { xs: '52px', md: '48px' }, display: 'flex', alignItems: 'center' }}>
+            <Box sx={{ width: { xs: '100%', sm: '20%' }, height: { xs: '54px', sm: '50px', md: '48px' }, display: 'flex', alignItems: 'center' }}>
               <FormControl fullWidth sx={{ height: '100%' }}>
                 <Select
                   displayEmpty
@@ -456,7 +456,7 @@ export default function Hero() {
                   }}
                   MenuProps={menuPropsRTL}
                   startAdornment={
-                    <InputAdornment position="start" sx={{ position: 'absolute', right: '8px' }}>
+                    <InputAdornment position="start" sx={{ position: 'absolute', right: '10px' }}>
                       <WorkIcon fontSize="small" sx={{ color: employerColors.primary }} />
                     </InputAdornment>
                   }
@@ -474,7 +474,7 @@ export default function Hero() {
             </Box>
 
             {/* زیرگروه کاری */}
-            <Box sx={{ width: { xs: '100%', sm: '20%' }, height: { xs: '52px', md: '48px' }, display: 'flex', alignItems: 'center' }}>
+            <Box sx={{ width: { xs: '100%', sm: '20%' }, height: { xs: '54px', sm: '50px', md: '48px' }, display: 'flex', alignItems: 'center' }}>
               <FormControl fullWidth sx={{ height: '100%' }}>
                 <Select
                   displayEmpty
@@ -491,7 +491,7 @@ export default function Hero() {
                   }}
                   MenuProps={menuPropsRTL}
                   startAdornment={
-                    <InputAdornment position="start" sx={{ position: 'absolute', right: '8px' }}>
+                    <InputAdornment position="start" sx={{ position: 'absolute', right: '10px' }}>
                       <WorkIcon fontSize="small" sx={{ color: employerColors.primary }} />
                     </InputAdornment>
                   }
@@ -509,7 +509,7 @@ export default function Hero() {
             </Box>
 
             {/* استان */}
-            <Box sx={{ width: { xs: '100%', sm: '20%' }, height: { xs: '52px', md: '48px' }, display: 'flex', alignItems: 'center' }}>
+            <Box sx={{ width: { xs: '100%', sm: '20%' }, height: { xs: '54px', sm: '50px', md: '48px' }, display: 'flex', alignItems: 'center' }}>
               <FormControl fullWidth sx={{ height: '100%' }}>
                 <Select
                   displayEmpty
@@ -525,7 +525,7 @@ export default function Hero() {
                   }}
                   MenuProps={menuPropsRTL}
                   startAdornment={
-                    <InputAdornment position="start" sx={{ position: 'absolute', right: '8px' }}>
+                    <InputAdornment position="start" sx={{ position: 'absolute', right: '10px' }}>
                       <LocationOnIcon fontSize="small" sx={{ color: employerColors.primary }} />
                     </InputAdornment>
                   }
@@ -543,7 +543,7 @@ export default function Hero() {
             </Box>
 
             {/* شهر */}
-            <Box sx={{ width: { xs: '100%', sm: '20%' }, height: { xs: '52px', md: '48px' }, display: 'flex', alignItems: 'center' }}>
+            <Box sx={{ width: { xs: '100%', sm: '20%' }, height: { xs: '54px', sm: '50px', md: '48px' }, display: 'flex', alignItems: 'center' }}>
               <FormControl fullWidth sx={{ height: '100%' }}>
                 <Select
                   displayEmpty
@@ -560,7 +560,7 @@ export default function Hero() {
                   }}
                   MenuProps={menuPropsRTL}
                   startAdornment={
-                    <InputAdornment position="start" sx={{ position: 'absolute', right: '8px' }}>
+                    <InputAdornment position="start" sx={{ position: 'absolute', right: '10px' }}>
                       <LocationOnIcon fontSize="small" sx={{ color: employerColors.primary }} />
                     </InputAdornment>
                   }
@@ -581,7 +581,7 @@ export default function Hero() {
             <Box
               sx={{
                 width: { xs: '100%', sm: '20%' },
-                height: { xs: '52px', md: '48px' },
+                height: { xs: '54px', sm: '50px', md: '48px' },
                 display: 'flex',
                 alignItems: 'center'
               }}
@@ -600,16 +600,16 @@ export default function Hero() {
                   alignItems: 'center',
                   justifyContent: 'center',
                   padding: '0 16px',
-                  borderRadius: '6px',
+                  borderRadius: '8px',
                   background: `linear-gradient(135deg, ${employerColors.light} 0%, ${employerColors.primary} 100%)`,
                   boxShadow: 'none',
                   '&:hover': {
                     background: `linear-gradient(135deg, ${employerColors.primary} 0%, ${employerColors.dark} 100%)`,
-                    boxShadow: '0px 2px 5px rgba(0, 0, 0, 0.1)',
+                    boxShadow: '0px 4px 8px rgba(0, 0, 0, 0.15)',
                   },
                   color: '#fff',
                   fontWeight: 'bold',
-                  fontSize: '0.95rem',
+                  fontSize: { xs: '1rem', sm: '0.95rem' },
                   textTransform: 'none',
                   border: 'none'
                 }}
@@ -625,7 +625,7 @@ export default function Hero() {
               position: 'relative',
               zIndex: 1,
               textAlign: 'center',
-              mt: { xs: 1.5, sm: 2.5 }
+              mt: { xs: 2, sm: 2.5, md: 3 }
             }}
           >
             <Box
@@ -633,7 +633,7 @@ export default function Hero() {
                 display: 'flex',
                 flexDirection: 'row',
                 justifyContent: 'center',
-                gap: { xs: 2, sm: 3 }
+                gap: { xs: 2.5, sm: 3, md: 4 }
               }}
             >
               <Box
@@ -642,30 +642,41 @@ export default function Hero() {
                   cursor: 'pointer',
                   margin: 0,
                   backgroundColor: filterOption === 'internship' ? 'rgba(255, 218, 62, 0.15)' : 'rgba(255, 255, 255, 0.15)',
-                  borderRadius: '8px',
+                  borderRadius: '10px',
                   border: `2px solid ${filterOption === 'internship' ? '#FFDA3E' : 'rgba(255, 255, 255, 0.4)'}`,
-                  padding: { xs: '0px 14px', sm: '0px 18px' },
-                  boxShadow: 'none',
+                  padding: { xs: '0px 16px', sm: '0px 20px' },
+                  boxShadow: filterOption === 'internship' ? '0 2px 8px rgba(0, 0, 0, 0.1)' : 'none',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  width: { xs: '110px', sm: '130px' },
-                  minWidth: { xs: '110px', sm: '130px' },
-                  height: { xs: '52px', md: '48px' },
-                  gap: '8px'
+                  width: { xs: '125px', sm: '140px', md: '150px' },
+                  minWidth: { xs: '125px', sm: '140px', md: '150px' },
+                  height: { xs: '52px', sm: '50px', md: '48px' },
+                  gap: '10px',
+                  transition: 'all 0.2s ease-in-out',
+                  '&:hover': {
+                    backgroundColor: filterOption === 'internship' ? 'rgba(255, 218, 62, 0.2)' : 'rgba(255, 255, 255, 0.2)',
+                    transform: 'translateY(-2px)',
+                  },
+                  '&:active': {
+                    transform: 'translateY(0)',
+                  }
                 }}
               >
-                <SchoolIcon
-                  sx={{
-                    color: filterOption === 'internship' ? '#FFDA3E' : 'rgba(255, 255, 255, 0.9)',
-                    fontSize: '1rem'
-                  }}
-                />
+                <span>
+                  <FontAwesomeIcon
+                    icon={faGraduationCap}
+                    style={{
+                      color: filterOption === 'internship' ? '#FFDA3E' : 'rgba(255, 255, 255, 0.9)',
+                      fontSize: '1.1rem'
+                    }}
+                  />
+                </span>
                 <Typography
                   sx={{
                     color: filterOption === 'internship' ? '#FFDA3E' : 'rgba(255, 255, 255, 0.9)',
                     fontWeight: filterOption === 'internship' ? '700' : '500',
-                    fontSize: { xs: '0.9rem', sm: '1rem' },
+                    fontSize: { xs: '0.95rem', sm: '1rem' },
                     textShadow: filterOption === 'internship' ? '0 1px 2px rgba(0,0,0,0.3)' : 'none',
                     userSelect: 'none',
                   }}
@@ -679,30 +690,41 @@ export default function Hero() {
                   cursor: 'pointer',
                   margin: 0,
                   backgroundColor: filterOption === 'remote' ? 'rgba(255, 218, 62, 0.15)' : 'rgba(255, 255, 255, 0.15)',
-                  borderRadius: '8px',
+                  borderRadius: '10px',
                   border: `2px solid ${filterOption === 'remote' ? '#FFDA3E' : 'rgba(255, 255, 255, 0.4)'}`,
-                  padding: { xs: '0px 14px', sm: '0px 18px' },
-                  boxShadow: 'none',
+                  padding: { xs: '0px 16px', sm: '0px 20px' },
+                  boxShadow: filterOption === 'remote' ? '0 2px 8px rgba(0, 0, 0, 0.1)' : 'none',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  width: { xs: '110px', sm: '130px' },
-                  minWidth: { xs: '110px', sm: '130px' },
-                  height: { xs: '52px', md: '48px' },
-                  gap: '8px'
+                  width: { xs: '125px', sm: '140px', md: '150px' },
+                  minWidth: { xs: '125px', sm: '140px', md: '150px' },
+                  height: { xs: '52px', sm: '50px', md: '48px' },
+                  gap: '10px',
+                  transition: 'all 0.2s ease-in-out',
+                  '&:hover': {
+                    backgroundColor: filterOption === 'remote' ? 'rgba(255, 218, 62, 0.2)' : 'rgba(255, 255, 255, 0.2)',
+                    transform: 'translateY(-2px)',
+                  },
+                  '&:active': {
+                    transform: 'translateY(0)',
+                  }
                 }}
               >
-                <LaptopIcon
-                  sx={{
-                    color: filterOption === 'remote' ? '#FFDA3E' : 'rgba(255, 255, 255, 0.9)',
-                    fontSize: '1rem'
-                  }}
-                />
+                <span>
+                  <FontAwesomeIcon
+                    icon={faLaptopHouse}
+                    style={{
+                      color: filterOption === 'remote' ? '#FFDA3E' : 'rgba(255, 255, 255, 0.9)',
+                      fontSize: '1.1rem'
+                    }}
+                  />
+                </span>
                 <Typography
                   sx={{
                     color: filterOption === 'remote' ? '#FFDA3E' : 'rgba(255, 255, 255, 0.9)',
                     fontWeight: filterOption === 'remote' ? '700' : '500',
-                    fontSize: { xs: '0.9rem', sm: '1rem' },
+                    fontSize: { xs: '0.95rem', sm: '1rem' },
                     textShadow: filterOption === 'remote' ? '0 1px 2px rgba(0,0,0,0.3)' : 'none',
                     userSelect: 'none',
                   }}

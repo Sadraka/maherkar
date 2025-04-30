@@ -99,7 +99,7 @@ export default function AboutUs() {
   }, [isVisible]);
 
   return (
-    <Box sx={{ py: { xs: 1.5, sm: 2, md: 3 }, backgroundColor: '#fff' }}>
+    <Box sx={{ py: { xs: 1.5, sm: 2, md: 3 }, backgroundColor: '#f5f7fa' }}>
       <Container maxWidth="lg">
         <Box sx={{ textAlign: 'center', mb: 5 }}>
           <Typography
