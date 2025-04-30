@@ -17,6 +17,8 @@ import LocationOnOutlinedIcon from '@mui/icons-material/LocationOnOutlined';
 import WorkOutlineIcon from '@mui/icons-material/WorkOutline';
 import CheckIcon from '@mui/icons-material/Check';
 import HistoryIcon from '@mui/icons-material/History';
+import AccessTimeIcon from '@mui/icons-material/AccessTime';
+import PaidOutlinedIcon from '@mui/icons-material/PaidOutlined';
 import { useJobSeekerTheme } from '@/contexts/JobSeekerThemeContext';
 
 // تابع تبدیل اعداد انگلیسی به فارسی
@@ -46,6 +48,22 @@ interface ExpertCardProps {
 export default function ExpertCard({ expert }: ExpertCardProps) {
   const theme = useTheme();
   const jobSeekerColors = useJobSeekerTheme();
+
+  // تابع تبدیل تاریخ به عبارت "چند ساعت/دقیقه پیش"
+  const getTimeAgo = (date: Date): string => {
+    const now = new Date();
+    const diffMs = now.getTime() - date.getTime();
+    const diffHrs = Math.floor(diffMs / (1000 * 60 * 60));
+    const diffMins = Math.floor(diffMs / (1000 * 60));
+
+    if (diffHrs > 24) {
+      return `${convertToPersianNumber(Math.floor(diffHrs / 24))} روز پیش`;
+    }
+    if (diffHrs > 0) {
+      return `${convertToPersianNumber(diffHrs)} ساعت پیش`;
+    }
+    return `${convertToPersianNumber(diffMins)} دقیقه پیش`;
+  };
 
   return (
     <Card

@@ -9,16 +9,21 @@ import {
   useTheme,
   Skeleton,
   Card,
-  CardContent
+  CardContent,
+  useMediaQuery
 } from '@mui/material';
 import JobCard, { JobType } from './JobCard';
 import WorkOutlineIcon from '@mui/icons-material/WorkOutline';
+import WorkIcon from '@mui/icons-material/Work';
+import AddIcon from '@mui/icons-material/Add';
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import { useJobSeekerTheme } from '@/contexts/JobSeekerThemeContext';
 import { EMPLOYER_THEME } from '@/constants/colors';
 
 export default function JobListings() {
   const theme = useTheme();
   const jobSeekerColors = useJobSeekerTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
   // استفاده از رنگ‌های کارفرما
   const employerColors = EMPLOYER_THEME;
@@ -26,80 +31,100 @@ export default function JobListings() {
   // اضافه کردن وضعیت بارگذاری
   const [loading, setLoading] = useState(true);
 
+  // تعداد کارت‌ها براساس سایز صفحه
+  const jobsToShow = isMobile ? 4 : 7;
+
   const [jobs, setJobs] = useState<JobType[]>([
     {
       id: 1,
-      title: 'توسعه‌دهنده فرانت‌اند ارشد',
+      title: 'توسعه‌دهنده فرانت‌اند ارشد ',
       company: 'شرکت فناوری نوین',
       location: 'تهران',
-      isRemote: true,
-      salary: '۳۰-۲۰ میلیون تومان',
+      salary: '30 to 50',
       skills: ['React', 'TypeScript', 'NextJS'],
-      isUrgent: true,
-      isPromoted: true, // آگهی نردبان شده
+      subscriptionStatus: 'special', // آگهی با اشتراک ویژه (نردبان)
       timePosted: '۲ ساعت پیش',
-      jobType: 'تمام‌وقت'
+      jobType: 'Full-Time',
+      industry: 'فناوری اطلاعات',
+      created_at: new Date().toISOString()
     },
     {
       id: 2,
       title: 'طراح ارشد محصول',
       company: 'استودیو طراحی دیدار',
       location: 'اصفهان',
-      isRemote: false,
-      salary: '۱۵-۱۰ میلیون تومان',
+      salary: '10 to 15',
       skills: ['UI/UX', 'Figma', 'Adobe XD'],
-      isUrgent: false,
+      subscriptionStatus: 'default',
       timePosted: '۳ ساعت پیش',
-      jobType: 'تمام‌وقت'
+      jobType: 'Full-Time',
+      industry: 'طراحی دیجیتال',
+      created_at: new Date().toISOString()
     },
     {
       id: 3,
       title: 'مهندس DevOps',
       company: 'گروه فناوری آسان',
       location: 'تهران',
-      isRemote: true,
-      salary: '۴۰-۲۵ میلیون تومان',
+      salary: '30 to 50',
       skills: ['Docker', 'Kubernetes', 'CI/CD'],
-      isUrgent: true,
-      isPromoted: true, // آگهی نردبان شده
+      subscriptionStatus: 'special', // آگهی با اشتراک ویژه (نردبان)
       timePosted: '۴ ساعت پیش',
-      jobType: 'تمام‌وقت'
+      jobType: 'Full-Time',
+      industry: 'فناوری اطلاعات',
+      created_at: new Date().toISOString()
     },
     {
       id: 4,
       title: 'کارشناس تولید محتوا',
       company: 'مجموعه دیجیتال مارکتینگ نگار',
       location: 'شیراز',
-      isRemote: true,
-      salary: '۱۰-۷ میلیون تومان',
+      salary: '5 to 10',
       skills: ['SEO', 'تولید محتوا', 'مدیریت شبکه‌های اجتماعی'],
-      isUrgent: false,
+      subscriptionStatus: 'default',
       timePosted: '۶ ساعت پیش',
-      jobType: 'پاره‌وقت'
+      jobType: 'Part-Time',
+      industry: 'بازاریابی دیجیتال',
+      created_at: new Date().toISOString()
     },
     {
       id: 5,
       title: 'مدیر پروژه نرم‌افزاری',
       company: 'هلدینگ توسعه فناوری ایران',
       location: 'تهران',
-      isRemote: false,
-      salary: '۳۵-۲۵ میلیون تومان',
+      salary: '30 to 50',
       skills: ['Scrum', 'Jira', 'مدیریت تیم'],
-      isUrgent: true,
+      subscriptionStatus: 'default',
       timePosted: '۱ روز پیش',
-      jobType: 'تمام‌وقت'
+      jobType: 'Full-Time',
+      industry: 'مدیریت پروژه',
+      created_at: new Date().toISOString()
     },
     {
       id: 6,
       title: 'طراح گرافیک',
       company: 'استودیو خلاقیت بصیر',
       location: 'مشهد',
-      isRemote: true,
-      salary: '۱۵-۱۰ میلیون تومان',
+      salary: '10 to 15',
       skills: ['فتوشاپ', 'ایلاستریتور', 'طراحی'],
-      isUrgent: false,
+      subscriptionStatus: 'default',
       timePosted: '۱ روز پیش',
-      jobType: 'پروژه‌ای'
+      jobType: 'Remote',
+      industry: 'طراحی گرافیک',
+      created_at: new Date().toISOString()
+    },
+    {
+      id: 7,
+      title: 'طراح گرافیک',
+      company: 'استودیو خلاقیت بصیر',
+      location: 'تبریز',
+      salary: '10 to 15',
+      skills: ['فتوشاپ', 'ایلاستریتور', 'طراحی'],
+      subscriptionStatus: 'default',
+      timePosted: '۱ روز پیش',
+      jobType: 'Full-Time',
+      industry: 'طراحی گرافیک',
+      created_at: new Date().toISOString()
     },
   ]);
 
@@ -113,10 +138,10 @@ export default function JobListings() {
     return () => clearTimeout(timer);
   }, []);
 
-  // مرتب‌سازی آگهی‌ها - آگهی‌های ویژه در اول نمایش داده می‌شوند
+  // مرتب‌سازی آگهی‌ها - آگهی‌های ویژه (نردبان) در اول نمایش داده می‌شوند
   const sortedJobs = [...jobs].sort((a, b) => {
-    if (a.isPromoted && !b.isPromoted) return -1;
-    if (!a.isPromoted && b.isPromoted) return 1;
+    if (a.subscriptionStatus === 'special' && b.subscriptionStatus !== 'special') return -1;
+    if (a.subscriptionStatus !== 'special' && b.subscriptionStatus === 'special') return 1;
     return 0;
   });
 
@@ -235,12 +260,30 @@ export default function JobListings() {
           </Typography>
         </Box>
 
-        <Box sx={{ maxWidth: 1200, mx: 'auto' }}>
+        <Box sx={{ maxWidth: 1300, mx: 'auto' }}>
+          {/* لینک مشاهده آگهی‌های بیشتر */}
+          <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 2 }}>
+            <Button
+              endIcon={<ArrowBackIcon />}
+              sx={{
+                color: employerColors.primary,
+                fontWeight: 600,
+                fontSize: '0.9rem',
+                '&:hover': {
+                  backgroundColor: 'transparent',
+                  color: employerColors.dark,
+                }
+              }}
+            >
+              مشاهده آگهی‌های بیشتر
+            </Button>
+          </Box>
+
           <Box
             sx={{
               display: 'grid',
-              gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr', md: '1fr 1fr 1fr' },
-              gap: 3,
+              gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr', md: '1fr 1fr 1fr 1fr' },
+              gap: { xs: 2, md: 1 },
               '& > div': {
                 height: '100%' // همه کارت‌ها ارتفاع یکسان داشته باشند
               }
@@ -248,43 +291,123 @@ export default function JobListings() {
           >
             {loading ? (
               // نمایش Skeleton در حالت بارگذاری
-              Array.from(new Array(6)).map((_, index) => (
+              Array.from(new Array(8)).map((_, index) => (
                 <Box key={index} sx={{ height: '100%' }}>
                   <JobCardSkeleton />
                 </Box>
               ))
             ) : (
               // نمایش کارت‌های واقعی بعد از بارگذاری
-              sortedJobs.map((job) => (
-                <Box key={job.id} sx={{ height: '100%' }}>
-                  <JobCard job={job} />
+              <>
+                {/* دسکتاپ: نمایش 7 آگهی واقعی + 1 کارت ثبت پروژه (مجموعا 8 کارت) */}
+                {/* موبایل: نمایش 4 آگهی واقعی + 1 کارت ثبت پروژه (مجموعا 5 کارت) */}
+                {sortedJobs.slice(0, jobsToShow).map((job) => (
+                  <Box key={job.id} sx={{ height: '100%' }}>
+                    <JobCard job={job} />
+                  </Box>
+                ))}
+
+                {/* کارت دعوت به ثبت آگهی */}
+                <Box sx={{ height: '100%' }}>
+                  <Card
+                    sx={{
+                      height: '100%',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      borderRadius: 3,
+                      border: '2px dashed rgba(25, 118, 210, 0.3)',
+                      overflow: 'hidden',
+                      position: 'relative',
+                      backgroundColor: 'rgba(25, 118, 210, 0.02)',
+                      transition: 'all 0.25s ease-in-out',
+                      p: 0,
+                      maxWidth: '100%',
+                      width: { xs: '100%', sm: '270px', md: '290px' },
+                      mx: 'auto',
+                      '&:hover': {
+                        transform: 'translateY(-4px)',
+                        boxShadow: '0 6px 15px rgba(0,0,0,0.1)',
+                        border: '2px dashed rgba(25, 118, 210, 0.5)',
+                      }
+                    }}
+                  >
+                    <Box sx={{
+                      p: 2,
+                      display: 'flex',
+                      flexDirection: 'column',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      flex: 1
+                    }}>
+                      <Box
+                        sx={{
+                          backgroundColor: 'rgba(25, 118, 210, 0.08)',
+                          color: '#1976d2',
+                          width: 60,
+                          height: 60,
+                          borderRadius: '50%',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          mb: 2
+                        }}
+                      >
+                        <AddIcon sx={{ fontSize: '2rem' }} />
+                      </Box>
+
+                      <Typography
+                        variant="h6"
+                        component="h3"
+                        sx={{
+                          fontWeight: 700,
+                          fontSize: '1rem',
+                          color: 'text.primary',
+                          textAlign: 'center',
+                          mb: 1
+                        }}
+                      >
+                        آگهی خود را ثبت کنید
+                      </Typography>
+
+                      <Typography
+                        variant="body2"
+                        sx={{
+                          color: 'text.secondary',
+                          fontSize: '0.85rem',
+                          textAlign: 'center',
+                          mb: 2,
+                          px: 1
+                        }}
+                      >
+                        با ثبت آگهی شغلی، بهترین متخصصان را پیدا کنید
+                      </Typography>
+
+                      <Button
+                        variant="contained"
+                        disableElevation
+                        sx={{
+                          py: 0.8,
+                          px: 2,
+                          fontWeight: 'bold',
+                          borderRadius: 1.5,
+                          fontSize: '0.85rem',
+                          backgroundColor: '#4299e1',
+                          color: '#fff',
+                          transition: 'all 0.2s ease',
+                          '&:hover': {
+                            backgroundColor: '#1976d2',
+                            boxShadow: '0 4px 8px rgba(25, 118, 210, 0.3)',
+                          }
+                        }}
+                      >
+                        ثبت آگهی جدید
+                      </Button>
+                    </Box>
+                  </Card>
                 </Box>
-              ))
+              </>
             )}
           </Box>
-        </Box>
-
-        <Box sx={{ mt: 6, textAlign: 'center' }}>
-          <Button
-            variant="contained"
-            disableElevation
-            color="primary"
-            sx={{
-              px: 4,
-              py: 1.2,
-              fontWeight: 700,
-              borderRadius: 2,
-              fontSize: '1rem',
-              background: `linear-gradient(135deg, ${employerColors.light} 0%, ${employerColors.primary} 100%)`,
-              boxShadow: `0 4px 8px rgba(10, 59, 121, 0.2)`,
-              '&:hover': {
-                background: `linear-gradient(135deg, ${employerColors.primary} 0%, ${employerColors.dark} 100%)`,
-                boxShadow: `0 6px 10px rgba(10, 59, 121, 0.3)`,
-              }
-            }}
-          >
-            مشاهده همه آگهی‌ها
-          </Button>
         </Box>
       </Container>
     </Box>
