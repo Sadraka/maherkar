@@ -160,9 +160,13 @@ export default function Experts() {
   ];
 
   return (
-    <Box sx={{ py: { xs: 4, sm: 5, md: 6 }, backgroundColor: '#f5f7fa' }}>
-      <Container maxWidth="lg">
-        <Box sx={{ textAlign: 'center', mb: { xs: 3, sm: 4, md: 6 } }}>
+    <Box sx={{
+      pt: { xs: 1.5, sm: 2, md: 3 },
+      pb: { xs: 1.5, sm: 2, md: 3 },
+      backgroundColor: '#f5f7fa'
+    }}>
+      <Container maxWidth="lg" sx={{ px: { xs: 1.5, sm: 2, md: 3 } }}>
+        <Box sx={{ textAlign: 'center', mb: { xs: 3, sm: 3, md: 3 } }}>
           <Typography
             variant="h3"
             component="h2"
@@ -193,9 +197,12 @@ export default function Experts() {
             sx={{
               mt: { xs: 1.5, sm: 2 },
               fontSize: { xs: '0.85rem', sm: '0.9rem', md: '1rem' },
-              maxWidth: { xs: '95%', sm: '85%', md: '600px' },
+              maxWidth: { xs: '95%', sm: '85%', md: '80%', lg: '900px' },
               mx: 'auto',
-              lineHeight: 1.6
+              lineHeight: { xs: 1.6, md: 1.8 },
+              whiteSpace: { md: 'nowrap' },
+              overflow: { md: 'hidden' },
+              textOverflow: { md: 'ellipsis' }
             }}
           >
             مجموعه‌ای از متخصصین حرفه‌ای و کارآزموده در زمینه‌های مختلف که آماده همکاری با کارفرمایان محترم هستند

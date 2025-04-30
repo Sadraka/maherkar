@@ -1,25 +1,55 @@
 'use client'
 
-import { Box, Container, Typography, TextField, MenuItem, Button, useTheme, useMediaQuery, InputAdornment, MenuProps, FormControl, OutlinedInput, Select, SelectChangeEvent } from '@mui/material';
+import { Box, Container, Typography, TextField, MenuItem, Button, useTheme, useMediaQuery, InputAdornment, MenuProps, FormControl, OutlinedInput, Select, SelectChangeEvent, Radio, RadioGroup, FormControlLabel, Stack } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 import LocationOnIcon from '@mui/icons-material/LocationOn';
 import WorkIcon from '@mui/icons-material/Work';
 import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
+import SchoolIcon from '@mui/icons-material/School';
+import LaptopIcon from '@mui/icons-material/Laptop';
 import { useState, useEffect } from 'react';
 import { useJobSeekerTheme } from '@/contexts/JobSeekerThemeContext';
 import { EMPLOYER_THEME } from '@/constants/colors';
 import Image from 'next/image';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faLaptopHouse, faGraduationCap } from '@fortawesome/free-solid-svg-icons';
 
 // تعریف داده‌های فارسی برای فیلدهای انتخابی
 const jobCategories = [
-  { value: '', label: 'همه گروه‌های شغلی' },
+  { value: '', label: 'همه گروه‌های کاری' },
   { value: 'dev', label: 'برنامه‌نویسی و توسعه' },
   { value: 'design', label: 'طراحی و خلاقیت' },
   { value: 'marketing', label: 'بازاریابی و فروش' },
   { value: 'content', label: 'تولید محتوا و ترجمه' },
   { value: 'business', label: 'کسب و کار' },
   { value: 'engineering', label: 'مهندسی و معماری' }
+];
+
+// زیرگروه‌های کاری
+const jobSubCategories = [
+  { value: '', label: 'همه زیرگروه‌ها', parentCategory: '' },
+  // برنامه‌نویسی و توسعه
+  { value: 'frontend', label: 'فرانت‌اند', parentCategory: 'dev' },
+  { value: 'backend', label: 'بک‌اند', parentCategory: 'dev' },
+  { value: 'mobile', label: 'موبایل', parentCategory: 'dev' },
+  { value: 'fullstack', label: 'فول‌استک', parentCategory: 'dev' },
+  // طراحی و خلاقیت
+  { value: 'ui-ux', label: 'رابط و تجربه کاربری', parentCategory: 'design' },
+  { value: 'graphic', label: 'گرافیک', parentCategory: 'design' },
+  { value: 'motion', label: 'موشن گرافیک', parentCategory: 'design' },
+  // بازاریابی و فروش
+  { value: 'digital-marketing', label: 'دیجیتال مارکتینگ', parentCategory: 'marketing' },
+  { value: 'sales', label: 'فروش', parentCategory: 'marketing' },
+  // تولید محتوا و ترجمه
+  { value: 'content-creation', label: 'تولید محتوا', parentCategory: 'content' },
+  { value: 'translation', label: 'ترجمه', parentCategory: 'content' },
+  // کسب و کار
+  { value: 'management', label: 'مدیریت', parentCategory: 'business' },
+  { value: 'finance', label: 'مالی و حسابداری', parentCategory: 'business' },
+  // مهندسی و معماری
+  { value: 'civil', label: 'عمران', parentCategory: 'engineering' },
+  { value: 'architecture', label: 'معماری', parentCategory: 'engineering' },
 ];
 
 const provinces = [
@@ -51,15 +81,30 @@ export default function Hero() {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   const [jobCategory, setJobCategory] = useState('');
+  const [jobSubCategory, setJobSubCategory] = useState('');
   const [location, setLocation] = useState('');
   const [city, setCity] = useState('');
+  const [filterOption, setFilterOption] = useState('');
   const jobSeekerColors = useJobSeekerTheme();
-  
+
   // رنگ‌های کارفرما برای استفاده در این کامپوننت
   const employerColors = EMPLOYER_THEME;
 
   // Filtered cities based on selected province
   const [filteredCities, setFilteredCities] = useState(cities);
+
+  // زیرگروه‌های فیلتر شده بر اساس گروه کاری انتخاب شده
+  const [filteredSubCategories, setFilteredSubCategories] = useState(jobSubCategories);
+
+  // تابع برای تغییر وضعیت فیلترها (فعال/غیرفعال)
+  const handleFilterChange = (value: string) => {
+    // اگر همان گزینه دوباره انتخاب شد، آن را غیرفعال کن
+    if (filterOption === value) {
+      setFilterOption('');
+    } else {
+      setFilterOption(value);
+    }
+  };
 
   // Effect to update filtered cities when province changes
   useEffect(() => {
@@ -71,94 +116,112 @@ export default function Hero() {
       setFilteredCities(cities);
     }
     // Reset city selection when province changes
-    setCity(''); 
+    setCity('');
   }, [location]); // Rerun effect when location (province) changes
+
+  // به‌روزرسانی زیرگروه‌های کاری بر اساس گروه کاری انتخاب شده
+  useEffect(() => {
+    if (jobCategory) {
+      // زیرگروه‌های مرتبط با گروه کاری انتخاب شده به علاوه گزینه "همه زیرگروه‌ها"
+      setFilteredSubCategories(jobSubCategories.filter(sc => sc.parentCategory === jobCategory || sc.parentCategory === ''));
+    } else {
+      // اگر گروه کاری انتخاب نشده باشد، همه زیرگروه‌ها نمایش داده شوند
+      setFilteredSubCategories(jobSubCategories);
+    }
+    // ریست کردن انتخاب زیرگروه کاری هنگام تغییر گروه کاری
+    setJobSubCategory('');
+  }, [jobCategory]);
 
   // یافتن برچسب فارسی مناسب برای مقدار انتخاب شده
   const getJobCategoryLabel = () => {
     const category = jobCategories.find(cat => cat.value === jobCategory);
-    return category ? category.label : 'گروه شغلی';
+    return category ? category.label : 'گروه کاری';
   };
-  
+
+  const getJobSubCategoryLabel = () => {
+    const subCategory = jobSubCategories.find(sc => sc.value === jobSubCategory);
+    return subCategory ? subCategory.label : 'زیرگروه کاری';
+  };
+
   const getLocationLabel = () => {
     const province = provinces.find(prov => prov.value === location);
     return province ? province.label : 'استان';
   };
-  
+
   const getCityLabel = () => {
     const selectedCity = cities.find(c => c.value === city);
     return selectedCity ? selectedCity.label : 'شهر';
   };
-  
+
   // تنظیمات مشترک منوی کشویی
   const menuPropsRTL: Partial<MenuProps> = {
-      anchorOrigin: { vertical: "bottom", horizontal: "center" },
-      transformOrigin: { vertical: "top", horizontal: "center" },
-      PaperProps: {
-        sx: { 
-          marginTop: '8px',
+    anchorOrigin: { vertical: "bottom", horizontal: "center" },
+    transformOrigin: { vertical: "top", horizontal: "center" },
+    PaperProps: {
+      sx: {
+        marginTop: '8px',
+        textAlign: 'center',
+        direction: 'rtl',
+        width: 'auto',
+        maxHeight: { xs: '250px', sm: '280px', md: '300px' },
+        maxWidth: { xs: '100%', md: 'none' },
+        boxShadow: '0px 5px 15px rgba(0, 0, 0, 0.15)',
+        borderRadius: '8px',
+        overflowY: 'auto',
+        WebkitOverflowScrolling: 'touch',
+        msOverflowStyle: 'none',
+        // در موبایل منو به اندازه کامپوننت Select باشد
+        [theme.breakpoints.down('sm')]: {
+          minWidth: '100%',
+        },
+        '& .MuiMenuItem-root': {
+          justifyContent: 'center',
           textAlign: 'center',
-          direction: 'rtl',
-          width: 'auto',
-          maxHeight: { xs: '250px', sm: '280px', md: '300px' },
-          maxWidth: { xs: '100%', md: 'none' },
-          boxShadow: '0px 5px 15px rgba(0, 0, 0, 0.15)',
-          borderRadius: '8px',
-          overflowY: 'auto',
-          WebkitOverflowScrolling: 'touch',
-          msOverflowStyle: 'none',
-          // در موبایل منو به اندازه کامپوننت Select باشد
-          [theme.breakpoints.down('sm')]: {
-            minWidth: '100%',
-          },
-          '& .MuiMenuItem-root': { 
-            justifyContent: 'center', 
-            textAlign: 'center',
-            width: '100%',
-            padding: { xs: '12px 16px', md: '8px 16px' },
-            fontSize: { xs: '0.95rem', md: '0.875rem' },
-            minHeight: { xs: '50px', md: '36px' },
-            whiteSpace: 'normal',
-            wordWrap: 'break-word',
-            lineHeight: '1.4',
-            '&:hover': {
-                backgroundColor: employerColors.bgVeryLight,
-            },
-            '&.Mui-selected': {
-                backgroundColor: employerColors.bgLight,
-                color: employerColors.primary,
-                fontWeight: 'bold',
-                '&:hover': {
-                    backgroundColor: employerColors.bgLight,
-                }
-            }
-          },
-          '&::-webkit-scrollbar': {
-            width: '8px',
-          },
-          '&::-webkit-scrollbar-track': {
-            backgroundColor: 'rgba(0,0,0,0.05)',
-            borderRadius: '4px',
-          },
-          '&::-webkit-scrollbar-thumb': {
-            backgroundColor: 'rgba(0,0,0,0.15)',
-            borderRadius: '4px',
-            '&:hover': {
-              backgroundColor: 'rgba(0,0,0,0.25)',
-            },
-          }
-        }
-      },
-      MenuListProps: {
-        sx: { 
-          paddingTop: '8px',
-          paddingBottom: '8px',
           width: '100%',
-          display: 'flex',
-          flexDirection: 'column',
-          gap: '2px'
+          padding: { xs: '12px 16px', md: '8px 16px' },
+          fontSize: { xs: '0.95rem', md: '0.875rem' },
+          minHeight: { xs: '50px', md: '36px' },
+          whiteSpace: 'normal',
+          wordWrap: 'break-word',
+          lineHeight: '1.4',
+          '&:hover': {
+            backgroundColor: employerColors.bgVeryLight,
+          },
+          '&.Mui-selected': {
+            backgroundColor: employerColors.bgLight,
+            color: employerColors.primary,
+            fontWeight: 'bold',
+            '&:hover': {
+              backgroundColor: employerColors.bgLight,
+            }
+          }
+        },
+        '&::-webkit-scrollbar': {
+          width: '8px',
+        },
+        '&::-webkit-scrollbar-track': {
+          backgroundColor: 'rgba(0,0,0,0.05)',
+          borderRadius: '4px',
+        },
+        '&::-webkit-scrollbar-thumb': {
+          backgroundColor: 'rgba(0,0,0,0.15)',
+          borderRadius: '4px',
+          '&:hover': {
+            backgroundColor: 'rgba(0,0,0,0.25)',
+          },
         }
       }
+    },
+    MenuListProps: {
+      sx: {
+        paddingTop: '8px',
+        paddingBottom: '8px',
+        width: '100%',
+        display: 'flex',
+        flexDirection: 'column',
+        gap: '2px'
+      }
+    }
   };
 
   // استایل مشترک برای فیلدها
@@ -173,76 +236,77 @@ export default function Hero() {
       backgroundColor: theme.palette.background.paper,
       transition: 'border-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out',
       direction: 'rtl', // اضافه کردن direction rtl به کل فیلد
-      '&.Mui-focused .MuiOutlinedInput-notchedOutline': { 
+      '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
         borderColor: 'transparent', // حذف border در حالت focus
         borderWidth: 0,
         boxShadow: `0 0 0 2px ${employerColors.primary}20` // سایه نامحسوس در زمان focus
       },
-      '&:hover .MuiOutlinedInput-notchedOutline': { 
-         borderColor: 'transparent', // حذف border در حالت hover
+      '&:hover .MuiOutlinedInput-notchedOutline': {
+        borderColor: 'transparent', // حذف border در حالت hover
       },
-      '.MuiOutlinedInput-notchedOutline': { 
-         borderColor: 'transparent', // حذف border در حالت عادی
-         borderWidth: 0
-       }
+      '.MuiOutlinedInput-notchedOutline': {
+        borderColor: 'transparent', // حذف border در حالت عادی
+        borderWidth: 0
+      }
     },
     // وسط‌چین کردن متن ورودی
     '& .MuiInputBase-input': {
-        height: '100%',
-        textAlign: 'center',
-        direction: 'rtl',
-        paddingLeft: '36px',  // افزایش پدینگ چپ برای آیکون
-        paddingRight: '36px',  // افزایش پدینگ راست برای آیکون
-        fontSize: { xs: '0.95rem', md: '0.9rem' } // فونت بزرگتر در موبایل
-     },
-     // انتقال آیکون دراپ‌داون به سمت چپ
-     '& .MuiSelect-icon': {
-       right: 'auto',
-       left: '7px',
-       color: employerColors.primary
-     },
-     '& .MuiSelect-select': {
-       height: '100%',
-       display: 'flex',
-       alignItems: 'center',
-       justifyContent: 'center',
-       textAlign: 'center',
-       paddingRight: '28px',
-       paddingLeft: '28px',
-       width: '100%'
-     }
+      height: '100%',
+      textAlign: 'center',
+      direction: 'rtl',
+      paddingLeft: '36px',  // افزایش پدینگ چپ برای آیکون
+      paddingRight: '36px',  // افزایش پدینگ راست برای آیکون
+      fontSize: { xs: '0.95rem', md: '0.9rem' } // فونت بزرگتر در موبایل
+    },
+    // انتقال آیکون دراپ‌داون به سمت چپ
+    '& .MuiSelect-icon': {
+      right: 'auto',
+      left: '7px',
+      color: employerColors.primary
+    },
+    '& .MuiSelect-select': {
+      height: '100%',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      textAlign: 'center',
+      paddingRight: '28px',
+      paddingLeft: '28px',
+      width: '100%'
+    }
   };
 
   // استایل برای فیلدهایی که آیکون شروع دارند
   const textFieldWithStartIconStyles = {
     ...textFieldStyles,
     '& .MuiInputBase-input': {
-        textAlign: 'right',
-        direction: 'rtl',
-        paddingRight: '36px',  // پدینگ بیشتر برای جا دادن آیکون در سمت راست
-        paddingLeft: '36px'    // پدینگ بیشتر در سمت چپ
-     },
+      textAlign: 'right',
+      direction: 'rtl',
+      paddingRight: '36px',  // پدینگ بیشتر برای جا دادن آیکون در سمت راست
+      paddingLeft: '36px'    // پدینگ بیشتر در سمت چپ
+    },
   };
 
   return (
     <Box
       sx={{
-        pt: { xs: 4, md: 6 },
-        pb: { xs: 2, md: 3 },
+        pt: { xs: 1.5, sm: 2, md: 3 },
+        pb: { xs: 1.5, sm: 2, md: 3 },
         backgroundColor: theme.palette.background.default,
         position: 'relative',
-        overflow: 'hidden'
+        overflow: 'hidden',
+        width: '100%'
       }}
     >
-      <Container maxWidth="lg">
+      <Container maxWidth="lg" sx={{ px: { xs: 1.5, sm: 2, md: 3 } }}>
         <Box
           sx={{
             position: 'relative',
-            borderRadius: '12px',
+            borderRadius: { xs: '8px', sm: '12px' },
             overflow: 'hidden',
             background: 'linear-gradient(135deg, #3366cc 0%, #4477dd 100%)',
-            p: { xs: 4, md: 5 },
-            mb: 4,
+            p: { xs: 2, sm: 2.5, md: 3.5 },
+            mb: { xs: 0, sm: 0 },
             boxShadow: '0 10px 30px rgba(0, 0, 0, 0.15), 0 5px 15px rgba(0, 0, 0, 0.1)',
             '&::after': {
               content: '""',
@@ -271,22 +335,22 @@ export default function Hero() {
             }
           }}
         >
-          <Box sx={{ textAlign: 'center', mb: { xs: 5, md: 6 }, position: 'relative', zIndex: 1 }}>
-            <Typography 
-              variant="h4" 
-              component="h1" 
-              sx={{ 
-                fontWeight: 700, 
+          <Box sx={{ textAlign: 'center', mb: { xs: 3, md: 4 }, position: 'relative', zIndex: 1 }}>
+            <Typography
+              variant="h4"
+              component="h1"
+              sx={{
+                fontWeight: 700,
                 fontSize: { xs: '1.3rem', sm: '1.8rem', md: '2.1rem' },
                 color: '#ffffff',
-                mb: 2,
+                mb: { xs: 0, sm: 0 }, // حذف مارجین پایین چون دیگر متن توضیحی وجود ندارد
                 display: { xs: 'none', sm: 'block' } // نمایش فقط در حالت دسکتاپ و تبلت
               }}
             >
-              هوشمند انتخاب کن، <Box 
-                component="span" 
-                sx={{ 
-                  color: '#FFDA3E', 
+              هوشمند انتخاب کن، <Box
+                component="span"
+                sx={{
+                  color: '#FFDA3E',
                   position: 'relative',
                   display: 'inline-block',
                   '&::after': {
@@ -306,14 +370,14 @@ export default function Hero() {
                 سریع
               </Box> استخدام شو
             </Typography>
-            
+
             {/* نمایش عنوان در حالت موبایل به صورت دو سطری */}
-            <Box sx={{ display: { xs: 'block', sm: 'none' }, mb: 2 }}>
-              <Typography 
-                variant="h4" 
-                component="h1" 
-                sx={{ 
-                  fontWeight: 700, 
+            <Box sx={{ display: { xs: 'block', sm: 'none' }, mb: 0 }}>
+              <Typography
+                variant="h4"
+                component="h1"
+                sx={{
+                  fontWeight: 700,
                   fontSize: '1.3rem',
                   color: '#ffffff',
                   mb: 0.5,
@@ -322,21 +386,21 @@ export default function Hero() {
               >
                 هوشمند انتخاب کن،
               </Typography>
-              <Typography 
-                variant="h4" 
-                component="span" 
-                sx={{ 
-                  fontWeight: 700, 
+              <Typography
+                variant="h4"
+                component="span"
+                sx={{
+                  fontWeight: 700,
                   fontSize: '1.3rem',
                   color: '#ffffff',
                   lineHeight: 1.3,
                   position: 'relative'
                 }}
               >
-                <Box 
-                  component="span" 
-                  sx={{ 
-                    color: '#FFDA3E', 
+                <Box
+                  component="span"
+                  sx={{
+                    color: '#FFDA3E',
                     position: 'relative',
                     display: 'inline-block',
                     '&::after': {
@@ -357,42 +421,26 @@ export default function Hero() {
                 </Box> استخدام شو
               </Typography>
             </Box>
-            
-            <Typography 
-              variant="body1" 
-              sx={{
-                fontSize: { xs: '0.85rem', sm: '1rem', md: '1.1rem' },
-                maxWidth: { xs: '95%', sm: '90%' },
-                mx: 'auto',
-                lineHeight: 1.6,
-                color: 'rgba(255, 255, 255, 0.9)',
-                whiteSpace: 'nowrap', // مطمئن می‌شویم که همیشه یک خطی نمایش داده شود
-                overflow: 'hidden',
-                textOverflow: 'ellipsis' // اگر متن طولانی باشد، با سه نقطه نمایش داده می‌شود
-              }}
-            >
-              بهترین فرصت‌های شغلی و پروژه‌ها در دسترس شماست
-            </Typography>
           </Box>
-          
+
           <Box
             sx={{
               width: '100%',
               display: 'flex',
               flexDirection: { xs: 'column', sm: 'row' },
               alignItems: 'center',
-              gap: { xs: 1.5, sm: 1 },
+              gap: { xs: 0.75, sm: 0.5 },
               backgroundColor: theme.palette.background.paper,
-              p: { xs: 2, md: 1.5 },
-              borderRadius: '8px',
+              p: { xs: 1, sm: 1.5, md: 1 },
+              borderRadius: { xs: '6px', sm: '8px' },
               boxShadow: '0px 5px 25px rgba(0, 0, 0, 0.1)',
               position: 'relative',
               zIndex: 1,
-              mb: { xs: 3, md: 4 }
+              mb: { xs: 1.5, sm: 2, md: 3 }
             }}
           >
-            {/* گروه شغلی */}
-            <Box sx={{ width: { xs: '100%', sm: '25%' }, height: { xs: '52px', md: '48px' }, display: 'flex', alignItems: 'center' }}>
+            {/* گروه کاری */}
+            <Box sx={{ width: { xs: '100%', sm: '20%' }, height: { xs: '52px', md: '48px' }, display: 'flex', alignItems: 'center' }}>
               <FormControl fullWidth sx={{ height: '100%' }}>
                 <Select
                   displayEmpty
@@ -425,8 +473,43 @@ export default function Hero() {
               </FormControl>
             </Box>
 
+            {/* زیرگروه کاری */}
+            <Box sx={{ width: { xs: '100%', sm: '20%' }, height: { xs: '52px', md: '48px' }, display: 'flex', alignItems: 'center' }}>
+              <FormControl fullWidth sx={{ height: '100%' }}>
+                <Select
+                  displayEmpty
+                  value={jobSubCategory}
+                  onChange={(e: SelectChangeEvent<string>) => setJobSubCategory(e.target.value)}
+                  disabled={filteredSubCategories.length <= 1}
+                  input={<OutlinedInput sx={textFieldStyles} />}
+                  renderValue={() => {
+                    return (
+                      <Box component="div" sx={{ display: 'flex', justifyContent: 'center', width: '100%' }}>
+                        {getJobSubCategoryLabel()}
+                      </Box>
+                    );
+                  }}
+                  MenuProps={menuPropsRTL}
+                  startAdornment={
+                    <InputAdornment position="start" sx={{ position: 'absolute', right: '8px' }}>
+                      <WorkIcon fontSize="small" sx={{ color: employerColors.primary }} />
+                    </InputAdornment>
+                  }
+                  IconComponent={(props: any) => (
+                    <KeyboardArrowDownIcon {...props} sx={{ color: employerColors.primary }} />
+                  )}
+                >
+                  {filteredSubCategories.map((subCategory) => (
+                    <MenuItem key={subCategory.value} value={subCategory.value}>
+                      {subCategory.label}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+            </Box>
+
             {/* استان */}
-            <Box sx={{ width: { xs: '100%', sm: '25%' }, height: { xs: '52px', md: '48px' }, display: 'flex', alignItems: 'center' }}>
+            <Box sx={{ width: { xs: '100%', sm: '20%' }, height: { xs: '52px', md: '48px' }, display: 'flex', alignItems: 'center' }}>
               <FormControl fullWidth sx={{ height: '100%' }}>
                 <Select
                   displayEmpty
@@ -460,13 +543,13 @@ export default function Hero() {
             </Box>
 
             {/* شهر */}
-            <Box sx={{ width: { xs: '100%', sm: '25%' }, height: { xs: '52px', md: '48px' }, display: 'flex', alignItems: 'center' }}>
+            <Box sx={{ width: { xs: '100%', sm: '20%' }, height: { xs: '52px', md: '48px' }, display: 'flex', alignItems: 'center' }}>
               <FormControl fullWidth sx={{ height: '100%' }}>
                 <Select
                   displayEmpty
                   value={city}
                   onChange={(e: SelectChangeEvent<string>) => setCity(e.target.value)}
-                  disabled={filteredCities.length === 0}
+                  disabled={filteredCities.length <= 1}
                   input={<OutlinedInput sx={textFieldStyles} />}
                   renderValue={() => {
                     return (
@@ -495,9 +578,9 @@ export default function Hero() {
             </Box>
 
             {/* دکمه جستجو */}
-            <Box 
-              sx={{ 
-                width: { xs: '100%', sm: '25%' }, 
+            <Box
+              sx={{
+                width: { xs: '100%', sm: '20%' },
                 height: { xs: '52px', md: '48px' },
                 display: 'flex',
                 alignItems: 'center'
@@ -509,7 +592,7 @@ export default function Hero() {
                 startIcon={<SearchIcon sx={{ ml: 0.5 }} />}
                 fullWidth
                 disableElevation
-                sx={{ 
+                sx={{
                   height: '100%',
                   minHeight: '100%',
                   boxSizing: 'border-box',
@@ -535,59 +618,98 @@ export default function Hero() {
               </Button>
             </Box>
           </Box>
-          
-          {/* بخش کلمات پرجستجو */}
-          <Box 
-            sx={{ 
-              position: 'relative', 
-              zIndex: 1, 
+
+          {/* بخش گزینه‌های فیلتر */}
+          <Box
+            sx={{
+              position: 'relative',
+              zIndex: 1,
               textAlign: 'center',
-              mt: 2 
+              mt: { xs: 1.5, sm: 2.5 }
             }}
           >
-            <Box 
-              sx={{ 
-                display: 'flex', 
-                flexWrap: 'wrap', 
+            <Box
+              sx={{
+                display: 'flex',
+                flexDirection: 'row',
                 justifyContent: 'center',
-                gap: { xs: 1, md: 1.5 } 
+                gap: { xs: 2, sm: 3 }
               }}
             >
-              {['کارآموزی', 'طراح وب', 'برنامه‌نویس React', 'مترجم انگلیسی', 'گرافیست', 'دورکاری', 'پاره‌وقت', 'حسابدار', 'مدیر فروش', 'متخصص دیجیتال مارکتینگ', 'تولید محتوا'].map((keyword, idx) => {
-                return (
-                  <Button 
-                    key={idx}
-                    variant="outlined"
-                    size="small"
-                    sx={{
-                      color: '#ffffff',
-                      borderColor: 'rgba(255, 255, 255, 0.5)',
-                      backgroundColor: 'rgba(255, 255, 255, 0.1)',
-                      fontSize: { xs: '0.75rem', md: '0.85rem' },
-                      py: { xs: 0.5, md: 0.7 },
-                      px: { xs: 1.5, md: 2 },
-                      minWidth: 'unset',
-                      textTransform: 'none',
-                      borderRadius: '4px',
-                      fontWeight: 'medium',
-                      transition: 'all 0.2s ease-in-out',
-                      boxShadow: '0 2px 4px rgba(0, 0, 0, 0.08)',
-                      '&:hover': {
-                        backgroundColor: 'rgba(255, 255, 255, 0.2)',
-                        borderColor: 'rgba(255, 255, 255, 0.7)',
-                        transform: 'translateY(-2px)',
-                        boxShadow: '0 4px 8px rgba(0, 0, 0, 0.12)',
-                      },
-                      '&:active': {
-                        transform: 'translateY(0)',
-                        boxShadow: '0 1px 2px rgba(0, 0, 0, 0.1)',
-                      }
-                    }}
-                  >
-                    {keyword}
-                  </Button>
-                );
-              })}
+              <Box
+                onClick={() => handleFilterChange('internship')}
+                sx={{
+                  cursor: 'pointer',
+                  margin: 0,
+                  backgroundColor: filterOption === 'internship' ? 'rgba(255, 218, 62, 0.15)' : 'rgba(255, 255, 255, 0.15)',
+                  borderRadius: '8px',
+                  border: `2px solid ${filterOption === 'internship' ? '#FFDA3E' : 'rgba(255, 255, 255, 0.4)'}`,
+                  padding: { xs: '0px 14px', sm: '0px 18px' },
+                  boxShadow: 'none',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  width: { xs: '110px', sm: '130px' },
+                  minWidth: { xs: '110px', sm: '130px' },
+                  height: { xs: '52px', md: '48px' },
+                  gap: '8px'
+                }}
+              >
+                <SchoolIcon
+                  sx={{
+                    color: filterOption === 'internship' ? '#FFDA3E' : 'rgba(255, 255, 255, 0.9)',
+                    fontSize: '1rem'
+                  }}
+                />
+                <Typography
+                  sx={{
+                    color: filterOption === 'internship' ? '#FFDA3E' : 'rgba(255, 255, 255, 0.9)',
+                    fontWeight: filterOption === 'internship' ? '700' : '500',
+                    fontSize: { xs: '0.9rem', sm: '1rem' },
+                    textShadow: filterOption === 'internship' ? '0 1px 2px rgba(0,0,0,0.3)' : 'none',
+                    userSelect: 'none',
+                  }}
+                >
+                  کارآموزی
+                </Typography>
+              </Box>
+              <Box
+                onClick={() => handleFilterChange('remote')}
+                sx={{
+                  cursor: 'pointer',
+                  margin: 0,
+                  backgroundColor: filterOption === 'remote' ? 'rgba(255, 218, 62, 0.15)' : 'rgba(255, 255, 255, 0.15)',
+                  borderRadius: '8px',
+                  border: `2px solid ${filterOption === 'remote' ? '#FFDA3E' : 'rgba(255, 255, 255, 0.4)'}`,
+                  padding: { xs: '0px 14px', sm: '0px 18px' },
+                  boxShadow: 'none',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  width: { xs: '110px', sm: '130px' },
+                  minWidth: { xs: '110px', sm: '130px' },
+                  height: { xs: '52px', md: '48px' },
+                  gap: '8px'
+                }}
+              >
+                <LaptopIcon
+                  sx={{
+                    color: filterOption === 'remote' ? '#FFDA3E' : 'rgba(255, 255, 255, 0.9)',
+                    fontSize: '1rem'
+                  }}
+                />
+                <Typography
+                  sx={{
+                    color: filterOption === 'remote' ? '#FFDA3E' : 'rgba(255, 255, 255, 0.9)',
+                    fontWeight: filterOption === 'remote' ? '700' : '500',
+                    fontSize: { xs: '0.9rem', sm: '1rem' },
+                    textShadow: filterOption === 'remote' ? '0 1px 2px rgba(0,0,0,0.3)' : 'none',
+                    userSelect: 'none',
+                  }}
+                >
+                  دورکاری
+                </Typography>
+              </Box>
             </Box>
           </Box>
         </Box>

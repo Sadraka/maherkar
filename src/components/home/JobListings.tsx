@@ -231,13 +231,13 @@ export default function JobListings() {
   return (
     <Box
       sx={{
-        pt: { xs: 2, sm: 3, md: 4 },
-        pb: { xs: 4, sm: 5, md: 6 },
+        pt: { xs: 1.5, sm: 2, md: 3 },
+        pb: { xs: 1.5, sm: 2, md: 3 },
         backgroundColor: '#ffffff'
       }}
     >
-      <Container maxWidth="lg" sx={{ px: { xs: 2, sm: 3, md: 3 } }}>
-        <Box sx={{ mb: { xs: 4, sm: 5, md: 6 }, textAlign: 'center' }}>
+      <Container maxWidth="lg" sx={{ px: { xs: 1.5, sm: 2, md: 3 } }}>
+        <Box sx={{ mb: { xs: 3, sm: 3, md: 3 }, textAlign: 'center' }}>
           <Typography
             variant="h3"
             component="h2"

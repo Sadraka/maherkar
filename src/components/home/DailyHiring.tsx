@@ -1,9 +1,9 @@
 'use client'
 
-import { 
-  Box, 
-  Typography, 
-  Container, 
+import {
+  Box,
+  Typography,
+  Container,
   Button,
   Grid
 } from '@mui/material';
@@ -35,29 +35,33 @@ export default function DailyHiring() {
   ];
 
   return (
-    <Box sx={{ py: 5, backgroundColor: '#fff' }}>
-      <Container maxWidth="lg">
-        <Box sx={{ textAlign: 'center', mb: 5 }}>
-          <Typography 
-            variant="h3" 
-            component="h2" 
-            sx={{ 
-              fontWeight: 800, 
+    <Box sx={{
+      pt: { xs: 1.5, sm: 2, md: 3 },
+      pb: { xs: 1.5, sm: 2, md: 3 },
+      backgroundColor: '#fff'
+    }}>
+      <Container maxWidth="lg" sx={{ px: { xs: 1.5, sm: 2, md: 3 } }}>
+        <Box sx={{ textAlign: 'center', mb: { xs: 3, sm: 3, md: 3 } }}>
+          <Typography
+            variant="h3"
+            component="h2"
+            sx={{
+              fontWeight: 800,
               mb: 1.5,
-              fontSize: { xs: '1.8rem', md: '2.2rem' },
+              fontSize: { xs: '1.5rem', sm: '1.8rem', md: '2.2rem' },
               color: 'primary.main'
             }}
           >
             استخدام روزانه، سریع و مطمئن
           </Typography>
-          <Typography 
-            variant="h5" 
+          <Typography
+            variant="h5"
             component="h3"
-            sx={{ 
+            sx={{
               fontWeight: 500,
               mb: 2,
               color: 'text.secondary',
-              maxWidth: 650, 
+              maxWidth: 650,
               mx: 'auto',
               fontSize: { xs: '1rem', md: '1.1rem' }
             }}
@@ -65,17 +69,17 @@ export default function DailyHiring() {
             با سرویس آگهی ویژه، شانس دیده شدن آگهی شما توسط متخصصان تا ۳ برابر افزایش می‌یابد
           </Typography>
         </Box>
-        
+
         <Grid container spacing={3} sx={{ mb: 4 }}>
           {features.map((feature, index) => (
             <Grid size={{ xs: 12, sm: 4 }} key={index}>
-              <Box sx={{ 
-                display: 'flex', 
+              <Box sx={{
+                display: 'flex',
                 flexDirection: 'column',
                 alignItems: 'center',
                 textAlign: 'center',
               }}>
-                <Box sx={{ 
+                <Box sx={{
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
@@ -87,19 +91,19 @@ export default function DailyHiring() {
                 }}>
                   {feature.icon}
                 </Box>
-                <Typography 
-                  variant="h6" 
-                  sx={{ 
+                <Typography
+                  variant="h6"
+                  sx={{
                     fontWeight: 'bold',
-                    mb: 1, 
-                    fontSize: '1.05rem' 
+                    mb: 1,
+                    fontSize: '1.05rem'
                   }}
                 >
                   {feature.title}
                 </Typography>
-                <Typography 
-                  variant="body2" 
-                  sx={{ 
+                <Typography
+                  variant="body2"
+                  sx={{
                     color: 'text.secondary',
                     maxWidth: '90%',
                     mx: 'auto'
@@ -111,17 +115,17 @@ export default function DailyHiring() {
             </Grid>
           ))}
         </Grid>
-        
+
         <Box sx={{ textAlign: 'center' }}>
-          <Button 
-            variant="contained" 
+          <Button
+            variant="contained"
             size="large"
             startIcon={<WorkOutlineIcon />}
-            sx={{ 
+            sx={{
               backgroundColor: employerColors.primary,
               background: `linear-gradient(135deg, ${employerColors.light} 0%, ${employerColors.primary} 100%)`,
-              '&:hover': { 
-                background: `linear-gradient(135deg, ${employerColors.primary} 0%, ${employerColors.dark} 100%)` 
+              '&:hover': {
+                background: `linear-gradient(135deg, ${employerColors.primary} 0%, ${employerColors.dark} 100%)`
               },
               py: 1.2,
               px: 4,

@@ -1,12 +1,12 @@
 'use client'
 
 import { useState } from 'react';
-import { 
-  Box, 
-  Typography, 
-  Container, 
-  Accordion, 
-  AccordionSummary, 
+import {
+  Box,
+  Typography,
+  Container,
+  Accordion,
+  AccordionSummary,
   AccordionDetails,
   Paper,
   Grid,
@@ -63,29 +63,33 @@ export default function FAQ() {
   ];
 
   return (
-    <Box sx={{ py: 6, backgroundColor: '#fff' }}>
-      <Container maxWidth="lg">
-        <Box sx={{ textAlign: 'center', mb: 5 }}>
-          <Typography 
-            variant="h3" 
-            component="h2" 
-            sx={{ 
-              fontWeight: 800, 
+    <Box sx={{
+      pt: { xs: 1.5, sm: 2, md: 3 },
+      pb: { xs: 1.5, sm: 2, md: 3 },
+      backgroundColor: '#fff'
+    }}>
+      <Container maxWidth="lg" sx={{ px: { xs: 1.5, sm: 2, md: 3 } }}>
+        <Box sx={{ textAlign: 'center', mb: { xs: 3, sm: 3, md: 3 } }}>
+          <Typography
+            variant="h3"
+            component="h2"
+            sx={{
+              fontWeight: 800,
               mb: 1.5,
-              fontSize: { xs: '1.8rem', md: '2.2rem' },
+              fontSize: { xs: '1.5rem', sm: '1.8rem', md: '2.2rem' },
               color: 'primary.main'
             }}
           >
             سوالات متداول
           </Typography>
-          <Typography 
-            variant="h5" 
+          <Typography
+            variant="h5"
             component="h3"
-            sx={{ 
+            sx={{
               fontWeight: 500,
               mb: 2,
               color: 'text.secondary',
-              maxWidth: 650, 
+              maxWidth: 650,
               mx: 'auto',
               fontSize: { xs: '1rem', md: '1.1rem' }
             }}
@@ -147,18 +151,18 @@ export default function FAQ() {
             </Paper>
           </Grid>
         </Grid>
-        
+
         <Box sx={{ textAlign: 'center', mt: 5 }}>
           <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
             پاسخ سوال خود را پیدا نکردید؟
           </Typography>
-          <Button 
+          <Button
             variant="contained"
-            sx={{ 
+            sx={{
               backgroundColor: employerColors.primary,
               background: `linear-gradient(135deg, ${employerColors.light} 0%, ${employerColors.primary} 100%)`,
-              '&:hover': { 
-                background: `linear-gradient(135deg, ${employerColors.primary} 0%, ${employerColors.dark} 100%)` 
+              '&:hover': {
+                background: `linear-gradient(135deg, ${employerColors.primary} 0%, ${employerColors.dark} 100%)`
               },
               borderRadius: 2,
               px: 4,

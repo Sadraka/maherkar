@@ -115,7 +115,8 @@ export default function ExpertCard({ expert }: ExpertCardProps) {
           alignItems: 'center',
           mb: { xs: 1, sm: 1.5 },
           minHeight: { xs: 40, sm: 45, md: 50 },  // همانند JobCard
-          pb: { xs: 0.5, sm: 0.8 }
+          py: { xs: 0.5, sm: 0.8 }, // اضافه کردن پدینگ بالا و پایین یکسان
+          pb: 0
         }}>
           <Box sx={{ position: 'relative', mr: { xs: 1, sm: 1.5 } }}>
             <Avatar
@@ -128,31 +129,41 @@ export default function ExpertCard({ expert }: ExpertCardProps) {
               }}
             />
           </Box>
-          <Box>
+          <Box sx={{ display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
             <Typography variant="h6" sx={{
               fontWeight: 'bold',
-              fontSize: { xs: '0.85rem', sm: '0.95rem' },
-              mb: { xs: 0.1, sm: 0.2 },
-              lineHeight: 1.2
+              fontSize: { xs: '0.95rem', sm: '1.05rem' },
+              mb: { xs: 0.3, sm: 0.4 },
+              lineHeight: 1.3
             }}>
               {expert.name}
             </Typography>
             <Typography variant="body2" color="text.secondary" sx={{
-              fontSize: { xs: '0.75rem', sm: '0.8rem' },
-              lineHeight: 1.2
+              fontSize: { xs: '0.8rem', sm: '0.85rem' },
+              lineHeight: 1.3,
+              mt: { xs: 0.1, sm: 0.2 }
             }}>
               {expert.jobTitle}
             </Typography>
           </Box>
         </Box>
 
-        {/* حذف Divider اضافی و نگه داشتن فقط یک خط */}
-        <Divider sx={{
+        {/* خط سرتاسری زیر هدر */}
+        <Box sx={{
+          position: 'relative',
           mt: { xs: 0.2, sm: 0.4 },
           mb: { xs: 0.8, sm: 1 },
-          borderColor: jobSeekerColors.bgLight,
-          width: '100%' // خط سرتاسری
-        }} />
+          mx: { xs: -1.5, sm: -2 },
+          height: 1
+        }}>
+          <Box sx={{
+            position: 'absolute',
+            left: 0,
+            right: 0,
+            height: '1px',
+            bgcolor: jobSeekerColors.bgLight
+          }} />
+        </Box>
 
         {/* اطلاعات اصلی */}
         <Box sx={{
@@ -181,7 +192,7 @@ export default function ExpertCard({ expert }: ExpertCardProps) {
               }} />
             </Box>
             <Typography variant="body2" color="text.secondary" sx={{
-              fontSize: { xs: '0.7rem', sm: '0.75rem' },
+              fontSize: { xs: '0.8rem', sm: '0.85rem' },
               mr: 0,
               ml: { xs: 1.2, sm: 1.5 }
             }}>
@@ -206,7 +217,7 @@ export default function ExpertCard({ expert }: ExpertCardProps) {
               }} />
             </Box>
             <Typography variant="body2" color="text.secondary" sx={{
-              fontSize: { xs: '0.7rem', sm: '0.75rem' },
+              fontSize: { xs: '0.8rem', sm: '0.85rem' },
               mr: 0,
               ml: { xs: 1.2, sm: 1.5 }
             }}>
@@ -232,7 +243,7 @@ export default function ExpertCard({ expert }: ExpertCardProps) {
                 }} />
               </Box>
               <Typography variant="body2" color="text.secondary" sx={{
-                fontSize: { xs: '0.7rem', sm: '0.75rem' },
+                fontSize: { xs: '0.8rem', sm: '0.85rem' },
                 mr: 0,
                 ml: { xs: 1.2, sm: 1.5 }
               }}>
@@ -248,7 +259,7 @@ export default function ExpertCard({ expert }: ExpertCardProps) {
             mb: { xs: 0.2, sm: 0.3 },
             fontWeight: 600,
             color: theme.palette.text.secondary,
-            fontSize: { xs: '0.7rem', sm: '0.75rem' }
+            fontSize: { xs: '0.8rem', sm: '0.85rem' }
           }}>
             مهارت‌های کلیدی:
           </Typography>
@@ -262,7 +273,7 @@ export default function ExpertCard({ expert }: ExpertCardProps) {
                   bgcolor: `rgba(0, 112, 60, 0.08)`, // پس‌زمینه سبز کم‌رنگ
                   border: 'none', // حذف بوردر
                   fontWeight: 500,
-                  fontSize: { xs: '0.6rem', sm: '0.65rem' },
+                  fontSize: { xs: '0.7rem', sm: '0.75rem' },
                   borderRadius: 1,
                   color: jobSeekerColors.primary,
                   py: 0,
@@ -277,7 +288,7 @@ export default function ExpertCard({ expert }: ExpertCardProps) {
             ))}
             {expert.skills.length > 3 && (
               <Typography variant="body2" sx={{
-                fontSize: { xs: '0.6rem', sm: '0.65rem' },
+                fontSize: { xs: '0.7rem', sm: '0.75rem' },
                 color: theme.palette.text.secondary,
                 mt: 0.2
               }}>
@@ -297,7 +308,7 @@ export default function ExpertCard({ expert }: ExpertCardProps) {
         }}>
           {expert.expectedSalary && (
             <Typography variant="body2" sx={{
-              fontSize: { xs: '0.65rem', sm: '0.7rem' },
+              fontSize: { xs: '0.75rem', sm: '0.8rem' },
               color: jobSeekerColors.primary,
               fontWeight: 500
             }}>
@@ -319,7 +330,7 @@ export default function ExpertCard({ expert }: ExpertCardProps) {
               py: { xs: 0.6, sm: 0.8, md: 1 },
               fontWeight: 'bold',
               borderRadius: 1.5,
-              fontSize: { xs: '0.8rem', sm: '0.85rem', md: '0.9rem' },
+              fontSize: { xs: '0.9rem', sm: '0.95rem', md: '1rem' },
               background: `linear-gradient(135deg, ${jobSeekerColors.light} 0%, ${jobSeekerColors.primary} 100%)`,
               boxShadow: `0 3px 6px rgba(0, 112, 60, 0.2)`,
               '&:hover': {

@@ -17,7 +17,7 @@ export default function AboutUs() {
   const jobSeekerColors = useJobSeekerTheme();
   const statsRef = useRef<HTMLDivElement>(null);
   const [isVisible, setIsVisible] = useState(false);
-  
+
   // آمار و ارقام مربوط به وب‌سایت به صورت ساده
   const stats = [
     { id: 1, value: 15000, label: 'متخصص', suffix: '+' },
@@ -28,12 +28,12 @@ export default function AboutUs() {
 
   // مقادیر فعلی شمارنده
   const [counters, setCounters] = useState<number[]>([0, 0, 0]);
-  
+
   // مدت زمان انیمیشن (میلی‌ثانیه)
   const animationDuration = 2500;
   // تعداد مراحل بین 0 تا مقدار نهایی - افزایش برای روان‌تر شدن
   const steps = 120;
-  
+
   // تابع easing برای حرکت طبیعی‌تر
   const easeOutQuad = (t: number): number => t * (2 - t);
 
@@ -65,17 +65,17 @@ export default function AboutUs() {
   // شروع شمارش وقتی المان در دید کاربر قرار می‌گیرد
   useEffect(() => {
     if (!isVisible) return;
-    
+
     // زمان شروع انیمیشن
     const startTime = Date.now();
-    
+
     const interval = setInterval(() => {
       const elapsedTime = Date.now() - startTime;
       const rawProgress = Math.min(elapsedTime / animationDuration, 1);
-      
+
       // استفاده از تابع easing برای حرکت طبیعی‌تر
       const progress = easeOutQuad(rawProgress);
-      
+
       if (rawProgress === 1) {
         // در پایان انیمیشن، مقادیر نهایی تنظیم شوند
         setCounters([
@@ -93,20 +93,20 @@ export default function AboutUs() {
         ]);
       }
     }, animationDuration / steps);
-    
+
     // پاکسازی افکت
     return () => clearInterval(interval);
   }, [isVisible]);
 
   return (
-    <Box sx={{ py: 6, backgroundColor: '#fff' }}>
+    <Box sx={{ py: { xs: 1.5, sm: 2, md: 3 }, backgroundColor: '#fff' }}>
       <Container maxWidth="lg">
         <Box sx={{ textAlign: 'center', mb: 5 }}>
-          <Typography 
-            variant="h3" 
-            component="h2" 
-            sx={{ 
-              fontWeight: 800, 
+          <Typography
+            variant="h3"
+            component="h2"
+            sx={{
+              fontWeight: 800,
               mb: 1.5,
               fontSize: { xs: '1.8rem', md: '2.2rem' },
               color: jobSeekerColors.primary
@@ -114,14 +114,14 @@ export default function AboutUs() {
           >
             ماهرکار؛ سامانه کاریابی پیشرو در ایران
           </Typography>
-          <Typography 
-            variant="h5" 
+          <Typography
+            variant="h5"
             component="h3"
-            sx={{ 
+            sx={{
               fontWeight: 500,
               mb: 4,
               color: 'text.secondary',
-              maxWidth: 650, 
+              maxWidth: 650,
               mx: 'auto',
               fontSize: { xs: '1rem', md: '1.1rem' }
             }}
@@ -133,16 +133,16 @@ export default function AboutUs() {
         <Grid container spacing={2} sx={{ mb: 4 }} ref={statsRef}>
           {stats.map((stat, index) => (
             <Grid size={{ xs: 6, sm: 3 }} key={stat.id}>
-              <Box sx={{ 
+              <Box sx={{
                 textAlign: 'center',
                 p: 2,
                 borderRadius: 2,
                 backgroundColor: '#fff'
               }}>
-                <Typography 
-                  variant="h3" 
-                  sx={{ 
-                    fontWeight: 800, 
+                <Typography
+                  variant="h3"
+                  sx={{
+                    fontWeight: 800,
                     color: jobSeekerColors.primary,
                     fontSize: { xs: '1.6rem', md: '2rem' },
                     mb: 0.5
@@ -154,8 +154,8 @@ export default function AboutUs() {
                     </>
                   )}
                 </Typography>
-                <Typography 
-                  variant="body1" 
+                <Typography
+                  variant="body1"
                   sx={{ color: 'text.secondary' }}
                 >
                   {stat.label}
@@ -166,11 +166,11 @@ export default function AboutUs() {
         </Grid>
 
         <Box sx={{ textAlign: 'center' }}>
-          <Button 
-            variant="contained" 
+          <Button
+            variant="contained"
             color="secondary"
             startIcon={<InfoIcon />}
-            sx={{ 
+            sx={{
               px: 4,
               py: 1.2,
               borderRadius: 2,
