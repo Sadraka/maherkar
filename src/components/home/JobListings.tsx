@@ -326,21 +326,21 @@ export default function JobListings() {
               }}
             >
               <Button
-                variant="outlined"
+                variant="contained"
                 endIcon={<ArrowBackIcon />}
                 sx={{
-                  color: employerColors.primary,
-                  borderColor: employerColors.bgLight,
+                  backgroundColor: employerColors.primary,
+                  color: '#fff',
                   fontWeight: 600,
                   fontSize: { xs: '0.9rem', md: '1rem' },
                   py: { xs: 1, md: 1.2 },
                   px: { xs: 2, md: 3 },
                   borderRadius: 2,
+                  boxShadow: '0 2px 8px rgba(25, 118, 210, 0.25)',
                   transition: 'all 0.3s ease',
                   '&:hover': {
-                    backgroundColor: 'rgba(25, 118, 210, 0.04)',
-                    borderColor: employerColors.primary,
-                    color: employerColors.dark,
+                    backgroundColor: employerColors.dark,
+                    boxShadow: '0 4px 12px rgba(25, 118, 210, 0.35)',
                   }
                 }}
               >
