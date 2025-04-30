@@ -11,7 +11,8 @@ import {
   Divider,
   useTheme,
   Avatar,
-  Paper
+  Paper,
+  useMediaQuery
 } from '@mui/material';
 import LocationOnOutlinedIcon from '@mui/icons-material/LocationOnOutlined';
 import AccessTimeOutlinedIcon from '@mui/icons-material/AccessTimeOutlined';
@@ -174,6 +175,8 @@ const getGenderText = (gender?: JobType['gender']): string => {
 export default function JobCard({ job }: JobCardProps) {
   const theme = useTheme();
   const jobSeekerColors = useJobSeekerTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+  const isTablet = useMediaQuery(theme.breakpoints.between('sm', 'md'));
 
   // استفاده از رنگ‌های کارفرما
   const employerColors = EMPLOYER_THEME;
@@ -184,7 +187,7 @@ export default function JobCard({ job }: JobCardProps) {
         height: '100%',
         display: 'flex',
         flexDirection: 'column',
-        borderRadius: 3,
+        borderRadius: { xs: 2, sm: 2.5, md: 3 },
         border: `1px solid #E0E0E0`,
         boxShadow: '0 2px 8px rgba(0,0,0,0.05)',
         overflow: 'hidden',
@@ -192,13 +195,11 @@ export default function JobCard({ job }: JobCardProps) {
         backgroundColor: theme.palette.background.paper,
         transition: 'all 0.25s ease-in-out',
         p: 0,
-        maxWidth: '100%',
-        width: { xs: '100%', sm: '270px', md: '290px' },
+        width: '100%',
         mx: 'auto',
         '&:hover': {
           transform: 'translateY(-4px)',
           boxShadow: '0 6px 15px rgba(0,0,0,0.1)',
-          border: `1px solid #BDBDBD`,
         }
       }}
     >
@@ -212,8 +213,8 @@ export default function JobCard({ job }: JobCardProps) {
             alignItems: 'center',
             justifyContent: 'space-between',
             borderBottom: `1px solid ${theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.05)'}`,
-            minHeight: 50,
-            px: 0.8,
+            minHeight: { xs: 45, sm: 50 },
+            px: { xs: 1, sm: 1.2 },
           }}
         >
           <Typography
@@ -221,7 +222,7 @@ export default function JobCard({ job }: JobCardProps) {
             component="h3"
             sx={{
               fontWeight: 700,
-              fontSize: '0.95rem',
+              fontSize: { xs: '0.9rem', sm: '0.95rem', md: '1rem' },
               color: 'text.primary',
               lineHeight: 1.3,
               overflow: 'hidden',
@@ -245,7 +246,7 @@ export default function JobCard({ job }: JobCardProps) {
               sx={{
                 bgcolor: '#e53935',
                 color: '#fff',
-                fontSize: '0.75rem',
+                fontSize: { xs: '0.7rem', sm: '0.75rem' },
                 fontWeight: 700,
                 px: 0.8,
                 py: 0.3,
@@ -254,7 +255,7 @@ export default function JobCard({ job }: JobCardProps) {
                 alignItems: 'center',
                 justifyContent: 'center',
                 minWidth: 'auto',
-                height: 22,
+                height: { xs: 20, sm: 22 },
                 whiteSpace: 'nowrap',
                 flexShrink: 0,
                 mr: 0.5,
@@ -267,31 +268,31 @@ export default function JobCard({ job }: JobCardProps) {
         </Box>
 
         {/* بدنه کارت - اطلاعات شغلی با فاصله کمتر */}
-        <Box sx={{ px: 0.8, py: 1, flex: 1, display: 'flex', flexDirection: 'column' }}>
-          <Box sx={{ display: 'grid', gap: 1.2 }}>
+        <Box sx={{ px: { xs: 1, sm: 1.2 }, py: { xs: 0.8, sm: 1 }, flex: 1, display: 'flex', flexDirection: 'column' }}>
+          <Box sx={{ display: 'grid', gap: { xs: 1, sm: 1.2 } }}>
             {/* محل کار */}
             <Box sx={{ display: 'flex', alignItems: 'center' }}>
               <Box
                 sx={{
                   backgroundColor: 'rgba(25, 118, 210, 0.08)',
                   color: '#1976d2',
-                  width: 32,
-                  height: 32,
+                  width: { xs: 28, sm: 32 },
+                  height: { xs: 28, sm: 32 },
                   borderRadius: '50%',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
                   ml: 0.5,
-                  mr: 1,
+                  mr: { xs: 0.8, sm: 1 },
                 }}
               >
-                <LocationOnOutlinedIcon sx={{ fontSize: '1.1rem' }} />
+                <LocationOnOutlinedIcon sx={{ fontSize: { xs: '1rem', sm: '1.1rem' } }} />
               </Box>
               <Typography
                 variant="body2"
                 sx={{
                   color: 'text.primary',
-                  fontSize: '0.9rem',
+                  fontSize: { xs: '0.85rem', sm: '0.9rem' },
                   display: 'flex',
                   alignItems: 'center',
                   overflow: 'hidden',
@@ -310,23 +311,23 @@ export default function JobCard({ job }: JobCardProps) {
                 sx={{
                   backgroundColor: 'rgba(25, 118, 210, 0.08)',
                   color: '#1976d2',
-                  width: 32,
-                  height: 32,
+                  width: { xs: 28, sm: 32 },
+                  height: { xs: 28, sm: 32 },
                   borderRadius: '50%',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
                   ml: 0.5,
-                  mr: 1,
+                  mr: { xs: 0.8, sm: 1 },
                 }}
               >
-                <AccessTimeOutlinedIcon sx={{ fontSize: '1.1rem' }} />
+                <AccessTimeOutlinedIcon sx={{ fontSize: { xs: '1rem', sm: '1.1rem' } }} />
               </Box>
               <Typography
                 variant="body2"
                 sx={{
                   color: 'text.secondary',
-                  fontSize: '0.9rem',
+                  fontSize: { xs: '0.85rem', sm: '0.9rem' },
                   overflow: 'hidden',
                   textOverflow: 'ellipsis',
                   whiteSpace: 'nowrap',
@@ -343,23 +344,23 @@ export default function JobCard({ job }: JobCardProps) {
                 sx={{
                   backgroundColor: 'rgba(25, 118, 210, 0.08)',
                   color: '#1976d2',
-                  width: 32,
-                  height: 32,
+                  width: { xs: 28, sm: 32 },
+                  height: { xs: 28, sm: 32 },
                   borderRadius: '50%',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
                   ml: 0.5,
-                  mr: 1,
+                  mr: { xs: 0.8, sm: 1 },
                 }}
               >
-                <WorkOutlineIcon sx={{ fontSize: '1.1rem' }} />
+                <WorkOutlineIcon sx={{ fontSize: { xs: '1rem', sm: '1.1rem' } }} />
               </Box>
               <Typography
                 variant="body2"
                 sx={{
                   color: 'text.secondary',
-                  fontSize: '0.9rem',
+                  fontSize: { xs: '0.85rem', sm: '0.9rem' },
                   overflow: 'hidden',
                   textOverflow: 'ellipsis',
                   whiteSpace: 'nowrap',
@@ -376,23 +377,23 @@ export default function JobCard({ job }: JobCardProps) {
                 sx={{
                   backgroundColor: 'rgba(25, 118, 210, 0.08)',
                   color: '#1976d2',
-                  width: 32,
-                  height: 32,
+                  width: { xs: 28, sm: 32 },
+                  height: { xs: 28, sm: 32 },
                   borderRadius: '50%',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
                   ml: 0.5,
-                  mr: 1,
+                  mr: { xs: 0.8, sm: 1 },
                 }}
               >
-                <PaidOutlinedIcon sx={{ fontSize: '1.1rem' }} />
+                <PaidOutlinedIcon sx={{ fontSize: { xs: '1rem', sm: '1.1rem' } }} />
               </Box>
               <Typography
                 variant="body2"
                 sx={{
                   color: '#1976d2',
-                  fontSize: '0.9rem',
+                  fontSize: { xs: '0.85rem', sm: '0.9rem' },
                   fontWeight: 600,
                   overflow: 'hidden',
                   textOverflow: 'ellipsis',
@@ -407,17 +408,17 @@ export default function JobCard({ job }: JobCardProps) {
         </Box>
 
         {/* دکمه مشاهده آگهی با آیکون چشم - به صورت مستطیلی */}
-        <Box sx={{ px: 1.2, pb: 1.5, pt: 0.5 }}>
+        <Box sx={{ px: { xs: 1, sm: 1.2 }, pb: { xs: 1.2, sm: 1.5 }, pt: 0.5 }}>
           <Button
             fullWidth
             variant="contained"
             disableElevation
             startIcon={<VisibilityOutlinedIcon fontSize="small" />}
             sx={{
-              py: 1,
+              py: { xs: 0.8, sm: 1 },
               fontWeight: 'bold',
               borderRadius: 1.5,
-              fontSize: '0.9rem',
+              fontSize: { xs: '0.85rem', sm: '0.9rem' },
               backgroundColor: '#4299e1',
               color: '#fff',
               transition: 'all 0.2s ease',

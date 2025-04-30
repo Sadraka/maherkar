@@ -32,8 +32,19 @@ declare module '@mui/material/styles' {
 // const JOB_SEEKER_LIGHT_GREEN = '#34a853'; // سبز روشن‌تر
 // const JOB_SEEKER_DARK_GREEN = '#137333'; // سبز خیلی تیره
 
+// تنظیم تم اصلی با افزایش عرض breakpoints و Container
 const theme = createTheme({
   direction: 'rtl',
+  // تعریف breakpoints جدید برای تطابق با عرض سایت
+  breakpoints: {
+    values: {
+      xs: 0,
+      sm: 600,
+      md: 960,
+      lg: 1280,
+      xl: 1440, // افزایش عرض breakpoint xl
+    },
+  },
   typography: {
     fontFamily: 'IRANSansX, Roboto, Arial',
     h1: {
@@ -200,4 +211,28 @@ const theme = createTheme({
   },
 });
 
-export default theme; 
+// Override کردن maxWidth برای Container با تم جدید
+const themeWithContainerOverrides = createTheme({
+  ...theme,
+  components: {
+    ...theme.components,
+    MuiContainer: {
+      styleOverrides: {
+        maxWidthSm: {
+          maxWidth: '600px',
+        },
+        maxWidthMd: {
+          maxWidth: '960px',
+        },
+        maxWidthLg: {
+          maxWidth: '1440px', // افزایش عرض از 1200px به 1440px
+        },
+        maxWidthXl: {
+          maxWidth: '1440px',
+        },
+      },
+    },
+  },
+});
+
+export default themeWithContainerOverrides; 
