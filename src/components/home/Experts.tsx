@@ -7,16 +7,25 @@ import {
   Button,
   useTheme,
   Grid,
-  useMediaQuery
+  useMediaQuery,
+  Card,
+  CardContent,
+  Avatar,
+  Skeleton,
+  Stack,
+  Chip
 } from '@mui/material';
 import { useJobSeekerTheme } from '@/contexts/JobSeekerThemeContext';
 import ExpertCard, { ExpertType } from './ExpertCard';
 import AddResumeCard from './AddResumeCard';
+import { useState, useEffect } from 'react';
 
 export default function Experts() {
   const theme = useTheme();
   const jobSeekerColors = useJobSeekerTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+  // اضافه کردن state برای بارگذاری
+  const [loading, setLoading] = useState(true);
 
   const experts: ExpertType[] = [
     {
@@ -186,8 +195,168 @@ export default function Experts() {
     },
   ];
 
+  // شبیه‌سازی بارگذاری داده‌ها
+  useEffect(() => {
+    // شبیه‌سازی API call
+    const timer = setTimeout(() => {
+      setLoading(false);
+    }, 1000);
+
+    return () => clearTimeout(timer);
+  }, []);
+
+  // کامپوننت نمایش‌دهنده Skeleton
+  const ExpertCardSkeleton = () => (
+    <Card
+      sx={{
+        display: 'flex',
+        flexDirection: 'column',
+        borderRadius: { xs: 1.5, sm: 2 },
+        border: `1px solid ${jobSeekerColors.bgLight}`,
+        boxShadow: '0 3px 8px rgba(0,0,0,0.05)',
+        overflow: 'hidden',
+        position: 'relative',
+        backgroundColor: theme.palette.background.paper,
+        width: { xs: '100%', sm: '100%', md: '100%' },
+        mx: 'auto',
+        height: '100%'
+      }}
+    >
+      <CardContent sx={{
+        p: { xs: 1.5, sm: 2 },
+        pb: { xs: "6px !important", sm: "8px !important" },
+        display: 'flex',
+        flexDirection: 'column',
+        height: '100%'
+      }}>
+        {/* هدر کارت - آواتار و نام */}
+        <Box sx={{
+          display: 'flex',
+          alignItems: 'center',
+          mb: { xs: 1, sm: 1.5 },
+          minHeight: { xs: 40, sm: 45, md: 50 },
+          py: { xs: 0.5, sm: 0.8 },
+          pb: 0
+        }}>
+          <Box sx={{ position: 'relative', mr: { xs: 1, sm: 1.5 } }}>
+            <Skeleton
+              variant="circular"
+              width={isMobile ? 45 : 55}
+              height={isMobile ? 45 : 55}
+            />
+          </Box>
+          <Box sx={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', width: '70%' }}>
+            <Skeleton variant="text" width="80%" height={24} sx={{ mb: 0.5 }} />
+            <Skeleton variant="text" width="60%" height={18} />
+          </Box>
+        </Box>
+
+        {/* خط سرتاسری زیر هدر */}
+        <Box sx={{
+          position: 'relative',
+          mt: { xs: 0.2, sm: 0.4 },
+          mb: { xs: 0.8, sm: 1 },
+          mx: { xs: -1.5, sm: -2 },
+          height: 1
+        }}>
+          <Box sx={{
+            position: 'absolute',
+            left: 0,
+            right: 0,
+            height: '1px',
+            bgcolor: jobSeekerColors.bgLight
+          }} />
+        </Box>
+
+        {/* اطلاعات اصلی */}
+        <Box sx={{
+          mb: { xs: 0.8, sm: 1 },
+          p: 0,
+          pb: { xs: 0.8, sm: 1 },
+          bgcolor: theme.palette.background.paper,
+          border: 'none',
+          borderRadius: 1.5,
+          fontSize: { xs: '0.75rem', sm: '0.8rem' }
+        }}>
+          {/* محل کار */}
+          <Box sx={{ display: 'flex', alignItems: 'center', mb: { xs: 0.4, sm: 0.5 } }}>
+            <Skeleton
+              variant="circular"
+              width={24}
+              height={24}
+              sx={{ ml: 1.5 }}
+            />
+            <Skeleton variant="text" width="60%" height={20} />
+          </Box>
+
+          {/* نوع کار ترجیحی */}
+          <Box sx={{ display: 'flex', alignItems: 'center', mb: { xs: 0.4, sm: 0.5 } }}>
+            <Skeleton
+              variant="circular"
+              width={24}
+              height={24}
+              sx={{ ml: 1.5 }}
+            />
+            <Skeleton variant="text" width="40%" height={20} />
+          </Box>
+
+          {/* سابقه کاری */}
+          <Box sx={{ display: 'flex', alignItems: 'center' }}>
+            <Skeleton
+              variant="circular"
+              width={24}
+              height={24}
+              sx={{ ml: 1.5 }}
+            />
+            <Skeleton variant="text" width="50%" height={20} />
+          </Box>
+        </Box>
+
+        {/* مهارت‌ها */}
+        <Box sx={{ mb: { xs: 0.8, sm: 1.2 } }}>
+          <Skeleton variant="text" width="40%" height={20} sx={{ mb: 0.8 }} />
+          <Stack direction="row" spacing={0} flexWrap="wrap" gap={0.5}>
+            <Skeleton variant="rectangular" width={60} height={18} sx={{ borderRadius: 1 }} />
+            <Skeleton variant="rectangular" width={70} height={18} sx={{ borderRadius: 1 }} />
+            <Skeleton variant="rectangular" width={55} height={18} sx={{ borderRadius: 1 }} />
+          </Stack>
+        </Box>
+
+        {/* اطلاعات تکمیلی */}
+        <Box sx={{
+          p: { xs: 0.8, sm: 1 },
+          bgcolor: `rgba(0, 112, 60, 0.04)`,
+          borderRadius: 1.5,
+          border: 'none',
+          mb: { xs: 0.8, sm: 1 }
+        }}>
+          <Skeleton variant="text" width="80%" height={20} />
+        </Box>
+
+        {/* فضای خالی بین محتوا و دکمه */}
+        <Box sx={{ flexGrow: 1 }} />
+
+        {/* دکمه مشاهده رزومه */}
+        <Box sx={{ pt: { xs: 0.3, sm: 0.5 }, pb: { xs: 1, sm: 1.2, md: 1.5 } }}>
+          <Skeleton
+            variant="rectangular"
+            height={44}
+            width="100%"
+            sx={{ borderRadius: 1.5 }}
+          />
+        </Box>
+      </CardContent>
+    </Card>
+  );
+
   // تعداد کارت‌های نمایشی بر اساس سایز صفحه
   const visibleExperts = isMobile ? 4 : 7;
+
+  // تعداد کارت‌های اسکلتون بر اساس سایز صفحه
+  const getSkeletonCardsCount = () => {
+    if (isMobile) return 4;
+    return 8;
+  };
 
   return (
     <Box sx={{
@@ -246,11 +415,10 @@ export default function Experts() {
           justifyContent: 'flex-start',
           px: { xs: 1, sm: 2, md: 0 }
         }}>
-          {experts
-            .filter(expert => expert.isVerified)
-            .slice(0, visibleExperts)
-            .map((expert) => (
-              <Box key={expert.id} sx={{
+          {loading ? (
+            // نمایش Skeleton در حالت بارگذاری
+            Array.from(new Array(getSkeletonCardsCount())).map((_, index) => (
+              <Box key={index} sx={{
                 width: {
                   xs: '100%',
                   sm: 'calc(50% - 20px)',
@@ -259,46 +427,69 @@ export default function Experts() {
                 },
                 height: { xs: 'auto', sm: '345px' }
               }}>
-                <ExpertCard expert={expert} />
+                <ExpertCardSkeleton />
               </Box>
-            ))}
+            ))
+          ) : (
+            // نمایش کارت‌های واقعی بعد از بارگذاری
+            <>
+              {experts
+                .filter(expert => expert.isVerified)
+                .slice(0, visibleExperts)
+                .map((expert) => (
+                  <Box key={expert.id} sx={{
+                    width: {
+                      xs: '100%',
+                      sm: 'calc(50% - 20px)',
+                      md: 'calc(33.33% - 24px)',
+                      lg: 'calc(25% - 24px)'
+                    },
+                    height: { xs: 'auto', sm: '345px' }
+                  }}>
+                    <ExpertCard expert={expert} />
+                  </Box>
+                ))}
 
-          {/* کارت ثبت رزومه - همیشه آخرین کارت */}
-          <Box sx={{
-            width: {
-              xs: '100%',
-              sm: 'calc(50% - 20px)',
-              md: 'calc(33.33% - 24px)',
-              lg: 'calc(25% - 24px)'
-            },
-            height: { xs: 'auto', sm: '345px' }
-          }}>
-            <AddResumeCard onClick={() => console.log('ثبت رزومه جدید')} />
+              {/* کارت ثبت رزومه - همیشه آخرین کارت */}
+              <Box sx={{
+                width: {
+                  xs: '100%',
+                  sm: 'calc(50% - 20px)',
+                  md: 'calc(33.33% - 24px)',
+                  lg: 'calc(25% - 24px)'
+                },
+                height: { xs: 'auto', sm: '345px' }
+              }}>
+                <AddResumeCard onClick={() => console.log('ثبت رزومه جدید')} />
+              </Box>
+            </>
+          )}
+        </Box>
+
+        {!loading && (
+          <Box sx={{ mt: { xs: 4, sm: 5, md: 6 }, textAlign: 'center' }}>
+            <Button
+              variant="contained"
+              disableElevation
+              color="success"
+              sx={{
+                px: { xs: 3, sm: 4 },
+                py: { xs: 1, sm: 1.2 },
+                fontWeight: 700,
+                borderRadius: 2,
+                fontSize: { xs: '0.9rem', sm: '1rem' },
+                background: `linear-gradient(135deg, ${jobSeekerColors.light} 0%, ${jobSeekerColors.primary} 100%)`,
+                boxShadow: `0 4px 8px rgba(0, 112, 60, 0.2)`,
+                '&:hover': {
+                  background: `linear-gradient(135deg, ${jobSeekerColors.primary} 0%, ${jobSeekerColors.dark} 100%)`,
+                  boxShadow: `0 6px 10px rgba(0, 112, 60, 0.3)`,
+                }
+              }}
+            >
+              مشاهده همه متخصصین جویای کار
+            </Button>
           </Box>
-        </Box>
-
-        <Box sx={{ mt: { xs: 4, sm: 5, md: 6 }, textAlign: 'center' }}>
-          <Button
-            variant="contained"
-            disableElevation
-            color="success"
-            sx={{
-              px: { xs: 3, sm: 4 },
-              py: { xs: 1, sm: 1.2 },
-              fontWeight: 700,
-              borderRadius: 2,
-              fontSize: { xs: '0.9rem', sm: '1rem' },
-              background: `linear-gradient(135deg, ${jobSeekerColors.light} 0%, ${jobSeekerColors.primary} 100%)`,
-              boxShadow: `0 4px 8px rgba(0, 112, 60, 0.2)`,
-              '&:hover': {
-                background: `linear-gradient(135deg, ${jobSeekerColors.primary} 0%, ${jobSeekerColors.dark} 100%)`,
-                boxShadow: `0 6px 10px rgba(0, 112, 60, 0.3)`,
-              }
-            }}
-          >
-            مشاهده همه متخصصین جویای کار
-          </Button>
-        </Box>
+        )}
       </Container>
     </Box>
   );

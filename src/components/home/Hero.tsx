@@ -8,7 +8,7 @@ import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import SchoolIcon from '@mui/icons-material/School';
 import LaptopIcon from '@mui/icons-material/Laptop';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useLayoutEffect } from 'react';
 import { useJobSeekerTheme } from '@/contexts/JobSeekerThemeContext';
 import { EMPLOYER_THEME } from '@/constants/colors';
 import Image from 'next/image';
@@ -79,31 +79,16 @@ const cities = [
 
 export default function Hero() {
   const theme = useTheme();
-  // استفاده از noSsr و مقدار پیش‌فرض برای دسکتاپ
-  const [hasMounted, setHasMounted] = useState(false);
-  const matchesMobile = useMediaQuery('(max-width:600px)');
-  const matchesTablet = useMediaQuery('(min-width:601px) and (max-width:1148px)');
-  const matchesDesktop = useMediaQuery('(min-width:1149px)');
+  const jobSeekerColors = useJobSeekerTheme();
 
-  // مقادیر پیش‌فرض برای حالت اولیه (قبل از لود کامل)
-  const isMobile = hasMounted ? matchesMobile : false;
-  const isTablet = hasMounted ? matchesTablet : false;
-  const isDesktop = hasMounted ? matchesDesktop : true; // پیش‌فرض: حالت دسکتاپ
-
-  // بررسی وضعیت mount شدن کامپوننت
-  useEffect(() => {
-    setHasMounted(true);
-  }, []);
+  // رنگ‌های کارفرما برای استفاده در این کامپوننت
+  const employerColors = EMPLOYER_THEME;
 
   const [jobCategory, setJobCategory] = useState('');
   const [jobSubCategory, setJobSubCategory] = useState('');
   const [location, setLocation] = useState('');
   const [city, setCity] = useState('');
   const [filterOption, setFilterOption] = useState('');
-  const jobSeekerColors = useJobSeekerTheme();
-
-  // رنگ‌های کارفرما برای استفاده در این کامپوننت
-  const employerColors = EMPLOYER_THEME;
 
   // Filtered cities based on selected province
   const [filteredCities, setFilteredCities] = useState(cities);
@@ -360,7 +345,7 @@ export default function Hero() {
                 fontSize: { xs: '1.5rem', sm: '1.8rem', md: '2.2rem' },
                 color: '#ffffff',
                 mb: { xs: 0, sm: 0 },
-                display: { xs: isMobile ? 'none' : 'block', md: 'block' }
+                display: { xs: 'none', sm: 'block', md: 'block' }
               }}
             >
               هوشمند انتخاب کن، <Box
@@ -388,7 +373,7 @@ export default function Hero() {
             </Typography>
 
             {/* نمایش عنوان در حالت موبایل به صورت دو سطری */}
-            <Box sx={{ display: { xs: isMobile ? 'block' : 'none', md: 'none' }, mb: 0 }}>
+            <Box sx={{ display: { xs: 'block', sm: 'none', md: 'none' }, mb: 0 }}>
               <Typography
                 variant="h4"
                 component="h1"
@@ -444,8 +429,8 @@ export default function Hero() {
             sx={{
               width: '100%',
               display: 'flex',
-              flexDirection: isDesktop ? 'row' : (isTablet ? 'row' : 'column'),
-              flexWrap: isTablet ? 'wrap' : 'nowrap',
+              flexDirection: { xs: 'column', sm: 'row' },
+              flexWrap: { xs: 'nowrap', sm: 'wrap', md: 'nowrap' },
               alignItems: 'center',
               gap: { xs: 1.25, sm: 1, md: 1 },
               backgroundColor: theme.palette.background.paper,
@@ -459,11 +444,11 @@ export default function Hero() {
           >
             {/* گروه کاری */}
             <Box sx={{
-              width: isDesktop ? '20%' : (isTablet ? '48%' : '100%'),
+              width: { xs: '100%', sm: '48%', md: '20%' },
               height: { xs: '54px', sm: '50px', md: '48px' },
               display: 'flex',
               alignItems: 'center',
-              mb: isTablet ? 1 : 0
+              mb: { xs: 0, sm: 1, md: 0 }
             }}>
               <FormControl fullWidth sx={{ height: '100%' }}>
                 <Select
@@ -499,11 +484,11 @@ export default function Hero() {
 
             {/* زیرگروه کاری */}
             <Box sx={{
-              width: isDesktop ? '20%' : (isTablet ? '48%' : '100%'),
+              width: { xs: '100%', sm: '48%', md: '20%' },
               height: { xs: '54px', sm: '50px', md: '48px' },
               display: 'flex',
               alignItems: 'center',
-              mb: isTablet ? 1 : 0
+              mb: { xs: 0, sm: 1, md: 0 }
             }}>
               <FormControl fullWidth sx={{ height: '100%' }}>
                 <Select
@@ -540,11 +525,11 @@ export default function Hero() {
 
             {/* استان */}
             <Box sx={{
-              width: isDesktop ? '20%' : (isTablet ? '48%' : '100%'),
+              width: { xs: '100%', sm: '48%', md: '20%' },
               height: { xs: '54px', sm: '50px', md: '48px' },
               display: 'flex',
               alignItems: 'center',
-              mb: isTablet && isDesktop ? 0 : (isTablet ? 1 : 0)
+              mb: { xs: 0, sm: 1, md: 0 }
             }}>
               <FormControl fullWidth sx={{ height: '100%' }}>
                 <Select
@@ -580,11 +565,11 @@ export default function Hero() {
 
             {/* شهر */}
             <Box sx={{
-              width: isDesktop ? '20%' : (isTablet ? '48%' : '100%'),
+              width: { xs: '100%', sm: '48%', md: '20%' },
               height: { xs: '54px', sm: '50px', md: '48px' },
               display: 'flex',
               alignItems: 'center',
-              mb: isTablet && !isDesktop ? 1 : 0
+              mb: { xs: 0, sm: 1, md: 0 }
             }}>
               <FormControl fullWidth sx={{ height: '100%' }}>
                 <Select
@@ -622,7 +607,7 @@ export default function Hero() {
             {/* دکمه جستجو */}
             <Box
               sx={{
-                width: isDesktop ? '20%' : '100%',
+                width: { xs: '100%', sm: '100%', md: '20%' },
                 height: { xs: '54px', sm: '50px', md: '48px' },
                 display: 'flex',
                 alignItems: 'center'
