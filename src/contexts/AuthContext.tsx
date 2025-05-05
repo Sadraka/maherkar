@@ -6,9 +6,12 @@ import authService, {
     UserData,
     LoginCredentials,
     RegisterData,
-    TokenResponse
-} from '@/lib/authService';
+    TokenResponse,
+    RegisterValidateResponse
+} from '../lib/authService';
 import { toast } from 'react-hot-toast';
+import ErrorHandler from '../components/common/ErrorHandler';
+import cookieService, { COOKIE_NAMES } from '../lib/cookieService';
 
 // تعریف اینترفیس برای وضعیت کانتکست
 interface AuthContextType {
@@ -16,9 +19,13 @@ interface AuthContextType {
     user: UserData | null;
     login: (credentials: LoginCredentials) => Promise<void>;
     logout: () => void;
-    register: (data: RegisterData) => Promise<string>;
-    verifyOtp: (token: string, code: string) => Promise<void>;
+    register: (userData: RegisterData) => Promise<string>;
+    verifyOtp: (token: string, code: string) => Promise<RegisterValidateResponse>;
+    checkPhoneExists: (phone: string) => Promise<boolean>;
     loading: boolean;
+    loginError: string | null;
+    registerError: string | null;
+    verifyError: string | null;
 }
 
 // ایجاد کانتکست با مقدار پیش‌فرض
@@ -28,8 +35,12 @@ const AuthContext = createContext<AuthContextType>({
     login: async () => { },
     logout: () => { },
     register: async () => '',
-    verifyOtp: async () => { },
-    loading: true
+    verifyOtp: async () => ({ Detail: { Message: '', User: {} as UserData, Token: {} as TokenResponse } }),
+    checkPhoneExists: async () => false,
+    loading: true,
+    loginError: null,
+    registerError: null,
+    verifyError: null
 });
 
 // هوک برای استفاده آسان از کانتکست
@@ -40,6 +51,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
     const [user, setUser] = useState<UserData | null>(null);
     const [loading, setLoading] = useState<boolean>(true);
+    const [loginError, setLoginError] = useState<string | null>(null);
+    const [registerError, setRegisterError] = useState<string | null>(null);
+    const [verifyError, setVerifyError] = useState<string | null>(null);
     const router = useRouter();
 
     // بررسی وضعیت احراز هویت در هنگام لود
@@ -50,7 +64,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             setUser(null);
         };
 
-        // بررسی وضعیت احراز هویت در localStorage
+        // بررسی وضعیت احراز هویت در کوکی
         const checkAuth = () => {
             const authenticated = authService.isAuthenticated();
             setIsAuthenticated(authenticated);
@@ -71,8 +85,16 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         };
     }, []);
 
+    // پاک کردن خطاها قبل از هر عملیات
+    const clearErrors = () => {
+        setLoginError(null);
+        setRegisterError(null);
+        setVerifyError(null);
+    };
+
     // تابع ورود کاربر
     const login = async (credentials: LoginCredentials) => {
+        clearErrors();
         setLoading(true);
         try {
             await authService.login(credentials);
@@ -84,60 +106,45 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
             toast.success('ورود با موفقیت انجام شد');
             router.push('/'); // هدایت به صفحه اصلی
-        } catch (error: any) {
-            console.error('خطا در ورود:', error);
-            const errorMessage = error.response?.data?.error || 'خطا در ورود به حساب کاربری';
-            toast.error(errorMessage);
+        } catch (error) {
+            setLoginError('خطا در ورود به حساب کاربری');
             throw error;
         } finally {
             setLoading(false);
         }
     };
 
-    // تابع ثبت‌نام (مرحله اول: درخواست OTP)
-    const register = async (data: RegisterData): Promise<string> => {
+    // تابع ثبت‌نام (مرحله اول)
+    const register = async (userData: RegisterData): Promise<string> => {
+        clearErrors();
         setLoading(true);
         try {
-            const response = await authService.registerOtp(data);
-            toast.success('کد تایید برای شما ارسال شد');
-            setLoading(false);
+            const response = await authService.registerOtp(userData);
             return response.Detail.token;
-        } catch (error: any) {
-            setLoading(false);
-            console.error('خطا در ثبت‌نام:', error);
-            const errorDetail = error.response?.data?.Detail;
-
-            if (typeof errorDetail === 'object') {
-                // نمایش خطاهای اعتبارسنجی
-                Object.entries(errorDetail).forEach(([field, errors]) => {
-                    toast.error(`${field}: ${errors}`);
-                });
-            } else {
-                toast.error(errorDetail || 'خطا در ثبت‌نام');
-            }
-
+        } catch (error) {
+            setRegisterError('خطا در ارسال کد تایید');
             throw error;
+        } finally {
+            setLoading(false);
         }
     };
 
-    // تابع تایید کد OTP (مرحله دوم ثبت‌نام)
-    const verifyOtp = async (token: string, code: string) => {
-        setLoading(true);
+    // تابع تایید کد OTP (مرحله دوم)
+    const verifyOtp = async (token: string, code: string): Promise<RegisterValidateResponse> => {
+        clearErrors();
         try {
             const response = await authService.validateOtp(token, code);
 
-            // دریافت اطلاعات کاربر و توکن‌ها
-            setUser(response.Detail.User);
-            setIsAuthenticated(true);
+            if (response.Detail && response.Detail.User && response.Detail.Token) {
+                setUser(response.Detail.User);
+                // اطلاعات کاربر در authService ذخیره می‌شود
+                setIsAuthenticated(true);
+            }
 
-            toast.success('ثبت‌نام با موفقیت انجام شد');
-            router.push('/'); // هدایت به صفحه اصلی
-        } catch (error: any) {
-            console.error('خطا در تایید کد:', error);
-            toast.error(error.response?.data?.Detail || 'کد تایید نامعتبر است');
+            return response;
+        } catch (error) {
+            setVerifyError('کد تایید نامعتبر است');
             throw error;
-        } finally {
-            setLoading(false);
         }
     };
 
@@ -150,6 +157,15 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         router.push('/login');
     };
 
+    // تابع بررسی تکراری بودن شماره تلفن
+    const checkPhoneExists = async (phone: string): Promise<boolean> => {
+        try {
+            return await authService.checkPhoneExists(phone);
+        } catch (error) {
+            throw error;
+        }
+    };
+
     // مقدار کانتکست
     const value = {
         isAuthenticated,
@@ -158,7 +174,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         logout,
         register,
         verifyOtp,
-        loading
+        checkPhoneExists,
+        loading,
+        loginError,
+        registerError,
+        verifyError
     };
 
     return (

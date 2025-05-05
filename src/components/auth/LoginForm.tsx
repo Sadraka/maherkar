@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
     Box,
     Typography,
@@ -9,7 +9,9 @@ import {
     Paper,
     InputAdornment,
     CircularProgress,
-    Link as MuiLink
+    Link as MuiLink,
+    useMediaQuery,
+    useTheme
 } from '@mui/material';
 import { useAuth } from '@/contexts/AuthContext';
 import { useRouter } from 'next/navigation';
@@ -17,6 +19,7 @@ import PhoneIcon from '@mui/icons-material/Phone';
 import LockIcon from '@mui/icons-material/Lock';
 import Link from 'next/link';
 import { EMPLOYER_THEME } from '@/constants/colors';
+import { ErrorHandler } from '@/components/common/ErrorHandler';
 
 interface LoginFormProps {
     onSuccess?: () => void;
@@ -31,6 +34,26 @@ export default function LoginForm({ onSuccess }: LoginFormProps) {
         phone?: string;
         password?: string;
     }>({});
+
+    // استفاده از هوک تم و وضعیت دستگاه
+    const theme = useTheme();
+    const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+    const isTablet = useMediaQuery(theme.breakpoints.between('sm', 'md'));
+
+    // پاک کردن خطاهای فرم هنگام تغییر مقادیر
+    const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        setPhone(e.target.value);
+        if (formErrors.phone) {
+            setFormErrors(prev => ({ ...prev, phone: undefined }));
+        }
+    };
+
+    const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        setPassword(e.target.value);
+        if (formErrors.password) {
+            setFormErrors(prev => ({ ...prev, password: undefined }));
+        }
+    };
 
     // اعتبارسنجی فرم
     const validateForm = () => {
@@ -74,8 +97,19 @@ export default function LoginForm({ onSuccess }: LoginFormProps) {
             }
             // در صورت موفقیت، کاربر به صفحه اصلی هدایت می‌شود (در تابع login)
         } catch (error) {
-            // خطا در useAuth مدیریت می‌شود
-            console.error('خطا در ورود:', error);
+            // خطا قبلاً در AuthContext نمایش داده شده است
+            // بنابراین نیازی به فراخوانی دوباره ErrorHandler.showError نیست
+
+            // استخراج خطاهای فیلدهای خاص (شماره تلفن و رمز عبور)
+            const phoneError = ErrorHandler.getFieldError(error, 'phone');
+            const passwordError = ErrorHandler.getFieldError(error, 'password');
+
+            if (phoneError || passwordError) {
+                setFormErrors({
+                    phone: phoneError,
+                    password: passwordError
+                });
+            }
         }
     };
 
@@ -85,19 +119,27 @@ export default function LoginForm({ onSuccess }: LoginFormProps) {
         <Paper
             elevation={3}
             sx={{
-                p: 5,
-                borderRadius: 2,
+                p: { xs: 2, sm: 3, md: 5 },
+                px: { xs: 1.5, sm: 3, md: 5 },
+                borderRadius: { xs: 1, sm: 2 },
                 border: `1px solid ${employerColors.bgLight}`,
+                width: { xs: '100%', sm: '450px', md: '500px' },
+                maxWidth: '100%',
+                mx: 'auto',
+                mb: { xs: 2, md: 4 }
             }}
         >
             <Typography
-                variant="h4"
+                variant={isMobile ? "h5" : "h4"}
                 component="h1"
                 align="center"
                 gutterBottom
                 fontWeight="bold"
                 color={employerColors.primary}
-                sx={{ mb: 4 }}
+                sx={{
+                    mb: { xs: 2, sm: 3, md: 4 },
+                    fontSize: { xs: '1.5rem', sm: '1.75rem', md: '2rem' }
+                }}
             >
                 ورود به ماهرکار
             </Typography>
@@ -106,7 +148,7 @@ export default function LoginForm({ onSuccess }: LoginFormProps) {
                 <Box sx={{
                     display: 'flex',
                     flexDirection: 'column',
-                    gap: 3
+                    gap: { xs: 2, sm: 3 }
                 }}>
                     <Box>
                         <TextField
@@ -115,7 +157,7 @@ export default function LoginForm({ onSuccess }: LoginFormProps) {
                             label="شماره تلفن"
                             variant="outlined"
                             value={phone}
-                            onChange={(e) => setPhone(e.target.value)}
+                            onChange={handlePhoneChange}
                             error={!!formErrors.phone}
                             helperText={formErrors.phone}
                             InputProps={{
@@ -125,8 +167,9 @@ export default function LoginForm({ onSuccess }: LoginFormProps) {
                                     </InputAdornment>
                                 ),
                             }}
-                            placeholder="09123456789"
+                            placeholder="۰۹۱۲۳۴۵۶۷۸۹"
                             inputProps={{ dir: "ltr" }}
+                            size={isMobile ? "small" : "medium"}
                         />
                     </Box>
 
@@ -138,7 +181,7 @@ export default function LoginForm({ onSuccess }: LoginFormProps) {
                             type="password"
                             variant="outlined"
                             value={password}
-                            onChange={(e) => setPassword(e.target.value)}
+                            onChange={handlePasswordChange}
                             error={!!formErrors.password}
                             helperText={formErrors.password}
                             InputProps={{
@@ -149,6 +192,7 @@ export default function LoginForm({ onSuccess }: LoginFormProps) {
                                 ),
                             }}
                             inputProps={{ dir: "ltr" }}
+                            size={isMobile ? "small" : "medium"}
                         />
                         <Box sx={{ textAlign: 'left', mt: 1 }}>
                             <MuiLink
@@ -156,7 +200,7 @@ export default function LoginForm({ onSuccess }: LoginFormProps) {
                                 href="/forgot-password"
                                 underline="hover"
                                 sx={{
-                                    fontSize: '0.875rem',
+                                    fontSize: { xs: '0.75rem', sm: '0.875rem' },
                                     color: employerColors.primary
                                 }}
                             >
@@ -170,34 +214,39 @@ export default function LoginForm({ onSuccess }: LoginFormProps) {
                             type="submit"
                             fullWidth
                             variant="contained"
-                            size="large"
+                            size={isMobile ? "medium" : "large"}
                             disabled={loading}
                             sx={{
-                                mt: 2,
-                                py: 1.5,
+                                mt: { xs: 1, sm: 2 },
+                                py: { xs: 1, sm: 1.5 },
                                 backgroundColor: employerColors.primary,
                                 '&:hover': {
                                     backgroundColor: employerColors.dark,
                                 },
-                                borderRadius: 2,
+                                borderRadius: { xs: 1, sm: 2 },
+                                fontSize: { xs: '0.9rem', sm: '1rem' }
                             }}
                         >
                             {loading ? (
-                                <CircularProgress size={24} color="inherit" />
+                                <CircularProgress size={isMobile ? 20 : 24} color="inherit" />
                             ) : (
                                 'ورود'
                             )}
                         </Button>
                     </Box>
 
-                    <Box sx={{ mt: 2, textAlign: 'center' }}>
-                        <Typography>
+                    <Box sx={{ mt: { xs: 1, sm: 2 }, textAlign: 'center' }}>
+                        <Typography variant={isMobile ? "body2" : "body1"}>
                             حساب کاربری ندارید؟{' '}
                             <MuiLink
                                 component={Link}
                                 href="/register"
                                 underline="hover"
-                                sx={{ fontWeight: 'bold', color: employerColors.primary }}
+                                sx={{
+                                    fontWeight: 'bold',
+                                    color: employerColors.primary,
+                                    fontSize: { xs: '0.85rem', sm: 'inherit' }
+                                }}
                             >
                                 ثبت‌نام کنید
                             </MuiLink>

@@ -1,4 +1,5 @@
 import axios from 'axios';
+import cookieService, { COOKIE_NAMES } from './cookieService';
 
 // ایجاد نمونه axios با تنظیمات پیش‌فرض
 const api = axios.create({
@@ -12,7 +13,7 @@ const api = axios.create({
 // افزودن interceptor برای اضافه کردن توکن به هدر درخواست‌ها
 api.interceptors.request.use(
     (config) => {
-        const token = localStorage.getItem('accessToken');
+        const token = cookieService.getCookie(COOKIE_NAMES.ACCESS_TOKEN);
         if (token) {
             config.headers.Authorization = `Bearer ${token}`;
         }
@@ -35,7 +36,7 @@ api.interceptors.response.use(
 
             try {
                 // تلاش برای رفرش توکن
-                const refreshToken = localStorage.getItem('refreshToken');
+                const refreshToken = cookieService.getCookie(COOKIE_NAMES.REFRESH_TOKEN);
 
                 if (!refreshToken) {
                     throw new Error('رفرش توکن یافت نشد');
@@ -47,8 +48,8 @@ api.interceptors.response.use(
 
                 const { access } = response.data;
 
-                // ذخیره توکن جدید در localStorage
-                localStorage.setItem('accessToken', access);
+                // ذخیره توکن جدید در کوکی با مدت انقضای 30 روز
+                cookieService.setCookie(COOKIE_NAMES.ACCESS_TOKEN, access, 30);
 
                 // تنظیم هدر توکن جدید
                 originalRequest.headers.Authorization = `Bearer ${access}`;
@@ -57,8 +58,8 @@ api.interceptors.response.use(
                 return api(originalRequest);
             } catch (refreshError) {
                 // اگر نمی‌توانیم توکن را رفرش کنیم، کاربر را خارج می‌کنیم
-                localStorage.removeItem('accessToken');
-                localStorage.removeItem('refreshToken');
+                cookieService.deleteCookie(COOKIE_NAMES.ACCESS_TOKEN);
+                cookieService.deleteCookie(COOKIE_NAMES.REFRESH_TOKEN);
 
                 // اگر event dispatcherی داریم، می‌توان کاربر را به صفحه ورود هدایت کرد
                 window.dispatchEvent(new Event('logout'));

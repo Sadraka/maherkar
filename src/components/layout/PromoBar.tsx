@@ -5,6 +5,7 @@ import { Box, Container, Typography, IconButton, Button } from '@mui/material'
 import CloseIcon from '@mui/icons-material/Close'
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward'
 import { useTheme } from '@mui/material/styles'
+import cookieService, { COOKIE_NAMES } from '@/lib/cookieService'
 
 export default function PromoBar() {
   const theme = useTheme()
@@ -20,10 +21,8 @@ export default function PromoBar() {
   // برای بستن دستی نوار تبلیغاتی
   const handleClose = () => {
     setIsVisible(false)
-    // ذخیره وضعیت در localStorage برای جلوگیری از نمایش مجدد در بارگذاری‌های بعدی
-    if (typeof window !== 'undefined') {
-      localStorage.setItem('promoBarClosed', 'true')
-    }
+    // ذخیره وضعیت در کوکی برای جلوگیری از نمایش مجدد در بارگذاری‌های بعدی
+    cookieService.setCookie(COOKIE_NAMES.PROMO_BAR_CLOSED, 'true', 30); // 30 روز
   }
 
   // محاسبه ارتفاع نوار یکبار در شروع
@@ -32,14 +31,14 @@ export default function PromoBar() {
       const height = barRef.current.offsetHeight;
       setBarHeight(height);
       isInitialMount.current = false;
-      
+
       // اندازه‌گیری مجدد در صورت تغییر اندازه صفحه
       const handleResize = () => {
         if (barRef.current) {
           setBarHeight(barRef.current.offsetHeight);
         }
       };
-      
+
       window.addEventListener('resize', handleResize);
       return () => {
         window.removeEventListener('resize', handleResize);
@@ -49,18 +48,16 @@ export default function PromoBar() {
 
   useEffect(() => {
     setIsMounted(true)
-    
-    // برای تست، localStorage را پاک می‌کنیم تا نوار همیشه نمایش داده شود
-    if (typeof window !== 'undefined') {
-      localStorage.removeItem('promoBarClosed')
-    }
-    
+
+    // برای تست، کوکی را پاک می‌کنیم تا نوار همیشه نمایش داده شود
+    cookieService.deleteCookie(COOKIE_NAMES.PROMO_BAR_CLOSED);
+
     setIsVisible(true)
 
     // تشخیص اسکرول با throttling برای بهبود عملکرد
     const handleScroll = () => {
       lastScrollY.current = window.scrollY;
-      
+
       if (!ticking.current) {
         window.requestAnimationFrame(() => {
           // استفاده از آستانه بزرگتر و پایدارتر
@@ -72,7 +69,7 @@ export default function PromoBar() {
           }
           ticking.current = false;
         });
-        
+
         ticking.current = true;
       }
     }
@@ -94,7 +91,7 @@ export default function PromoBar() {
     <>
       {/* همیشه یک فضای خالی با همان ارتفاع داشته باشید تا از پرش جلوگیری شود */}
       <Box sx={{ height: barHeight, display: isScrolled ? 'block' : 'none' }} />
-      
+
       <Box
         ref={barRef}
         sx={{
@@ -155,14 +152,14 @@ export default function PromoBar() {
             >
               🚀 در ماهرکار ثبت نام کنید و از ۲۰٪ تخفیف ویژه برای کارفرمایان بهره‌مند شوید!
             </Typography>
-            
-            <Button 
-              size="small" 
-              color="inherit" 
+
+            <Button
+              size="small"
+              color="inherit"
               variant="outlined"
               endIcon={<ArrowForwardIcon />}
-              sx={{ 
-                mr: 1, 
+              sx={{
+                mr: 1,
                 ml: 2,
                 borderColor: 'rgba(255,255,255,0.5)',
                 fontSize: '0.75rem',

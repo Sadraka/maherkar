@@ -1,22 +1,22 @@
 import { createTheme } from '@mui/material/styles';
 import {
-  EMPLOYER_BLUE,
-  EMPLOYER_LIGHT_BLUE,
-  EMPLOYER_DARK_BLUE,
-  JOB_SEEKER_GREEN,
-  JOB_SEEKER_LIGHT_GREEN,
-  JOB_SEEKER_DARK_GREEN
+    EMPLOYER_BLUE,
+    EMPLOYER_LIGHT_BLUE,
+    EMPLOYER_DARK_BLUE,
+    JOB_SEEKER_GREEN,
+    JOB_SEEKER_LIGHT_GREEN,
+    JOB_SEEKER_DARK_GREEN
 } from '../constants/colors';
 
 declare module '@mui/material/styles' {
-  interface Palette {
-    employer: Palette['primary'];
-    candidate: Palette['primary'];
-  }
-  interface PaletteOptions {
-    employer?: PaletteOptions['primary'];
-    candidate?: PaletteOptions['primary'];
-  }
+    interface Palette {
+        employer: Palette['primary'];
+        candidate: Palette['primary'];
+    }
+    interface PaletteOptions {
+        employer?: PaletteOptions['primary'];
+        candidate?: PaletteOptions['primary'];
+    }
 }
 
 // رنگ‌های اصلی برای استفاده در سایت
@@ -34,205 +34,205 @@ declare module '@mui/material/styles' {
 
 // تنظیم تم اصلی با افزایش عرض breakpoints و Container
 const theme = createTheme({
-  direction: 'rtl',
-  // تعریف breakpoints جدید برای تطابق با عرض سایت
-  breakpoints: {
-    values: {
-      xs: 0,
-      sm: 600,
-      md: 960,
-      lg: 1280,
-      xl: 1440, // افزایش عرض breakpoint xl
-    },
-  },
-  typography: {
-    fontFamily: 'IRANSansX, Roboto, Arial',
-    h1: {
-      fontWeight: 700,
-    },
-    h2: {
-      fontWeight: 700,
-    },
-    h3: {
-      fontWeight: 600,
-    },
-    h4: {
-      fontWeight: 600,
-    },
-    h5: {
-      fontWeight: 600,
-    },
-    h6: {
-      fontWeight: 600,
-    },
-    subtitle1: {
-      fontSize: '1.1rem',
-      fontWeight: 500,
-    },
-    subtitle2: {
-      fontSize: '0.95rem',
-      fontWeight: 500,
-    },
-  },
-  palette: {
-    primary: {
-      main: EMPLOYER_BLUE,
-      light: EMPLOYER_LIGHT_BLUE,
-      dark: EMPLOYER_DARK_BLUE,
-      contrastText: '#fff',
-    },
-    secondary: {
-      main: JOB_SEEKER_GREEN,
-      light: JOB_SEEKER_LIGHT_GREEN,
-      dark: JOB_SEEKER_DARK_GREEN,
-      contrastText: '#fff',
-    },
-    success: {
-      main: JOB_SEEKER_GREEN,
-      light: JOB_SEEKER_LIGHT_GREEN,
-      dark: JOB_SEEKER_DARK_GREEN,
-      contrastText: '#fff',
-    },
-    // رنگ‌های اختصاصی برای کارفرما و کارجو
-    employer: {
-      main: EMPLOYER_BLUE,
-      light: EMPLOYER_LIGHT_BLUE,
-      dark: EMPLOYER_DARK_BLUE,
-      contrastText: '#fff',
-    },
-    candidate: {
-      main: JOB_SEEKER_GREEN,
-      light: JOB_SEEKER_LIGHT_GREEN,
-      dark: JOB_SEEKER_DARK_GREEN,
-      contrastText: '#fff',
-    },
-    background: {
-      default: '#f8f9fa',
-      paper: '#ffffff',
-    },
-    text: {
-      primary: '#333333',
-      secondary: '#666666',
-    },
-  },
-  components: {
-    MuiButton: {
-      styleOverrides: {
-        root: {
-          borderRadius: '8px',
-          textTransform: 'none',
-          fontFamily: 'IRANSansX',
-          fontSize: '0.95rem',
-          fontWeight: 500,
-          padding: '8px 16px',
-          boxShadow: 'none',
-          '&:hover': {
-            boxShadow: '0px 4px 8px rgba(0, 0, 0, 0.1)',
-          },
+    direction: 'rtl',
+    // تعریف breakpoints جدید برای تطابق با عرض سایت
+    breakpoints: {
+        values: {
+            xs: 0,
+            sm: 600,
+            md: 960,
+            lg: 1280,
+            xl: 1440, // افزایش عرض breakpoint xl
         },
-        containedPrimary: {
-          background: `linear-gradient(135deg, ${EMPLOYER_LIGHT_BLUE} 0%, ${EMPLOYER_BLUE} 100%)`,
-        },
-        containedSecondary: {
-          background: `linear-gradient(135deg, ${JOB_SEEKER_LIGHT_GREEN} 0%, ${JOB_SEEKER_GREEN} 100%)`,
-        },
-        containedSuccess: {
-          background: JOB_SEEKER_GREEN,
-          '&:hover': {
-            background: JOB_SEEKER_GREEN,
-          }
-        },
-      },
     },
-    MuiCard: {
-      styleOverrides: {
-        root: {
-          borderRadius: '12px',
-          boxShadow: '0px 4px 20px rgba(0, 0, 0, 0.05)',
-          transition: 'transform 0.2s, box-shadow 0.2s',
-          '&:hover': {
-            transform: 'translateY(-5px)',
-            boxShadow: '0px 8px 25px rgba(0, 0, 0, 0.1)',
-          },
+    typography: {
+        fontFamily: 'IRANSansX, Roboto, Arial',
+        h1: {
+            fontWeight: 700,
         },
-      },
+        h2: {
+            fontWeight: 700,
+        },
+        h3: {
+            fontWeight: 600,
+        },
+        h4: {
+            fontWeight: 600,
+        },
+        h5: {
+            fontWeight: 600,
+        },
+        h6: {
+            fontWeight: 600,
+        },
+        subtitle1: {
+            fontSize: '1.1rem',
+            fontWeight: 500,
+        },
+        subtitle2: {
+            fontSize: '0.95rem',
+            fontWeight: 500,
+        },
     },
-    MuiTextField: {
-      styleOverrides: {
-        root: {
-          fontFamily: 'IRANSansX',
-          '& .MuiInputLabel-root': {
-            fontFamily: 'IRANSansX',
-          },
-          '& .MuiOutlinedInput-root': {
-            fontFamily: 'IRANSansX',
-            borderRadius: '8px',
-            '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-              borderColor: EMPLOYER_BLUE,
-              borderWidth: '2px',
+    palette: {
+        primary: {
+            main: EMPLOYER_BLUE,
+            light: EMPLOYER_LIGHT_BLUE,
+            dark: EMPLOYER_DARK_BLUE,
+            contrastText: '#fff',
+        },
+        secondary: {
+            main: JOB_SEEKER_GREEN,
+            light: JOB_SEEKER_LIGHT_GREEN,
+            dark: JOB_SEEKER_DARK_GREEN,
+            contrastText: '#fff',
+        },
+        success: {
+            main: JOB_SEEKER_GREEN,
+            light: JOB_SEEKER_LIGHT_GREEN,
+            dark: JOB_SEEKER_DARK_GREEN,
+            contrastText: '#fff',
+        },
+        // رنگ‌های اختصاصی برای کارفرما و کارجو
+        employer: {
+            main: EMPLOYER_BLUE,
+            light: EMPLOYER_LIGHT_BLUE,
+            dark: EMPLOYER_DARK_BLUE,
+            contrastText: '#fff',
+        },
+        candidate: {
+            main: JOB_SEEKER_GREEN,
+            light: JOB_SEEKER_LIGHT_GREEN,
+            dark: JOB_SEEKER_DARK_GREEN,
+            contrastText: '#fff',
+        },
+        background: {
+            default: '#f8f9fa',
+            paper: '#ffffff',
+        },
+        text: {
+            primary: '#333333',
+            secondary: '#666666',
+        },
+    },
+    components: {
+        MuiButton: {
+            styleOverrides: {
+                root: {
+                    borderRadius: '8px',
+                    textTransform: 'none',
+                    fontFamily: 'IRANSansX',
+                    fontSize: '0.95rem',
+                    fontWeight: 500,
+                    padding: '8px 16px',
+                    boxShadow: 'none',
+                    '&:hover': {
+                        boxShadow: '0px 4px 8px rgba(0, 0, 0, 0.1)',
+                    },
+                },
+                containedPrimary: {
+                    background: `linear-gradient(135deg, ${EMPLOYER_LIGHT_BLUE} 0%, ${EMPLOYER_BLUE} 100%)`,
+                },
+                containedSecondary: {
+                    background: `linear-gradient(135deg, ${JOB_SEEKER_LIGHT_GREEN} 0%, ${JOB_SEEKER_GREEN} 100%)`,
+                },
+                containedSuccess: {
+                    background: JOB_SEEKER_GREEN,
+                    '&:hover': {
+                        background: JOB_SEEKER_GREEN,
+                    }
+                },
             },
-          },
         },
-      },
-    },
-    MuiAppBar: {
-      styleOverrides: {
-        root: {
-          boxShadow: '0px 2px 10px rgba(0, 0, 0, 0.05)',
+        MuiCard: {
+            styleOverrides: {
+                root: {
+                    borderRadius: '12px',
+                    boxShadow: '0px 4px 20px rgba(0, 0, 0, 0.05)',
+                    transition: 'transform 0.2s, box-shadow 0.2s',
+                    '&:hover': {
+                        transform: 'translateY(-5px)',
+                        boxShadow: '0px 8px 25px rgba(0, 0, 0, 0.1)',
+                    },
+                },
+            },
         },
-      },
-    },
-    MuiMenuItem: {
-      styleOverrides: {
-        root: {
-          fontFamily: 'IRANSansX',
+        MuiTextField: {
+            styleOverrides: {
+                root: {
+                    fontFamily: 'IRANSansX',
+                    '& .MuiInputLabel-root': {
+                        fontFamily: 'IRANSansX',
+                    },
+                    '& .MuiOutlinedInput-root': {
+                        fontFamily: 'IRANSansX',
+                        borderRadius: '8px',
+                        '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                            borderColor: EMPLOYER_BLUE,
+                            borderWidth: '2px',
+                        },
+                    },
+                },
+            },
         },
-      },
-    },
-    MuiTab: {
-      styleOverrides: {
-        root: {
-          fontFamily: 'IRANSansX',
-          textTransform: 'none',
-          fontWeight: 500,
+        MuiAppBar: {
+            styleOverrides: {
+                root: {
+                    boxShadow: '0px 2px 10px rgba(0, 0, 0, 0.05)',
+                },
+            },
         },
-      },
-    },
-    MuiChip: {
-      styleOverrides: {
-        root: {
-          fontFamily: 'IRANSansX',
+        MuiMenuItem: {
+            styleOverrides: {
+                root: {
+                    fontFamily: 'IRANSansX',
+                },
+            },
         },
-      },
+        MuiTab: {
+            styleOverrides: {
+                root: {
+                    fontFamily: 'IRANSansX',
+                    textTransform: 'none',
+                    fontWeight: 500,
+                },
+            },
+        },
+        MuiChip: {
+            styleOverrides: {
+                root: {
+                    fontFamily: 'IRANSansX',
+                },
+            },
+        },
     },
-  },
-  shape: {
-    borderRadius: 8,
-  },
+    shape: {
+        borderRadius: 8,
+    },
 });
 
 // Override کردن maxWidth برای Container با تم جدید
 const themeWithContainerOverrides = createTheme({
-  ...theme,
-  components: {
-    ...theme.components,
-    MuiContainer: {
-      styleOverrides: {
-        maxWidthSm: {
-          maxWidth: '600px',
+    ...theme,
+    components: {
+        ...theme.components,
+        MuiContainer: {
+            styleOverrides: {
+                maxWidthSm: {
+                    maxWidth: '600px',
+                },
+                maxWidthMd: {
+                    maxWidth: '960px',
+                },
+                maxWidthLg: {
+                    maxWidth: '1440px', // افزایش عرض از 1200px به 1440px
+                },
+                maxWidthXl: {
+                    maxWidth: '1440px',
+                },
+            },
         },
-        maxWidthMd: {
-          maxWidth: '960px',
-        },
-        maxWidthLg: {
-          maxWidth: '1440px', // افزایش عرض از 1200px به 1440px
-        },
-        maxWidthXl: {
-          maxWidth: '1440px',
-        },
-      },
     },
-  },
 });
 
 export default themeWithContainerOverrides; 
