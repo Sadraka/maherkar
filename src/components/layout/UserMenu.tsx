@@ -205,7 +205,10 @@ export default function UserMenu({ user, isLoggedIn }: UserMenuProps) {
                         {user?.name || 'کاربر ماهرکار'}
                     </Typography>
                     <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
-                        {user?.email || 'user@example.com'}
+                        {user?.email || 'بدون ایمیل'}
+                    </Typography>
+                    <Typography variant="caption" color="text.secondary" sx={{ mt: 0.5, display: 'block', fontSize: '0.7rem' }}>
+                        {user?.role === 'employer' ? 'کارفرما' : user?.role === 'candidate' ? 'کارجو' : 'کاربر'}
                     </Typography>
                 </Box>
 

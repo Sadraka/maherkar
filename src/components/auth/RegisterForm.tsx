@@ -34,6 +34,7 @@ import { EMPLOYER_THEME } from '@/constants/colors';
 import { ErrorHandler } from '@/components/common/ErrorHandler';
 import axios from 'axios';
 import authService from '@/lib/authService';
+import cookieService, { COOKIE_NAMES } from '@/lib/cookieService';
 import { toast } from 'react-hot-toast';
 
 // کامپوننت آیکون مراحل با اعداد فارسی
@@ -74,7 +75,7 @@ interface RegisterFormProps {
 }
 
 export default function RegisterForm({ onSuccess }: RegisterFormProps) {
-    const { register, verifyOtp, isAuthenticated, loading, checkPhoneExists } = useAuth();
+    const { register, verifyOtp, isAuthenticated, loading, checkPhoneExists, checkUsernameExists, checkEmailExists } = useAuth();
     const router = useRouter();
     const employerColors = EMPLOYER_THEME;
     const theme = useTheme();
@@ -152,414 +153,343 @@ export default function RegisterForm({ onSuccess }: RegisterFormProps) {
         setOtpError('');
     };
 
-    // اعتبارسنجی شماره تلفن (مرحله اول)
-    const validatePhoneForm = () => {
-        let isValid = true;
+    // اعتبارسنجی شماره تلفن در مرحله اول
+    const validatePhoneStep = (): boolean => {
         const errors: Record<string, string> = {};
 
-        // اعتبارسنجی شماره تلفن
-        if (!formData.phone) {
-            errors.phone = 'شماره تلفن الزامی است';
-            isValid = false;
-        } else if (!/^09\d{9}$/.test(formData.phone)) {
-            errors.phone = 'شماره تلفن باید با 09 شروع شده و 11 رقم باشد';
-            isValid = false;
+        // بررسی خالی نبودن شماره تلفن
+        if (!formData.phone.trim()) {
+            errors.phone = 'شماره همراه الزامی است';
+        }
+        // بررسی فرمت شماره تلفن (۱۱ رقم و شروع با ۰۹)
+        else if (!/^09\d{9}$/.test(formData.phone.trim())) {
+            errors.phone = 'شماره همراه باید ۱۱ رقم و با ۰۹ شروع شود';
         }
 
         setFormErrors(errors);
-        return isValid;
+        return Object.keys(errors).length === 0;
     };
 
-    // اعتبارسنجی کد تایید (مرحله دوم)
-    const validateOtpForm = () => {
-        let isValid = true;
-
-        if (!phoneOtpCode) {
-            setOtpError('وارد کردن کد تایید الزامی است');
-            isValid = false;
-        } else if (phoneOtpCode.length !== 6) {
-            setOtpError('کد تایید باید ۶ رقم باشد');
-            isValid = false;
+    // اعتبارسنجی کد OTP در مرحله دوم
+    const validateOtpStep = (): boolean => {
+        if (!phoneOtpCode.trim()) {
+            setOtpError('لطفاً کد تایید را وارد کنید');
+            return false;
         }
-
-        return isValid;
+        if (phoneOtpCode.trim().length !== 6 || !/^\d+$/.test(phoneOtpCode.trim())) {
+            setOtpError('کد تایید باید شامل ۶ رقم باشد');
+            return false;
+        }
+        return true;
     };
 
-    // اعتبارسنجی اطلاعات کاربر (مرحله سوم)
-    const validateUserForm = () => {
-        let isValid = true;
+    // اعتبارسنجی اطلاعات کاربر در مرحله سوم
+    const validateUserInfoStep = (): boolean => {
         const errors: Record<string, string> = {};
 
-        // اعتبارسنجی نام و نام خانوادگی
-        if (!formData.full_name) {
-            errors.full_name = 'وارد کردن نام و نام خانوادگی الزامی است';
-            isValid = false;
+        // بررسی نام و نام خانوادگی
+        if (!formData.full_name.trim()) {
+            errors.full_name = 'نام و نام خانوادگی الزامی است';
         }
 
-        // اعتبارسنجی نام کاربری
-        if (!formData.username) {
-            errors.username = 'وارد کردن نام کاربری الزامی است';
-            isValid = false;
-        } else if (formData.username.length < 3) {
+        // بررسی نام کاربری
+        if (!formData.username.trim()) {
+            errors.username = 'نام کاربری الزامی است';
+        } else if (formData.username.trim().length < 3) {
             errors.username = 'نام کاربری باید حداقل ۳ کاراکتر باشد';
-            isValid = false;
         }
 
-        // اعتبارسنجی ایمیل
-        if (!formData.email) {
-            errors.email = 'وارد کردن ایمیل الزامی است';
-            isValid = false;
-        } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
-            errors.email = 'فرمت ایمیل نامعتبر است';
-            isValid = false;
+        // بررسی ایمیل
+        if (!formData.email.trim()) {
+            errors.email = 'ایمیل الزامی است';
+        } else if (!/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}$/i.test(formData.email.trim())) {
+            errors.email = 'ایمیل نامعتبر است';
         }
 
-        // اعتبارسنجی رمز عبور
+        // بررسی رمز عبور
         if (!formData.password) {
-            errors.password = 'وارد کردن رمز عبور الزامی است';
-            isValid = false;
+            errors.password = 'رمز عبور الزامی است';
         } else if (formData.password.length < 8) {
             errors.password = 'رمز عبور باید حداقل ۸ کاراکتر باشد';
-            isValid = false;
         }
 
-        // اعتبارسنجی تکرار رمز عبور
+        // بررسی تکرار رمز عبور
         if (!formData.password_conf) {
             errors.password_conf = 'تکرار رمز عبور الزامی است';
-            isValid = false;
-        } else if (formData.password !== formData.password_conf) {
-            errors.password_conf = 'رمز عبور و تکرار آن مطابقت ندارند';
-            isValid = false;
+        } else if (formData.password_conf !== formData.password) {
+            errors.password_conf = 'تکرار رمز عبور با رمز عبور مطابقت ندارد';
         }
 
         setFormErrors(errors);
-        return isValid;
+        return Object.keys(errors).length === 0;
     };
 
-    // ارسال فرم مرحله اول (ارسال شماره تلفن و درخواست کد تایید)
+    // بررسی وجود شماره تلفن - فقط یک بار در مرحله اول
     const handlePhoneSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
-
-        // اعتبارسنجی فرم شماره تلفن
-        if (!validatePhoneForm()) {
-            return;
-        }
+        if (!validatePhoneStep()) return;
 
         setIsSubmitting(true);
 
         try {
-            // بررسی تکراری بودن شماره تلفن
-            try {
-                const phoneExists = await checkPhoneExists(formData.phone);
-
-                if (phoneExists) {
-                    setFormErrors(prev => ({
-                        ...prev,
-                        phone: 'این شماره تلفن قبلاً ثبت شده است'
-                    }));
-                    setIsSubmitting(false);
-                    return;
-                }
-
-                // اگر شماره تلفن تکراری نبود، درخواست ارسال کد تایید
-                // ارسال داده‌های موقت برای دریافت کد تایید
-                const tempData = {
-                    username: `temp_${formData.phone}`,
-                    email: `${formData.phone}@temp.com`,
-                    phone: formData.phone,
-                    password: "password12345678",
-                    password_conf: "password12345678",
-                    full_name: "کاربر موقت",
-                    user_type: "JS"
-                };
-
-                const token = await register(tempData);
-                setPhoneOtpToken(token);
-                setActiveStep(1); // رفتن به مرحله دوم (تایید شماره با کد)
-                toast.success('کد تایید برای شماره شما ارسال شد');
-
-            } catch (phoneError: any) {
-                // تلاش برای تشخیص خطای تکراری بودن شماره از طریق پاسخ API
-                if (phoneError.response?.data) {
-                    // بررسی خطای فیلد phone
-                    if (phoneError.response.data.phone) {
-                        const phoneErrorMsg = Array.isArray(phoneError.response.data.phone)
-                            ? phoneError.response.data.phone[0]
-                            : phoneError.response.data.phone;
-
-                        if (typeof phoneErrorMsg === 'string' && (
-                            phoneErrorMsg.includes('قبلا ثبت شده') ||
-                            phoneErrorMsg.includes('قبلاً ثبت شده') ||
-                            phoneErrorMsg.includes('already exists') ||
-                            phoneErrorMsg.includes('تکراری') ||
-                            phoneErrorMsg.includes('already registered') ||
-                            phoneErrorMsg.includes('already used') ||
-                            phoneErrorMsg.includes('ثبت شده') ||
-                            phoneErrorMsg.includes('وجود دارد') ||
-                            phoneErrorMsg.includes('exists')
-                        )) {
-                            setFormErrors(prev => ({
-                                ...prev,
-                                phone: 'این شماره تلفن قبلاً ثبت شده است'
-                            }));
-                            setIsSubmitting(false);
-                            return;
-                        }
-                    }
-
-                    // بررسی کل پاسخ خطا
-                    const errorResponseStr = JSON.stringify(phoneError.response.data).toLowerCase();
-                    if (errorResponseStr.includes('phone') && (
-                        errorResponseStr.includes('قبلا ثبت شده') ||
-                        errorResponseStr.includes('قبلاً ثبت شده') ||
-                        errorResponseStr.includes('already exists') ||
-                        errorResponseStr.includes('تکراری') ||
-                        errorResponseStr.includes('already registered') ||
-                        errorResponseStr.includes('already used') ||
-                        errorResponseStr.includes('ثبت شده') ||
-                        errorResponseStr.includes('وجود دارد') ||
-                        errorResponseStr.includes('exists')
-                    )) {
-                        setFormErrors(prev => ({
-                            ...prev,
-                            phone: 'این شماره تلفن قبلاً ثبت شده است'
-                        }));
-                        setIsSubmitting(false);
-                        return;
-                    }
-                }
-
-                // سایر خطاها
-                setFormErrors(prev => ({
-                    ...prev,
-                    phone: 'خطا در بررسی شماره تلفن. لطفاً دوباره تلاش کنید.'
-                }));
+            // بررسی وجود شماره تلفن بدون ثبت هیچ اطلاعاتی
+            const phoneExists = await checkPhoneExists(formData.phone);
+            if (phoneExists) {
+                setFormErrors({
+                    phone: 'این شماره تلفن قبلاً ثبت شده است'
+                });
+                setIsSubmitting(false);
+                return;
             }
+
+            console.log('شماره تلفن تایید شد، انتقال به مرحله اطلاعات کاربری');
+
+            // پیشرفت به مرحله اطلاعات کاربری
+            setActiveStep(1);
         } catch (error: any) {
             console.error('خطا در بررسی شماره تلفن:', error);
-            setFormErrors(prev => ({
-                ...prev,
-                phone: 'خطا در بررسی شماره تلفن. لطفاً دوباره تلاش کنید.'
-            }));
+
+            // نمایش خطای دریافتی از سرور
+            if (error.response?.data) {
+                const apiErrors: Record<string, string> = {};
+
+                Object.entries(error.response.data).forEach(([key, value]) => {
+                    const errorValue = Array.isArray(value) ? value[0] : value;
+                    if (typeof errorValue === 'string') {
+                        apiErrors[key] = errorValue;
+                    }
+                });
+
+                setFormErrors(apiErrors);
+            } else {
+                setFormErrors({
+                    phone: error.message || 'خطا در بررسی شماره تلفن. لطفاً دوباره تلاش کنید.'
+                });
+            }
         } finally {
             setIsSubmitting(false);
         }
     };
 
-    // ارسال فرم مرحله دوم (تایید کد OTP شماره تلفن)
-    const handleOtpSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    // تکمیل اطلاعات کاربر و انتقال به مرحله OTP
+    const handleUserInfoSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
-
-        if (!validateOtpForm()) {
-            return;
-        }
+        if (!validateUserInfoStep()) return;
 
         setIsSubmitting(true);
 
         try {
-            // در اینجا ما فقط صحت کد OTP را بررسی می‌کنیم
-            // ولی ثبت‌نام کامل را انجام نمی‌دهیم
-
-            try {
-                // درخواست تایید کد OTP به API
-                const response = await axios.post(
-                    `${process.env.NEXT_PUBLIC_AUTH_URL || 'http://localhost:8000/auth'}/register-otp-validate/${phoneOtpToken}/`,
-                    { code: phoneOtpCode }
-                );
-
-                // فقط اگر سرور کد 200 برگرداند به مرحله بعد می‌رویم
-                if (response.status >= 200 && response.status < 300) {
-                    // به مرحله بعدی می‌رویم بدون اینکه ثبت‌نام را کامل کنیم
-                    setActiveStep(2);
-
-                    // در اینجا متغیر formData را با اطلاعات شماره تلفن تنظیم می‌کنیم
-                    // تا در مرحله بعد در دسترس باشد
-                    setFormData(prev => ({
-                        ...prev,
-                        phone: formData.phone
-                    }));
-
-                    toast.success('شماره تلفن با موفقیت تایید شد');
-                } else {
-                    // اگر هر پاسخی غیر از موفقیت دریافت کنیم
-                    setOtpError('کد تایید نامعتبر است');
+            // بررسی تکراری بودن نام کاربری قبل از ارسال درخواست OTP
+            if (formData.username) {
+                const usernameExists = await checkUsernameExists(formData.username);
+                if (usernameExists) {
+                    setFormErrors({
+                        username: 'این نام کاربری قبلاً ثبت شده است، لطفاً نام کاربری دیگری انتخاب کنید'
+                    });
+                    setIsSubmitting(false);
+                    return;
                 }
-            } catch (validationError: any) {
-                console.error('خطا در بررسی کد تایید:', validationError);
+            }
 
-                // تنظیم پیام خطای مناسب بر اساس پاسخ سرور
-                if (validationError.response) {
-                    if (validationError.response.status === 400 || validationError.response.status === 401) {
-                        setOtpError('کد تایید نامعتبر است');
-                    } else if (validationError.response.status === 404) {
-                        setOtpError('کد تایید منقضی شده است');
-                    } else {
-                        setOtpError('خطا در تایید کد. لطفاً دوباره تلاش کنید');
-                    }
-
-                    // بررسی پیام خطای داخل پاسخ
-                    if (validationError.response.data?.Detail) {
-                        const detailError = validationError.response.data.Detail;
-                        if (typeof detailError === 'string') {
-                            if (detailError.toLowerCase().includes('invalid')) {
-                                setOtpError('کد تایید نامعتبر است');
-                            } else if (detailError.toLowerCase().includes('expired')) {
-                                setOtpError('کد تایید منقضی شده است');
-                            }
-                        } else if (typeof detailError === 'object' && detailError.Message) {
-                            const message = detailError.Message.toLowerCase();
-                            if (message.includes('invalid')) {
-                                setOtpError('کد تایید نامعتبر است');
-                            } else if (message.includes('expired')) {
-                                setOtpError('کد تایید منقضی شده است');
-                            }
-                        }
-                    }
-
-                    // بررسی خطای ویژه کد
-                    if (validationError.response.data?.code) {
-                        setOtpError('کد تایید نامعتبر است');
-                    }
-                } else {
-                    setOtpError('خطا در ارتباط با سرور. لطفاً بعداً دوباره تلاش کنید');
+            // بررسی تکراری بودن ایمیل قبل از ارسال درخواست OTP
+            if (formData.email) {
+                const emailExists = await checkEmailExists(formData.email);
+                if (emailExists) {
+                    setFormErrors({
+                        email: 'این ایمیل قبلاً ثبت شده است، لطفاً ایمیل دیگری وارد کنید'
+                    });
+                    setIsSubmitting(false);
+                    return;
                 }
+            }
+
+            console.log('اطلاعات کاربر تایید شد، انتقال به مرحله دریافت کد OTP...');
+
+            // ارسال اطلاعات کامل کاربر و درخواست OTP
+            const otpToken = await register({
+                ...formData,
+                register_stage: 'request_otp'
+            });
+
+            console.log('کد OTP دریافت شد، توکن:', otpToken);
+
+            // ذخیره توکن OTP برای استفاده در مرحله بعد
+            setPhoneOtpToken(otpToken);
+
+            // پیشرفت به مرحله تایید OTP
+            setActiveStep(2);
+            toast.success('کد تایید برای شماره شما ارسال شد');
+        } catch (error: any) {
+            console.error('خطا در ارسال درخواست OTP:', error);
+
+            // نمایش خطاهای دریافتی از سرور
+            if (error.response?.data) {
+                const apiErrors: Record<string, string> = {};
+
+                Object.entries(error.response.data).forEach(([key, value]) => {
+                    const errorValue = Array.isArray(value) ? value[0] : value;
+                    if (typeof errorValue === 'string') {
+                        apiErrors[key] = errorValue;
+                    }
+                });
+
+                setFormErrors(apiErrors);
+            } else {
+                setFormErrors({
+                    general: error.message || 'خطا در ارسال درخواست OTP. لطفاً دوباره تلاش کنید.'
+                });
+            }
+        } finally {
+            setIsSubmitting(false);
+        }
+    };
+
+    // تایید کد OTP و تکمیل ثبت‌نام
+    const handleOtpSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+        e.preventDefault();
+        if (!validateOtpStep()) return;
+
+        setIsSubmitting(true);
+
+        try {
+            console.log('تایید کد OTP و تکمیل ثبت‌نام با توکن:', phoneOtpToken);
+
+            // ارسال کد OTP برای تایید نهایی و تکمیل ثبت‌نام
+            const verificationResponse = await verifyOtp(phoneOtpToken, phoneOtpCode);
+
+            console.log('ثبت‌نام با موفقیت تکمیل شد:', verificationResponse);
+
+            // بررسی نوع کاربر انتخاب شده و نوع کاربر ایجاد شده
+            if (formData.user_type === 'EM' && verificationResponse.Detail?.User?.user_type === 'JS') {
+                // اگر کاربر نوع کارفرما را انتخاب کرده اما به عنوان کارجو ثبت شده است
+                toast.success('ثبت‌نام با موفقیت انجام شد. شما اکنون به صفحه تغییر نوع کاربری هدایت می‌شوید.');
+
+                // هدایت کاربر به صفحه تغییر نوع کاربری
+                if (onSuccess) {
+                    onSuccess();
+                } else {
+                    setTimeout(() => {
+                        router.push('/change-user-type');
+                    }, 1500);
+                }
+                return;
+            } else {
+                toast.success('ثبت‌نام با موفقیت انجام شد، اکنون می‌توانید از امکانات سایت استفاده کنید');
+            }
+
+            // هدایت کاربر به صفحه اصلی یا فراخوانی تابع onSuccess
+            if (onSuccess) {
+                onSuccess();
+            } else {
+                router.push('/');
             }
         } catch (error: any) {
             console.error('خطا در تایید کد:', error);
 
-            // تنظیم پیام خطای فارسی برای تمام حالت‌ها
-            if (error.response?.data?.code) {
-                setOtpError('کد تایید نامعتبر است');
-            } else if (error.response?.data?.Detail) {
-                const detailError = error.response.data.Detail;
-                if (typeof detailError === 'string') {
-                    // تبدیل پیام خطای انگلیسی احتمالی به فارسی
-                    if (detailError.toLowerCase().includes('invalid')) {
-                        setOtpError('کد تایید نامعتبر است');
-                    } else if (detailError.toLowerCase().includes('expired')) {
-                        setOtpError('کد تایید منقضی شده است');
-                    } else {
-                        setOtpError('خطا در تایید کد: ' + detailError);
+            // بررسی خطای نام کاربری تکراری و برگشت به مرحله اطلاعات کاربری
+            if (error.message && error.message.includes('نام کاربری انتخابی شما قبلاً در سیستم ثبت شده است')) {
+                setFormErrors({
+                    username: 'نام کاربری انتخابی شما قبلاً در سیستم ثبت شده است'
+                });
+                toast.error('نام کاربری تکراری است. لطفاً نام کاربری دیگری انتخاب کنید');
+
+                // برگشت به مرحله وارد کردن اطلاعات کاربری
+                setActiveStep(1);
+                setIsSubmitting(false);
+                return;
+            }
+            // بررسی خطای ایمیل تکراری و برگشت به مرحله اطلاعات کاربری
+            else if (error.message && error.message.includes('ایمیل انتخابی شما قبلاً در سیستم ثبت شده است')) {
+                setFormErrors({
+                    email: 'ایمیل انتخابی شما قبلاً در سیستم ثبت شده است'
+                });
+                toast.error('ایمیل تکراری است. لطفاً ایمیل دیگری وارد کنید');
+
+                // برگشت به مرحله وارد کردن اطلاعات کاربری
+                setActiveStep(1);
+                setIsSubmitting(false);
+                return;
+            }
+            // بررسی خطای شماره تلفن تکراری و برگشت به مرحله شماره تلفن
+            else if (error.message && error.message.includes('شماره تلفن انتخابی شما قبلاً در سیستم ثبت شده است')) {
+                setFormErrors({
+                    phone: 'شماره تلفن انتخابی شما قبلاً در سیستم ثبت شده است'
+                });
+                toast.error('شماره تلفن تکراری است. لطفاً شماره تلفن دیگری وارد کنید');
+
+                // برگشت به مرحله وارد کردن شماره تلفن
+                setActiveStep(0);
+                setIsSubmitting(false);
+                return;
+            }
+            // بررسی سایر خطاهای تکراری و برگشت به مرحله مناسب
+            else if (error.message && error.message.includes('اطلاعات وارد شده تکراری است')) {
+                setFormErrors({
+                    general: 'اطلاعات وارد شده تکراری است. لطفاً اطلاعات خود را بررسی کنید'
+                });
+                toast.error('اطلاعات وارد شده تکراری است. لطفاً اطلاعات خود را بررسی کنید');
+
+                // برگشت به مرحله وارد کردن اطلاعات کاربری
+                setActiveStep(1);
+                setIsSubmitting(false);
+                return;
+            }
+
+            // نمایش خطای کد تایید به صورت مستقیم
+            if (error.message) {
+                setOtpError(error.message);
+            } else if (error.response?.data) {
+                // بررسی ساختارهای مختلف پاسخ خطا
+                if (error.response.data.Detail) {
+                    if (typeof error.response.data.Detail === 'string') {
+                        setOtpError(error.response.data.Detail);
+                    } else if (typeof error.response.data.Detail === 'object' && error.response.data.Detail.Message) {
+                        setOtpError(error.response.data.Detail.Message);
                     }
-                } else if (typeof detailError === 'object' && detailError.Message) {
-                    // تبدیل پیام خطای انگلیسی احتمالی به فارسی
-                    const message = detailError.Message.toLowerCase();
-                    if (message.includes('invalid')) {
-                        setOtpError('کد تایید نامعتبر است');
-                    } else if (message.includes('expired')) {
-                        setOtpError('کد تایید منقضی شده است');
-                    } else {
-                        setOtpError('خطا در تایید کد: ' + detailError.Message);
-                    }
+                } else if (error.response.data.code) {
+                    setOtpError(Array.isArray(error.response.data.code) ? error.response.data.code[0] : error.response.data.code);
+                } else {
+                    setOtpError('کد تایید نامعتبر است. لطفاً کد صحیح را وارد کنید یا درخواست ارسال مجدد کد را بزنید.');
                 }
             } else {
-                setOtpError('کد تایید نامعتبر است یا منقضی شده است');
+                setOtpError('خطا در تایید کد. لطفاً دوباره تلاش کنید یا با پشتیبانی تماس بگیرید.');
             }
         } finally {
             setIsSubmitting(false);
         }
     };
 
-    // ارسال فرم مرحله سوم (تکمیل اطلاعات کاربر و ثبت‌نام نهایی)
-    const handleUserInfoSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-        e.preventDefault();
-
-        // اعتبارسنجی فرم
-        if (!validateUserForm()) {
-            return;
-        }
-
-        setIsSubmitting(true);
-
-        try {
-            // ارسال اطلاعات کاربر به API برای ثبت‌نام نهایی
-            await register(formData);
-
-            // در صورت موفقیت، پیام نمایش داده می‌شود
-            toast.success('ثبت‌نام با موفقیت انجام شد');
-
-            // کاربر به صفحه اصلی هدایت می‌شود (از طریق useEffect)
-        } catch (error: any) {
-            console.error('خطا در ثبت‌نام:', error);
-            // به جای نمایش toast خطا، خطاها را در فرم نمایش می‌دهیم
-            if (error.response?.data) {
-                const apiErrors = error.response.data;
-                let updatedErrors = { ...formErrors };
-
-                // بررسی خطاهای مربوط به هر فیلد
-                Object.keys(formData).forEach(field => {
-                    if (apiErrors[field]) {
-                        const fieldError = Array.isArray(apiErrors[field])
-                            ? apiErrors[field][0]
-                            : apiErrors[field];
-                        updatedErrors[field] = fieldError;
-                    }
-                });
-
-                // بررسی خطاهای عمومی
-                if (apiErrors.non_field_errors || apiErrors.__all__ || apiErrors.Detail) {
-                    const generalError = apiErrors.non_field_errors || apiErrors.__all__ || apiErrors.Detail;
-                    if (typeof generalError === 'string') {
-                        // نمایش خطای عمومی در یکی از فیلدها (مثلاً نام کاربری)
-                        updatedErrors.username = generalError;
-                    } else if (Array.isArray(generalError)) {
-                        updatedErrors.username = generalError[0];
-                    } else if (typeof generalError === 'object' && generalError.Message) {
-                        updatedErrors.username = generalError.Message;
-                    }
-                }
-
-                setFormErrors(updatedErrors);
-            } else if (error.message) {
-                // اگر فقط خطای متنی داشتیم
-                setFormErrors(prev => ({
-                    ...prev,
-                    username: error.message
-                }));
-            }
-        } finally {
-            setIsSubmitting(false);
-        }
-    };
-
-    // ارسال مجدد کد OTP
+    // ارسال مجدد کد تایید
     const handleResendOtp = async () => {
         setIsSubmitting(true);
 
         try {
-            // ارسال مجدد درخواست کد تایید با همان شماره تلفن
-            const tempData = {
-                username: `temp_${formData.phone}`,
-                email: `${formData.phone}@temp.com`,
-                phone: formData.phone,
-                password: "password12345678",
-                password_conf: "password12345678",
-                full_name: "کاربر موقت",
-                user_type: "JS"
-            };
+            console.log('ارسال مجدد درخواست کد تایید');
 
-            const token = await register(tempData);
-            setPhoneOtpToken(token);
+            // ارسال مجدد درخواست کد با همه اطلاعات کاربر جمع‌آوری شده
+            const otpToken = await register({
+                ...formData,
+                register_stage: 'request_otp'
+            });
+
+            console.log('توکن OTP جدید دریافت شد:', otpToken);
+
+            // ذخیره توکن جدید
+            setPhoneOtpToken(otpToken);
 
             // پاک کردن کد قبلی
             setPhoneOtpCode('');
             setOtpError('');
+
             toast.success('کد تایید جدید ارسال شد');
         } catch (error: any) {
-            // خطاهای ارسال مجدد کد را در فیلد OTP نمایش می‌دهیم
+            console.error('خطا در ارسال مجدد کد تایید:', error);
+
+            // نمایش خطاهای دریافتی از سرور
             if (error.response?.data) {
-                if (error.response.data.Detail) {
-                    const detailError = error.response.data.Detail;
-                    if (typeof detailError === 'string') {
-                        setOtpError(detailError);
-                    } else if (typeof detailError === 'object' && detailError.Message) {
-                        setOtpError(detailError.Message);
-                    }
-                } else {
-                    setOtpError('خطا در ارسال مجدد کد تایید');
-                }
+                setOtpError('خطا در ارسال مجدد کد تایید: ' + JSON.stringify(error.response.data));
             } else {
-                setOtpError('خطا در ارسال مجدد کد تایید');
+                setOtpError(error.message || 'خطا در ارسال مجدد کد تایید');
             }
         } finally {
             setIsSubmitting(false);
@@ -647,6 +577,9 @@ export default function RegisterForm({ onSuccess }: RegisterFormProps) {
                     <Typography variant={isMobile ? "body2" : "body1"} gutterBottom>
                         کد تایید به شماره {formData.phone} ارسال شد.
                     </Typography>
+                    <Typography variant={isMobile ? "body2" : "body1"} color="text.secondary" gutterBottom>
+                        لطفاً کد دریافتی را وارد کنید. با تایید این کد، ثبت‌نام شما تکمیل خواهد شد.
+                    </Typography>
 
                     <Box>
                         <TextField
@@ -673,7 +606,7 @@ export default function RegisterForm({ onSuccess }: RegisterFormProps) {
                     }}>
                         <Button
                             variant="outlined"
-                            onClick={() => setActiveStep(0)}
+                            onClick={() => setActiveStep(1)}
                             disabled={isSubmitting}
                             fullWidth={isMobile}
                             size={isMobile ? "medium" : "large"}
@@ -708,7 +641,7 @@ export default function RegisterForm({ onSuccess }: RegisterFormProps) {
                                 },
                             }}
                         >
-                            {isSubmitting ? <CircularProgress size={isMobile ? 20 : 24} color="inherit" /> : 'تایید شماره تلفن'}
+                            {isSubmitting ? <CircularProgress size={isMobile ? 20 : 24} color="inherit" /> : 'تایید کد'}
                         </Button>
                     </Box>
 
@@ -979,16 +912,16 @@ export default function RegisterForm({ onSuccess }: RegisterFormProps) {
                     <StepLabel StepIconComponent={PersianStepIcon}>{isMobile ? "شماره" : "شماره همراه"}</StepLabel>
                 </Step>
                 <Step>
-                    <StepLabel StepIconComponent={PersianStepIcon}>{isMobile ? "تایید" : "تایید شماره"}</StepLabel>
+                    <StepLabel StepIconComponent={PersianStepIcon}>{isMobile ? "اطلاعات" : "اطلاعات کاربری"}</StepLabel>
                 </Step>
                 <Step>
-                    <StepLabel StepIconComponent={PersianStepIcon}>{isMobile ? "اطلاعات" : "اطلاعات کاربری"}</StepLabel>
+                    <StepLabel StepIconComponent={PersianStepIcon}>{isMobile ? "تایید" : "تایید شماره"}</StepLabel>
                 </Step>
             </Stepper>
 
             {activeStep === 0 && renderPhoneForm()}
-            {activeStep === 1 && renderOtpForm()}
-            {activeStep === 2 && renderUserInfoForm()}
+            {activeStep === 1 && renderUserInfoForm()}
+            {activeStep === 2 && renderOtpForm()}
         </Paper>
     );
 } 

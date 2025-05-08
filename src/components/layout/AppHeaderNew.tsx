@@ -448,8 +448,8 @@ export default function AppHeaderNew() {
               <UserMenu
                 isLoggedIn={isAuthenticated}
                 user={user ? {
-                  name: user.full_name,
-                  email: user.email,
+                  name: user.full_name || user.username,
+                  email: user.email || user.phone,
                   role: user.user_type === 'JS' ? 'candidate' : 'employer'
                 } : undefined}
               />
