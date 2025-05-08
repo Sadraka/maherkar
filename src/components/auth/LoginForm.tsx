@@ -16,23 +16,27 @@ import {
 import { useAuth } from '@/contexts/AuthContext';
 import { useRouter } from 'next/navigation';
 import PhoneIcon from '@mui/icons-material/Phone';
-import LockIcon from '@mui/icons-material/Lock';
+import VerifiedUserIcon from '@mui/icons-material/VerifiedUser';
 import Link from 'next/link';
 import { EMPLOYER_THEME } from '@/constants/colors';
 import { ErrorHandler } from '@/components/common/ErrorHandler';
+import toast from 'react-hot-toast';
 
 interface LoginFormProps {
     onSuccess?: () => void;
 }
 
 export default function LoginForm({ onSuccess }: LoginFormProps) {
-    const { login, loading } = useAuth();
+    const { loginOtp, validateLoginOtp, loading } = useAuth();
     const router = useRouter();
     const [phone, setPhone] = useState('');
-    const [password, setPassword] = useState('');
+    const [otpCode, setOtpCode] = useState('');
+    const [token, setToken] = useState('');
+    const [activeStep, setActiveStep] = useState(0);
     const [formErrors, setFormErrors] = useState<{
         phone?: string;
-        password?: string;
+        otp?: string;
+        non_field_errors?: string;
     }>({});
 
     // استفاده از هوک تم و وضعیت دستگاه
@@ -48,16 +52,16 @@ export default function LoginForm({ onSuccess }: LoginFormProps) {
         }
     };
 
-    const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        setPassword(e.target.value);
-        if (formErrors.password) {
-            setFormErrors(prev => ({ ...prev, password: undefined }));
+    const handleOtpChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        setOtpCode(e.target.value);
+        if (formErrors.otp) {
+            setFormErrors(prev => ({ ...prev, otp: undefined }));
         }
     };
 
-    // اعتبارسنجی فرم
-    const validateForm = () => {
-        const errors: { phone?: string; password?: string } = {};
+    // اعتبارسنجی فرم شماره تلفن
+    const validatePhoneForm = () => {
+        const errors: { phone?: string } = {};
         let isValid = true;
 
         // بررسی شماره تلفن
@@ -69,12 +73,21 @@ export default function LoginForm({ onSuccess }: LoginFormProps) {
             isValid = false;
         }
 
-        // بررسی رمز عبور
-        if (!password) {
-            errors.password = 'رمز عبور الزامی است';
+        setFormErrors(errors);
+        return isValid;
+    };
+
+    // اعتبارسنجی فرم کد OTP
+    const validateOtpForm = () => {
+        const errors: { otp?: string } = {};
+        let isValid = true;
+
+        // بررسی کد OTP
+        if (!otpCode) {
+            errors.otp = 'کد تأیید الزامی است';
             isValid = false;
-        } else if (password.length < 8) {
-            errors.password = 'رمز عبور باید حداقل 8 کاراکتر باشد';
+        } else if (!/^\d{6}$/.test(otpCode)) {
+            errors.otp = 'کد تأیید باید 6 رقم باشد';
             isValid = false;
         }
 
@@ -82,34 +95,159 @@ export default function LoginForm({ onSuccess }: LoginFormProps) {
         return isValid;
     };
 
-    // تابع ارسال فرم
-    const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    // تابع ارسال فرم شماره تلفن
+    const handlePhoneSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
 
-        if (!validateForm()) {
+        if (!validatePhoneForm()) {
             return;
         }
 
         try {
-            await login({ phone, password });
-            if (onSuccess) {
-                onSuccess();
-            }
-            // در صورت موفقیت، کاربر به صفحه اصلی هدایت می‌شود (در تابع login)
-        } catch (error) {
-            // خطا قبلاً در AuthContext نمایش داده شده است
-            // بنابراین نیازی به فراخوانی دوباره ErrorHandler.showError نیست
+            const receivedToken = await loginOtp(phone);
+            setToken(receivedToken);
+            toast.success('کد تأیید به شماره تلفن شما ارسال شد');
+            setActiveStep(1);
+        } catch (error: any) {
+            console.error('خطا در ارسال کد تایید برای ورود:', error);
 
-            // استخراج خطاهای فیلدهای خاص (شماره تلفن و رمز عبور)
-            const phoneError = ErrorHandler.getFieldError(error, 'phone');
-            const passwordError = ErrorHandler.getFieldError(error, 'password');
+            // مدیریت بهتر خطاها بر اساس ساختار پاسخ سرور
+            if (error.response?.data) {
+                const apiErrors: Record<string, string> = {};
 
-            if (phoneError || passwordError) {
+                // خطاهای عمومی 
+                if (error.response.data.non_field_errors) {
+                    apiErrors.non_field_errors = Array.isArray(error.response.data.non_field_errors)
+                        ? error.response.data.non_field_errors[0]
+                        : error.response.data.non_field_errors;
+                }
+
+                // خطاهای مربوط به شماره تلفن
+                if (error.response.data.phone) {
+                    apiErrors.phone = Array.isArray(error.response.data.phone)
+                        ? error.response.data.phone[0]
+                        : error.response.data.phone;
+                }
+
+                // خطاهای ساختار Detail
+                if (error.response.data.Detail) {
+                    if (typeof error.response.data.Detail === 'string') {
+                        apiErrors.non_field_errors = error.response.data.Detail;
+                    } else if (typeof error.response.data.Detail === 'object') {
+                        if (error.response.data.Detail.phone) {
+                            apiErrors.phone = Array.isArray(error.response.data.Detail.phone)
+                                ? error.response.data.Detail.phone[0]
+                                : error.response.data.Detail.phone;
+                        }
+                    }
+                }
+
+                // اگر حداقل یک خطا پیدا شده باشد
+                if (Object.keys(apiErrors).length > 0) {
+                    setFormErrors(apiErrors);
+                } else {
+                    // اگر خطایی از سرور دریافت نشد اما پاسخ خطا داشتیم
+                    setFormErrors({
+                        non_field_errors: 'خطا در ارسال درخواست. لطفاً دوباره تلاش کنید.'
+                    });
+                }
+            } else if (error.message) {
+                // اگر خطا پیام داشته باشد
                 setFormErrors({
-                    phone: phoneError,
-                    password: passwordError
+                    non_field_errors: error.message
+                });
+            } else {
+                // خطای ناشناخته
+                setFormErrors({
+                    non_field_errors: 'خطا در ارسال درخواست. لطفاً دوباره تلاش کنید.'
                 });
             }
+        }
+    };
+
+    // تابع ارسال فرم کد OTP
+    const handleOtpSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+        e.preventDefault();
+
+        if (!validateOtpForm()) {
+            return;
+        }
+
+        try {
+            await validateLoginOtp(token, otpCode);
+            toast.success('ورود با موفقیت انجام شد');
+            if (onSuccess) {
+                onSuccess();
+            } else {
+                router.push('/');
+            }
+        } catch (error: any) {
+            console.error('خطا در تایید کد OTP:', error);
+
+            // مدیریت بهتر خطاها بر اساس ساختار پاسخ سرور
+            if (error.response?.data) {
+                const apiErrors: Record<string, string> = {};
+
+                // خطاهای مربوط به کد
+                if (error.response.data.code) {
+                    apiErrors.otp = Array.isArray(error.response.data.code)
+                        ? error.response.data.code[0]
+                        : error.response.data.code;
+                }
+
+                // خطاهای ساختار Detail
+                if (error.response.data.Detail) {
+                    if (typeof error.response.data.Detail === 'string') {
+                        apiErrors.non_field_errors = error.response.data.Detail;
+                    } else if (typeof error.response.data.Detail === 'object') {
+                        if (error.response.data.Detail.code) {
+                            apiErrors.otp = Array.isArray(error.response.data.Detail.code)
+                                ? error.response.data.Detail.code[0]
+                                : error.response.data.Detail.code;
+                        }
+                    }
+                }
+
+                // خطاهای عمومی 
+                if (error.response.data.non_field_errors) {
+                    apiErrors.non_field_errors = Array.isArray(error.response.data.non_field_errors)
+                        ? error.response.data.non_field_errors[0]
+                        : error.response.data.non_field_errors;
+                }
+
+                // اگر حداقل یک خطا پیدا شده باشد
+                if (Object.keys(apiErrors).length > 0) {
+                    setFormErrors(apiErrors);
+                } else {
+                    // اگر خطایی از سرور دریافت نشد اما پاسخ خطا داشتیم
+                    setFormErrors({
+                        non_field_errors: 'کد تایید نامعتبر است. لطفاً دوباره تلاش کنید.'
+                    });
+                }
+            } else if (error.message) {
+                // اگر خطا پیام داشته باشد
+                setFormErrors({
+                    otp: error.message
+                });
+            } else {
+                // خطای ناشناخته
+                setFormErrors({
+                    non_field_errors: 'خطا در تایید کد. لطفاً دوباره تلاش کنید.'
+                });
+            }
+        }
+    };
+
+    // درخواست مجدد کد تایید
+    const handleResendOtp = async () => {
+        try {
+            const receivedToken = await loginOtp(phone);
+            setToken(receivedToken);
+            setOtpCode('');
+            toast.success('کد تأیید جدید به شماره تلفن شما ارسال شد');
+        } catch (error: any) {
+            console.error('خطا در ارسال مجدد کد تایید:', error);
+            toast.error('مشکل در ارسال مجدد کد تأیید. لطفاً دوباره تلاش کنید.');
         }
     };
 
@@ -123,7 +261,7 @@ export default function LoginForm({ onSuccess }: LoginFormProps) {
                 px: { xs: 1.5, sm: 3, md: 5 },
                 borderRadius: { xs: 1, sm: 2 },
                 border: `1px solid ${employerColors.bgLight}`,
-                width: { xs: '100%', sm: '450px', md: '500px' },
+                width: { xs: '100%', sm: '100%', md: '600px' },
                 maxWidth: '100%',
                 mx: 'auto',
                 mb: { xs: 2, md: 4 }
@@ -138,122 +276,180 @@ export default function LoginForm({ onSuccess }: LoginFormProps) {
                 color={employerColors.primary}
                 sx={{
                     mb: { xs: 2, sm: 3, md: 4 },
-                    fontSize: { xs: '1.5rem', sm: '1.75rem', md: '2rem' }
+                    fontSize: { xs: '1.4rem', sm: '1.75rem', md: '2rem' }
                 }}
             >
                 ورود به ماهرکار
             </Typography>
 
-            <form onSubmit={handleSubmit}>
-                <Box sx={{
-                    display: 'flex',
-                    flexDirection: 'column',
-                    gap: { xs: 2, sm: 3 }
-                }}>
-                    <Box>
-                        <TextField
-                            fullWidth
-                            id="phone"
-                            label="شماره تلفن"
-                            variant="outlined"
-                            value={phone}
-                            onChange={handlePhoneChange}
-                            error={!!formErrors.phone}
-                            helperText={formErrors.phone}
-                            InputProps={{
-                                startAdornment: (
-                                    <InputAdornment position="start">
-                                        <PhoneIcon />
-                                    </InputAdornment>
-                                ),
-                            }}
-                            placeholder="۰۹۱۲۳۴۵۶۷۸۹"
-                            inputProps={{ dir: "ltr" }}
-                            size={isMobile ? "small" : "medium"}
-                        />
-                    </Box>
+            {/* نمایش خطاهای عمومی */}
+            {formErrors.non_field_errors && (
+                <Typography
+                    color="error"
+                    sx={{ mb: 2, textAlign: 'center', fontWeight: 'medium' }}
+                >
+                    {formErrors.non_field_errors}
+                </Typography>
+            )}
 
-                    <Box>
-                        <TextField
-                            fullWidth
-                            id="password"
-                            label="رمز عبور"
-                            type="password"
-                            variant="outlined"
-                            value={password}
-                            onChange={handlePasswordChange}
-                            error={!!formErrors.password}
-                            helperText={formErrors.password}
-                            InputProps={{
-                                startAdornment: (
-                                    <InputAdornment position="start">
-                                        <LockIcon />
-                                    </InputAdornment>
-                                ),
-                            }}
-                            inputProps={{ dir: "ltr" }}
-                            size={isMobile ? "small" : "medium"}
-                        />
-                        <Box sx={{ textAlign: 'left', mt: 1 }}>
-                            <MuiLink
-                                component={Link}
-                                href="/forgot-password"
-                                underline="hover"
+            {activeStep === 0 ? (
+                <form onSubmit={handlePhoneSubmit}>
+                    <Box sx={{
+                        display: 'flex',
+                        flexDirection: 'column',
+                        gap: { xs: 2, sm: 3 }
+                    }}>
+                        <Box>
+                            <TextField
+                                fullWidth
+                                id="phone"
+                                label="شماره تلفن"
+                                variant="outlined"
+                                value={phone}
+                                onChange={handlePhoneChange}
+                                error={!!formErrors.phone}
+                                helperText={formErrors.phone}
+                                InputProps={{
+                                    startAdornment: (
+                                        <InputAdornment position="start">
+                                            <PhoneIcon />
+                                        </InputAdornment>
+                                    ),
+                                }}
+                                placeholder="۰۹۱۲۳۴۵۶۷۸۹"
+                                inputProps={{ dir: "ltr" }}
+                                size={isMobile ? "small" : "medium"}
+                                autoFocus
+                            />
+                        </Box>
+
+                        <Box>
+                            <Button
+                                type="submit"
+                                fullWidth
+                                variant="contained"
+                                size={isMobile ? "medium" : "large"}
+                                disabled={loading}
                                 sx={{
-                                    fontSize: { xs: '0.75rem', sm: '0.875rem' },
-                                    color: employerColors.primary
+                                    mt: { xs: 1, sm: 2 },
+                                    py: { xs: 1, sm: 1.5 },
+                                    backgroundColor: employerColors.primary,
+                                    '&:hover': {
+                                        backgroundColor: employerColors.dark,
+                                    },
+                                    borderRadius: { xs: 1, sm: 2 },
+                                    fontSize: { xs: '0.9rem', sm: '1rem' }
                                 }}
                             >
-                                رمز عبور خود را فراموش کرده‌اید؟
-                            </MuiLink>
+                                {loading ? (
+                                    <CircularProgress size={isMobile ? 20 : 24} color="inherit" />
+                                ) : (
+                                    'دریافت کد تأیید'
+                                )}
+                            </Button>
                         </Box>
                     </Box>
+                </form>
+            ) : (
+                <form onSubmit={handleOtpSubmit}>
+                    <Box sx={{
+                        display: 'flex',
+                        flexDirection: 'column',
+                        gap: { xs: 2, sm: 3 }
+                    }}>
+                        <Typography variant={isMobile ? "body2" : "body1"} gutterBottom>
+                            کد تایید به شماره {phone} ارسال شد.
+                        </Typography>
 
-                    <Box>
-                        <Button
-                            type="submit"
-                            fullWidth
-                            variant="contained"
-                            size={isMobile ? "medium" : "large"}
-                            disabled={loading}
-                            sx={{
-                                mt: { xs: 1, sm: 2 },
-                                py: { xs: 1, sm: 1.5 },
-                                backgroundColor: employerColors.primary,
-                                '&:hover': {
-                                    backgroundColor: employerColors.dark,
-                                },
-                                borderRadius: { xs: 1, sm: 2 },
-                                fontSize: { xs: '0.9rem', sm: '1rem' }
-                            }}
-                        >
-                            {loading ? (
-                                <CircularProgress size={isMobile ? 20 : 24} color="inherit" />
-                            ) : (
-                                'ورود'
-                            )}
-                        </Button>
-                    </Box>
+                        <Box>
+                            <TextField
+                                fullWidth
+                                id="otp"
+                                label="کد تأیید"
+                                variant="outlined"
+                                value={otpCode}
+                                onChange={handleOtpChange}
+                                error={!!formErrors.otp}
+                                helperText={formErrors.otp}
+                                InputProps={{
+                                    startAdornment: (
+                                        <InputAdornment position="start">
+                                            <VerifiedUserIcon />
+                                        </InputAdornment>
+                                    ),
+                                }}
+                                placeholder="کد 6 رقمی"
+                                inputProps={{ dir: "ltr", maxLength: 6 }}
+                                size={isMobile ? "small" : "medium"}
+                                autoFocus
+                            />
+                        </Box>
 
-                    <Box sx={{ mt: { xs: 1, sm: 2 }, textAlign: 'center' }}>
-                        <Typography variant={isMobile ? "body2" : "body1"}>
-                            حساب کاربری ندارید؟{' '}
-                            <MuiLink
-                                component={Link}
-                                href="/register"
-                                underline="hover"
+                        <Box>
+                            <Button
+                                type="submit"
+                                fullWidth
+                                variant="contained"
+                                size={isMobile ? "medium" : "large"}
+                                disabled={loading}
                                 sx={{
-                                    fontWeight: 'bold',
-                                    color: employerColors.primary,
-                                    fontSize: { xs: '0.85rem', sm: 'inherit' }
+                                    mt: { xs: 1, sm: 2 },
+                                    py: { xs: 1, sm: 1.5 },
+                                    backgroundColor: employerColors.primary,
+                                    '&:hover': {
+                                        backgroundColor: employerColors.dark,
+                                    },
+                                    borderRadius: { xs: 1, sm: 2 },
+                                    fontSize: { xs: '0.9rem', sm: '1rem' }
                                 }}
                             >
-                                ثبت‌نام کنید
-                            </MuiLink>
-                        </Typography>
+                                {loading ? (
+                                    <CircularProgress size={isMobile ? 20 : 24} color="inherit" />
+                                ) : (
+                                    'ورود'
+                                )}
+                            </Button>
+                        </Box>
+
+                        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mt: 1 }}>
+                            <Button
+                                variant="text"
+                                onClick={() => setActiveStep(0)}
+                                sx={{ fontSize: { xs: '0.75rem', sm: '0.875rem' } }}
+                            >
+                                بازگشت
+                            </Button>
+
+                            <Button
+                                variant="text"
+                                onClick={handleResendOtp}
+                                disabled={loading}
+                                sx={{ fontSize: { xs: '0.75rem', sm: '0.875rem' } }}
+                            >
+                                ارسال مجدد کد
+                            </Button>
+                        </Box>
                     </Box>
-                </Box>
-            </form>
+                </form>
+            )}
+
+            <Box sx={{ mt: { xs: 3, sm: 4 }, textAlign: 'center' }}>
+                <Typography variant={isMobile ? "body2" : "body1"}>
+                    حساب کاربری ندارید؟{' '}
+                    <MuiLink
+                        component={Link}
+                        href="/register"
+                        underline="hover"
+                        sx={{
+                            fontWeight: 'bold',
+                            color: employerColors.primary,
+                            fontSize: { xs: '0.85rem', sm: 'inherit' }
+                        }}
+                    >
+                        ثبت‌نام کنید
+                    </MuiLink>
+                </Typography>
+            </Box>
         </Paper>
     );
 } 

@@ -10,18 +10,12 @@ import cookieService, { COOKIE_NAMES } from '../lib/cookieService';
 // interface ها برای تایپ‌های مورد نیاز
 export interface LoginCredentials {
     phone: string;
-    password: string;
 }
 
 export interface RegisterData {
-    username?: string;
-    email?: string;
+    full_name: string;
     phone: string;
-    password?: string;
-    password_conf?: string;
-    full_name?: string;
-    user_type?: string;
-    register_stage: 'request_otp' | 'validate_otp' | 'complete';
+    user_type: string;
 }
 
 export interface RegisterOtpResponse {
@@ -108,129 +102,14 @@ const authService = {
         }
     },
 
-    // بررسی وجود نام کاربری در دیتابیس
-    checkUsernameExists: async (username: string): Promise<boolean> => {
-        try {
-            console.log('بررسی تکراری بودن نام کاربری:', username);
-
-            // ارسال درخواست برای بررسی نام کاربری
-            const response = await axios.get(`${AUTH_URL}/check-username/?username=${encodeURIComponent(username)}`);
-
-            // اگر پاسخ موفقیت‌آمیز باشد و exists در پاسخ وجود داشته باشد
-            if (response.data && response.data.exists !== undefined) {
-                console.log('نتیجه بررسی نام کاربری:', response.data.exists ? 'تکراری' : 'قابل استفاده');
-                return response.data.exists;
-            }
-
-            // اگر پاسخ به صورت استاندارد نباشد، فرض می‌کنیم نام کاربری وجود ندارد
-            return false;
-        } catch (error: any) {
-            console.error('خطا در بررسی نام کاربری:', error);
-
-            // اگر API بررسی نام کاربری وجود نداشته باشد یا دسترسی به آن نباشد
-            // در این حالت ادامه روند ثبت‌نام را اجازه می‌دهیم
-            // بعداً در مرحله validateOtp خطای تکراری بودن را مدیریت می‌کنیم
-            return false;
-        }
-    },
-
-    // بررسی وجود ایمیل در دیتابیس
-    checkEmailExists: async (email: string): Promise<boolean> => {
-        try {
-            console.log('بررسی تکراری بودن ایمیل:', email);
-
-            // ارسال درخواست برای بررسی ایمیل
-            const response = await axios.get(`${AUTH_URL}/check-email/?email=${encodeURIComponent(email)}`);
-
-            // اگر پاسخ موفقیت‌آمیز باشد و exists در پاسخ وجود داشته باشد
-            if (response.data && response.data.exists !== undefined) {
-                console.log('نتیجه بررسی ایمیل:', response.data.exists ? 'تکراری' : 'قابل استفاده');
-                return response.data.exists;
-            }
-
-            // اگر پاسخ به صورت استاندارد نباشد، فرض می‌کنیم ایمیل وجود ندارد
-            return false;
-        } catch (error: any) {
-            console.error('خطا در بررسی ایمیل:', error);
-
-            // اگر API بررسی ایمیل وجود نداشته باشد یا دسترسی به آن نباشد
-            // در این حالت ادامه روند ثبت‌نام را اجازه می‌دهیم
-            // بعداً در مرحله validateOtp خطای تکراری بودن را مدیریت می‌کنیم
-            return false;
-        }
-    },
-
-    // تابع ورود کاربر
-    login: async (credentials: LoginCredentials): Promise<UserData> => {
-        try {
-            console.log('ارسال درخواست ورود با اطلاعات:', credentials);
-
-            // ارسال درخواست ورود به API
-            const response = await axios.post<TokenResponse>(
-                `${AUTH_URL}/login/`,
-                credentials
-            );
-
-            console.log('پاسخ API برای درخواست ورود:', response.data);
-
-            // ذخیره توکن‌ها در کوکی با مدت انقضای 30 روز
-            cookieService.setCookie(COOKIE_NAMES.ACCESS_TOKEN, response.data.access, 30);
-            cookieService.setCookie(COOKIE_NAMES.REFRESH_TOKEN, response.data.refresh, 30);
-
-            // دریافت اطلاعات کاربر با استفاده از توکن دسترسی
-            try {
-                // تنظیم هدر authorization برای درخواست بعدی
-                const userResponse = await axios.get<UserData>(`${AUTH_URL}/user/`, {
-                    headers: {
-                        'Authorization': `Bearer ${response.data.access}`
-                    }
-                });
-
-                console.log('اطلاعات کاربر دریافت شد:', userResponse.data);
-
-                // ذخیره اطلاعات کاربر در کوکی
-                cookieService.setObjectCookie(COOKIE_NAMES.USER_DATA, userResponse.data, 30);
-
-                // برگرداندن اطلاعات کاربر
-                return userResponse.data;
-            } catch (userError) {
-                console.error('خطا در دریافت اطلاعات کاربر:', userError);
-                // در صورت خطا در دریافت اطلاعات کاربر، هنوز احراز هویت موفق بوده است
-                // یک ساختار پایه برای اطلاعات کاربر بر اساس شماره تلفن ایجاد می‌کنیم
-                const basicUserData: UserData = {
-                    username: '',
-                    email: '',
-                    phone: credentials.phone,
-                    user_type: 'JS' // نوع کاربر پیش‌فرض
-                };
-
-                // ذخیره اطلاعات پایه در کوکی
-                cookieService.setObjectCookie(COOKIE_NAMES.USER_DATA, basicUserData, 30);
-
-                return basicUserData;
-            }
-        } catch (error: any) {
-            console.error('خطا در ورود:', error.response?.data || error.message);
-            throw error;
-        }
-    },
-
     // مرحله اول ثبت‌نام: درخواست کد OTP
-    registerOtp: async (userData: RegisterData): Promise<RegisterOtpResponse> => {
+    registerOtp: async (userData: RegisterData): Promise<string> => {
         try {
             console.log('ارسال درخواست کد تایید با اطلاعات کاربر:', userData);
 
-            // آماده‌سازی داده‌های ارسالی براساس مرحله ثبت‌نام
-            const dataToSend = {
-                ...userData,
-                register_stage: userData.register_stage || 'request_otp'
-            };
-
-            console.log('اطلاعات نهایی ارسالی به سرور:', dataToSend);
-
             const response = await axios.post<RegisterOtpResponse>(
                 `${AUTH_URL}/register-otp/`,
-                dataToSend
+                userData
             );
 
             console.log('پاسخ API برای درخواست کد تایید:', response.data);
@@ -250,9 +129,47 @@ const authService = {
                 });
             }
 
-            return response.data;
+            // بازگرداندن توکن
+            return response.data.Detail.token;
         } catch (error: any) {
             console.error('خطا در ارسال کد تایید:', error.response?.data || error.message);
+
+            // بهبود مدیریت خطاها
+            if (error.response?.data?.Detail) {
+                const errorDetail = error.response.data.Detail;
+
+                // اگر پیام خطا از سرور آمده باشد
+                if (typeof errorDetail === 'string') {
+                    throw new Error(errorDetail);
+                }
+                // اگر خطاهای ولیدیشن آمده باشد
+                else if (typeof errorDetail === 'object') {
+                    // بررسی خطای شماره تلفن تکراری
+                    if (errorDetail.phone) {
+                        const phoneError = Array.isArray(errorDetail.phone)
+                            ? errorDetail.phone[0]
+                            : errorDetail.phone;
+                        throw new Error(phoneError);
+                    }
+
+                    // بررسی خطای نام کامل
+                    if (errorDetail.full_name) {
+                        const fullNameError = Array.isArray(errorDetail.full_name)
+                            ? errorDetail.full_name[0]
+                            : errorDetail.full_name;
+                        throw new Error(fullNameError);
+                    }
+
+                    // بررسی خطای نوع کاربر
+                    if (errorDetail.user_type) {
+                        const userTypeError = Array.isArray(errorDetail.user_type)
+                            ? errorDetail.user_type[0]
+                            : errorDetail.user_type;
+                        throw new Error(userTypeError);
+                    }
+                }
+            }
+
             throw error;
         }
     },
@@ -304,7 +221,6 @@ const authService = {
                 if (response.data.Detail && response.data.Detail.User) {
                     cookieService.setObjectCookie(COOKIE_NAMES.USER_DATA, response.data.Detail.User, 30);
                     console.log('اطلاعات کاربر با موفقیت ذخیره شد:', {
-                        username: response.data.Detail.User.username,
                         phone: response.data.Detail.User.phone,
                         userType: response.data.Detail.User.user_type,
                         timestamp: new Date().toISOString()
@@ -339,40 +255,24 @@ const authService = {
                     timestamp: new Date().toISOString()
                 });
 
-                // تبدیل پاسخ خطا به رشته برای جستجوی الگوها
-                const errorResponseStr = JSON.stringify(error.response.data).toLowerCase();
-
-                // بررسی خطای IntegrityError که از سمت Django با کد 500 ارسال می‌شود
-                if (error.response.status === 500 &&
-                    (errorResponseStr.includes('integrityerror') ||
-                        errorResponseStr.includes('unique constraint'))) {
-
-                    console.error('خطای یکتایی داده:', {
-                        error: error.response.data,
-                        timestamp: new Date().toISOString()
-                    });
-
-                    // تشخیص نوع خطای یکتایی (ایمیل، نام کاربری یا سایر)
-                    if (errorResponseStr.includes('users_user.username')) {
-                        console.error('خطای تکراری بودن نام کاربری');
-                        throw new Error('نام کاربری انتخابی شما قبلاً در سیستم ثبت شده است. لطفاً به مرحله قبل برگردید و نام کاربری دیگری انتخاب کنید.');
-                    } else if (errorResponseStr.includes('users_user.email')) {
-                        console.error('خطای تکراری بودن ایمیل');
-                        throw new Error('ایمیل انتخابی شما قبلاً در سیستم ثبت شده است. لطفاً به مرحله قبل برگردید و ایمیل دیگری وارد کنید.');
-                    } else if (errorResponseStr.includes('users_user.phone')) {
-                        console.error('خطای تکراری بودن شماره تلفن');
-                        throw new Error('شماره تلفن انتخابی شما قبلاً در سیستم ثبت شده است. لطفاً به مرحله اول برگردید و شماره تلفن دیگری وارد کنید.');
-                    } else {
-                        console.error('خطای یکتایی نامشخص');
-                        throw new Error('اطلاعات وارد شده تکراری است. لطفاً به مرحله قبل برگردید و اطلاعات خود را بررسی کنید.');
-                    }
+                // خطای اعتبارسنجی کد OTP
+                if (error.response.data?.code) {
+                    const codeError = Array.isArray(error.response.data.code)
+                        ? error.response.data.code[0]
+                        : error.response.data.code;
+                    throw new Error(codeError);
                 }
-                // بررسی خطاهای مختلف برای ارائه پیام مناسب
-                else if (error.response.status === 400 || error.response.status === 401) {
-                    throw new Error('کد تایید نامعتبر است. لطفاً کد صحیح را وارد کنید.');
-                } else if (error.response.status === 404) {
+
+                // خطای OTP غیرفعال
+                if (error.response.status === 400 || error.response.status === 401) {
+                    throw new Error('کد تایید نامعتبر است یا منقضی شده است. لطفاً کد جدید درخواست کنید.');
+                }
+                // خطای توکن نامعتبر
+                else if (error.response.status === 404) {
                     throw new Error('توکن نامعتبر است. لطفاً دوباره درخواست کد تایید کنید.');
-                } else if (error.response.status === 500) {
+                }
+                // خطای سرور
+                else if (error.response.status === 500) {
                     console.error('خطای سرور 500:', {
                         error: error.response.data,
                         timestamp: new Date().toISOString()
@@ -433,6 +333,159 @@ const authService = {
             // نمایش پیام خطا
             toast.error(error.response?.data?.message || 'خطا در بروزرسانی نوع کاربر، لطفاً دوباره تلاش کنید');
 
+            throw error;
+        }
+    },
+
+    // درخواست OTP برای ورود
+    loginOtp: async (phone: string): Promise<string> => {
+        try {
+            console.log('ارسال درخواست OTP برای ورود با شماره:', phone);
+
+            const response = await axios.post<RegisterOtpResponse>(
+                `${AUTH_URL}/login-otp/`,
+                { phone }
+            );
+
+            console.log('پاسخ API برای درخواست OTP ورود:', response.data);
+
+            // نمایش کد تایید در صورت وجود
+            if (response.data.Detail && response.data.Detail.code) {
+                toast.success(`کد تایید ورود: ${response.data.Detail.code}`, {
+                    duration: 10000,
+                    position: 'top-center',
+                    style: {
+                        background: '#e0f7fa',
+                        color: '#00838f',
+                        fontWeight: 'bold',
+                        fontSize: '1rem',
+                        padding: '16px'
+                    }
+                });
+            }
+
+            // بازگرداندن توکن
+            return response.data.Detail.token;
+        } catch (error: any) {
+            console.error('خطا در ارسال کد تایید برای ورود:', error.response?.data || error.message);
+
+            // بهبود مدیریت خطاها
+            if (error.response?.data?.Detail) {
+                const errorDetail = error.response.data.Detail;
+
+                // اگر پیام خطا از سرور آمده باشد
+                if (typeof errorDetail === 'string') {
+                    throw new Error(errorDetail);
+                }
+                // اگر خطاهای ولیدیشن آمده باشد
+                else if (typeof errorDetail === 'object') {
+                    // بررسی خطای شماره تلفن
+                    if (errorDetail.phone) {
+                        const phoneError = Array.isArray(errorDetail.phone)
+                            ? errorDetail.phone[0]
+                            : errorDetail.phone;
+                        throw new Error(phoneError);
+                    }
+                }
+            }
+
+            // اگر خطای ۴۰۴ باشد یعنی شماره تلفن وجود ندارد
+            if (error.response?.status === 404) {
+                throw new Error('شماره تلفن در سیستم ثبت نشده است.');
+            }
+
+            throw error;
+        }
+    },
+
+    // تایید OTP برای ورود
+    validateLoginOtp: async (token: string, code: string): Promise<UserData> => {
+        try {
+            console.log('شروع فرآیند تایید OTP برای ورود:', {
+                token: token.substring(0, 10) + '...',
+                codeLength: code.length,
+                timestamp: new Date().toISOString()
+            });
+
+            // تنظیم تایم‌اوت برای درخواست
+            const response = await axios.post<TokenResponse>(
+                `${AUTH_URL}/login-validate-otp/${token}/`,
+                { code },
+                {
+                    timeout: 10000, // 10 ثانیه تایم‌اوت
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    }
+                }
+            );
+
+            console.log('پاسخ دریافتی از API پس از تایید کد OTP برای ورود:', {
+                status: response.status,
+                hasTokens: !!response.data,
+                timestamp: new Date().toISOString()
+            });
+
+            // ذخیره توکن‌ها در کوکی با مدت انقضای 30 روز
+            cookieService.setCookie(COOKIE_NAMES.ACCESS_TOKEN, response.data.access, 30);
+            cookieService.setCookie(COOKIE_NAMES.REFRESH_TOKEN, response.data.refresh, 30);
+
+            // دریافت اطلاعات کاربر با استفاده از توکن دسترسی
+            try {
+                // تنظیم هدر authorization برای درخواست بعدی
+                const userResponse = await axios.get<UserData>(`${AUTH_URL}/user/`, {
+                    headers: {
+                        'Authorization': `Bearer ${response.data.access}`
+                    }
+                });
+
+                console.log('اطلاعات کاربر دریافت شد:', userResponse.data);
+
+                // ذخیره اطلاعات کاربر در کوکی
+                cookieService.setObjectCookie(COOKIE_NAMES.USER_DATA, userResponse.data, 30);
+
+                // برگرداندن اطلاعات کاربر
+                return userResponse.data;
+            } catch (userError) {
+                console.error('خطا در دریافت اطلاعات کاربر:', userError);
+                // در صورت خطا در دریافت اطلاعات کاربر، هنوز احراز هویت موفق بوده است
+                throw new Error('ورود با موفقیت انجام شد اما دریافت اطلاعات کاربر با خطا مواجه شد.');
+            }
+        } catch (error: any) {
+            console.error('خطا در تایید کد OTP برای ورود:', {
+                error: error.message,
+                response: error.response?.data,
+                status: error.response?.status,
+                timestamp: new Date().toISOString()
+            });
+
+            // بهبود مدیریت خطاها
+            if (error.response) {
+                // خطای اعتبارسنجی کد OTP
+                if (error.response.data?.code) {
+                    const codeError = Array.isArray(error.response.data.code)
+                        ? error.response.data.code[0]
+                        : error.response.data.code;
+                    throw new Error(codeError);
+                }
+
+                // خطای OTP غیرفعال
+                if (error.response.status === 400 || error.response.status === 401) {
+                    throw new Error('کد تایید نامعتبر است یا منقضی شده است. لطفاً کد جدید درخواست کنید.');
+                }
+                // خطای توکن نامعتبر
+                else if (error.response.status === 404) {
+                    throw new Error('توکن نامعتبر است. لطفاً دوباره درخواست کد تایید کنید.');
+                }
+                // خطای سرور
+                else if (error.response.status === 500) {
+                    throw new Error('خطای سرور در تایید کد. لطفاً چند دقیقه صبر کنید و دوباره تلاش کنید.');
+                }
+            } else if (error.code === 'ECONNABORTED') {
+                throw new Error('زمان درخواست به پایان رسید. لطفاً دوباره تلاش کنید.');
+            }
+
+            // در صورت بروز سایر خطاها
             throw error;
         }
     },

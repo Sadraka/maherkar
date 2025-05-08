@@ -24,17 +24,10 @@ import {
 import { styled } from '@mui/material/styles';
 import { useAuth } from '@/contexts/AuthContext';
 import { useRouter } from 'next/navigation';
-import PersonIcon from '@mui/icons-material/Person';
-import EmailIcon from '@mui/icons-material/Email';
 import PhoneIcon from '@mui/icons-material/Phone';
-import LockIcon from '@mui/icons-material/Lock';
 import BadgeIcon from '@mui/icons-material/Badge';
 import Link from 'next/link';
 import { EMPLOYER_THEME } from '@/constants/colors';
-import { ErrorHandler } from '@/components/common/ErrorHandler';
-import axios from 'axios';
-import authService from '@/lib/authService';
-import cookieService, { COOKIE_NAMES } from '@/lib/cookieService';
 import { toast } from 'react-hot-toast';
 
 // کامپوننت آیکون مراحل با اعداد فارسی
@@ -75,7 +68,7 @@ interface RegisterFormProps {
 }
 
 export default function RegisterForm({ onSuccess }: RegisterFormProps) {
-    const { register, verifyOtp, isAuthenticated, loading, checkPhoneExists, checkUsernameExists, checkEmailExists } = useAuth();
+    const { registerOtp, validateOtp, isAuthenticated, loading, checkPhoneExists } = useAuth();
     const router = useRouter();
     const employerColors = EMPLOYER_THEME;
     const theme = useTheme();
@@ -96,13 +89,9 @@ export default function RegisterForm({ onSuccess }: RegisterFormProps) {
     // خطای کد تایید
     const [otpError, setOtpError] = useState('');
 
-    // فرم ثبت‌نام
+    // فرم ثبت‌نام - فقط شامل نام کامل، شماره تلفن و نوع کاربر
     const [formData, setFormData] = useState({
-        username: '',
-        email: '',
         phone: '',
-        password: '',
-        password_conf: '',
         full_name: '',
         user_type: 'JS', // پیش‌فرض: جوینده کار
     });
@@ -170,7 +159,7 @@ export default function RegisterForm({ onSuccess }: RegisterFormProps) {
         return Object.keys(errors).length === 0;
     };
 
-    // اعتبارسنجی کد OTP در مرحله دوم
+    // اعتبارسنجی کد OTP در مرحله سوم
     const validateOtpStep = (): boolean => {
         if (!phoneOtpCode.trim()) {
             setOtpError('لطفاً کد تایید را وارد کنید');
@@ -183,41 +172,15 @@ export default function RegisterForm({ onSuccess }: RegisterFormProps) {
         return true;
     };
 
-    // اعتبارسنجی اطلاعات کاربر در مرحله سوم
+    // اعتبارسنجی اطلاعات شخصی در مرحله دوم
     const validateUserInfoStep = (): boolean => {
         const errors: Record<string, string> = {};
 
         // بررسی نام و نام خانوادگی
         if (!formData.full_name.trim()) {
             errors.full_name = 'نام و نام خانوادگی الزامی است';
-        }
-
-        // بررسی نام کاربری
-        if (!formData.username.trim()) {
-            errors.username = 'نام کاربری الزامی است';
-        } else if (formData.username.trim().length < 3) {
-            errors.username = 'نام کاربری باید حداقل ۳ کاراکتر باشد';
-        }
-
-        // بررسی ایمیل
-        if (!formData.email.trim()) {
-            errors.email = 'ایمیل الزامی است';
-        } else if (!/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}$/i.test(formData.email.trim())) {
-            errors.email = 'ایمیل نامعتبر است';
-        }
-
-        // بررسی رمز عبور
-        if (!formData.password) {
-            errors.password = 'رمز عبور الزامی است';
-        } else if (formData.password.length < 8) {
-            errors.password = 'رمز عبور باید حداقل ۸ کاراکتر باشد';
-        }
-
-        // بررسی تکرار رمز عبور
-        if (!formData.password_conf) {
-            errors.password_conf = 'تکرار رمز عبور الزامی است';
-        } else if (formData.password_conf !== formData.password) {
-            errors.password_conf = 'تکرار رمز عبور با رمز عبور مطابقت ندارد';
+        } else if (formData.full_name.trim().length < 3) {
+            errors.full_name = 'نام و نام خانوادگی باید حداقل ۳ کاراکتر باشد';
         }
 
         setFormErrors(errors);
@@ -271,7 +234,7 @@ export default function RegisterForm({ onSuccess }: RegisterFormProps) {
         }
     };
 
-    // تکمیل اطلاعات کاربر و انتقال به مرحله OTP
+    // تکمیل اطلاعات کاربر و ارسال درخواست کد OTP
     const handleUserInfoSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         if (!validateUserInfoStep()) return;
@@ -279,36 +242,13 @@ export default function RegisterForm({ onSuccess }: RegisterFormProps) {
         setIsSubmitting(true);
 
         try {
-            // بررسی تکراری بودن نام کاربری قبل از ارسال درخواست OTP
-            if (formData.username) {
-                const usernameExists = await checkUsernameExists(formData.username);
-                if (usernameExists) {
-                    setFormErrors({
-                        username: 'این نام کاربری قبلاً ثبت شده است، لطفاً نام کاربری دیگری انتخاب کنید'
-                    });
-                    setIsSubmitting(false);
-                    return;
-                }
-            }
+            console.log('اطلاعات کاربر تایید شد، ارسال درخواست کد OTP...');
 
-            // بررسی تکراری بودن ایمیل قبل از ارسال درخواست OTP
-            if (formData.email) {
-                const emailExists = await checkEmailExists(formData.email);
-                if (emailExists) {
-                    setFormErrors({
-                        email: 'این ایمیل قبلاً ثبت شده است، لطفاً ایمیل دیگری وارد کنید'
-                    });
-                    setIsSubmitting(false);
-                    return;
-                }
-            }
-
-            console.log('اطلاعات کاربر تایید شد، انتقال به مرحله دریافت کد OTP...');
-
-            // ارسال اطلاعات کامل کاربر و درخواست OTP
-            const otpToken = await register({
-                ...formData,
-                register_stage: 'request_otp'
+            // ارسال اطلاعات به API برای دریافت OTP
+            const otpToken = await registerOtp({
+                phone: formData.phone,
+                full_name: formData.full_name,
+                user_type: formData.user_type
             });
 
             console.log('کد OTP دریافت شد، توکن:', otpToken);
@@ -322,23 +262,10 @@ export default function RegisterForm({ onSuccess }: RegisterFormProps) {
         } catch (error: any) {
             console.error('خطا در ارسال درخواست OTP:', error);
 
-            // نمایش خطاهای دریافتی از سرور
-            if (error.response?.data) {
-                const apiErrors: Record<string, string> = {};
-
-                Object.entries(error.response.data).forEach(([key, value]) => {
-                    const errorValue = Array.isArray(value) ? value[0] : value;
-                    if (typeof errorValue === 'string') {
-                        apiErrors[key] = errorValue;
-                    }
-                });
-
-                setFormErrors(apiErrors);
-            } else {
-                setFormErrors({
-                    general: error.message || 'خطا در ارسال درخواست OTP. لطفاً دوباره تلاش کنید.'
-                });
-            }
+            // نمایش خطای دریافتی 
+            setFormErrors({
+                general: error.message || 'خطا در ارسال درخواست OTP. لطفاً دوباره تلاش کنید.'
+            });
         } finally {
             setIsSubmitting(false);
         }
@@ -355,7 +282,7 @@ export default function RegisterForm({ onSuccess }: RegisterFormProps) {
             console.log('تایید کد OTP و تکمیل ثبت‌نام با توکن:', phoneOtpToken);
 
             // ارسال کد OTP برای تایید نهایی و تکمیل ثبت‌نام
-            const verificationResponse = await verifyOtp(phoneOtpToken, phoneOtpCode);
+            const verificationResponse = await validateOtp(phoneOtpToken, phoneOtpCode);
 
             console.log('ثبت‌نام با موفقیت تکمیل شد:', verificationResponse);
 
@@ -386,56 +313,7 @@ export default function RegisterForm({ onSuccess }: RegisterFormProps) {
         } catch (error: any) {
             console.error('خطا در تایید کد:', error);
 
-            // بررسی خطای نام کاربری تکراری و برگشت به مرحله اطلاعات کاربری
-            if (error.message && error.message.includes('نام کاربری انتخابی شما قبلاً در سیستم ثبت شده است')) {
-                setFormErrors({
-                    username: 'نام کاربری انتخابی شما قبلاً در سیستم ثبت شده است'
-                });
-                toast.error('نام کاربری تکراری است. لطفاً نام کاربری دیگری انتخاب کنید');
-
-                // برگشت به مرحله وارد کردن اطلاعات کاربری
-                setActiveStep(1);
-                setIsSubmitting(false);
-                return;
-            }
-            // بررسی خطای ایمیل تکراری و برگشت به مرحله اطلاعات کاربری
-            else if (error.message && error.message.includes('ایمیل انتخابی شما قبلاً در سیستم ثبت شده است')) {
-                setFormErrors({
-                    email: 'ایمیل انتخابی شما قبلاً در سیستم ثبت شده است'
-                });
-                toast.error('ایمیل تکراری است. لطفاً ایمیل دیگری وارد کنید');
-
-                // برگشت به مرحله وارد کردن اطلاعات کاربری
-                setActiveStep(1);
-                setIsSubmitting(false);
-                return;
-            }
-            // بررسی خطای شماره تلفن تکراری و برگشت به مرحله شماره تلفن
-            else if (error.message && error.message.includes('شماره تلفن انتخابی شما قبلاً در سیستم ثبت شده است')) {
-                setFormErrors({
-                    phone: 'شماره تلفن انتخابی شما قبلاً در سیستم ثبت شده است'
-                });
-                toast.error('شماره تلفن تکراری است. لطفاً شماره تلفن دیگری وارد کنید');
-
-                // برگشت به مرحله وارد کردن شماره تلفن
-                setActiveStep(0);
-                setIsSubmitting(false);
-                return;
-            }
-            // بررسی سایر خطاهای تکراری و برگشت به مرحله مناسب
-            else if (error.message && error.message.includes('اطلاعات وارد شده تکراری است')) {
-                setFormErrors({
-                    general: 'اطلاعات وارد شده تکراری است. لطفاً اطلاعات خود را بررسی کنید'
-                });
-                toast.error('اطلاعات وارد شده تکراری است. لطفاً اطلاعات خود را بررسی کنید');
-
-                // برگشت به مرحله وارد کردن اطلاعات کاربری
-                setActiveStep(1);
-                setIsSubmitting(false);
-                return;
-            }
-
-            // نمایش خطای کد تایید به صورت مستقیم
+            // نمایش خطای کد تایید
             if (error.message) {
                 setOtpError(error.message);
             } else if (error.response?.data) {
@@ -466,10 +344,11 @@ export default function RegisterForm({ onSuccess }: RegisterFormProps) {
         try {
             console.log('ارسال مجدد درخواست کد تایید');
 
-            // ارسال مجدد درخواست کد با همه اطلاعات کاربر جمع‌آوری شده
-            const otpToken = await register({
-                ...formData,
-                register_stage: 'request_otp'
+            // ارسال مجدد درخواست کد تایید
+            const otpToken = await registerOtp({
+                phone: formData.phone,
+                full_name: formData.full_name,
+                user_type: formData.user_type
             });
 
             console.log('توکن OTP جدید دریافت شد:', otpToken);
@@ -486,11 +365,7 @@ export default function RegisterForm({ onSuccess }: RegisterFormProps) {
             console.error('خطا در ارسال مجدد کد تایید:', error);
 
             // نمایش خطاهای دریافتی از سرور
-            if (error.response?.data) {
-                setOtpError('خطا در ارسال مجدد کد تایید: ' + JSON.stringify(error.response.data));
-            } else {
-                setOtpError(error.message || 'خطا در ارسال مجدد کد تایید');
-            }
+            setOtpError(error.message || 'خطا در ارسال مجدد کد تایید');
         } finally {
             setIsSubmitting(false);
         }
@@ -498,9 +373,6 @@ export default function RegisterForm({ onSuccess }: RegisterFormProps) {
 
     // رندر فرم مرحله اول (شماره تلفن)
     const renderPhoneForm = () => {
-        // تعریف متغیر isMobile درون تابع
-        const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
-
         return (
             <Box component="form" onSubmit={handlePhoneSubmit}>
                 <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
@@ -544,7 +416,7 @@ export default function RegisterForm({ onSuccess }: RegisterFormProps) {
                                 borderRadius: 2,
                             }}
                         >
-                            {isSubmitting ? <CircularProgress size={24} color="inherit" /> : 'دریافت کد تایید'}
+                            {isSubmitting ? <CircularProgress size={24} color="inherit" /> : 'ادامه'}
                         </Button>
                     </Box>
 
@@ -566,11 +438,110 @@ export default function RegisterForm({ onSuccess }: RegisterFormProps) {
         );
     };
 
-    // رندر فرم مرحله دوم (تایید شماره تلفن با کد OTP)
-    const renderOtpForm = () => {
-        // تعریف متغیر isMobile درون تابع
-        const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+    // رندر فرم مرحله دوم (اطلاعات کاربر)
+    const renderUserInfoForm = () => {
+        return (
+            <Box component="form" onSubmit={handleUserInfoSubmit}>
+                <Box sx={{ display: 'flex', flexDirection: 'column', gap: { xs: 2, sm: 3 } }}>
+                    <Box>
+                        <TextField
+                            fullWidth
+                            name="full_name"
+                            label="نام و نام خانوادگی"
+                            variant="outlined"
+                            value={formData.full_name}
+                            onChange={handleChange}
+                            error={!!formErrors.full_name}
+                            helperText={formErrors.full_name}
+                            autoFocus
+                            InputProps={{
+                                startAdornment: (
+                                    <InputAdornment position="start">
+                                        <BadgeIcon />
+                                    </InputAdornment>
+                                ),
+                            }}
+                            inputProps={{ dir: "rtl" }}
+                            size={isMobile ? "small" : "medium"}
+                        />
+                    </Box>
 
+                    <Box>
+                        <FormControl fullWidth variant="outlined" size={isMobile ? "small" : "medium"}>
+                            <InputLabel id="user-type-label">نوع کاربر</InputLabel>
+                            <Select
+                                labelId="user-type-label"
+                                id="user-type"
+                                value={formData.user_type}
+                                label="نوع کاربر"
+                                onChange={handleSelectChange}
+                            >
+                                <MenuItem value="JS">کارجو</MenuItem>
+                                <MenuItem value="EM">کارفرما</MenuItem>
+                            </Select>
+                        </FormControl>
+                    </Box>
+
+                    {formErrors.general && (
+                        <Typography color="error" variant="body2" sx={{ mt: 1 }}>
+                            {formErrors.general}
+                        </Typography>
+                    )}
+
+                    <Box sx={{
+                        display: 'flex',
+                        flexDirection: { xs: 'column', sm: 'row' },
+                        justifyContent: 'space-between',
+                        gap: { xs: 1, sm: 2 },
+                        mt: { xs: 1, sm: 2 }
+                    }}>
+                        <Button
+                            variant="outlined"
+                            onClick={() => setActiveStep(0)}
+                            disabled={isSubmitting}
+                            fullWidth={isMobile}
+                            size={isMobile ? "medium" : "large"}
+                            sx={{
+                                order: { xs: 2, sm: 1 }, // در موبایل پایین باشد
+                                px: 3,
+                                py: { xs: 0.5, sm: 1 },
+                                borderColor: employerColors.primary,
+                                color: employerColors.primary,
+                                '&:hover': {
+                                    borderColor: employerColors.dark,
+                                    backgroundColor: 'rgba(0, 0, 0, 0.04)',
+                                },
+                            }}
+                        >
+                            بازگشت
+                        </Button>
+
+                        <Button
+                            type="submit"
+                            variant="contained"
+                            disabled={isSubmitting}
+                            fullWidth={isMobile}
+                            size={isMobile ? "medium" : "large"}
+                            sx={{
+                                order: { xs: 1, sm: 2 }, // در موبایل بالا باشد
+                                px: 3,
+                                py: { xs: 0.5, sm: 1 },
+                                backgroundColor: employerColors.primary,
+                                '&:hover': {
+                                    backgroundColor: employerColors.dark,
+                                },
+                            }}
+                        >
+                            {isSubmitting ? <CircularProgress size={isMobile ? 20 : 24} color="inherit" /> : 'دریافت کد تایید'}
+                        </Button>
+                    </Box>
+                </Box>
+            </Box>
+        );
+    };
+
+    // رندر فرم مرحله سوم (تایید شماره تلفن با کد OTP)
+    const renderOtpForm = () => {
         return (
             <Box component="form" onSubmit={handleOtpSubmit}>
                 <Box sx={{ display: 'flex', flexDirection: 'column', gap: { xs: 2, sm: 3 } }}>
@@ -660,196 +631,6 @@ export default function RegisterForm({ onSuccess }: RegisterFormProps) {
                             }}
                         >
                             ارسال مجدد کد تایید
-                        </Button>
-                    </Box>
-                </Box>
-            </Box>
-        );
-    };
-
-    // رندر فرم مرحله سوم (تکمیل اطلاعات)
-    const renderUserInfoForm = () => {
-        // تعریف متغیر isMobile درون تابع
-        const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
-
-        return (
-            <Box component="form" onSubmit={handleUserInfoSubmit}>
-                <Box sx={{ display: 'flex', flexDirection: 'column', gap: { xs: 2, sm: 3 } }}>
-                    <Box>
-                        <TextField
-                            fullWidth
-                            name="full_name"
-                            label="نام و نام خانوادگی"
-                            variant="outlined"
-                            value={formData.full_name}
-                            onChange={handleChange}
-                            error={!!formErrors.full_name}
-                            helperText={formErrors.full_name}
-                            autoFocus
-                            InputProps={{
-                                startAdornment: (
-                                    <InputAdornment position="start">
-                                        <BadgeIcon />
-                                    </InputAdornment>
-                                ),
-                            }}
-                            inputProps={{ dir: "rtl" }}
-                            size={isMobile ? "small" : "medium"}
-                        />
-                    </Box>
-
-                    <Box>
-                        <TextField
-                            fullWidth
-                            name="username"
-                            label="نام کاربری"
-                            variant="outlined"
-                            value={formData.username}
-                            onChange={handleChange}
-                            error={!!formErrors.username}
-                            helperText={formErrors.username}
-                            InputProps={{
-                                startAdornment: (
-                                    <InputAdornment position="start">
-                                        <PersonIcon />
-                                    </InputAdornment>
-                                ),
-                            }}
-                            inputProps={{ dir: "rtl" }}
-                            size={isMobile ? "small" : "medium"}
-                        />
-                    </Box>
-
-                    <Box>
-                        <TextField
-                            fullWidth
-                            name="email"
-                            label="ایمیل"
-                            type="email"
-                            variant="outlined"
-                            value={formData.email}
-                            onChange={handleChange}
-                            error={!!formErrors.email}
-                            helperText={formErrors.email}
-                            InputProps={{
-                                startAdornment: (
-                                    <InputAdornment position="start">
-                                        <EmailIcon />
-                                    </InputAdornment>
-                                ),
-                            }}
-                            inputProps={{ dir: "ltr" }}
-                            size={isMobile ? "small" : "medium"}
-                        />
-                    </Box>
-
-                    <Box>
-                        <TextField
-                            fullWidth
-                            name="password"
-                            label="رمز عبور"
-                            type="password"
-                            variant="outlined"
-                            value={formData.password}
-                            onChange={handleChange}
-                            error={!!formErrors.password}
-                            helperText={formErrors.password}
-                            InputProps={{
-                                startAdornment: (
-                                    <InputAdornment position="start">
-                                        <LockIcon />
-                                    </InputAdornment>
-                                ),
-                            }}
-                            inputProps={{ dir: "ltr" }}
-                            size={isMobile ? "small" : "medium"}
-                        />
-                    </Box>
-
-                    <Box>
-                        <TextField
-                            fullWidth
-                            name="password_conf"
-                            label="تکرار رمز عبور"
-                            type="password"
-                            variant="outlined"
-                            value={formData.password_conf}
-                            onChange={handleChange}
-                            error={!!formErrors.password_conf}
-                            helperText={formErrors.password_conf}
-                            InputProps={{
-                                startAdornment: (
-                                    <InputAdornment position="start">
-                                        <LockIcon />
-                                    </InputAdornment>
-                                ),
-                            }}
-                            inputProps={{ dir: "ltr" }}
-                            size={isMobile ? "small" : "medium"}
-                        />
-                    </Box>
-
-                    <Box>
-                        <FormControl fullWidth variant="outlined" size={isMobile ? "small" : "medium"}>
-                            <InputLabel id="user-type-label">نوع کاربر</InputLabel>
-                            <Select
-                                labelId="user-type-label"
-                                id="user-type"
-                                value={formData.user_type}
-                                label="نوع کاربر"
-                                onChange={handleSelectChange}
-                            >
-                                <MenuItem value="JS">کارجو</MenuItem>
-                                <MenuItem value="EM">کارفرما</MenuItem>
-                            </Select>
-                        </FormControl>
-                    </Box>
-
-                    <Box sx={{
-                        display: 'flex',
-                        flexDirection: { xs: 'column', sm: 'row' },
-                        justifyContent: 'space-between',
-                        gap: { xs: 1, sm: 2 },
-                        mt: { xs: 1, sm: 2 }
-                    }}>
-                        <Button
-                            variant="outlined"
-                            onClick={() => setActiveStep(1)}
-                            disabled={isSubmitting}
-                            fullWidth={isMobile}
-                            size={isMobile ? "medium" : "large"}
-                            sx={{
-                                order: { xs: 2, sm: 1 }, // در موبایل پایین باشد
-                                px: 3,
-                                py: { xs: 0.5, sm: 1 },
-                                borderColor: employerColors.primary,
-                                color: employerColors.primary,
-                                '&:hover': {
-                                    borderColor: employerColors.dark,
-                                    backgroundColor: 'rgba(0, 0, 0, 0.04)',
-                                },
-                            }}
-                        >
-                            بازگشت
-                        </Button>
-
-                        <Button
-                            type="submit"
-                            variant="contained"
-                            disabled={isSubmitting}
-                            fullWidth={isMobile}
-                            size={isMobile ? "medium" : "large"}
-                            sx={{
-                                order: { xs: 1, sm: 2 }, // در موبایل بالا باشد
-                                px: 3,
-                                py: { xs: 0.5, sm: 1 },
-                                backgroundColor: employerColors.primary,
-                                '&:hover': {
-                                    backgroundColor: employerColors.dark,
-                                },
-                            }}
-                        >
-                            {isSubmitting ? <CircularProgress size={isMobile ? 20 : 24} color="inherit" /> : 'تکمیل ثبت‌نام'}
                         </Button>
                     </Box>
                 </Box>

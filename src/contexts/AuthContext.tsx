@@ -17,13 +17,12 @@ import cookieService, { COOKIE_NAMES } from '../lib/cookieService';
 interface AuthContextType {
     isAuthenticated: boolean;
     user: UserData | null;
-    login: (credentials: LoginCredentials) => Promise<void>;
+    loginOtp: (phone: string) => Promise<string>;
+    validateLoginOtp: (token: string, code: string) => Promise<UserData>;
     logout: () => void;
-    register: (userData: RegisterData) => Promise<string>;
-    verifyOtp: (token: string, code: string) => Promise<RegisterValidateResponse>;
+    registerOtp: (userData: RegisterData) => Promise<string>;
+    validateOtp: (token: string, code: string) => Promise<RegisterValidateResponse>;
     checkPhoneExists: (phone: string) => Promise<boolean>;
-    checkUsernameExists: (username: string) => Promise<boolean>;
-    checkEmailExists: (email: string) => Promise<boolean>;
     updateUserType: (user_type: string) => Promise<UserData>;
     loading: boolean;
     loginError: string | null;
@@ -35,10 +34,16 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType>({
     isAuthenticated: false,
     user: null,
-    login: async () => { },
+    loginOtp: async () => "",
+    validateLoginOtp: async () => ({
+        username: "",
+        email: "",
+        phone: "",
+        user_type: ""
+    }),
     logout: () => { },
-    register: async () => "",
-    verifyOtp: async () => ({
+    registerOtp: async () => "",
+    validateOtp: async () => ({
         Detail: {
             Message: "",
             User: {
@@ -54,8 +59,6 @@ const AuthContext = createContext<AuthContextType>({
         }
     }),
     checkPhoneExists: async () => false,
-    checkUsernameExists: async () => false,
-    checkEmailExists: async () => false,
     updateUserType: async () => ({
         username: "",
         email: "",
@@ -117,39 +120,40 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         setVerifyError(null);
     };
 
-    // تابع ورود کاربر
-    const login = async (credentials: LoginCredentials) => {
+    // تابع ورود با OTP - درخواست کد
+    const loginOtp = async (phone: string): Promise<string> => {
         clearErrors();
         setLoading(true);
         try {
-            // دریافت اطلاعات کاربر مستقیماً از authService.login
-            const userData = await authService.login(credentials);
+            console.log('شروع فرآیند ورود با OTP برای شماره:', phone);
+            const token = await authService.loginOtp(phone);
+            console.log('درخواست OTP ورود با موفقیت انجام شد، توکن دریافت شد');
+            return token;
+        } catch (error: any) {
+            console.error('خطا در درخواست OTP ورود:', error.message);
+            setLoginError(error.message || 'خطا در درخواست کد تایید ورود');
+            throw error;
+        } finally {
+            setLoading(false);
+        }
+    };
 
-            // تنظیم وضعیت احراز هویت و اطلاعات کاربر
+    // تابع ورود با OTP - تایید کد
+    const validateLoginOtp = async (token: string, code: string): Promise<UserData> => {
+        clearErrors();
+        setLoading(true);
+        try {
+            console.log('تایید کد OTP برای ورود...');
+            const userData = await authService.validateLoginOtp(token, code);
+
             setUser(userData);
             setIsAuthenticated(true);
 
             toast.success('ورود با موفقیت انجام شد');
-            router.push('/'); // هدایت به صفحه اصلی
+            return userData;
         } catch (error: any) {
-            // بررسی خطاهای خاص برای نمایش پیام مناسب
-            let errorMessage = 'خطا در ورود به حساب کاربری';
-
-            if (error.response?.data) {
-                if (error.response.data.non_field_errors) {
-                    // خطاهای عمومی مانند نام کاربری یا رمز عبور اشتباه
-                    const nonFieldErrors = Array.isArray(error.response.data.non_field_errors)
-                        ? error.response.data.non_field_errors[0]
-                        : error.response.data.non_field_errors;
-                    errorMessage = nonFieldErrors || errorMessage;
-                }
-                else if (error.response.data.detail) {
-                    // خطای جزئیات
-                    errorMessage = error.response.data.detail;
-                }
-            }
-
-            setLoginError(errorMessage);
+            console.error('خطا در تایید کد OTP برای ورود:', error.message);
+            setLoginError(error.message || 'کد تایید نامعتبر است');
             throw error;
         } finally {
             setLoading(false);
@@ -157,31 +161,25 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     };
 
     // تابع ثبت‌نام (مرحله ارسال OTP)
-    const register = async (userData: RegisterData): Promise<string> => {
+    const registerOtp = async (userData: RegisterData): Promise<string> => {
         clearErrors();
         setLoading(true);
         try {
             console.log('شروع فرآیند ثبت‌نام با داده‌ها:', {
                 phone: userData.phone,
-                register_stage: userData.register_stage,
-                has_username: !!userData.username,
-                has_email: !!userData.email,
-                has_password: !!userData.password
+                full_name: userData.full_name,
+                user_type: userData.user_type
             });
 
-            const response = await authService.registerOtp(userData);
+            const token = await authService.registerOtp(userData);
 
             console.log('درخواست کد OTP با موفقیت انجام شد، توکن دریافت شد');
 
-            return response.Detail.token;
+            return token;
         } catch (error: any) {
-            console.error('خطا در فرآیند ثبت‌نام:', error.response?.data || error.message);
+            console.error('خطا در فرآیند ثبت‌نام:', error.message);
 
-            const errorMessage = error.response?.data
-                ? `خطا در ارسال کد تایید: ${JSON.stringify(error.response.data)}`
-                : 'خطا در ارسال کد تایید';
-
-            setRegisterError(errorMessage);
+            setRegisterError(error.message || 'خطا در ارسال کد تایید');
             throw error;
         } finally {
             setLoading(false);
@@ -189,7 +187,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     };
 
     // تابع تایید کد OTP (مرحله دوم)
-    const verifyOtp = async (token: string, code: string): Promise<RegisterValidateResponse> => {
+    const validateOtp = async (token: string, code: string): Promise<RegisterValidateResponse> => {
         clearErrors();
         setLoading(true);
         try {
@@ -230,24 +228,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         }
     };
 
-    // تابع بررسی تکراری بودن نام کاربری
-    const checkUsernameExists = async (username: string): Promise<boolean> => {
-        try {
-            return await authService.checkUsernameExists(username);
-        } catch (error) {
-            throw error;
-        }
-    };
-
-    // تابع بررسی تکراری بودن ایمیل
-    const checkEmailExists = async (email: string): Promise<boolean> => {
-        try {
-            return await authService.checkEmailExists(email);
-        } catch (error) {
-            throw error;
-        }
-    };
-
     // تابع به‌روزرسانی نوع کاربر
     const updateUserType = async (user_type: string): Promise<UserData> => {
         clearErrors();
@@ -267,13 +247,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const value = {
         isAuthenticated,
         user,
-        login,
+        loginOtp,
+        validateLoginOtp,
         logout,
-        register,
-        verifyOtp,
+        registerOtp,
+        validateOtp,
         checkPhoneExists,
-        checkUsernameExists,
-        checkEmailExists,
         updateUserType,
         loading,
         loginError,
