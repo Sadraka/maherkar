@@ -197,8 +197,6 @@ export default function LoginForm({ onSuccess }: LoginFormProps) {
 
             // بررسی اینکه آیا اطلاعات کاربر دریافت شده است
             if (!userData || (!userData.phone && !userData.user_type)) {
-                // اگر اطلاعات کاربر خالی باشد، هنوز پیام موفقیت را نمایش می‌دهیم 
-                // اما یک هشدار هم نمایش می‌دهیم که اطلاعات کامل نیست
                 toast.success('ورود با موفقیت انجام شد');
                 toast('اطلاعات کاربری شما به صورت کامل دریافت نشد. لطفاً اطلاعات پروفایل خود را تکمیل کنید.', {
                     duration: 5000,
@@ -209,11 +207,9 @@ export default function LoginForm({ onSuccess }: LoginFormProps) {
                     }
                 });
             } else {
-                // اگر اطلاعات کاربر با موفقیت دریافت شده باشد
                 toast.success('ورود با موفقیت انجام شد');
             }
 
-            // فراخوانی onSuccess یا هدایت به صفحه اصلی
             if (onSuccess) {
                 onSuccess();
             } else {
@@ -230,65 +226,88 @@ export default function LoginForm({ onSuccess }: LoginFormProps) {
                 const apiErrors: Record<string, string> = {};
 
                 // مدیریت ساختارهای مختلف خطا
-                // ساختار 1: خطاهای مستقیم فیلد در سطح بالا
                 if (error.response.data.code) {
-                    apiErrors.otp = Array.isArray(error.response.data.code)
+                    const codeError = Array.isArray(error.response.data.code)
                         ? error.response.data.code[0]
                         : error.response.data.code;
+                    apiErrors.otp = 'کد تایید وارد شده صحیح نیست. لطفاً دوباره تلاش کنید.';
                 }
 
                 if (error.response.data.non_field_errors) {
-                    apiErrors.non_field_errors = Array.isArray(error.response.data.non_field_errors)
+                    const nonFieldError = Array.isArray(error.response.data.non_field_errors)
                         ? error.response.data.non_field_errors[0]
                         : error.response.data.non_field_errors;
+                    if (nonFieldError.includes('کد تایید') || nonFieldError.includes('OTP')) {
+                        apiErrors.otp = 'کد تایید وارد شده صحیح نیست. لطفاً دوباره تلاش کنید.';
+                    } else {
+                        apiErrors.non_field_errors = nonFieldError;
+                    }
                 }
 
-                // ساختار 2: خطاها در Detail
+                // ساختار Detail
                 if (error.response.data.Detail) {
                     if (typeof error.response.data.Detail === 'string') {
-                        apiErrors.non_field_errors = error.response.data.Detail;
+                        if (error.response.data.Detail.includes('کد تایید') || error.response.data.Detail.includes('OTP')) {
+                            apiErrors.otp = 'کد تایید وارد شده صحیح نیست. لطفاً دوباره تلاش کنید.';
+                        } else {
+                            apiErrors.non_field_errors = error.response.data.Detail;
+                        }
                     } else if (typeof error.response.data.Detail === 'object') {
                         if (error.response.data.Detail.code) {
-                            apiErrors.otp = Array.isArray(error.response.data.Detail.code)
-                                ? error.response.data.Detail.code[0]
-                                : error.response.data.Detail.code;
+                            apiErrors.otp = 'کد تایید وارد شده صحیح نیست. لطفاً دوباره تلاش کنید.';
                         }
-
                         if (error.response.data.Detail.message) {
-                            apiErrors.non_field_errors = error.response.data.Detail.message;
+                            if (error.response.data.Detail.message.includes('کد تایید') || error.response.data.Detail.message.includes('OTP')) {
+                                apiErrors.otp = 'کد تایید وارد شده صحیح نیست. لطفاً دوباره تلاش کنید.';
+                            } else {
+                                apiErrors.non_field_errors = error.response.data.Detail.message;
+                            }
                         }
                     }
                 }
 
-                // ساختار 3: خطا در error یا message
+                // خطاهای عمومی
                 if (error.response.data.error) {
-                    apiErrors.non_field_errors = error.response.data.error;
+                    if (error.response.data.error.includes('کد تایید') || error.response.data.error.includes('OTP')) {
+                        apiErrors.otp = 'کد تایید وارد شده صحیح نیست. لطفاً دوباره تلاش کنید.';
+                    } else {
+                        apiErrors.non_field_errors = error.response.data.error;
+                    }
                 }
 
                 if (error.response.data.message) {
-                    apiErrors.non_field_errors = error.response.data.message;
+                    if (error.response.data.message.includes('کد تایید') || error.response.data.message.includes('OTP')) {
+                        apiErrors.otp = 'کد تایید وارد شده صحیح نیست. لطفاً دوباره تلاش کنید.';
+                    } else {
+                        apiErrors.non_field_errors = error.response.data.message;
+                    }
                 }
 
                 // اگر حداقل یک خطا پیدا شد، آن را نمایش می‌دهیم
                 if (Object.keys(apiErrors).length > 0) {
                     setFormErrors(apiErrors);
                 } else {
-                    // اگر هیچ خطایی در ساختارهای بالا پیدا نشد
                     setFormErrors({
-                        non_field_errors: 'کد تایید نامعتبر است. لطفاً دوباره تلاش کنید.'
+                        otp: 'کد تایید وارد شده صحیح نیست. لطفاً دوباره تلاش کنید.'
                     });
                 }
             }
             // اگر خطا مستقیماً پیام داشته باشد
             else if (error.message) {
-                setFormErrors({
-                    otp: error.message
-                });
+                if (error.message.includes('کد تایید') || error.message.includes('OTP')) {
+                    setFormErrors({
+                        otp: 'کد تایید وارد شده صحیح نیست. لطفاً دوباره تلاش کنید.'
+                    });
+                } else {
+                    setFormErrors({
+                        non_field_errors: error.message
+                    });
+                }
             }
             // اگر هیچ اطلاعاتی در خطا وجود نداشت
             else {
                 setFormErrors({
-                    non_field_errors: 'خطا در تایید کد. لطفاً دوباره تلاش کنید.'
+                    otp: 'کد تایید وارد شده صحیح نیست. لطفاً دوباره تلاش کنید.'
                 });
             }
         }
