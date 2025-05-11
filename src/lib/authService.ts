@@ -603,7 +603,7 @@ const authService = {
     // دریافت اطلاعات کاربر از کوکی
     getUserData: (): UserData | null => {
         try {
-            return cookieService.getObjectCookie<UserData>(COOKIE_NAMES.USER_DATA);
+        return cookieService.getObjectCookie<UserData>(COOKIE_NAMES.USER_DATA);
         } catch (error) {
             console.error('خطا در بازیابی اطلاعات کاربر از کوکی:', error);
             return null;

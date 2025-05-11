@@ -110,16 +110,31 @@ export default function LoginForm({ onSuccess }: LoginFormProps) {
             setActiveStep(1);
         } catch (error: any) {
             console.error('خطا در ارسال کد تایید برای ورود:', error);
-
-            // پاک کردن خطاهای قبلی
             setFormErrors({});
 
-            // خطاهای مختلف API
+            // بررسی خطای "شماره تلفن موجود نیست"
+            const errorMessage = error.response?.data?.phone?.[0] || 
+                               error.response?.data?.Detail?.phone || 
+                               (Array.isArray(error.response?.data?.non_field_errors) ? 
+                                error.response?.data?.non_field_errors[0] : 
+                                error.response?.data?.non_field_errors) ||
+                               error.response?.data?.Detail || 
+                               error.message;
+
+            console.log('خطای استخراج شده:', errorMessage);
+
+            if (typeof errorMessage === 'string' && 
+                (errorMessage.includes('شماره تلفن موجود نیست') || 
+                 errorMessage.includes('موجود نیست'))) {
+                // بدون نمایش خطا، مستقیم به صفحه ثبت‌نام برو با شماره تلفن
+                router.push(`/register?phone=${encodeURIComponent(phone)}`);
+                return;
+            }
+
+            // مدیریت سایر خطاها
             if (error.response?.data) {
                 const apiErrors: Record<string, string> = {};
 
-                // مدیریت ساختارهای مختلف خطا
-                // ساختار 1: خطاهای مستقیم فیلد در سطح بالا
                 if (error.response.data.phone) {
                     apiErrors.phone = Array.isArray(error.response.data.phone)
                         ? error.response.data.phone[0]
@@ -132,7 +147,6 @@ export default function LoginForm({ onSuccess }: LoginFormProps) {
                         : error.response.data.non_field_errors;
                 }
 
-                // ساختار 2: خطاها در Detail
                 if (error.response.data.Detail) {
                     if (typeof error.response.data.Detail === 'string') {
                         apiErrors.non_field_errors = error.response.data.Detail;
@@ -142,40 +156,24 @@ export default function LoginForm({ onSuccess }: LoginFormProps) {
                                 ? error.response.data.Detail.phone[0]
                                 : error.response.data.Detail.phone;
                         }
-
                         if (error.response.data.Detail.message) {
                             apiErrors.non_field_errors = error.response.data.Detail.message;
                         }
                     }
                 }
 
-                // ساختار 3: خطا در error یا message
-                if (error.response.data.error) {
-                    apiErrors.non_field_errors = error.response.data.error;
-                }
-
-                if (error.response.data.message) {
-                    apiErrors.non_field_errors = error.response.data.message;
-                }
-
-                // اگر حداقل یک خطا پیدا شد، آن را نمایش می‌دهیم
                 if (Object.keys(apiErrors).length > 0) {
                     setFormErrors(apiErrors);
                 } else {
-                    // اگر هیچ خطایی در ساختارهای بالا پیدا نشد
                     setFormErrors({
                         non_field_errors: 'خطا در ارسال درخواست. لطفاً دوباره تلاش کنید.'
                     });
                 }
-            }
-            // اگر خطا مستقیماً پیام داشته باشد
-            else if (error.message) {
+            } else if (error.message) {
                 setFormErrors({
                     non_field_errors: error.message
                 });
-            }
-            // اگر هیچ اطلاعاتی در خطا وجود نداشت
-            else {
+            } else {
                 setFormErrors({
                     non_field_errors: 'خطا در ارسال درخواست. لطفاً دوباره تلاش کنید.'
                 });
@@ -328,6 +326,20 @@ export default function LoginForm({ onSuccess }: LoginFormProps) {
 
     const employerColors = EMPLOYER_THEME;
 
+    useEffect(() => {
+        // بررسی خطای شماره تلفن در هر دو فیلد phone و non_field_errors
+        const phoneError = formErrors.phone;
+        const nonFieldError = formErrors.non_field_errors;
+        
+        if ((phoneError && phoneError.includes('شماره تلفن موجود نیست')) || 
+            (nonFieldError && nonFieldError.includes('شماره تلفن موجود نیست'))) {
+            toast.error('شماره تلفن شما در سیستم ثبت نشده است');
+            setTimeout(() => {
+                router.push('/register');
+            }, 2000);
+        }
+    }, [formErrors.phone, formErrors.non_field_errors, router]);
+
     return (
         <Paper
             elevation={3}
@@ -369,39 +381,39 @@ export default function LoginForm({ onSuccess }: LoginFormProps) {
 
             {activeStep === 0 ? (
                 <form onSubmit={handlePhoneSubmit}>
-                    <Box sx={{
-                        display: 'flex',
-                        flexDirection: 'column',
-                        gap: { xs: 2, sm: 3 }
-                    }}>
-                        <Box>
-                            <TextField
-                                fullWidth
-                                id="phone"
-                                label="شماره تلفن"
-                                variant="outlined"
-                                value={phone}
-                                onChange={handlePhoneChange}
-                                error={!!formErrors.phone}
-                                helperText={formErrors.phone}
-                                InputProps={{
-                                    startAdornment: (
-                                        <InputAdornment position="start">
-                                            <PhoneIcon />
-                                        </InputAdornment>
-                                    ),
-                                }}
-                                placeholder="۰۹۱۲۳۴۵۶۷۸۹"
-                                inputProps={{ dir: "ltr" }}
-                                size={isMobile ? "small" : "medium"}
+                <Box sx={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: { xs: 2, sm: 3 }
+                }}>
+                    <Box>
+                        <TextField
+                            fullWidth
+                            id="phone"
+                            label="شماره تلفن"
+                            variant="outlined"
+                            value={phone}
+                            onChange={handlePhoneChange}
+                            error={!!formErrors.phone}
+                            helperText={formErrors.phone}
+                            InputProps={{
+                                startAdornment: (
+                                    <InputAdornment position="start">
+                                        <PhoneIcon />
+                                    </InputAdornment>
+                                ),
+                            }}
+                            placeholder="۰۹۱۲۳۴۵۶۷۸۹"
+                            inputProps={{ dir: "ltr" }}
+                            size={isMobile ? "small" : "medium"}
                                 autoFocus
-                            />
-                        </Box>
+                        />
+                    </Box>
 
-                        <Box>
+                    <Box>
                             <Button
                                 type="submit"
-                                fullWidth
+                            fullWidth
                                 variant="contained"
                                 size={isMobile ? "medium" : "large"}
                                 disabled={loading}
@@ -508,23 +520,26 @@ export default function LoginForm({ onSuccess }: LoginFormProps) {
                 </form>
             )}
 
-            <Box sx={{ mt: { xs: 3, sm: 4 }, textAlign: 'center' }}>
-                <Typography variant={isMobile ? "body2" : "body1"}>
-                    حساب کاربری ندارید؟{' '}
-                    <MuiLink
-                        component={Link}
-                        href="/register"
-                        underline="hover"
-                        sx={{
-                            fontWeight: 'bold',
-                            color: employerColors.primary,
-                            fontSize: { xs: '0.85rem', sm: 'inherit' }
-                        }}
-                    >
-                        ثبت‌نام کنید
-                    </MuiLink>
-                </Typography>
-            </Box>
+            {/* نمایش لینک ثبت‌نام فقط در مرحله اول */}
+            {activeStep === 0 && (
+                <Box sx={{ mt: { xs: 3, sm: 4 }, textAlign: 'center' }}>
+                    <Typography variant={isMobile ? "body2" : "body1"}>
+                        حساب کاربری ندارید؟{' '}
+                        <MuiLink
+                            component={Link}
+                            href="/register"
+                            underline="hover"
+                            sx={{
+                                fontWeight: 'bold',
+                                color: employerColors.primary,
+                                fontSize: { xs: '0.85rem', sm: 'inherit' }
+                            }}
+                        >
+                            ثبت‌نام کنید
+                        </MuiLink>
+                    </Typography>
+                </Box>
+            )}
         </Paper>
     );
 } 

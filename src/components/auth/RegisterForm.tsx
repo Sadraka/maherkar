@@ -99,6 +99,20 @@ export default function RegisterForm({ onSuccess }: RegisterFormProps) {
     // خطاهای اعتبارسنجی فرم
     const [formErrors, setFormErrors] = useState<Record<string, string>>({});
 
+    // دریافت شماره تلفن از پارامترهای URL در صورت وجود
+    useEffect(() => {
+        if (typeof window !== 'undefined') {
+            const urlParams = new URLSearchParams(window.location.search);
+            const phoneParam = urlParams.get('phone');
+            if (phoneParam) {
+                setFormData(prev => ({
+                    ...prev,
+                    phone: phoneParam
+                }));
+            }
+        }
+    }, []);
+
     // هدایت کاربر به صفحه اصلی اگر قبلاً احراز هویت شده باشد
     useEffect(() => {
         if (isAuthenticated) {
@@ -313,19 +327,30 @@ export default function RegisterForm({ onSuccess }: RegisterFormProps) {
         } catch (error: any) {
             console.error('خطا در تایید کد:', error);
 
-            // نمایش خطای کد تایید
+            // نمایش خطای کد تایید به زبان فارسی
             if (error.message) {
-                setOtpError(error.message);
+                // بررسی و تبدیل پیام‌های خطای انگلیسی به فارسی
+                if (error.message.includes('Invalid OTP') || error.message.includes('invalid') || error.message.includes('code')) {
+                    setOtpError('کد تایید وارد شده صحیح نیست. لطفاً دوباره تلاش کنید.');
+                } else if (error.message.includes('Inactive') || error.message.includes('expire')) {
+                    setOtpError('کد تایید منقضی شده است. لطفاً درخواست ارسال کد جدید را بزنید.');
+                } else {
+                    setOtpError(error.message); // اگر پیام به فارسی باشد، همان را نمایش می‌دهیم
+                }
             } else if (error.response?.data) {
                 // بررسی ساختارهای مختلف پاسخ خطا
                 if (error.response.data.Detail) {
                     if (typeof error.response.data.Detail === 'string') {
-                        setOtpError(error.response.data.Detail);
+                        if (error.response.data.Detail.includes('Inactive')) {
+                            setOtpError('کد تایید منقضی شده است. لطفاً درخواست ارسال کد جدید را بزنید.');
+                        } else {
+                            setOtpError('کد تایید وارد شده صحیح نیست. لطفاً دوباره تلاش کنید.');
+                        }
                     } else if (typeof error.response.data.Detail === 'object' && error.response.data.Detail.Message) {
-                        setOtpError(error.response.data.Detail.Message);
+                        setOtpError('کد تایید وارد شده صحیح نیست. لطفاً دوباره تلاش کنید.');
                     }
                 } else if (error.response.data.code) {
-                    setOtpError(Array.isArray(error.response.data.code) ? error.response.data.code[0] : error.response.data.code);
+                    setOtpError('کد تایید وارد شده صحیح نیست. لطفاً دوباره تلاش کنید.');
                 } else {
                     setOtpError('کد تایید نامعتبر است. لطفاً کد صحیح را وارد کنید یا درخواست ارسال مجدد کد را بزنید.');
                 }
