@@ -111,25 +111,28 @@ export default function LoginForm({ onSuccess }: LoginFormProps) {
         } catch (error: any) {
             console.error('خطا در ارسال کد تایید برای ورود:', error);
 
-            // مدیریت بهتر خطاها بر اساس ساختار پاسخ سرور
+            // پاک کردن خطاهای قبلی
+            setFormErrors({});
+
+            // خطاهای مختلف API
             if (error.response?.data) {
                 const apiErrors: Record<string, string> = {};
 
-                // خطاهای عمومی 
-                if (error.response.data.non_field_errors) {
-                    apiErrors.non_field_errors = Array.isArray(error.response.data.non_field_errors)
-                        ? error.response.data.non_field_errors[0]
-                        : error.response.data.non_field_errors;
-                }
-
-                // خطاهای مربوط به شماره تلفن
+                // مدیریت ساختارهای مختلف خطا
+                // ساختار 1: خطاهای مستقیم فیلد در سطح بالا
                 if (error.response.data.phone) {
                     apiErrors.phone = Array.isArray(error.response.data.phone)
                         ? error.response.data.phone[0]
                         : error.response.data.phone;
                 }
 
-                // خطاهای ساختار Detail
+                if (error.response.data.non_field_errors) {
+                    apiErrors.non_field_errors = Array.isArray(error.response.data.non_field_errors)
+                        ? error.response.data.non_field_errors[0]
+                        : error.response.data.non_field_errors;
+                }
+
+                // ساختار 2: خطاها در Detail
                 if (error.response.data.Detail) {
                     if (typeof error.response.data.Detail === 'string') {
                         apiErrors.non_field_errors = error.response.data.Detail;
@@ -139,25 +142,40 @@ export default function LoginForm({ onSuccess }: LoginFormProps) {
                                 ? error.response.data.Detail.phone[0]
                                 : error.response.data.Detail.phone;
                         }
+
+                        if (error.response.data.Detail.message) {
+                            apiErrors.non_field_errors = error.response.data.Detail.message;
+                        }
                     }
                 }
 
-                // اگر حداقل یک خطا پیدا شده باشد
+                // ساختار 3: خطا در error یا message
+                if (error.response.data.error) {
+                    apiErrors.non_field_errors = error.response.data.error;
+                }
+
+                if (error.response.data.message) {
+                    apiErrors.non_field_errors = error.response.data.message;
+                }
+
+                // اگر حداقل یک خطا پیدا شد، آن را نمایش می‌دهیم
                 if (Object.keys(apiErrors).length > 0) {
                     setFormErrors(apiErrors);
                 } else {
-                    // اگر خطایی از سرور دریافت نشد اما پاسخ خطا داشتیم
+                    // اگر هیچ خطایی در ساختارهای بالا پیدا نشد
                     setFormErrors({
                         non_field_errors: 'خطا در ارسال درخواست. لطفاً دوباره تلاش کنید.'
                     });
                 }
-            } else if (error.message) {
-                // اگر خطا پیام داشته باشد
+            }
+            // اگر خطا مستقیماً پیام داشته باشد
+            else if (error.message) {
                 setFormErrors({
                     non_field_errors: error.message
                 });
-            } else {
-                // خطای ناشناخته
+            }
+            // اگر هیچ اطلاعاتی در خطا وجود نداشت
+            else {
                 setFormErrors({
                     non_field_errors: 'خطا در ارسال درخواست. لطفاً دوباره تلاش کنید.'
                 });
@@ -174,8 +192,28 @@ export default function LoginForm({ onSuccess }: LoginFormProps) {
         }
 
         try {
-            await validateLoginOtp(token, otpCode);
-            toast.success('ورود با موفقیت انجام شد');
+            const userData = await validateLoginOtp(token, otpCode);
+            console.log('اطلاعات کاربر دریافت شده:', userData);
+
+            // بررسی اینکه آیا اطلاعات کاربر دریافت شده است
+            if (!userData || (!userData.phone && !userData.user_type)) {
+                // اگر اطلاعات کاربر خالی باشد، هنوز پیام موفقیت را نمایش می‌دهیم 
+                // اما یک هشدار هم نمایش می‌دهیم که اطلاعات کامل نیست
+                toast.success('ورود با موفقیت انجام شد');
+                toast('اطلاعات کاربری شما به صورت کامل دریافت نشد. لطفاً اطلاعات پروفایل خود را تکمیل کنید.', {
+                    duration: 5000,
+                    icon: '⚠️',
+                    style: {
+                        backgroundColor: '#fff8e1',
+                        color: '#ff9800'
+                    }
+                });
+            } else {
+                // اگر اطلاعات کاربر با موفقیت دریافت شده باشد
+                toast.success('ورود با موفقیت انجام شد');
+            }
+
+            // فراخوانی onSuccess یا هدایت به صفحه اصلی
             if (onSuccess) {
                 onSuccess();
             } else {
@@ -184,18 +222,28 @@ export default function LoginForm({ onSuccess }: LoginFormProps) {
         } catch (error: any) {
             console.error('خطا در تایید کد OTP:', error);
 
-            // مدیریت بهتر خطاها بر اساس ساختار پاسخ سرور
+            // پاک کردن خطاهای قبلی
+            setFormErrors({});
+
+            // خطاهای مختلف API
             if (error.response?.data) {
                 const apiErrors: Record<string, string> = {};
 
-                // خطاهای مربوط به کد
+                // مدیریت ساختارهای مختلف خطا
+                // ساختار 1: خطاهای مستقیم فیلد در سطح بالا
                 if (error.response.data.code) {
                     apiErrors.otp = Array.isArray(error.response.data.code)
                         ? error.response.data.code[0]
                         : error.response.data.code;
                 }
 
-                // خطاهای ساختار Detail
+                if (error.response.data.non_field_errors) {
+                    apiErrors.non_field_errors = Array.isArray(error.response.data.non_field_errors)
+                        ? error.response.data.non_field_errors[0]
+                        : error.response.data.non_field_errors;
+                }
+
+                // ساختار 2: خطاها در Detail
                 if (error.response.data.Detail) {
                     if (typeof error.response.data.Detail === 'string') {
                         apiErrors.non_field_errors = error.response.data.Detail;
@@ -205,32 +253,40 @@ export default function LoginForm({ onSuccess }: LoginFormProps) {
                                 ? error.response.data.Detail.code[0]
                                 : error.response.data.Detail.code;
                         }
+
+                        if (error.response.data.Detail.message) {
+                            apiErrors.non_field_errors = error.response.data.Detail.message;
+                        }
                     }
                 }
 
-                // خطاهای عمومی 
-                if (error.response.data.non_field_errors) {
-                    apiErrors.non_field_errors = Array.isArray(error.response.data.non_field_errors)
-                        ? error.response.data.non_field_errors[0]
-                        : error.response.data.non_field_errors;
+                // ساختار 3: خطا در error یا message
+                if (error.response.data.error) {
+                    apiErrors.non_field_errors = error.response.data.error;
                 }
 
-                // اگر حداقل یک خطا پیدا شده باشد
+                if (error.response.data.message) {
+                    apiErrors.non_field_errors = error.response.data.message;
+                }
+
+                // اگر حداقل یک خطا پیدا شد، آن را نمایش می‌دهیم
                 if (Object.keys(apiErrors).length > 0) {
                     setFormErrors(apiErrors);
                 } else {
-                    // اگر خطایی از سرور دریافت نشد اما پاسخ خطا داشتیم
+                    // اگر هیچ خطایی در ساختارهای بالا پیدا نشد
                     setFormErrors({
                         non_field_errors: 'کد تایید نامعتبر است. لطفاً دوباره تلاش کنید.'
                     });
                 }
-            } else if (error.message) {
-                // اگر خطا پیام داشته باشد
+            }
+            // اگر خطا مستقیماً پیام داشته باشد
+            else if (error.message) {
                 setFormErrors({
                     otp: error.message
                 });
-            } else {
-                // خطای ناشناخته
+            }
+            // اگر هیچ اطلاعاتی در خطا وجود نداشت
+            else {
                 setFormErrors({
                     non_field_errors: 'خطا در تایید کد. لطفاً دوباره تلاش کنید.'
                 });

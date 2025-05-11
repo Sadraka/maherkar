@@ -408,7 +408,7 @@ const authService = {
             });
 
             // تنظیم تایم‌اوت برای درخواست
-            const response = await axios.post<TokenResponse>(
+            const response = await axios.post<TokenResponse | any>(
                 `${AUTH_URL}/login-validate-otp/${token}/`,
                 { code },
                 {
@@ -422,20 +422,53 @@ const authService = {
 
             console.log('پاسخ دریافتی از API پس از تایید کد OTP برای ورود:', {
                 status: response.status,
-                hasTokens: !!response.data,
+                data: response.data,
                 timestamp: new Date().toISOString()
             });
 
+            // بررسی ساختار پاسخ سرور
+            let accessToken = '';
+            let refreshToken = '';
+
+            // اگر پاسخ به صورت متعارف باشد (توکن‌ها در سطح بالایی)
+            if (response.data && response.data.access && response.data.refresh) {
+                accessToken = response.data.access;
+                refreshToken = response.data.refresh;
+            }
+            // اگر پاسخ در ساختار Detail.Token باشد
+            else if (response.data?.Detail?.Token) {
+                accessToken = response.data.Detail.Token.access;
+                refreshToken = response.data.Detail.Token.refresh;
+            }
+            // اگر هیچ توکنی یافت نشد
+            else {
+                throw new Error('ساختار پاسخ سرور نامعتبر است. لطفاً دوباره تلاش کنید.');
+            }
+
+            // اطمینان از وجود توکن‌ها
+            if (!accessToken || !refreshToken) {
+                console.error('توکن‌ها در پاسخ سرور یافت نشد:', response.data);
+                throw new Error('دریافت توکن با شکست مواجه شد. لطفاً دوباره تلاش کنید.');
+            }
+
             // ذخیره توکن‌ها در کوکی با مدت انقضای 30 روز
-            cookieService.setCookie(COOKIE_NAMES.ACCESS_TOKEN, response.data.access, 30);
-            cookieService.setCookie(COOKIE_NAMES.REFRESH_TOKEN, response.data.refresh, 30);
+            cookieService.setCookie(COOKIE_NAMES.ACCESS_TOKEN, accessToken, 30);
+            cookieService.setCookie(COOKIE_NAMES.REFRESH_TOKEN, refreshToken, 30);
+
+            // اول بررسی می‌کنیم آیا اطلاعات کاربر در پاسخ وجود دارد
+            if (response.data?.Detail?.User) {
+                const userData = response.data.Detail.User;
+                cookieService.setObjectCookie(COOKIE_NAMES.USER_DATA, userData, 30);
+                console.log('اطلاعات کاربر از پاسخ سرور دریافت شد:', userData);
+                return userData;
+            }
 
             // دریافت اطلاعات کاربر با استفاده از توکن دسترسی
             try {
                 // تنظیم هدر authorization برای درخواست بعدی
                 const userResponse = await axios.get<UserData>(`${AUTH_URL}/user/`, {
                     headers: {
-                        'Authorization': `Bearer ${response.data.access}`
+                        'Authorization': `Bearer ${accessToken}`
                     }
                 });
 
@@ -446,10 +479,48 @@ const authService = {
 
                 // برگرداندن اطلاعات کاربر
                 return userResponse.data;
-            } catch (userError) {
+            } catch (userError: any) {
                 console.error('خطا در دریافت اطلاعات کاربر:', userError);
-                // در صورت خطا در دریافت اطلاعات کاربر، هنوز احراز هویت موفق بوده است
-                throw new Error('ورود با موفقیت انجام شد اما دریافت اطلاعات کاربر با خطا مواجه شد.');
+
+                // تلاش برای استخراج اطلاعات اساسی کاربر از پیلود JWT
+                try {
+                    const payloadBase64 = accessToken.split('.')[1];
+                    const payload = JSON.parse(atob(payloadBase64));
+                    console.log('استخراج اطلاعات از JWT:', payload);
+
+                    // ساخت اطلاعات اولیه کاربر از طریق پیلود JWT
+                    const basicUserData: UserData = {
+                        username: payload.username || '',
+                        email: payload.email || '',
+                        phone: payload.phone || '',
+                        user_type: payload.user_type || 'JS', // نوع کاربر پیش‌فرض
+                        full_name: payload.full_name || ''
+                    };
+
+                    // ذخیره اطلاعات پایه در کوکی
+                    cookieService.setObjectCookie(COOKIE_NAMES.USER_DATA, basicUserData, 30);
+
+                    console.log('اطلاعات پایه کاربر استخراج و ذخیره شد:', basicUserData);
+
+                    // برگرداندن اطلاعات پایه کاربر
+                    return basicUserData;
+                } catch (jwtError) {
+                    console.error('خطا در استخراج اطلاعات از JWT:', jwtError);
+
+                    // در صورت نبود هیچ داده‌ای، یک ساختار پایه برمی‌گردانیم تا حداقل ورود موفق باشد
+                    const emptyUserData: UserData = {
+                        username: '',
+                        email: '',
+                        phone: '',
+                        user_type: 'JS'
+                    };
+
+                    // ذخیره اطلاعات خالی در کوکی
+                    cookieService.setObjectCookie(COOKIE_NAMES.USER_DATA, emptyUserData, 30);
+
+                    // بازگرداندن اطلاعات خالی کاربر
+                    return emptyUserData;
+                }
             }
         } catch (error: any) {
             console.error('خطا در تایید کد OTP برای ورود:', {
@@ -461,12 +532,37 @@ const authService = {
 
             // بهبود مدیریت خطاها
             if (error.response) {
-                // خطای اعتبارسنجی کد OTP
-                if (error.response.data?.code) {
-                    const codeError = Array.isArray(error.response.data.code)
-                        ? error.response.data.code[0]
-                        : error.response.data.code;
-                    throw new Error(codeError);
+                // بررسی ساختار پاسخ خطا
+                if (error.response.data) {
+                    // خطای اعتبارسنجی کد OTP
+                    if (error.response.data.code) {
+                        const codeError = Array.isArray(error.response.data.code)
+                            ? error.response.data.code[0]
+                            : error.response.data.code;
+                        throw new Error(codeError);
+                    }
+
+                    // خطاهای ساختار Detail
+                    if (error.response.data.Detail) {
+                        if (typeof error.response.data.Detail === 'string') {
+                            throw new Error(error.response.data.Detail);
+                        } else if (typeof error.response.data.Detail === 'object') {
+                            if (error.response.data.Detail.code) {
+                                const codeError = Array.isArray(error.response.data.Detail.code)
+                                    ? error.response.data.Detail.code[0]
+                                    : error.response.data.Detail.code;
+                                throw new Error(codeError);
+                            }
+                        }
+                    }
+
+                    // خطاهای non_field_errors
+                    if (error.response.data.non_field_errors) {
+                        const nonFieldError = Array.isArray(error.response.data.non_field_errors)
+                            ? error.response.data.non_field_errors[0]
+                            : error.response.data.non_field_errors;
+                        throw new Error(nonFieldError);
+                    }
                 }
 
                 // خطای OTP غیرفعال
@@ -504,10 +600,14 @@ const authService = {
         return !!cookieService.getCookie(COOKIE_NAMES.ACCESS_TOKEN);
     },
 
-    // دریافت اطلاعات کاربر
+    // دریافت اطلاعات کاربر از کوکی
     getUserData: (): UserData | null => {
-        if (typeof window === 'undefined') return null; // اجرای سمت سرور
-        return cookieService.getObjectCookie<UserData>(COOKIE_NAMES.USER_DATA);
+        try {
+            return cookieService.getObjectCookie<UserData>(COOKIE_NAMES.USER_DATA);
+        } catch (error) {
+            console.error('خطا در بازیابی اطلاعات کاربر از کوکی:', error);
+            return null;
+        }
     },
 
     // تابع دریافت توکن برای استفاده در درخواست‌ها
