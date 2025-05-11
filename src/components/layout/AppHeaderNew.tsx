@@ -407,50 +407,51 @@ export default function AppHeaderNew() {
                 </Box>
               </Box>
 
-              {/* آیکون اعلان‌ها (زنگوله) */}
-              <Tooltip title="اعلان‌ها" arrow>
-                <Box
-                  component="a"
-                  href="#"
-                  sx={{
-                    width: { xs: '34px', md: '42px' },
-                    height: { xs: '34px', md: '42px' },
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    cursor: 'pointer',
-                    transition: 'all 0.25s ease',
-                    position: 'relative',
-                    overflow: 'hidden',
-                    '&:hover': {
-                      transform: 'translateY(-2px)',
-                      '& .icon': {
-                        color: theme.palette.primary.dark
+              {/* آیکون اعلان‌ها (زنگوله) - فقط برای کاربران لاگین شده */}
+              {isAuthenticated && (
+                <Tooltip title="اعلان‌ها" arrow>
+                  <Box
+                    component="a"
+                    href="#"
+                    sx={{
+                      width: { xs: '34px', md: '42px' },
+                      height: { xs: '34px', md: '42px' },
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      cursor: 'pointer',
+                      transition: 'all 0.25s ease',
+                      position: 'relative',
+                      overflow: 'hidden',
+                      '&:hover': {
+                        transform: 'translateY(-2px)',
+                        '& .icon': {
+                          color: theme.palette.primary.dark
+                        }
                       }
-                    }
-                  }}
-                >
-                  <FontAwesomeIcon
-                    icon={faBell}
-                    className="icon"
-                    style={{
-                      fontSize: '1.2rem',
-                      width: '20px',
-                      height: '20px',
-                      color: theme.palette.primary.main,
-                      transition: 'all 0.25s ease'
                     }}
-                  />
-                </Box>
-              </Tooltip>
+                  >
+                    <FontAwesomeIcon
+                      icon={faBell}
+                      className="icon"
+                      style={{
+                        fontSize: '1.2rem',
+                        width: '20px',
+                        height: '20px',
+                        color: theme.palette.primary.main,
+                        transition: 'all 0.25s ease'
+                      }}
+                    />
+                  </Box>
+                </Tooltip>
+              )}
 
               {/* کامپوننت منوی کاربر */}
               <UserMenu
                 isLoggedIn={isAuthenticated}
                 user={user ? {
-                  name: user.full_name || user.username,
-                  email: user.email || user.phone,
-                  role: user.user_type === 'JS' ? 'candidate' : 'employer'
+                  name: user.full_name || '',
+                  role: user.user_type
                 } : undefined}
               />
             </Box>

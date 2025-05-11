@@ -22,7 +22,8 @@ import {
     faCog,
     faFileAlt,
     faBriefcase,
-    faUserCircle
+    faUserCircle,
+    faPhone
 } from '@fortawesome/free-solid-svg-icons';
 import { useAuth } from '@/contexts/AuthContext';
 
@@ -32,17 +33,51 @@ interface UserMenuProps {
         name?: string;
         email?: string;
         avatar?: string;
-        role?: 'employer' | 'candidate' | 'admin';
+        role?: string; // پشتیبانی از همه انواع نقش‌ها ('JS', 'EM', 'AD', 'SU', 'employer', 'candidate', 'admin')
     };
     isLoggedIn: boolean;
 }
 
-export default function UserMenu({ user, isLoggedIn }: UserMenuProps) {
+export default function UserMenu({ user: propUser, isLoggedIn }: UserMenuProps) {
     const theme = useTheme();
     const router = useRouter();
-    const { logout: authLogout } = useAuth();
+    const { logout: authLogout, user: authUser } = useAuth();
     const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
     const open = Boolean(anchorEl);
+
+    // ترکیب اطلاعات کاربر از props و context
+    const currentUser = {
+        name: authUser?.full_name || propUser?.name || '',
+        phone: authUser?.phone || '',
+        avatar: propUser?.avatar || '',
+        role: authUser?.user_type || propUser?.role || '',
+    };
+
+    // تبدیل نوع کاربر به فارسی
+    const getUserRoleText = (role: string) => {
+        switch (role) {
+            case 'JS': 
+            case 'candidate': 
+                return 'جوینده کار';
+            case 'EM': 
+            case 'employer': 
+                return 'کارفرما';
+            case 'AD': 
+                return 'مدیر';
+            case 'SU': 
+                return 'پشتیبان';
+            default:
+                return 'کاربر';
+        }
+    };
+
+    // حرف اول نام برای نمایش در آواتار
+    const getAvatarText = () => {
+        if (currentUser.name) {
+            return currentUser.name.charAt(0).toUpperCase();
+        }
+        return '';
+    };
 
     // مدیریت باز و بسته شدن منو
     const handleClick = (event: MouseEvent<HTMLElement>) => {
@@ -124,10 +159,10 @@ export default function UserMenu({ user, isLoggedIn }: UserMenuProps) {
                         }
                     }}
                 >
-                    {user?.avatar ? (
+                    {currentUser.avatar ? (
                         <Avatar
-                            src={user.avatar}
-                            alt={user.name || 'کاربر'}
+                            src={currentUser.avatar}
+                            alt={currentUser.name || 'کاربر'}
                             sx={{
                                 width: { xs: 32, md: 38 },
                                 height: { xs: 32, md: 38 },
@@ -144,7 +179,7 @@ export default function UserMenu({ user, isLoggedIn }: UserMenuProps) {
                                 fontSize: '1rem'
                             }}
                         >
-                            {user?.name ? user.name.charAt(0).toUpperCase() : (
+                            {getAvatarText() || (
                                 <FontAwesomeIcon
                                     icon={faUserCircle}
                                     style={{
@@ -202,13 +237,18 @@ export default function UserMenu({ user, isLoggedIn }: UserMenuProps) {
                 {/* هدر منو - اطلاعات کاربر */}
                 <Box sx={{ px: 2, py: 1.5 }}>
                     <Typography variant="subtitle1" fontWeight={600}>
-                        {user?.name || 'کاربر ماهرکار'}
+                        {currentUser.name || 'کاربر ماهرکار'}
                     </Typography>
-                    <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
-                        {user?.email || 'بدون ایمیل'}
-                    </Typography>
+                    
+                    <Box sx={{ display: 'flex', alignItems: 'center', mt: 0.5 }}>
+                        <FontAwesomeIcon icon={faPhone} style={{ fontSize: '0.7rem', color: theme.palette.text.secondary, marginLeft: '5px' }} />
+                        <Typography variant="body2" color="text.secondary">
+                            {currentUser.phone || 'شماره تلفن نامشخص'}
+                        </Typography>
+                    </Box>
+                    
                     <Typography variant="caption" color="text.secondary" sx={{ mt: 0.5, display: 'block', fontSize: '0.7rem' }}>
-                        {user?.role === 'employer' ? 'کارفرما' : user?.role === 'candidate' ? 'کارجو' : 'کاربر'}
+                        {getUserRoleText(currentUser.role)}
                     </Typography>
                 </Box>
 
@@ -222,7 +262,7 @@ export default function UserMenu({ user, isLoggedIn }: UserMenuProps) {
                     مشاهده پروفایل
                 </MenuItem>
 
-                {user?.role === 'candidate' && (
+                {(currentUser.role === 'candidate' || currentUser.role === 'JS') && (
                     <MenuItem component={Link} href="/resume" onClick={handleClose} sx={{ py: 1.5 }}>
                         <ListItemIcon>
                             <FontAwesomeIcon icon={faFileAlt} style={{ fontSize: '1rem', color: theme.palette.candidate.main }} />
@@ -231,7 +271,7 @@ export default function UserMenu({ user, isLoggedIn }: UserMenuProps) {
                     </MenuItem>
                 )}
 
-                {user?.role === 'employer' && (
+                {(currentUser.role === 'employer' || currentUser.role === 'EM') && (
                     <MenuItem component={Link} href="/dashboard/jobs" onClick={handleClose} sx={{ py: 1.5 }}>
                         <ListItemIcon>
                             <FontAwesomeIcon icon={faBriefcase} style={{ fontSize: '1rem', color: theme.palette.employer.main }} />
@@ -249,9 +289,9 @@ export default function UserMenu({ user, isLoggedIn }: UserMenuProps) {
 
                 <Divider />
 
-                <MenuItem onClick={handleLogout} sx={{ py: 1.5, color: theme.palette.error.main }}>
-                    <ListItemIcon sx={{ color: theme.palette.error.main }}>
-                        <FontAwesomeIcon icon={faSignOutAlt} style={{ fontSize: '1rem' }} />
+                <MenuItem onClick={handleLogout} sx={{ py: 1.5, color: '#d32f2f' }}>
+                    <ListItemIcon sx={{ color: 'inherit' }}>
+                        <FontAwesomeIcon icon={faSignOutAlt} style={{ fontSize: '1rem', color: '#d32f2f' }} />
                     </ListItemIcon>
                     خروج از حساب
                 </MenuItem>
