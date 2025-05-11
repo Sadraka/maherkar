@@ -14,7 +14,7 @@ import {
     useTheme
 } from '@mui/material';
 import { useAuth } from '@/contexts/AuthContext';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import PhoneIcon from '@mui/icons-material/Phone';
 import VerifiedUserIcon from '@mui/icons-material/VerifiedUser';
 import Link from 'next/link';
@@ -29,6 +29,7 @@ interface LoginFormProps {
 export default function LoginForm({ onSuccess }: LoginFormProps) {
     const { loginOtp, validateLoginOtp, loading } = useAuth();
     const router = useRouter();
+    const searchParams = useSearchParams();
     const [phone, setPhone] = useState('');
     const [otpCode, setOtpCode] = useState('');
     const [token, setToken] = useState('');
@@ -41,6 +42,9 @@ export default function LoginForm({ onSuccess }: LoginFormProps) {
 
     // تایمر ارسال مجدد کد OTP
     const [resendTimer, setResendTimer] = useState(0); // شمارنده به ثانیه
+
+    // دریافت redirect URL از پارامترهای URL
+    const redirectUrl = searchParams.get('redirect') || '/';
 
     // بررسی وجود تایمر در localStorage هنگام لود اولیه
     useEffect(() => {
@@ -305,7 +309,9 @@ export default function LoginForm({ onSuccess }: LoginFormProps) {
             if (onSuccess) {
                 onSuccess();
             } else {
-                router.push('/');
+                // استفاده از مسیر redirect در صورت وجود
+                const decodedRedirectUrl = redirectUrl ? decodeURIComponent(redirectUrl) : '/';
+                router.push(decodedRedirectUrl);
             }
         } catch (error: any) {
             console.error('خطا در تایید کد OTP:', error);
