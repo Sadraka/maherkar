@@ -5,12 +5,12 @@ import {
   Typography, 
   Container, 
   Grid, 
-  Link,
   Stack,
   IconButton,
   Divider,
   Paper
 } from '@mui/material';
+import Link from 'next/link';
 import FacebookIcon from '@mui/icons-material/Facebook';
 import TwitterIcon from '@mui/icons-material/Twitter';
 import InstagramIcon from '@mui/icons-material/Instagram';
@@ -46,8 +46,8 @@ export default function Footer() {
       title: 'دسترسی سریع',
       links: [
         { title: 'سوالات متداول', url: '#' },
-        { title: 'قوانین و مقررات', url: '#' },
-        { title: 'حریم خصوصی', url: '#' },
+        { title: 'شرایط و قوانین', url: '/terms' },
+        { title: 'حریم خصوصی', url: '/privacy' },
         { title: 'تماس با ما', url: '#' }
       ]
     }
@@ -130,7 +130,7 @@ export default function Footer() {
               {socialLinks.map((social, index) => (
                 <IconButton 
                   key={index} 
-                  component="a" 
+                  component={Link}
                   href={social.url} 
                   size="small" 
                   sx={{ 
@@ -211,10 +211,10 @@ export default function Footer() {
                   </Typography>
                   <Stack spacing={{ xs: 1, md: 1.5 }} sx={{ px: { xs: 1, md: 0 } }}>
                     {category.links.map((link, linkIndex) => (
-                      <Link 
+                      <Box 
                         key={linkIndex}
+                        component={Link}
                         href={link.url} 
-                        underline="none" 
                         sx={{
                           color: 'text.secondary',
                           fontSize: { xs: '0.8rem', md: '0.9rem' },
@@ -225,11 +225,12 @@ export default function Footer() {
                             ),
                             transform: 'translateX(-2px)'
                           },
-                          display: 'inline-block'
+                          display: 'inline-block',
+                          textDecoration: 'none'
                         }}
                       >
                         {link.title}
-                      </Link>
+                      </Box>
                     ))}
                   </Stack>
                 </Grid>
@@ -253,10 +254,10 @@ export default function Footer() {
                   </Typography>
                   <Stack spacing={{ xs: 1, md: 1.5 }} sx={{ px: { xs: 1, md: 0 } }}>
                     {footerLinks[2].links.map((link, linkIndex) => (
-                      <Link 
+                      <Box 
                         key={linkIndex}
+                        component={Link}
                         href={link.url} 
-                        underline="none" 
                         sx={{
                           color: 'text.secondary',
                           fontSize: { xs: '0.8rem', md: '0.9rem' },
@@ -265,11 +266,12 @@ export default function Footer() {
                             color: '#333',
                             transform: 'translateX(-2px)'
                           },
-                          display: 'inline-block'
+                          display: 'inline-block',
+                          textDecoration: 'none'
                         }}
                       >
                         {link.title}
-                      </Link>
+                      </Box>
                     ))}
                   </Stack>
                 </Box>
@@ -338,7 +340,7 @@ export default function Footer() {
                       {socialLinks.map((social, index) => (
                         <IconButton 
                           key={index} 
-                          component="a" 
+                          component={Link}
                           href={social.url} 
                           size="small" 
                           sx={{ 

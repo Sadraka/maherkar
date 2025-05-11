@@ -19,7 +19,10 @@ import {
     FormControl,
     InputLabel,
     useMediaQuery,
-    useTheme
+    useTheme,
+    Checkbox,
+    FormControlLabel,
+    FormHelperText
 } from '@mui/material';
 import { styled } from '@mui/material/styles';
 import { useAuth } from '@/contexts/AuthContext';
@@ -91,7 +94,7 @@ export default function RegisterForm({ onSuccess }: RegisterFormProps) {
 
     // تایمر ارسال مجدد کد OTP (120 ثانیه = 2 دقیقه)
     const [resendTimer, setResendTimer] = useState(0);
-
+    
     // فرم ثبت‌نام - فقط شامل نام کامل، شماره تلفن و نوع کاربر
     const [formData, setFormData] = useState({
         phone: '',
@@ -240,24 +243,29 @@ export default function RegisterForm({ onSuccess }: RegisterFormProps) {
     // تابع بروزرسانی کد تایید
     const handleOtpChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setPhoneOtpCode(e.target.value);
-        setOtpError('');
+        if (otpError) {
+            setOtpError('');
+        }
     };
 
     // اعتبارسنجی شماره تلفن در مرحله اول
     const validatePhoneStep = (): boolean => {
         const errors: Record<string, string> = {};
+        let isValid = true;
 
         // بررسی خالی نبودن شماره تلفن
         if (!formData.phone.trim()) {
             errors.phone = 'شماره همراه الزامی است';
+            isValid = false;
         }
         // بررسی فرمت شماره تلفن (۱۱ رقم و شروع با ۰۹)
         else if (!/^09\d{9}$/.test(formData.phone.trim())) {
             errors.phone = 'شماره همراه باید ۱۱ رقم و با ۰۹ شروع شود';
+            isValid = false;
         }
 
         setFormErrors(errors);
-        return Object.keys(errors).length === 0;
+        return isValid;
     };
 
     // اعتبارسنجی کد OTP در مرحله سوم
@@ -535,7 +543,7 @@ export default function RegisterForm({ onSuccess }: RegisterFormProps) {
         }
     };
 
-    // رندر فرم مرحله اول (شماره تلفن)
+    // رندر فرم مرحله اول (شماره تلفن) - با متن قوانین اما بدون چک‌باکس
     const renderPhoneForm = () => {
         return (
             <Box component="form" onSubmit={handlePhoneSubmit}>
@@ -561,6 +569,13 @@ export default function RegisterForm({ onSuccess }: RegisterFormProps) {
                             }}
                             inputProps={{ dir: "ltr" }}
                         />
+                    </Box>
+
+                    {/* متن شرایط و قوانین بدون چک‌باکس */}
+                    <Box sx={{ textAlign: 'center' }}>
+                        <Typography variant={isMobile ? "body2" : "body1"} color="text.secondary">
+                            با ثبت‌نام در ماهرکار، <MuiLink component={Link} href="/terms" target="_blank" underline="hover">شرایط و قوانین</MuiLink> و <MuiLink component={Link} href="/privacy" target="_blank" underline="hover">بیانیه حریم خصوصی</MuiLink> را می‌پذیرید
+                        </Typography>
                     </Box>
 
                     <Box>

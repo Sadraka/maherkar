@@ -20,6 +20,9 @@ const protectedPaths = [
 // مسیرهایی که کاربر احراز هویت شده نباید به آنها دسترسی داشته باشد
 const authPaths = ['/login', '/register'];
 
+// مسیرهایی که نیاز به احراز هویت ندارند (مسیرهای دسترسی عمومی)
+const publicPaths = ['/login', '/register', '/terms', '/privacy'];
+
 export function middleware(request: NextRequest) {
   // بررسی وجود توکن دسترسی
   const accessToken = request.cookies.get(COOKIE_NAMES.ACCESS_TOKEN)?.value;
