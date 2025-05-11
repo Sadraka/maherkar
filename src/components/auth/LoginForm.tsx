@@ -285,9 +285,11 @@ export default function LoginForm({ onSuccess }: LoginFormProps) {
             const userData = await validateLoginOtp(token, otpCode);
             console.log('اطلاعات کاربر دریافت شده:', userData);
 
-            // بررسی اینکه آیا اطلاعات کاربر دریافت شده است
+            // یک پیام موفقیت نمایش داده شود
+            toast.success('ورود با موفقیت انجام شد');
+            
+            // اگر اطلاعات کاربر ناقص باشد، یک پیام هشدار هم نمایش دهیم
             if (!userData || (!userData.phone && !userData.user_type)) {
-                toast.success('ورود با موفقیت انجام شد');
                 toast('اطلاعات کاربری شما به صورت کامل دریافت نشد. لطفاً اطلاعات پروفایل خود را تکمیل کنید.', {
                     duration: 5000,
                     icon: '⚠️',
@@ -296,8 +298,13 @@ export default function LoginForm({ onSuccess }: LoginFormProps) {
                         color: '#ff9800'
                     }
                 });
-            } else {
-                toast.success('ورود با موفقیت انجام شد');
+            }
+
+            // پاک کردن اطلاعات تایمر از localStorage
+            const phoneKey = phone.trim();
+            if (phoneKey) {
+                localStorage.removeItem(`otp_timer_${phoneKey}`);
+                localStorage.removeItem(`otp_step_${phoneKey}`);
             }
 
             if (onSuccess) {

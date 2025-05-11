@@ -215,7 +215,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         authService.logout();
         setIsAuthenticated(false);
         setUser(null);
-        toast.success('با موفقیت خارج شدید');
         router.push('/login');
     };
 
