@@ -547,7 +547,7 @@ export default function RegisterForm({ onSuccess }: RegisterFormProps) {
     const renderPhoneForm = () => {
         return (
             <Box component="form" onSubmit={handlePhoneSubmit}>
-                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+                <Box sx={{ display: 'flex', flexDirection: 'column', gap: { xs: 3, sm: 3 } }}>
                     <Box>
                         <TextField
                             fullWidth
@@ -568,12 +568,13 @@ export default function RegisterForm({ onSuccess }: RegisterFormProps) {
                                 ),
                             }}
                             inputProps={{ dir: "ltr" }}
+                            size={isMobile ? "medium" : "medium"}
                         />
                     </Box>
 
                     {/* متن شرایط و قوانین بدون چک‌باکس */}
                     <Box sx={{ textAlign: 'center' }}>
-                        <Typography variant={isMobile ? "body2" : "body1"} color="text.secondary">
+                        <Typography variant={isMobile ? "body2" : "body1"} color="text.secondary" sx={{ lineHeight: 1.6 }}>
                             با ثبت‌نام در ماهرکار، <MuiLink component={Link} href="/terms" target="_blank" underline="hover">شرایط و قوانین</MuiLink> و <MuiLink component={Link} href="/privacy" target="_blank" underline="hover">بیانیه حریم خصوصی</MuiLink> را می‌پذیرید
                         </Typography>
                     </Box>
@@ -583,7 +584,7 @@ export default function RegisterForm({ onSuccess }: RegisterFormProps) {
                             fullWidth
                             type="submit"
                             variant="contained"
-                            size="large"
+                            size={isMobile ? "large" : "large"}
                             disabled={isSubmitting}
                             sx={{
                                 mt: 2,
@@ -593,6 +594,7 @@ export default function RegisterForm({ onSuccess }: RegisterFormProps) {
                                     backgroundColor: employerColors.dark,
                                 },
                                 borderRadius: 2,
+                                fontSize: { xs: '1rem', sm: '1rem' }
                             }}
                         >
                             {isSubmitting ? <CircularProgress size={24} color="inherit" /> : 'ادامه'}
@@ -600,7 +602,7 @@ export default function RegisterForm({ onSuccess }: RegisterFormProps) {
                     </Box>
 
                     <Box sx={{ mt: 2, textAlign: 'center' }}>
-                        <Typography>
+                        <Typography variant={isMobile ? "body1" : "body1"}>
                             قبلاً ثبت‌نام کرده‌اید؟{' '}
                             <MuiLink
                                 component={Link}
@@ -621,7 +623,7 @@ export default function RegisterForm({ onSuccess }: RegisterFormProps) {
     const renderUserInfoForm = () => {
         return (
             <Box component="form" onSubmit={handleUserInfoSubmit}>
-                <Box sx={{ display: 'flex', flexDirection: 'column', gap: { xs: 2, sm: 3 } }}>
+                <Box sx={{ display: 'flex', flexDirection: 'column', gap: { xs: 3, sm: 3 } }}>
                     <Box>
                         <TextField
                             fullWidth
@@ -641,12 +643,12 @@ export default function RegisterForm({ onSuccess }: RegisterFormProps) {
                                 ),
                             }}
                             inputProps={{ dir: "rtl" }}
-                            size={isMobile ? "small" : "medium"}
+                            size={isMobile ? "medium" : "medium"}
                         />
                     </Box>
 
                     <Box>
-                        <FormControl fullWidth variant="outlined" size={isMobile ? "small" : "medium"}>
+                        <FormControl fullWidth variant="outlined" size={isMobile ? "medium" : "medium"}>
                             <InputLabel id="user-type-label">نوع کاربر</InputLabel>
                             <Select
                                 labelId="user-type-label"
@@ -662,7 +664,11 @@ export default function RegisterForm({ onSuccess }: RegisterFormProps) {
                     </Box>
 
                     {formErrors.general && (
-                        <Typography color="error" variant="body2" sx={{ mt: 1 }}>
+                        <Typography
+                            color="error"
+                            variant="body2"
+                            sx={{ mt: 1 }}
+                        >
                             {formErrors.general}
                         </Typography>
                     )}
@@ -671,7 +677,7 @@ export default function RegisterForm({ onSuccess }: RegisterFormProps) {
                         display: 'flex',
                         flexDirection: { xs: 'column', sm: 'row' },
                         justifyContent: 'space-between',
-                        gap: { xs: 1, sm: 2 },
+                        gap: { xs: 2, sm: 2 },
                         mt: { xs: 1, sm: 2 }
                     }}>
                         <Button
@@ -679,17 +685,17 @@ export default function RegisterForm({ onSuccess }: RegisterFormProps) {
                             onClick={() => setActiveStep(0)}
                             disabled={isSubmitting}
                             fullWidth={isMobile}
-                            size={isMobile ? "medium" : "large"}
+                            size={isMobile ? "large" : "large"}
                             sx={{
                                 order: { xs: 2, sm: 1 }, // در موبایل پایین باشد
-                                px: 3,
-                                py: { xs: 0.5, sm: 1 },
+                                py: { xs: 1.5, sm: 1.5 },
                                 borderColor: employerColors.primary,
                                 color: employerColors.primary,
                                 '&:hover': {
                                     borderColor: employerColors.dark,
                                     backgroundColor: 'rgba(0, 0, 0, 0.04)',
                                 },
+                                fontSize: { xs: '1rem', sm: '1rem' }
                             }}
                         >
                             بازگشت
@@ -700,18 +706,18 @@ export default function RegisterForm({ onSuccess }: RegisterFormProps) {
                             variant="contained"
                             disabled={isSubmitting}
                             fullWidth={isMobile}
-                            size={isMobile ? "medium" : "large"}
+                            size={isMobile ? "large" : "large"}
                             sx={{
                                 order: { xs: 1, sm: 2 }, // در موبایل بالا باشد
-                                px: 3,
-                                py: { xs: 0.5, sm: 1 },
+                                py: { xs: 1.5, sm: 1.5 },
                                 backgroundColor: employerColors.primary,
                                 '&:hover': {
                                     backgroundColor: employerColors.dark,
                                 },
+                                fontSize: { xs: '1rem', sm: '1rem' }
                             }}
                         >
-                            {isSubmitting ? <CircularProgress size={isMobile ? 20 : 24} color="inherit" /> : 'دریافت کد تایید'}
+                            {isSubmitting ? <CircularProgress size={24} color="inherit" /> : 'دریافت کد تایید'}
                         </Button>
                     </Box>
                 </Box>
@@ -723,8 +729,8 @@ export default function RegisterForm({ onSuccess }: RegisterFormProps) {
     const renderOtpForm = () => {
         return (
             <Box component="form" onSubmit={handleOtpSubmit}>
-                <Box sx={{ display: 'flex', flexDirection: 'column', gap: { xs: 2, sm: 3 } }}>
-                    <Typography variant={isMobile ? "body2" : "body1"} gutterBottom>
+                <Box sx={{ display: 'flex', flexDirection: 'column', gap: { xs: 3, sm: 3 } }}>
+                    <Typography variant={isMobile ? "body1" : "body1"} gutterBottom>
                         کد تایید به شماره {formData.phone} ارسال شد.
                     </Typography>
                     <Typography variant={isMobile ? "body2" : "body1"} color="text.secondary" gutterBottom>
@@ -743,7 +749,7 @@ export default function RegisterForm({ onSuccess }: RegisterFormProps) {
                             placeholder="کد ۶ رقمی"
                             autoFocus
                             inputProps={{ maxLength: 6, dir: "ltr" }}
-                            size={isMobile ? "small" : "medium"}
+                            size={isMobile ? "medium" : "medium"}
                         />
                     </Box>
 
@@ -751,7 +757,7 @@ export default function RegisterForm({ onSuccess }: RegisterFormProps) {
                         display: 'flex',
                         flexDirection: { xs: 'column', sm: 'row' },
                         justifyContent: 'space-between',
-                        gap: { xs: 1, sm: 2 },
+                        gap: { xs: 2, sm: 2 },
                         mt: { xs: 1, sm: 2 }
                     }}>
                         <Button
@@ -759,17 +765,17 @@ export default function RegisterForm({ onSuccess }: RegisterFormProps) {
                             onClick={() => setActiveStep(1)}
                             disabled={isSubmitting}
                             fullWidth={isMobile}
-                            size={isMobile ? "medium" : "large"}
+                            size={isMobile ? "large" : "large"}
                             sx={{
                                 order: { xs: 2, sm: 1 }, // در موبایل پایین باشد
-                                px: 3,
-                                py: { xs: 0.5, sm: 1 },
+                                py: { xs: 1.5, sm: 1.5 },
                                 borderColor: employerColors.primary,
                                 color: employerColors.primary,
                                 '&:hover': {
                                     borderColor: employerColors.dark,
                                     backgroundColor: 'rgba(0, 0, 0, 0.04)',
                                 },
+                                fontSize: { xs: '1rem', sm: '1rem' }
                             }}
                         >
                             بازگشت
@@ -780,29 +786,29 @@ export default function RegisterForm({ onSuccess }: RegisterFormProps) {
                             variant="contained"
                             disabled={isSubmitting}
                             fullWidth={isMobile}
-                            size={isMobile ? "medium" : "large"}
+                            size={isMobile ? "large" : "large"}
                             sx={{
                                 order: { xs: 1, sm: 2 }, // در موبایل بالا باشد
-                                px: 3,
-                                py: { xs: 0.5, sm: 1 },
+                                py: { xs: 1.5, sm: 1.5 },
                                 backgroundColor: employerColors.primary,
                                 '&:hover': {
                                     backgroundColor: employerColors.dark,
                                 },
+                                fontSize: { xs: '1rem', sm: '1rem' }
                             }}
                         >
-                            {isSubmitting ? <CircularProgress size={isMobile ? 20 : 24} color="inherit" /> : 'تایید کد'}
+                            {isSubmitting ? <CircularProgress size={24} color="inherit" /> : 'تایید کد'}
                         </Button>
                     </Box>
 
-                    <Box sx={{ display: 'flex', justifyContent: 'center', mt: { xs: 0, sm: 1 } }}>
+                    <Box sx={{ display: 'flex', justifyContent: 'center', mt: { xs: 1, sm: 1 } }}>
                         {resendTimer > 0 ? (
                             <Typography 
                                 variant="body2" 
                                 color="text.secondary"
                                 sx={{ 
                                     textAlign: 'center',
-                                    fontSize: { xs: '0.8rem', sm: '0.9rem' }
+                                    fontSize: { xs: '0.9rem', sm: '0.9rem' }
                                 }}
                             >
                                 امکان ارسال مجدد کد تا {formatTime(resendTimer)} دیگر
@@ -812,10 +818,10 @@ export default function RegisterForm({ onSuccess }: RegisterFormProps) {
                                 variant="text"
                                 onClick={handleResendOtp}
                                 disabled={isSubmitting || resendTimer > 0}
-                                size={isMobile ? "small" : "medium"}
+                                size={isMobile ? "medium" : "medium"}
                                 sx={{
                                     color: employerColors.primary,
-                                    fontSize: { xs: '0.8rem', sm: '0.9rem' },
+                                    fontSize: { xs: '0.9rem', sm: '0.9rem' },
                                     '&:hover': {
                                         backgroundColor: 'rgba(0, 0, 0, 0.04)',
                                     },
@@ -835,12 +841,20 @@ export default function RegisterForm({ onSuccess }: RegisterFormProps) {
             elevation={3}
             sx={{
                 p: { xs: 2, sm: 3, md: 5 },
-                px: { xs: 1.5, sm: 3, md: 5 },
-                borderRadius: { xs: 1, sm: 2 },
-                border: `1px solid ${employerColors.bgLight}`,
+                px: { xs: 2.5, sm: 3, md: 5 },
+                borderRadius: { xs: isMobile ? 0 : 1, sm: 2 },
+                border: isMobile ? 'none' : `1px solid ${employerColors.bgLight}`,
                 width: { xs: '100%', sm: '100%', md: '600px' },
                 maxWidth: '100%',
-                mx: 'auto'
+                mx: 'auto',
+                mb: { xs: 0, md: 4 },
+                display: 'flex',
+                flexDirection: 'column',
+                flexGrow: isMobile ? 1 : 0,
+                boxShadow: isMobile ? 'none' : 3,
+                height: isMobile ? '100vh' : 'auto',
+                overflow: 'auto',
+                justifyContent: isMobile ? 'center' : 'flex-start'
             }}
         >
             <Typography
@@ -851,8 +865,9 @@ export default function RegisterForm({ onSuccess }: RegisterFormProps) {
                 fontWeight="bold"
                 color={employerColors.primary}
                 sx={{
-                    mb: { xs: 2, sm: 3, md: 4 },
-                    fontSize: { xs: '1.4rem', sm: '1.75rem', md: '2rem' }
+                    mb: { xs: 3, sm: 3, md: 4 },
+                    mt: isMobile ? 2 : 0,
+                    fontSize: { xs: '1.5rem', sm: '1.75rem', md: '2rem' }
                 }}
             >
                 ثبت‌نام در ماهرکار
@@ -861,21 +876,29 @@ export default function RegisterForm({ onSuccess }: RegisterFormProps) {
             <Stepper
                 activeStep={activeStep}
                 sx={{
-                    mb: { xs: 2, sm: 3, md: 4 },
+                    mb: { xs: 3, sm: 3, md: 4 },
                     '& .MuiStepLabel-label': {
-                        fontSize: { xs: '0.65rem', sm: '0.8rem', md: '0.9rem' },
+                        fontSize: { xs: '0.7rem', sm: '0.8rem', md: '0.9rem' },
                         mt: { xs: 0.5, sm: 1 },
                         display: 'block',
-                        textAlign: 'center'
+                        textAlign: 'center',
+                        color: theme.palette.text.primary
                     },
                     '& .MuiStepIcon-root': {
-                        fontSize: { xs: '1.2rem', sm: '1.4rem', md: '1.5rem' }
+                        fontSize: { xs: '1.3rem', sm: '1.4rem', md: '1.5rem' }
                     },
                     '& .MuiStep-root': {
                         px: { xs: 0.5, sm: 1 }
                     },
                     '& .MuiStepConnector-root': {
                         mt: { xs: '10px', sm: '12px' }
+                    },
+                    '& .Mui-active': {
+                        color: `${employerColors.primary} !important`,
+                        fontWeight: 'bold'
+                    },
+                    '& .Mui-completed': {
+                        color: `${employerColors.primary} !important`
                     }
                 }}
                 orientation="horizontal"

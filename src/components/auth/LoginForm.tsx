@@ -468,13 +468,20 @@ export default function LoginForm({ onSuccess }: LoginFormProps) {
             elevation={3}
             sx={{
                 p: { xs: 2, sm: 3, md: 5 },
-                px: { xs: 1.5, sm: 3, md: 5 },
-                borderRadius: { xs: 1, sm: 2 },
-                border: `1px solid ${employerColors.bgLight}`,
+                px: { xs: 2.5, sm: 3, md: 5 },
+                borderRadius: { xs: isMobile ? 0 : 1, sm: 2 },
+                border: isMobile ? 'none' : `1px solid ${employerColors.bgLight}`,
                 width: { xs: '100%', sm: '100%', md: '600px' },
                 maxWidth: '100%',
                 mx: 'auto',
-                mb: { xs: 2, md: 4 }
+                mb: { xs: 0, md: 4 },
+                display: 'flex',
+                flexDirection: 'column',
+                flexGrow: isMobile ? 1 : 0,
+                boxShadow: isMobile ? 'none' : 3,
+                height: isMobile ? '100vh' : 'auto',
+                overflow: 'auto',
+                justifyContent: isMobile ? 'center' : 'flex-start'
             }}
         >
             <Typography
@@ -485,8 +492,9 @@ export default function LoginForm({ onSuccess }: LoginFormProps) {
                 fontWeight="bold"
                 color={employerColors.primary}
                 sx={{
-                    mb: { xs: 2, sm: 3, md: 4 },
-                    fontSize: { xs: '1.4rem', sm: '1.75rem', md: '2rem' }
+                    mb: { xs: 4, sm: 4, md: 5 },
+                    mt: isMobile ? 4 : 0,
+                    fontSize: { xs: '1.5rem', sm: '1.75rem', md: '2rem' }
                 }}
             >
                 ورود به ماهرکار
@@ -507,7 +515,8 @@ export default function LoginForm({ onSuccess }: LoginFormProps) {
                 <Box sx={{
                     display: 'flex',
                     flexDirection: 'column',
-                    gap: { xs: 2, sm: 3 }
+                    gap: { xs: 3, sm: 3 },
+                    width: '100%'
                 }}>
                     <Box>
                         <TextField
@@ -528,7 +537,7 @@ export default function LoginForm({ onSuccess }: LoginFormProps) {
                             }}
                             placeholder="۰۹۱۲۳۴۵۶۷۸۹"
                             inputProps={{ dir: "ltr" }}
-                            size={isMobile ? "small" : "medium"}
+                            size={isMobile ? "medium" : "medium"}
                                 autoFocus
                         />
                     </Box>
@@ -538,21 +547,21 @@ export default function LoginForm({ onSuccess }: LoginFormProps) {
                                 type="submit"
                             fullWidth
                                 variant="contained"
-                                size={isMobile ? "medium" : "large"}
+                                size={isMobile ? "large" : "large"}
                                 disabled={loading}
                                 sx={{
-                                    mt: { xs: 1, sm: 2 },
-                                    py: { xs: 1, sm: 1.5 },
+                                    mt: { xs: 2, sm: 2 },
+                                    py: { xs: 1.5, sm: 1.5 },
                                     backgroundColor: employerColors.primary,
                                     '&:hover': {
                                         backgroundColor: employerColors.dark,
                                     },
                                     borderRadius: { xs: 1, sm: 2 },
-                                    fontSize: { xs: '0.9rem', sm: '1rem' }
+                                    fontSize: { xs: '1rem', sm: '1rem' }
                                 }}
                             >
                                 {loading ? (
-                                    <CircularProgress size={isMobile ? 20 : 24} color="inherit" />
+                                    <CircularProgress size={isMobile ? 24 : 24} color="inherit" />
                                 ) : (
                                     'دریافت کد تأیید'
                                 )}
@@ -565,9 +574,10 @@ export default function LoginForm({ onSuccess }: LoginFormProps) {
                     <Box sx={{
                         display: 'flex',
                         flexDirection: 'column',
-                        gap: { xs: 2, sm: 3 }
+                        gap: { xs: 3, sm: 3 },
+                        width: '100%'
                     }}>
-                        <Typography variant={isMobile ? "body2" : "body1"} gutterBottom>
+                        <Typography variant={isMobile ? "body1" : "body1"} gutterBottom>
                             کد تایید به شماره {phone} ارسال شد.
                         </Typography>
 
@@ -590,7 +600,7 @@ export default function LoginForm({ onSuccess }: LoginFormProps) {
                                 }}
                                 placeholder="کد 6 رقمی"
                                 inputProps={{ dir: "ltr", maxLength: 6 }}
-                                size={isMobile ? "small" : "medium"}
+                                size={isMobile ? "medium" : "medium"}
                                 autoFocus
                             />
                     </Box>
@@ -600,21 +610,21 @@ export default function LoginForm({ onSuccess }: LoginFormProps) {
                             type="submit"
                             fullWidth
                             variant="contained"
-                            size={isMobile ? "medium" : "large"}
+                            size={isMobile ? "large" : "large"}
                             disabled={loading}
                             sx={{
-                                mt: { xs: 1, sm: 2 },
-                                py: { xs: 1, sm: 1.5 },
+                                mt: { xs: 2, sm: 2 },
+                                py: { xs: 1.5, sm: 1.5 },
                                 backgroundColor: employerColors.primary,
                                 '&:hover': {
                                     backgroundColor: employerColors.dark,
                                 },
                                 borderRadius: { xs: 1, sm: 2 },
-                                fontSize: { xs: '0.9rem', sm: '1rem' }
+                                fontSize: { xs: '1rem', sm: '1rem' }
                             }}
                         >
                             {loading ? (
-                                <CircularProgress size={isMobile ? 20 : 24} color="inherit" />
+                                <CircularProgress size={isMobile ? 24 : 24} color="inherit" />
                             ) : (
                                 'ورود'
                             )}
