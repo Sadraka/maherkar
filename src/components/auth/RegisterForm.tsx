@@ -89,12 +89,99 @@ export default function RegisterForm({ onSuccess }: RegisterFormProps) {
     // خطای کد تایید
     const [otpError, setOtpError] = useState('');
 
+    // تایمر ارسال مجدد کد OTP (120 ثانیه = 2 دقیقه)
+    const [resendTimer, setResendTimer] = useState(0);
+
     // فرم ثبت‌نام - فقط شامل نام کامل، شماره تلفن و نوع کاربر
     const [formData, setFormData] = useState({
         phone: '',
         full_name: '',
         user_type: 'JS', // پیش‌فرض: جوینده کار
     });
+
+    // بررسی وجود تایمر در localStorage هنگام لود اولیه
+    useEffect(() => {
+        const checkExistingTimer = () => {
+            const phoneKey = formData.phone.trim();
+            if (!phoneKey) return;
+            
+            try {
+                const storedData = localStorage.getItem(`reg_otp_timer_${phoneKey}`);
+                if (storedData) {
+                    const { endTime, userInfo } = JSON.parse(storedData);
+                    const now = new Date().getTime();
+                    const remainingTime = Math.round((endTime - now) / 1000);
+                    
+                    if (remainingTime > 0) {
+                        // استفاده از اطلاعات ذخیره شده کاربر
+                        if (userInfo?.full_name) {
+                            setFormData(prev => ({
+                                ...prev,
+                                full_name: userInfo.full_name,
+                                user_type: userInfo.user_type || 'JS'
+                            }));
+                        }
+                        
+                        // تنظیم تایمر
+                        setResendTimer(remainingTime);
+                        
+                        // اگر قبلاً مرحله OTP را دیده بود، مستقیم به آن برو
+                        const otpToken = localStorage.getItem(`reg_otp_token_${phoneKey}`);
+                        if (otpToken) {
+                            setPhoneOtpToken(otpToken);
+                            setActiveStep(2);
+                        } else if (formData.full_name) {
+                            // اگر نام کامل دارد، به مرحله دوم برو
+                            setActiveStep(1);
+                        }
+                    } else {
+                        // اگر تایمر منقضی شده، پاک کن
+                        localStorage.removeItem(`reg_otp_timer_${phoneKey}`);
+                        localStorage.removeItem(`reg_otp_token_${phoneKey}`);
+                    }
+                }
+            } catch (error) {
+                console.error('خطا در بازیابی تایمر ثبت‌نام:', error);
+            }
+        };
+        
+        checkExistingTimer();
+    }, [formData.phone]);
+
+    // وقتی کد ارسال می‌شود، تایمر شروع به کار می‌کند
+    useEffect(() => {
+        let interval: NodeJS.Timeout | null = null;
+        
+        if (resendTimer > 0) {
+            interval = setInterval(() => {
+                setResendTimer((prevTimer) => prevTimer - 1);
+                
+                // هر ثانیه بررسی شود که آیا تایمر به پایان رسیده
+                if (resendTimer <= 1) {
+                    const phoneKey = formData.phone.trim();
+                    if (phoneKey) {
+                        localStorage.removeItem(`reg_otp_timer_${phoneKey}`);
+                    }
+                }
+            }, 1000);
+        }
+        
+        return () => {
+            if (interval) clearInterval(interval);
+        };
+    }, [resendTimer, formData.phone]);
+
+    // تبدیل ثانیه به فرمت mm:ss فارسی
+    const formatTime = (seconds: number): string => {
+        const mins = Math.floor(seconds / 60);
+        const secs = seconds % 60;
+        const faDigits = ['۰', '۱', '۲', '۳', '۴', '۵', '۶', '۷', '۸', '۹'];
+        
+        const formattedMins = mins < 10 ? `۰${faDigits[mins]}` : `${faDigits[Math.floor(mins/10)]}${faDigits[mins%10]}`;
+        const formattedSecs = secs < 10 ? `۰${faDigits[secs]}` : `${faDigits[Math.floor(secs/10)]}${faDigits[secs%10]}`;
+        
+        return `${formattedMins}:${formattedSecs}`;
+    };
 
     // خطاهای اعتبارسنجی فرم
     const [formErrors, setFormErrors] = useState<Record<string, string>>({});
@@ -253,6 +340,34 @@ export default function RegisterForm({ onSuccess }: RegisterFormProps) {
         e.preventDefault();
         if (!validateUserInfoStep()) return;
 
+        // بررسی اگر تایمر از قبل فعال بود
+        const phoneKey = formData.phone.trim();
+        try {
+            const storedData = localStorage.getItem(`reg_otp_timer_${phoneKey}`);
+            if (storedData) {
+                const { endTime } = JSON.parse(storedData);
+                const now = new Date().getTime();
+                const remainingTime = Math.round((endTime - now) / 1000);
+                
+                if (remainingTime > 0) {
+                    // اگر تایمر فعال است و توکن ذخیره شده وجود دارد، مستقیم به مرحله OTP برو
+                    const otpToken = localStorage.getItem(`reg_otp_token_${phoneKey}`);
+                    if (otpToken) {
+                        setPhoneOtpToken(otpToken);
+                        setResendTimer(remainingTime);
+                        setActiveStep(2);
+                        return;
+                    }
+                } else {
+                    // تایمر منقضی شده، پاکش کن
+                    localStorage.removeItem(`reg_otp_timer_${phoneKey}`);
+                    localStorage.removeItem(`reg_otp_token_${phoneKey}`);
+                }
+            }
+        } catch (error) {
+            console.error('خطا در بررسی تایمر ثبت‌نام:', error);
+        }
+
         setIsSubmitting(true);
 
         try {
@@ -272,6 +387,20 @@ export default function RegisterForm({ onSuccess }: RegisterFormProps) {
 
             // پیشرفت به مرحله تایید OTP
             setActiveStep(2);
+            
+            // تنظیم تایمر و ذخیره در localStorage
+            setResendTimer(120);
+            const now = new Date().getTime();
+            const endTime = now + (120 * 1000); // 120 ثانیه بعد
+            localStorage.setItem(`reg_otp_timer_${phoneKey}`, JSON.stringify({ 
+                endTime,
+                userInfo: {
+                    full_name: formData.full_name,
+                    user_type: formData.user_type
+                }
+            }));
+            localStorage.setItem(`reg_otp_token_${phoneKey}`, otpToken);
+            
             toast.success('کد تایید برای شماره شما ارسال شد');
         } catch (error: any) {
             console.error('خطا در ارسال درخواست OTP:', error);
@@ -364,6 +493,9 @@ export default function RegisterForm({ onSuccess }: RegisterFormProps) {
 
     // ارسال مجدد کد تایید
     const handleResendOtp = async () => {
+        // اگر تایمر هنوز در حال شمارش است، اجازه ارسال مجدد نده
+        if (resendTimer > 0) return;
+        
         setIsSubmitting(true);
 
         try {
@@ -384,6 +516,20 @@ export default function RegisterForm({ onSuccess }: RegisterFormProps) {
             // پاک کردن کد قبلی
             setPhoneOtpCode('');
             setOtpError('');
+            
+            // تنظیم مجدد تایمر و ذخیره در localStorage
+            setResendTimer(120);
+            const phoneKey = formData.phone.trim();
+            const now = new Date().getTime();
+            const endTime = now + (120 * 1000); // 120 ثانیه بعد
+            localStorage.setItem(`reg_otp_timer_${phoneKey}`, JSON.stringify({ 
+                endTime,
+                userInfo: {
+                    full_name: formData.full_name,
+                    user_type: formData.user_type
+                }
+            }));
+            localStorage.setItem(`reg_otp_token_${phoneKey}`, otpToken);
 
             toast.success('کد تایید جدید ارسال شد');
         } catch (error: any) {
@@ -642,21 +788,34 @@ export default function RegisterForm({ onSuccess }: RegisterFormProps) {
                     </Box>
 
                     <Box sx={{ display: 'flex', justifyContent: 'center', mt: { xs: 0, sm: 1 } }}>
-                        <Button
-                            variant="text"
-                            onClick={handleResendOtp}
-                            disabled={isSubmitting}
-                            size={isMobile ? "small" : "medium"}
-                            sx={{
-                                color: employerColors.primary,
-                                fontSize: { xs: '0.8rem', sm: '0.9rem' },
-                                '&:hover': {
-                                    backgroundColor: 'rgba(0, 0, 0, 0.04)',
-                                },
-                            }}
-                        >
-                            ارسال مجدد کد تایید
-                        </Button>
+                        {resendTimer > 0 ? (
+                            <Typography 
+                                variant="body2" 
+                                color="text.secondary"
+                                sx={{ 
+                                    textAlign: 'center',
+                                    fontSize: { xs: '0.8rem', sm: '0.9rem' }
+                                }}
+                            >
+                                امکان ارسال مجدد کد تا {formatTime(resendTimer)} دیگر
+                            </Typography>
+                        ) : (
+                            <Button
+                                variant="text"
+                                onClick={handleResendOtp}
+                                disabled={isSubmitting || resendTimer > 0}
+                                size={isMobile ? "small" : "medium"}
+                                sx={{
+                                    color: employerColors.primary,
+                                    fontSize: { xs: '0.8rem', sm: '0.9rem' },
+                                    '&:hover': {
+                                        backgroundColor: 'rgba(0, 0, 0, 0.04)',
+                                    },
+                                }}
+                            >
+                                ارسال مجدد کد تایید
+                            </Button>
+                        )}
                     </Box>
                 </Box>
             </Box>

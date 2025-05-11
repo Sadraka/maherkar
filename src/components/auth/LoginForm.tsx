@@ -39,6 +39,65 @@ export default function LoginForm({ onSuccess }: LoginFormProps) {
         non_field_errors?: string;
     }>({});
 
+    // تایمر ارسال مجدد کد OTP
+    const [resendTimer, setResendTimer] = useState(0); // شمارنده به ثانیه
+
+    // بررسی وجود تایمر در localStorage هنگام لود اولیه
+    useEffect(() => {
+        const checkExistingTimer = () => {
+            const phoneKey = phone.trim();
+            if (!phoneKey) return;
+            
+            try {
+                const storedData = localStorage.getItem(`otp_timer_${phoneKey}`);
+                if (storedData) {
+                    const { endTime } = JSON.parse(storedData);
+                    const now = new Date().getTime();
+                    const remainingTime = Math.round((endTime - now) / 1000);
+                    
+                    if (remainingTime > 0) {
+                        setResendTimer(remainingTime);
+                        // اگر قبلاً مرحله OTP را دیده بود، مستقیم به آن برو
+                        if (localStorage.getItem(`otp_step_${phoneKey}`) === 'true') {
+                            setActiveStep(1);
+                        }
+                    } else {
+                        // اگر تایمر منقضی شده، پاک کن
+                        localStorage.removeItem(`otp_timer_${phoneKey}`);
+                        localStorage.removeItem(`otp_step_${phoneKey}`);
+                    }
+                }
+            } catch (error) {
+                console.error('خطا در بازیابی تایمر:', error);
+            }
+        };
+        
+        checkExistingTimer();
+    }, [phone]);
+
+    // وقتی کد ارسال می‌شود، تایمر شروع به کار می‌کند
+    useEffect(() => {
+        let interval: NodeJS.Timeout | null = null;
+        
+        if (resendTimer > 0) {
+            interval = setInterval(() => {
+                setResendTimer((prevTimer) => prevTimer - 1);
+                
+                // هر ثانیه بررسی شود که آیا تایمر به پایان رسیده
+                if (resendTimer <= 1) {
+                    const phoneKey = phone.trim();
+                    if (phoneKey) {
+                        localStorage.removeItem(`otp_timer_${phoneKey}`);
+                    }
+                }
+            }, 1000);
+        }
+        
+        return () => {
+            if (interval) clearInterval(interval);
+        };
+    }, [resendTimer, phone]);
+
     // استفاده از هوک تم و وضعیت دستگاه
     const theme = useTheme();
     const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
@@ -103,11 +162,44 @@ export default function LoginForm({ onSuccess }: LoginFormProps) {
             return;
         }
 
+        // بررسی اگر تایمر از قبل فعال بود
+        const phoneKey = phone.trim();
+        try {
+            const storedData = localStorage.getItem(`otp_timer_${phoneKey}`);
+            if (storedData) {
+                const { endTime } = JSON.parse(storedData);
+                const now = new Date().getTime();
+                const remainingTime = Math.round((endTime - now) / 1000);
+                
+                if (remainingTime > 0) {
+                    // اگر تایمر فعال است، مستقیم به مرحله دوم برو و تایمر را تنظیم کن
+                    setResendTimer(remainingTime);
+                    setActiveStep(1);
+                    localStorage.setItem(`otp_step_${phoneKey}`, 'true');
+                    return;
+                } else {
+                    // تایمر منقضی شده، پاکش کن
+                    localStorage.removeItem(`otp_timer_${phoneKey}`);
+                    localStorage.removeItem(`otp_step_${phoneKey}`);
+                }
+            }
+        } catch (error) {
+            console.error('خطا در بررسی تایمر:', error);
+        }
+
         try {
             const receivedToken = await loginOtp(phone);
             setToken(receivedToken);
             toast.success('کد تأیید به شماره تلفن شما ارسال شد');
             setActiveStep(1);
+            
+            // تنظیم تایمر و ذخیره در localStorage
+            setResendTimer(120);
+            const now = new Date().getTime();
+            const endTime = now + (120 * 1000); // 120 ثانیه بعد
+            localStorage.setItem(`otp_timer_${phoneKey}`, JSON.stringify({ endTime }));
+            localStorage.setItem(`otp_step_${phoneKey}`, 'true'); // نشانه اینکه قبلاً به مرحله OTP رفته
+            
         } catch (error: any) {
             console.error('خطا در ارسال کد تایید برای ورود:', error);
             setFormErrors({});
@@ -313,15 +405,38 @@ export default function LoginForm({ onSuccess }: LoginFormProps) {
 
     // درخواست مجدد کد تایید
     const handleResendOtp = async () => {
+        // اگر تایمر هنوز در حال شمارش است، اجازه ارسال مجدد نده
+        if (resendTimer > 0) return;
+        
         try {
             const receivedToken = await loginOtp(phone);
             setToken(receivedToken);
             setOtpCode('');
             toast.success('کد تأیید جدید به شماره تلفن شما ارسال شد');
+            
+            // تنظیم مجدد تایمر و ذخیره در localStorage
+            setResendTimer(120);
+            const phoneKey = phone.trim();
+            const now = new Date().getTime();
+            const endTime = now + (120 * 1000); // 120 ثانیه بعد
+            localStorage.setItem(`otp_timer_${phoneKey}`, JSON.stringify({ endTime }));
+            
         } catch (error: any) {
             console.error('خطا در ارسال مجدد کد تایید:', error);
             toast.error('مشکل در ارسال مجدد کد تأیید. لطفاً دوباره تلاش کنید.');
         }
+    };
+    
+    // تبدیل ثانیه به فرمت mm:ss فارسی
+    const formatTime = (seconds: number): string => {
+        const mins = Math.floor(seconds / 60);
+        const secs = seconds % 60;
+        const faDigits = ['۰', '۱', '۲', '۳', '۴', '۵', '۶', '۷', '۸', '۹'];
+        
+        const formattedMins = mins < 10 ? `۰${faDigits[mins]}` : `${faDigits[Math.floor(mins/10)]}${faDigits[mins%10]}`;
+        const formattedSecs = secs < 10 ? `۰${faDigits[secs]}` : `${faDigits[Math.floor(secs/10)]}${faDigits[secs%10]}`;
+        
+        return `${formattedMins}:${formattedSecs}`;
     };
 
     const employerColors = EMPLOYER_THEME;
@@ -470,33 +585,33 @@ export default function LoginForm({ onSuccess }: LoginFormProps) {
                                 size={isMobile ? "small" : "medium"}
                                 autoFocus
                             />
-                        </Box>
+                    </Box>
 
-                        <Box>
-                            <Button
-                                type="submit"
-                                fullWidth
-                                variant="contained"
-                                size={isMobile ? "medium" : "large"}
-                                disabled={loading}
-                                sx={{
-                                    mt: { xs: 1, sm: 2 },
-                                    py: { xs: 1, sm: 1.5 },
-                                    backgroundColor: employerColors.primary,
-                                    '&:hover': {
-                                        backgroundColor: employerColors.dark,
-                                    },
-                                    borderRadius: { xs: 1, sm: 2 },
-                                    fontSize: { xs: '0.9rem', sm: '1rem' }
-                                }}
-                            >
-                                {loading ? (
-                                    <CircularProgress size={isMobile ? 20 : 24} color="inherit" />
-                                ) : (
-                                    'ورود'
-                                )}
-                            </Button>
-                        </Box>
+                    <Box>
+                        <Button
+                            type="submit"
+                            fullWidth
+                            variant="contained"
+                            size={isMobile ? "medium" : "large"}
+                            disabled={loading}
+                            sx={{
+                                mt: { xs: 1, sm: 2 },
+                                py: { xs: 1, sm: 1.5 },
+                                backgroundColor: employerColors.primary,
+                                '&:hover': {
+                                    backgroundColor: employerColors.dark,
+                                },
+                                borderRadius: { xs: 1, sm: 2 },
+                                fontSize: { xs: '0.9rem', sm: '1rem' }
+                            }}
+                        >
+                            {loading ? (
+                                <CircularProgress size={isMobile ? 20 : 24} color="inherit" />
+                            ) : (
+                                'ورود'
+                            )}
+                        </Button>
+                    </Box>
 
                         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mt: 1 }}>
                             <Button
@@ -507,14 +622,28 @@ export default function LoginForm({ onSuccess }: LoginFormProps) {
                                 بازگشت
                             </Button>
 
-                            <Button
-                                variant="text"
-                                onClick={handleResendOtp}
-                                disabled={loading}
-                                sx={{ fontSize: { xs: '0.75rem', sm: '0.875rem' } }}
-                            >
-                                ارسال مجدد کد
-                            </Button>
+                            {resendTimer > 0 ? (
+                                <Typography 
+                                    variant="body2" 
+                                    color="text.secondary"
+                                    sx={{ 
+                                        fontSize: { xs: '0.75rem', sm: '0.875rem' },
+                                        display: 'flex',
+                                        alignItems: 'center'
+                                    }}
+                                >
+                                    ارسال مجدد تا {formatTime(resendTimer)}
+                                </Typography>
+                            ) : (
+                                <Button
+                                    variant="text"
+                                    onClick={handleResendOtp}
+                                    disabled={loading || resendTimer > 0}
+                                    sx={{ fontSize: { xs: '0.75rem', sm: '0.875rem' } }}
+                                >
+                                    ارسال مجدد کد
+                                </Button>
+                            )}
                         </Box>
                     </Box>
                 </form>
@@ -523,22 +652,22 @@ export default function LoginForm({ onSuccess }: LoginFormProps) {
             {/* نمایش لینک ثبت‌نام فقط در مرحله اول */}
             {activeStep === 0 && (
                 <Box sx={{ mt: { xs: 3, sm: 4 }, textAlign: 'center' }}>
-                    <Typography variant={isMobile ? "body2" : "body1"}>
-                        حساب کاربری ندارید؟{' '}
-                        <MuiLink
-                            component={Link}
-                            href="/register"
-                            underline="hover"
-                            sx={{
-                                fontWeight: 'bold',
-                                color: employerColors.primary,
-                                fontSize: { xs: '0.85rem', sm: 'inherit' }
-                            }}
-                        >
-                            ثبت‌نام کنید
-                        </MuiLink>
-                    </Typography>
-                </Box>
+                        <Typography variant={isMobile ? "body2" : "body1"}>
+                            حساب کاربری ندارید؟{' '}
+                            <MuiLink
+                                component={Link}
+                                href="/register"
+                                underline="hover"
+                                sx={{
+                                    fontWeight: 'bold',
+                                    color: employerColors.primary,
+                                    fontSize: { xs: '0.85rem', sm: 'inherit' }
+                                }}
+                            >
+                                ثبت‌نام کنید
+                            </MuiLink>
+                        </Typography>
+                    </Box>
             )}
         </Paper>
     );
