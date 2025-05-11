@@ -32,6 +32,7 @@ import BadgeIcon from '@mui/icons-material/Badge';
 import Link from 'next/link';
 import { EMPLOYER_THEME } from '@/constants/colors';
 import { toast } from 'react-hot-toast';
+import OtpInput from '@/components/common/OtpInput';
 
 // کامپوننت آیکون مراحل با اعداد فارسی
 const PersianStepIcon = (props: StepIconProps) => {
@@ -241,8 +242,8 @@ export default function RegisterForm({ onSuccess }: RegisterFormProps) {
     };
 
     // تابع بروزرسانی کد تایید
-    const handleOtpChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        setPhoneOtpCode(e.target.value);
+    const handleOtpChange = (value: string) => {
+        setPhoneOtpCode(value);
         if (otpError) {
             setOtpError('');
         }
@@ -738,18 +739,14 @@ export default function RegisterForm({ onSuccess }: RegisterFormProps) {
                     </Typography>
 
                     <Box>
-                        <TextField
-                            fullWidth
-                            label="کد تایید"
-                            variant="outlined"
+                        <OtpInput
                             value={phoneOtpCode}
                             onChange={handleOtpChange}
+                            length={6}
                             error={!!otpError}
                             helperText={otpError}
-                            placeholder="کد ۶ رقمی"
-                            autoFocus
-                            inputProps={{ maxLength: 6, dir: "ltr" }}
-                            size={isMobile ? "medium" : "medium"}
+                            autoFocus={true}
+                            disabled={isSubmitting}
                         />
                     </Box>
 

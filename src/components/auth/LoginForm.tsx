@@ -21,6 +21,7 @@ import Link from 'next/link';
 import { EMPLOYER_THEME } from '@/constants/colors';
 import { ErrorHandler } from '@/components/common/ErrorHandler';
 import toast from 'react-hot-toast';
+import OtpInput from '@/components/common/OtpInput';
 
 interface LoginFormProps {
     onSuccess?: () => void;
@@ -115,8 +116,9 @@ export default function LoginForm({ onSuccess }: LoginFormProps) {
         }
     };
 
-    const handleOtpChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        setOtpCode(e.target.value);
+    // اصلاح: مدیریت تغییرات کد OTP با کامپوننت جدید
+    const handleOtpChange = (value: string) => {
+        setOtpCode(value);
         if (formErrors.otp) {
             setFormErrors(prev => ({ ...prev, otp: undefined }));
         }
@@ -582,26 +584,14 @@ export default function LoginForm({ onSuccess }: LoginFormProps) {
                         </Typography>
 
                         <Box>
-                            <TextField
-                                fullWidth
-                                id="otp"
-                                label="کد تأیید"
-                                variant="outlined"
+                            <OtpInput
                                 value={otpCode}
                                 onChange={handleOtpChange}
+                                length={6}
                                 error={!!formErrors.otp}
                                 helperText={formErrors.otp}
-                                InputProps={{
-                                    startAdornment: (
-                                        <InputAdornment position="start">
-                                            <VerifiedUserIcon />
-                                        </InputAdornment>
-                                    ),
-                                }}
-                                placeholder="کد 6 رقمی"
-                                inputProps={{ dir: "ltr", maxLength: 6 }}
-                                size={isMobile ? "medium" : "medium"}
-                                autoFocus
+                                autoFocus={true}
+                                disabled={loading}
                             />
                     </Box>
 
@@ -610,21 +600,21 @@ export default function LoginForm({ onSuccess }: LoginFormProps) {
                             type="submit"
                             fullWidth
                             variant="contained"
-                            size={isMobile ? "large" : "large"}
+                                size={isMobile ? "large" : "large"}
                             disabled={loading}
                             sx={{
-                                mt: { xs: 2, sm: 2 },
-                                py: { xs: 1.5, sm: 1.5 },
+                                    mt: { xs: 2, sm: 2 },
+                                    py: { xs: 1.5, sm: 1.5 },
                                 backgroundColor: employerColors.primary,
                                 '&:hover': {
                                     backgroundColor: employerColors.dark,
                                 },
                                 borderRadius: { xs: 1, sm: 2 },
-                                fontSize: { xs: '1rem', sm: '1rem' }
+                                    fontSize: { xs: '1rem', sm: '1rem' }
                             }}
                         >
                             {loading ? (
-                                <CircularProgress size={isMobile ? 24 : 24} color="inherit" />
+                                    <CircularProgress size={isMobile ? 24 : 24} color="inherit" />
                             ) : (
                                 'ورود'
                             )}
