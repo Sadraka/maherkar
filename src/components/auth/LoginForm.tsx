@@ -284,11 +284,8 @@ export default function LoginForm({ onSuccess }: LoginFormProps) {
         try {
             const userData = await validateLoginOtp(token, otpCode);
             console.log('اطلاعات کاربر دریافت شده:', userData);
-
-            // یک پیام موفقیت نمایش داده شود
-            toast.success('ورود با موفقیت انجام شد');
             
-            // اگر اطلاعات کاربر ناقص باشد، یک پیام هشدار هم نمایش دهیم
+            // اگر اطلاعات کاربر ناقص باشد، یک پیام هشدار نمایش دهیم
             if (!userData || (!userData.phone && !userData.user_type)) {
                 toast('اطلاعات کاربری شما به صورت کامل دریافت نشد. لطفاً اطلاعات پروفایل خود را تکمیل کنید.', {
                     duration: 5000,
