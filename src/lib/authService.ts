@@ -60,7 +60,7 @@ const authService = {
             });
 
             // اگر به اینجا برسیم، یعنی درخواست موفقیت‌آمیز بوده که غیرمنطقی است
-            console.log('خطا: درخواست بررسی وجود شماره تلفن نباید موفقیت‌آمیز باشد');
+            // console.log('خطا: درخواست بررسی وجود شماره تلفن نباید موفقیت‌آمیز باشد');
             return false; // در هر صورت فرض می‌کنیم شماره تلفن وجود ندارد
         } catch (error: any) {
             if (error.response) {
@@ -76,7 +76,7 @@ const authService = {
                     if (typeof phoneError === 'string' &&
                         (phoneError.includes('شماره تلفن موجود نیست') ||
                             phoneError.includes('موجود نیست'))) {
-                        console.log('شماره تلفن در دیتابیس وجود ندارد');
+                        // console.log('شماره تلفن در دیتابیس وجود ندارد');
                         return false;
                     }
                 }
@@ -89,7 +89,7 @@ const authService = {
 
                     for (const err of errors) {
                         if (typeof err === 'string' && err.includes('رمز عبور اشتباه است')) {
-                            console.log('شماره تلفن در دیتابیس وجود دارد');
+                            // console.log('شماره تلفن در دیتابیس وجود دارد');
                             return true;
                         }
                     }
@@ -97,7 +97,7 @@ const authService = {
             }
 
             // در صورت عدم تشخیص دقیق، پیش‌فرض: شماره تلفن وجود ندارد
-            console.log('خطا در بررسی وجود شماره تلفن:', error);
+            // console.log('خطا در بررسی وجود شماره تلفن:', error);
             return false;
         }
     },
@@ -105,14 +105,14 @@ const authService = {
     // مرحله اول ثبت‌نام: درخواست کد OTP
     registerOtp: async (userData: RegisterData): Promise<string> => {
         try {
-            console.log('ارسال درخواست کد تایید با اطلاعات کاربر:', userData);
+            // console.log('ارسال درخواست کد تایید با اطلاعات کاربر:', userData);
 
             const response = await axios.post<RegisterOtpResponse>(
                 `${AUTH_URL}/register-otp/`,
                 userData
             );
 
-            console.log('پاسخ API برای درخواست کد تایید:', response.data);
+            // console.log('پاسخ API برای درخواست کد تایید:', response.data);
 
             // نمایش کد تایید در صورت وجود
             if (response.data.Detail && response.data.Detail.code) {
@@ -177,11 +177,11 @@ const authService = {
     // مرحله دوم ثبت‌نام: تایید کد OTP
     validateOtp: async (token: string, code: string): Promise<RegisterValidateResponse> => {
         try {
-            console.log('شروع فرآیند تایید OTP:', {
-                token: token.substring(0, 10) + '...',
-                codeLength: code.length,
-                timestamp: new Date().toISOString()
-            });
+            // console.log('شروع فرآیند تایید OTP:', {
+            //     token: token.substring(0, 10) + '...',
+            //     codeLength: code.length,
+            //     timestamp: new Date().toISOString()
+            // });
 
             // تنظیم تایم‌اوت برای درخواست
             const response = await axios.post<RegisterValidateResponse>(
@@ -196,23 +196,23 @@ const authService = {
                 }
             );
 
-            console.log('پاسخ دریافتی از API پس از تایید کد OTP:', {
-                status: response.status,
-                hasToken: !!response.data?.Detail?.Token,
-                hasUser: !!response.data?.Detail?.User,
-                timestamp: new Date().toISOString()
-            });
+            // console.log('پاسخ دریافتی از API پس از تایید کد OTP:', {
+            //     status: response.status,
+            //     hasToken: !!response.data?.Detail?.Token,
+            //     hasUser: !!response.data?.Detail?.User,
+            //     timestamp: new Date().toISOString()
+            // });
 
             // فقط در صورت دریافت پاسخ با وضعیت موفق، توکن‌ها و اطلاعات کاربر را ذخیره کنیم
             if (response.status >= 200 && response.status < 300 && response.data.Detail && response.data.Detail.Token) {
                 const { access, refresh } = response.data.Detail.Token;
 
                 // لاگ کردن وضعیت ذخیره توکن‌ها
-                console.log('ذخیره توکن‌های دسترسی:', {
-                    hasAccessToken: !!access,
-                    hasRefreshToken: !!refresh,
-                    timestamp: new Date().toISOString()
-                });
+                // console.log('ذخیره توکن‌های دسترسی:', {
+                //     hasAccessToken: !!access,
+                //     hasRefreshToken: !!refresh,
+                //     timestamp: new Date().toISOString()
+                // });
 
                 cookieService.setCookie(COOKIE_NAMES.ACCESS_TOKEN, access, 30);
                 cookieService.setCookie(COOKIE_NAMES.REFRESH_TOKEN, refresh, 30);
@@ -220,14 +220,14 @@ const authService = {
                 // ذخیره اطلاعات کاربر با مدت انقضای 30 روز
                 if (response.data.Detail && response.data.Detail.User) {
                     cookieService.setObjectCookie(COOKIE_NAMES.USER_DATA, response.data.Detail.User, 30);
-                    console.log('اطلاعات کاربر با موفقیت ذخیره شد:', {
-                        phone: response.data.Detail.User.phone,
-                        userType: response.data.Detail.User.user_type,
-                        timestamp: new Date().toISOString()
-                    });
+                    // console.log('اطلاعات کاربر با موفقیت ذخیره شد:', {
+                    //     phone: response.data.Detail.User.phone,
+                    //     userType: response.data.Detail.User.user_type,
+                    //     timestamp: new Date().toISOString()
+                    // });
                 }
 
-                console.log('ثبت‌نام با موفقیت تکمیل شد و کاربر احراز هویت شد');
+                // console.log('ثبت‌نام با موفقیت تکمیل شد و کاربر احراز هویت شد');
             } else {
                 console.error('پاسخ نامعتبر از سرور:', {
                     status: response.status,
@@ -291,7 +291,7 @@ const authService = {
     // تابع بروزرسانی نوع کاربر
     updateUserType: async (user_type: string): Promise<UserData> => {
         try {
-            console.log(`شروع فرآیند بروزرسانی نوع کاربر به ${user_type}`);
+            // console.log(`شروع فرآیند بروزرسانی نوع کاربر به ${user_type}`);
 
             const accessToken = cookieService.getCookie(COOKIE_NAMES.ACCESS_TOKEN);
             if (!accessToken) {
@@ -311,7 +311,7 @@ const authService = {
             );
 
             if (response.status === 200) {
-                console.log('نوع کاربر با موفقیت بروزرسانی شد:', response.data);
+                // console.log('نوع کاربر با موفقیت بروزرسانی شد:', response.data);
 
                 // بروزرسانی اطلاعات کاربر در کوکی
                 const userData = cookieService.getObjectCookie<UserData>(COOKIE_NAMES.USER_DATA);
@@ -340,14 +340,14 @@ const authService = {
     // درخواست OTP برای ورود
     loginOtp: async (phone: string): Promise<string> => {
         try {
-            console.log('ارسال درخواست OTP برای ورود با شماره:', phone);
+            // console.log('ارسال درخواست OTP برای ورود با شماره:', phone);
 
             const response = await axios.post<RegisterOtpResponse>(
                 `${AUTH_URL}/login-otp/`,
                 { phone }
             );
 
-            console.log('پاسخ API برای درخواست OTP ورود:', response.data);
+            // console.log('پاسخ API برای درخواست OTP ورود:', response.data);
 
             // نمایش کد تایید در صورت وجود
             if (response.data.Detail && response.data.Detail.code) {
@@ -401,11 +401,11 @@ const authService = {
     // تایید OTP برای ورود
     validateLoginOtp: async (token: string, code: string): Promise<UserData> => {
         try {
-            console.log('شروع فرآیند تایید OTP برای ورود:', {
-                token: token.substring(0, 10) + '...',
-                codeLength: code.length,
-                timestamp: new Date().toISOString()
-            });
+            // console.log('شروع فرآیند تایید OTP برای ورود:', {
+            //     token: token.substring(0, 10) + '...',
+            //     codeLength: code.length,
+            //     timestamp: new Date().toISOString()
+            // });
 
             // تنظیم تایم‌اوت برای درخواست
             const response = await axios.post<TokenResponse | any>(
@@ -420,11 +420,11 @@ const authService = {
                 }
             );
 
-            console.log('پاسخ دریافتی از API پس از تایید کد OTP برای ورود:', {
-                status: response.status,
-                data: response.data,
-                timestamp: new Date().toISOString()
-            });
+            // console.log('پاسخ دریافتی از API پس از تایید کد OTP برای ورود:', {
+            //     status: response.status,
+            //     data: response.data,
+            //     timestamp: new Date().toISOString()
+            // });
 
             // بررسی ساختار پاسخ سرور
             let accessToken = '';
@@ -459,7 +459,7 @@ const authService = {
             if (response.data?.Detail?.User) {
                 const userData = response.data.Detail.User;
                 cookieService.setObjectCookie(COOKIE_NAMES.USER_DATA, userData, 30);
-                console.log('اطلاعات کاربر از پاسخ سرور دریافت شد:', userData);
+                // console.log('اطلاعات کاربر از پاسخ سرور دریافت شد:', userData);
                 return userData;
             }
 
@@ -472,7 +472,7 @@ const authService = {
                     }
                 });
 
-                console.log('اطلاعات کاربر دریافت شد:', userResponse.data);
+                // console.log('اطلاعات کاربر دریافت شد:', userResponse.data);
 
                 // ذخیره اطلاعات کاربر در کوکی
                 cookieService.setObjectCookie(COOKIE_NAMES.USER_DATA, userResponse.data, 30);
@@ -486,7 +486,7 @@ const authService = {
                 try {
                     const payloadBase64 = accessToken.split('.')[1];
                     const payload = JSON.parse(atob(payloadBase64));
-                    console.log('استخراج اطلاعات از JWT:', payload);
+                    // console.log('استخراج اطلاعات از JWT:', payload);
 
                     // ساخت اطلاعات اولیه کاربر از طریق پیلود JWT
                     const basicUserData: UserData = {
@@ -500,7 +500,7 @@ const authService = {
                     // ذخیره اطلاعات پایه در کوکی
                     cookieService.setObjectCookie(COOKIE_NAMES.USER_DATA, basicUserData, 30);
 
-                    console.log('اطلاعات پایه کاربر استخراج و ذخیره شد:', basicUserData);
+                    // console.log('اطلاعات پایه کاربر استخراج و ذخیره شد:', basicUserData);
 
                     // برگرداندن اطلاعات پایه کاربر
                     return basicUserData;

@@ -213,7 +213,6 @@ export default function LoginForm({ onSuccess }: LoginFormProps) {
                                error.response?.data?.Detail || 
                                error.message;
 
-            console.log('خطای استخراج شده:', errorMessage);
 
             if (typeof errorMessage === 'string' && 
                 (errorMessage.includes('شماره تلفن موجود نیست') || 
@@ -283,7 +282,6 @@ export default function LoginForm({ onSuccess }: LoginFormProps) {
 
         try {
             const userData = await validateLoginOtp(token, otpCode);
-            console.log('اطلاعات کاربر دریافت شده:', userData);
             
             // اگر اطلاعات کاربر ناقص باشد، یک پیام هشدار نمایش دهیم
             if (!userData || (!userData.phone && !userData.user_type)) {

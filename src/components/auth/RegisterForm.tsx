@@ -306,7 +306,6 @@ export default function RegisterForm({ onSuccess }: RegisterFormProps) {
                 return;
             }
 
-            console.log('شماره تلفن تایید شد، انتقال به مرحله اطلاعات کاربری');
 
             // پیشرفت به مرحله اطلاعات کاربری
             setActiveStep(1);
@@ -371,7 +370,6 @@ export default function RegisterForm({ onSuccess }: RegisterFormProps) {
         setIsSubmitting(true);
 
         try {
-            console.log('اطلاعات کاربر تایید شد، ارسال درخواست کد OTP...');
 
             // ارسال اطلاعات به API برای دریافت OTP
             const otpToken = await registerOtp({
@@ -380,7 +378,6 @@ export default function RegisterForm({ onSuccess }: RegisterFormProps) {
                 user_type: formData.user_type
             });
 
-            console.log('کد OTP دریافت شد، توکن:', otpToken);
 
             // ذخیره توکن OTP برای استفاده در مرحله بعد
             setPhoneOtpToken(otpToken);
@@ -422,12 +419,10 @@ export default function RegisterForm({ onSuccess }: RegisterFormProps) {
         setIsSubmitting(true);
 
         try {
-            console.log('تایید کد OTP و تکمیل ثبت‌نام با توکن:', phoneOtpToken);
 
             // ارسال کد OTP برای تایید نهایی و تکمیل ثبت‌نام
             const verificationResponse = await validateOtp(phoneOtpToken, phoneOtpCode);
 
-            console.log('ثبت‌نام با موفقیت تکمیل شد:', verificationResponse);
 
             // بررسی نوع کاربر انتخاب شده و نوع کاربر ایجاد شده
             if (formData.user_type === 'EM' && verificationResponse.Detail?.User?.user_type === 'JS') {
@@ -499,7 +494,6 @@ export default function RegisterForm({ onSuccess }: RegisterFormProps) {
         setIsSubmitting(true);
 
         try {
-            console.log('ارسال مجدد درخواست کد تایید');
 
             // ارسال مجدد درخواست کد تایید
             const otpToken = await registerOtp({
@@ -508,7 +502,6 @@ export default function RegisterForm({ onSuccess }: RegisterFormProps) {
                 user_type: formData.user_type
             });
 
-            console.log('توکن OTP جدید دریافت شد:', otpToken);
 
             // ذخیره توکن جدید
             setPhoneOtpToken(otpToken);

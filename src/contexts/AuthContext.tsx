@@ -125,9 +125,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         clearErrors();
         setLoading(true);
         try {
-            console.log('شروع فرآیند ورود با OTP برای شماره:', phone);
             const token = await authService.loginOtp(phone);
-            console.log('درخواست OTP ورود با موفقیت انجام شد، توکن دریافت شد');
             return token;
         } catch (error: any) {
             console.error('خطا در درخواست OTP ورود:', error.message);
@@ -143,7 +141,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         clearErrors();
         setLoading(true);
         try {
-            console.log('تایید کد OTP برای ورود...');
             const userData = await authService.validateLoginOtp(token, code);
 
             setUser(userData);
@@ -165,15 +162,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         clearErrors();
         setLoading(true);
         try {
-            console.log('شروع فرآیند ثبت‌نام با داده‌ها:', {
-                phone: userData.phone,
-                full_name: userData.full_name,
-                user_type: userData.user_type
-            });
-
+      
             const token = await authService.registerOtp(userData);
 
-            console.log('درخواست کد OTP با موفقیت انجام شد، توکن دریافت شد');
 
             return token;
         } catch (error: any) {
