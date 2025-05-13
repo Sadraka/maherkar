@@ -38,6 +38,7 @@ export interface UserData {
     user_type: string;
     full_name?: string;
     last_login?: string;
+    user_type_original?: string;
 }
 
 export interface RegisterValidateResponse {
@@ -47,6 +48,46 @@ export interface RegisterValidateResponse {
         Token: TokenResponse;
     }
 }
+
+// تابع ترجمه خطاهای شبکه به فارسی
+const translateNetworkError = (error: any): string => {
+    // خطاهای عدم اتصال به سرور
+    if (error.code === 'ECONNABORTED') {
+        return 'زمان اتصال به سرور به پایان رسید. لطفاً اتصال اینترنت خود را بررسی کنید و دوباره تلاش کنید.';
+    }
+    
+    if (error.code === 'ERR_NETWORK' || error.message?.includes('Network Error')) {
+        return 'خطا در اتصال به سرور. لطفاً اتصال اینترنت خود را بررسی کنید و دوباره تلاش کنید.';
+    }
+    
+    if (error.code === 'ETIMEDOUT') {
+        return 'اتصال به سرور با تأخیر مواجه شد. لطفاً دوباره تلاش کنید.';
+    }
+    
+    if (error.code === 'ENOTFOUND') {
+        return 'سرور در دسترس نیست. لطفاً بعداً دوباره تلاش کنید.';
+    }
+    
+    // خطاهای HTTP
+    if (error.response) {
+        switch (error.response.status) {
+            case 500:
+                return 'خطای داخلی سرور. لطفاً با پشتیبانی تماس بگیرید.';
+            case 502:
+                return 'سرور در حال حاضر در دسترس نیست. لطفاً چند دقیقه دیگر دوباره تلاش کنید.';
+            case 503:
+                return 'سرویس موقتاً در دسترس نیست. لطفاً چند دقیقه دیگر دوباره تلاش کنید.';
+            case 504:
+                return 'زمان پاسخگویی سرور به پایان رسید. لطفاً چند دقیقه دیگر دوباره تلاش کنید.';
+            default:
+                // برای سایر خطاها، پیام اصلی را برمی‌گردانیم
+                break;
+        }
+    }
+    
+    // بازگشت پیام خطای اصلی اگر به موارد بالا نخورد
+    return error.message || 'خطای نامشخص در ارتباط با سرور. لطفاً دوباره تلاش کنید.';
+};
 
 // سرویس احراز هویت
 const authService = {
@@ -96,6 +137,11 @@ const authService = {
                 }
             }
 
+            // در صورت خطای شبکه، پیامی را نمایش می‌دهیم و خطا را مجدداً پرتاب می‌کنیم
+            if (!error.response && (error.code === 'ERR_NETWORK' || error.message?.includes('Network Error'))) {
+                throw new Error(translateNetworkError(error));
+            }
+
             // در صورت عدم تشخیص دقیق، پیش‌فرض: شماره تلفن وجود ندارد
             // console.log('خطا در بررسی وجود شماره تلفن:', error);
             return false;
@@ -133,6 +179,11 @@ const authService = {
             return response.data.Detail.token;
         } catch (error: any) {
             console.error('خطا در ارسال کد تایید:', error.response?.data || error.message);
+
+            // بررسی خطاهای شبکه
+            if (!error.response && (error.code === 'ERR_NETWORK' || error.message?.includes('Network Error') || error.code === 'ECONNABORTED')) {
+                throw new Error(translateNetworkError(error));
+            }
 
             // بهبود مدیریت خطاها
             if (error.response?.data?.Detail) {
@@ -227,6 +278,16 @@ const authService = {
                     // });
                 }
 
+                // ثبت لاگ اطلاعات کاربر برای بررسی نوع کاربر
+                if (response.data.Detail && response.data.Detail.User && response.data.Detail.User.user_type) {
+                    console.log('[authService] اطلاعات کاربر از سرور:', {
+                        user_type: response.data.Detail.User.user_type,
+                        user_type_check: response.data.Detail.User.user_type === 'EM' ? 'کارفرما است' : 'کارفرما نیست'
+                    });
+                } else {
+                    console.warn('[authService] نوع کاربر در پاسخ سرور یافت نشد');
+                }
+
                 // console.log('ثبت‌نام با موفقیت تکمیل شد و کاربر احراز هویت شد');
             } else {
                 console.error('پاسخ نامعتبر از سرور:', {
@@ -245,6 +306,11 @@ const authService = {
                 status: error.response?.status,
                 timestamp: new Date().toISOString()
             });
+
+            // بررسی خطاهای شبکه
+            if (!error.response && (error.code === 'ERR_NETWORK' || error.message?.includes('Network Error') || error.code === 'ECONNABORTED')) {
+                throw new Error(translateNetworkError(error));
+            }
 
             // بهبود مدیریت خطاها برای نمایش پیام‌های مناسب
             if (error.response) {
@@ -330,6 +396,13 @@ const authService = {
         } catch (error: any) {
             console.error('خطا در بروزرسانی نوع کاربر:', error.response?.data || error.message);
 
+            // بررسی خطاهای شبکه
+            if (!error.response && (error.code === 'ERR_NETWORK' || error.message?.includes('Network Error') || error.code === 'ECONNABORTED')) {
+                const errorMessage = translateNetworkError(error);
+                toast.error(errorMessage);
+                throw new Error(errorMessage);
+            }
+
             // نمایش پیام خطا
             toast.error(error.response?.data?.message || 'خطا در بروزرسانی نوع کاربر، لطفاً دوباره تلاش کنید');
 
@@ -368,6 +441,11 @@ const authService = {
             return response.data.Detail.token;
         } catch (error: any) {
             console.error('خطا در ارسال کد تایید برای ورود:', error.response?.data || error.message);
+
+            // بررسی خطاهای شبکه
+            if (!error.response && (error.code === 'ERR_NETWORK' || error.message?.includes('Network Error') || error.code === 'ECONNABORTED')) {
+                throw new Error(translateNetworkError(error));
+            }
 
             // بهبود مدیریت خطاها
             if (error.response?.data?.Detail) {
@@ -453,7 +531,7 @@ const authService = {
 
             // ذخیره توکن‌ها در کوکی با مدت انقضای 30 روز
             cookieService.setCookie(COOKIE_NAMES.ACCESS_TOKEN, accessToken, 30);
-            cookieService.setCookie(COOKIE_NAMES.REFRESH_TOKEN, refreshToken, 30);
+            cookieService.setCookie(COOKIE_NAMES.REFRESH_TOKEN, refreshToken, 60);
 
             // اول بررسی می‌کنیم آیا اطلاعات کاربر در پاسخ وجود دارد
             if (response.data?.Detail?.User) {
@@ -482,6 +560,11 @@ const authService = {
             } catch (userError: any) {
                 console.error('خطا در دریافت اطلاعات کاربر:', userError);
 
+                // بررسی خطاهای شبکه در درخواست دوم
+                if (!userError.response && (userError.code === 'ERR_NETWORK' || userError.message?.includes('Network Error') || userError.code === 'ECONNABORTED')) {
+                    throw new Error(translateNetworkError(userError));
+                }
+
                 // تلاش برای استخراج اطلاعات اساسی کاربر از پیلود JWT
                 try {
                     const payloadBase64 = accessToken.split('.')[1];
@@ -494,7 +577,8 @@ const authService = {
                         email: payload.email || '',
                         phone: payload.phone || '',
                         user_type: payload.user_type || 'JS', // نوع کاربر پیش‌فرض
-                        full_name: payload.full_name || ''
+                        full_name: payload.full_name || '',
+                        user_type_original: payload.user_type || 'JS'
                     };
 
                     // ذخیره اطلاعات پایه در کوکی
@@ -512,7 +596,8 @@ const authService = {
                         username: '',
                         email: '',
                         phone: '',
-                        user_type: 'JS'
+                        user_type: 'JS',
+                        user_type_original: 'JS'
                     };
 
                     // ذخیره اطلاعات خالی در کوکی
@@ -529,6 +614,11 @@ const authService = {
                 status: error.response?.status,
                 timestamp: new Date().toISOString()
             });
+
+            // بررسی خطاهای شبکه
+            if (!error.response && (error.code === 'ERR_NETWORK' || error.message?.includes('Network Error') || error.code === 'ECONNABORTED')) {
+                throw new Error(translateNetworkError(error));
+            }
 
             // بهبود مدیریت خطاها
             if (error.response) {
@@ -603,7 +693,24 @@ const authService = {
     // دریافت اطلاعات کاربر از کوکی
     getUserData: (): UserData | null => {
         try {
-        return cookieService.getObjectCookie<UserData>(COOKIE_NAMES.USER_DATA);
+            const userData = cookieService.getObjectCookie<UserData>(COOKIE_NAMES.USER_DATA);
+            
+            // نگاشت نوع کاربر ارسال شده از سرور به مقادیر مورد نیاز فرانت‌اند
+            if (userData) {
+                console.log('[authService] getUserData - نوع کاربر خوانده شده از کوکی:', userData.user_type);
+                
+                // اگر کاربر نوع EM باشد، برای استفاده در فرانت‌اند باید به employer تبدیل شود
+                // این تغییر فقط روی داده بازگشتی اعمال می‌شود و اصل داده در کوکی تغییر نمی‌کند
+                if (userData.user_type === 'EM') {
+                    return {
+                        ...userData,
+                        user_type_original: userData.user_type, // حفظ مقدار اصلی برای دیباگ
+                        user_type: 'employer' // تبدیل به مقدار مورد نیاز فرانت‌اند
+                    };
+                }
+            }
+            
+            return userData;
         } catch (error) {
             console.error('خطا در بازیابی اطلاعات کاربر از کوکی:', error);
             return null;

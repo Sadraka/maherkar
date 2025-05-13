@@ -23,7 +23,12 @@ import {
     faFileAlt,
     faBriefcase,
     faUserCircle,
-    faPhone
+    faPhone,
+    faTachometerAlt,
+    faBuilding,
+    faUsers,
+    faListAlt,
+    faBuildingUser
 } from '@fortawesome/free-solid-svg-icons';
 import { useAuth } from '@/contexts/AuthContext';
 
@@ -400,30 +405,132 @@ export default function UserMenu({ user: propUser, isLoggedIn }: UserMenuProps) 
                     )}
 
                     {(currentUser.role === 'employer' || currentUser.role === 'EM') && (
-                        <MenuItem component={Link} href="/dashboard/jobs" onClick={handleClose} sx={{ 
-                            py: 1.2,
-                            mx: 0.5,
-                            borderRadius: '8px', 
-                            transition: 'all 0.2s ease',
-                            '&:hover': {
-                                backgroundColor: `${theme.palette.employer.main}10`,
-                                '& .MuiListItemIcon-root': {
-                                    color: theme.palette.employer.main,
-                                    transform: 'scale(1.1)',
-                                }
-                            }
-                        }}>
-                            <ListItemIcon sx={{ 
+                        <>
+                            <MenuItem component={Link} href="/employer/dashboard" onClick={handleClose} sx={{ 
+                                py: 1.2,
+                                mx: 0.5,
+                                borderRadius: '8px', 
                                 transition: 'all 0.2s ease',
-                                minWidth: '35px'
+                                '&:hover': {
+                                    backgroundColor: `${theme.palette.employer.main}10`,
+                                    '& .MuiListItemIcon-root': {
+                                        color: theme.palette.employer.main,
+                                        transform: 'scale(1.1)',
+                                    }
+                                }
                             }}>
-                                <FontAwesomeIcon icon={faBriefcase} style={{ 
-                                    fontSize: '1rem', 
-                                    color: theme.palette.employer.main 
-                                }} />
-                            </ListItemIcon>
-                            آگهی‌های من
-                        </MenuItem>
+                                <ListItemIcon sx={{ 
+                                    transition: 'all 0.2s ease',
+                                    minWidth: '35px'
+                                }}>
+                                    <FontAwesomeIcon icon={faTachometerAlt} style={{ 
+                                        fontSize: '1rem', 
+                                        color: theme.palette.employer.main 
+                                    }} />
+                                </ListItemIcon>
+                                داشبورد کارفرما
+                            </MenuItem>
+
+                            <MenuItem component={Link} href="/employer/jobs" onClick={handleClose} sx={{ 
+                                py: 1.2,
+                                mx: 0.5,
+                                borderRadius: '8px', 
+                                transition: 'all 0.2s ease',
+                                '&:hover': {
+                                    backgroundColor: `${theme.palette.employer.main}10`,
+                                    '& .MuiListItemIcon-root': {
+                                        color: theme.palette.employer.main,
+                                        transform: 'scale(1.1)',
+                                    }
+                                }
+                            }}>
+                                <ListItemIcon sx={{ 
+                                    transition: 'all 0.2s ease',
+                                    minWidth: '35px'
+                                }}>
+                                    <FontAwesomeIcon icon={faListAlt} style={{ 
+                                        fontSize: '1rem', 
+                                        color: theme.palette.employer.main 
+                                    }} />
+                                </ListItemIcon>
+                                مدیریت آگهی‌ها
+                            </MenuItem>
+
+                            <MenuItem component={Link} href="/employer/applications" onClick={handleClose} sx={{ 
+                                py: 1.2,
+                                mx: 0.5,
+                                borderRadius: '8px', 
+                                transition: 'all 0.2s ease',
+                                '&:hover': {
+                                    backgroundColor: `${theme.palette.employer.main}10`,
+                                    '& .MuiListItemIcon-root': {
+                                        color: theme.palette.employer.main,
+                                        transform: 'scale(1.1)',
+                                    }
+                                }
+                            }}>
+                                <ListItemIcon sx={{ 
+                                    transition: 'all 0.2s ease',
+                                    minWidth: '35px'
+                                }}>
+                                    <FontAwesomeIcon icon={faUsers} style={{ 
+                                        fontSize: '1rem', 
+                                        color: theme.palette.employer.main 
+                                    }} />
+                                </ListItemIcon>
+                                درخواست‌های استخدام
+                            </MenuItem>
+
+                            <MenuItem component={Link} href="/employer/profile" onClick={handleClose} sx={{ 
+                                py: 1.2,
+                                mx: 0.5,
+                                borderRadius: '8px', 
+                                transition: 'all 0.2s ease',
+                                '&:hover': {
+                                    backgroundColor: `${theme.palette.employer.main}10`,
+                                    '& .MuiListItemIcon-root': {
+                                        color: theme.palette.employer.main,
+                                        transform: 'scale(1.1)',
+                                    }
+                                }
+                            }}>
+                                <ListItemIcon sx={{ 
+                                    transition: 'all 0.2s ease',
+                                    minWidth: '35px'
+                                }}>
+                                    <FontAwesomeIcon icon={faBuilding} style={{ 
+                                        fontSize: '1rem', 
+                                        color: theme.palette.employer.main 
+                                    }} />
+                                </ListItemIcon>
+                                پروفایل شرکت
+                            </MenuItem>
+
+                            <MenuItem component={Link} href="/employer/companies" onClick={handleClose} sx={{ 
+                                py: 1.2,
+                                mx: 0.5,
+                                borderRadius: '8px', 
+                                transition: 'all 0.2s ease',
+                                '&:hover': {
+                                    backgroundColor: `${theme.palette.employer.main}10`,
+                                    '& .MuiListItemIcon-root': {
+                                        color: theme.palette.employer.main,
+                                        transform: 'scale(1.1)',
+                                    }
+                                }
+                            }}>
+                                <ListItemIcon sx={{ 
+                                    transition: 'all 0.2s ease',
+                                    minWidth: '35px'
+                                }}>
+                                    <FontAwesomeIcon icon={faBuildingUser} style={{ 
+                                        fontSize: '1rem', 
+                                        color: theme.palette.employer.main 
+                                    }} />
+                                </ListItemIcon>
+                                مدیریت شرکت‌ها
+                            </MenuItem>
+                        </>
                     )}
 
                     <MenuItem component={Link} href="/settings" onClick={handleClose} sx={{ 

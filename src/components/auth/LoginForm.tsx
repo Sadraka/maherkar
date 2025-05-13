@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Suspense } from 'react';
 import {
     Box,
     Typography,
@@ -23,11 +23,8 @@ import { ErrorHandler } from '@/components/common/ErrorHandler';
 import toast from 'react-hot-toast';
 import OtpInput from '@/components/common/OtpInput';
 
-interface LoginFormProps {
-    onSuccess?: () => void;
-}
-
-export default function LoginForm({ onSuccess }: LoginFormProps) {
+// Wrapper component for parts that need useSearchParams
+const LoginFormContent = ({ onSuccess }: { onSuccess?: () => void }) => {
     const { loginOtp, validateLoginOtp, loading } = useAuth();
     const router = useRouter();
     const searchParams = useSearchParams();
@@ -678,5 +675,17 @@ export default function LoginForm({ onSuccess }: LoginFormProps) {
                     </Box>
             )}
         </Paper>
+    );
+};
+
+interface LoginFormProps {
+    onSuccess?: () => void;
+}
+
+export default function LoginForm({ onSuccess }: LoginFormProps) {
+    return (
+        <Suspense fallback={<Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '200px' }}><CircularProgress /></Box>}>
+            <LoginFormContent onSuccess={onSuccess} />
+        </Suspense>
     );
 } 

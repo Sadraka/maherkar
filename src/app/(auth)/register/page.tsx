@@ -28,8 +28,8 @@ export default function RegisterPage() {
                 }}
                 disableGutters={isMobile}
             >
-                <RegisterForm />
-            </Container>
+            <RegisterForm />
+        </Container>
         </Box>
     );
 } 

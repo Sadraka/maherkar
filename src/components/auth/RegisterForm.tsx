@@ -245,7 +245,7 @@ export default function RegisterForm({ onSuccess }: RegisterFormProps) {
     const handleOtpChange = (value: string) => {
         setPhoneOtpCode(value);
         if (otpError) {
-            setOtpError('');
+        setOtpError('');
         }
     };
 
@@ -403,7 +403,7 @@ export default function RegisterForm({ onSuccess }: RegisterFormProps) {
                 userInfo: {
                     full_name: formData.full_name,
                     user_type: formData.user_type
-                }
+                    }
             }));
             localStorage.setItem(`reg_otp_token_${phoneKey}`, otpToken);
             
@@ -484,7 +484,7 @@ export default function RegisterForm({ onSuccess }: RegisterFormProps) {
                     }
                 } else if (error.response.data.code) {
                     setOtpError('کد تایید وارد شده صحیح نیست. لطفاً دوباره تلاش کنید.');
-                } else {
+            } else {
                     setOtpError('کد تایید نامعتبر است. لطفاً کد صحیح را وارد کنید یا درخواست ارسال مجدد کد را بزنید.');
                 }
             } else {

@@ -40,8 +40,8 @@ export default function LoginPage() {
                 }}
                 disableGutters={isMobile}
             >
-                <LoginForm />
-            </Container>
+            <LoginForm />
+        </Container>
         </Box>
     );
 } 
