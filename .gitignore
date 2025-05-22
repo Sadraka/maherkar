@@ -13,14 +13,15 @@
 
 # testing
 /coverage
-   
+backend_api_documentation.md
 # next.js
 /.next/
 /out/
 /mahrakar.zip 
 # production
 /build
-
+/test_api.py
+/test_user_type.py
 # misc
 .DS_Store
 *.pem

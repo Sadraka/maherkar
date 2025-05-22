@@ -25,7 +25,7 @@ import {
     FormHelperText
 } from '@mui/material';
 import { styled } from '@mui/material/styles';
-import { useAuth } from '@/contexts/AuthContext';
+import { useAuthStore, useAuthActions, useAuthStatus } from '@/store/authStore';
 import { useRouter } from 'next/navigation';
 import PhoneIcon from '@mui/icons-material/Phone';
 import BadgeIcon from '@mui/icons-material/Badge';
@@ -72,7 +72,11 @@ interface RegisterFormProps {
 }
 
 export default function RegisterForm({ onSuccess }: RegisterFormProps) {
-    const { registerOtp, validateOtp, isAuthenticated, loading, checkPhoneExists } = useAuth();
+    // استفاده از Zustand به جای Context API
+    const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
+    const { registerOtp, validateOtp, checkPhoneExists } = useAuthActions();
+    const { loading, registerError, verifyError } = useAuthStatus();
+    
     const router = useRouter();
     const employerColors = EMPLOYER_THEME;
     const theme = useTheme();
@@ -307,6 +311,7 @@ export default function RegisterForm({ onSuccess }: RegisterFormProps) {
         try {
             // بررسی وجود شماره تلفن بدون ثبت هیچ اطلاعاتی
             const phoneExists = await checkPhoneExists(formData.phone);
+            
             if (phoneExists) {
                 setFormErrors({
                     phone: 'این شماره تلفن قبلاً ثبت شده است'
@@ -314,7 +319,6 @@ export default function RegisterForm({ onSuccess }: RegisterFormProps) {
                 setIsSubmitting(false);
                 return;
             }
-
 
             // پیشرفت به مرحله اطلاعات کاربری
             setActiveStep(1);
@@ -332,7 +336,13 @@ export default function RegisterForm({ onSuccess }: RegisterFormProps) {
                     }
                 });
 
-                setFormErrors(apiErrors);
+                if (Object.keys(apiErrors).length > 0) {
+                    setFormErrors(apiErrors);
+                } else {
+                    setFormErrors({
+                        phone: 'خطا در ارتباط با سرور. لطفاً دوباره تلاش کنید.'
+                    });
+                }
             } else {
                 setFormErrors({
                     phone: error.message || 'خطا در بررسی شماره تلفن. لطفاً دوباره تلاش کنید.'
@@ -379,14 +389,12 @@ export default function RegisterForm({ onSuccess }: RegisterFormProps) {
         setIsSubmitting(true);
 
         try {
-
             // ارسال اطلاعات به API برای دریافت OTP
             const otpToken = await registerOtp({
                 phone: formData.phone,
                 full_name: formData.full_name,
                 user_type: formData.user_type
             });
-
 
             // ذخیره توکن OTP برای استفاده در مرحله بعد
             setPhoneOtpToken(otpToken);
@@ -411,10 +419,30 @@ export default function RegisterForm({ onSuccess }: RegisterFormProps) {
         } catch (error: any) {
             console.error('خطا در ارسال درخواست OTP:', error);
 
-            // نمایش خطای دریافتی 
-            setFormErrors({
-                general: error.message || 'خطا در ارسال درخواست OTP. لطفاً دوباره تلاش کنید.'
-            });
+            // نمایش خطای دریافتی
+            if (error.response?.data?.Detail) {
+                const errorDetail = error.response.data.Detail;
+                if (typeof errorDetail === 'string') {
+                    setFormErrors({ general: errorDetail });
+                } else if (typeof errorDetail === 'object') {
+                    const apiErrors: Record<string, string> = {};
+                    Object.entries(errorDetail).forEach(([key, value]) => {
+                        const errorValue = Array.isArray(value) ? value[0] : value;
+                        if (typeof errorValue === 'string') {
+                            apiErrors[key] = errorValue;
+                        }
+                    });
+                    if (Object.keys(apiErrors).length > 0) {
+                        setFormErrors(apiErrors);
+                    } else {
+                        setFormErrors({ general: 'خطا در ارسال درخواست OTP' });
+                    }
+                }
+            } else {
+                setFormErrors({
+                    general: error.message || 'خطا در ارسال درخواست OTP. لطفاً دوباره تلاش کنید.'
+                });
+            }
         } finally {
             setIsSubmitting(false);
         }
@@ -428,10 +456,8 @@ export default function RegisterForm({ onSuccess }: RegisterFormProps) {
         setIsSubmitting(true);
 
         try {
-
             // ارسال کد OTP برای تایید نهایی و تکمیل ثبت‌نام
             const verificationResponse = await validateOtp(phoneOtpToken, phoneOtpCode);
-
 
             // بررسی نوع کاربر انتخاب شده و نوع کاربر ایجاد شده
             if (formData.user_type === 'EM' && verificationResponse.Detail?.User?.user_type === 'JS') {
@@ -484,7 +510,7 @@ export default function RegisterForm({ onSuccess }: RegisterFormProps) {
                     }
                 } else if (error.response.data.code) {
                     setOtpError('کد تایید وارد شده صحیح نیست. لطفاً دوباره تلاش کنید.');
-            } else {
+                } else {
                     setOtpError('کد تایید نامعتبر است. لطفاً کد صحیح را وارد کنید یا درخواست ارسال مجدد کد را بزنید.');
                 }
             } else {
@@ -503,14 +529,12 @@ export default function RegisterForm({ onSuccess }: RegisterFormProps) {
         setIsSubmitting(true);
 
         try {
-
             // ارسال مجدد درخواست کد تایید
             const otpToken = await registerOtp({
                 phone: formData.phone,
                 full_name: formData.full_name,
                 user_type: formData.user_type
             });
-
 
             // ذخیره توکن جدید
             setPhoneOtpToken(otpToken);
@@ -834,87 +858,64 @@ export default function RegisterForm({ onSuccess }: RegisterFormProps) {
     };
 
     return (
-        <Paper
-            elevation={3}
+        <Box
             sx={{
-                p: { xs: 2, sm: 3, md: 5 },
-                px: { xs: 2.5, sm: 3, md: 5 },
-                borderRadius: { xs: isMobile ? 0 : 1, sm: 2 },
-                border: isMobile ? 'none' : `1px solid ${employerColors.bgLight}`,
-                width: { xs: '100%', sm: '100%', md: '600px' },
-                maxWidth: '100%',
-                mx: 'auto',
-                mb: { xs: 0, md: 4 },
                 display: 'flex',
                 flexDirection: 'column',
-                flexGrow: isMobile ? 1 : 0,
-                boxShadow: isMobile ? 'none' : 3,
-                height: isMobile ? '100vh' : 'auto',
-                overflow: 'auto',
-                justifyContent: isMobile ? 'center' : 'flex-start'
+                width: '100%',
+                alignItems: 'center',
+                justifyContent: 'flex-start',
+                minHeight: isMobile ? 'calc(100vh - 100px)' : 'auto',
+                py: isMobile ? 0 : 2,
+                mt: isMobile ? 0 : 2
             }}
         >
-            <Typography
-                variant={isMobile ? "h5" : "h4"}
-                component="h1"
-                align="center"
-                gutterBottom
-                fontWeight="bold"
-                color={employerColors.primary}
-                sx={{
-                    mb: { xs: 3, sm: 3, md: 4 },
+            <Paper 
+                elevation={isMobile ? 0 : 3} 
+                sx={{ 
+                    p: { xs: 2, sm: 4 },
+                    borderRadius: { xs: 0, sm: 2 },
+                    display: 'flex',
+                    flexDirection: 'column',
+                    justifyContent: 'center',
+                    width: '100%',
+                    boxShadow: isMobile ? 'none' : '0px 3px 15px rgba(0, 0, 0, 0.1)',
                     mt: isMobile ? 2 : 0,
-                    fontSize: { xs: '1.5rem', sm: '1.75rem', md: '2rem' }
+                    mb: 'auto',
+                    mx: 'auto',
+                    maxWidth: isMobile ? '100%' : '600px'
                 }}
             >
-                ثبت‌نام در ماهرکار
-            </Typography>
+                {/* عنوان با استایل بهبود یافته */}
+                <Box sx={{ mb: 3, textAlign: 'center' }}>
+                    <Typography 
+                        variant="h5" 
+                        component="h1" 
+                        sx={{ 
+                            fontWeight: 'bold', 
+                            color: EMPLOYER_THEME.primary,
+                            mb: 1,
+                            fontSize: { xs: '1.5rem', sm: '1.75rem' }
+                        }}
+                    >
+                        ثبت‌نام در ماهرکار
+                    </Typography>
+                </Box>
 
-            <Stepper
-                activeStep={activeStep}
-                sx={{
-                    mb: { xs: 3, sm: 3, md: 4 },
-                    '& .MuiStepLabel-label': {
-                        fontSize: { xs: '0.7rem', sm: '0.8rem', md: '0.9rem' },
-                        mt: { xs: 0.5, sm: 1 },
-                        display: 'block',
-                        textAlign: 'center',
-                        color: theme.palette.text.primary
-                    },
-                    '& .MuiStepIcon-root': {
-                        fontSize: { xs: '1.3rem', sm: '1.4rem', md: '1.5rem' }
-                    },
-                    '& .MuiStep-root': {
-                        px: { xs: 0.5, sm: 1 }
-                    },
-                    '& .MuiStepConnector-root': {
-                        mt: { xs: '10px', sm: '12px' }
-                    },
-                    '& .Mui-active': {
-                        color: `${employerColors.primary} !important`,
-                        fontWeight: 'bold'
-                    },
-                    '& .Mui-completed': {
-                        color: `${employerColors.primary} !important`
-                    }
-                }}
-                orientation="horizontal"
-                alternativeLabel={true}
-            >
-                <Step>
-                    <StepLabel StepIconComponent={PersianStepIcon}>{isMobile ? "شماره" : "شماره همراه"}</StepLabel>
-                </Step>
-                <Step>
-                    <StepLabel StepIconComponent={PersianStepIcon}>{isMobile ? "اطلاعات" : "اطلاعات کاربری"}</StepLabel>
-                </Step>
-                <Step>
-                    <StepLabel StepIconComponent={PersianStepIcon}>{isMobile ? "تایید" : "تایید شماره"}</StepLabel>
-                </Step>
-            </Stepper>
+                {/* استپر */}
+                <Stepper activeStep={activeStep} sx={{ mb: 4 }}>
+                    {['شماره تلفن', 'اطلاعات کاربری', 'تایید کد'].map((label, index) => (
+                        <Step key={label}>
+                            <StepLabel StepIconComponent={PersianStepIcon}>{label}</StepLabel>
+                        </Step>
+                    ))}
+                </Stepper>
 
-            {activeStep === 0 && renderPhoneForm()}
-            {activeStep === 1 && renderUserInfoForm()}
-            {activeStep === 2 && renderOtpForm()}
-        </Paper>
+                {/* فرم‌ها */}
+                {activeStep === 0 && renderPhoneForm()}
+                {activeStep === 1 && renderUserInfoForm()}
+                {activeStep === 2 && renderOtpForm()}
+            </Paper>
+        </Box>
     );
 } 

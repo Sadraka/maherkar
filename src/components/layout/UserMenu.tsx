@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, MouseEvent } from 'react';
+import { useState, MouseEvent, useEffect, useRef } from 'react';
 import {
     Box,
     Avatar,
@@ -19,18 +19,14 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
     faUser,
     faSignOutAlt,
-    faCog,
-    faFileAlt,
-    faBriefcase,
-    faUserCircle,
-    faPhone,
     faTachometerAlt,
-    faBuilding,
-    faUsers,
     faListAlt,
-    faBuildingUser
+    faFileAlt,
+    faPhone,
+    faBuilding,
+    faClipboardList
 } from '@fortawesome/free-solid-svg-icons';
-import { useAuth } from '@/contexts/AuthContext';
+import { useAuthStore, useAuthActions } from '@/store/authStore';
 
 // تایپ‌های مورد نیاز
 interface UserMenuProps {
@@ -43,12 +39,57 @@ interface UserMenuProps {
     isLoggedIn: boolean;
 }
 
-export default function UserMenu({ user: propUser, isLoggedIn }: UserMenuProps) {
+export default function UserMenu({ user: propUser, isLoggedIn: propIsLoggedIn }: UserMenuProps) {
     const theme = useTheme();
     const router = useRouter();
-    const { logout: authLogout, user: authUser } = useAuth();
+    // استفاده جداگانه از selector‌ها برای کاهش رندرهای غیرضروری
+    const authUser = useAuthStore(state => state.user);
+    const isAuthenticated = useAuthStore(state => state.isAuthenticated);
+    const { logout: authLogout, refreshUserData } = useAuthActions();
     const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
     const open = Boolean(anchorEl);
+    const menuOpenedRef = useRef(false);
+    const prevOpenStateRef = useRef(open);
+
+    // بروزرسانی اطلاعات کاربر فقط زمانی که منو باز می‌شود (نه در هر رندر)
+    useEffect(() => {
+        // فقط اگر وضعیت منو از بسته به باز تغییر کرده، اطلاعات را به‌روز کن
+        if (open && !prevOpenStateRef.current && isAuthenticated) {
+            // ثبت اینکه منو باز شده است، برای جلوگیری از بروزرسانی‌های مکرر
+            menuOpenedRef.current = true;
+            
+            // برای جلوگیری از حلقه بی‌نهایت، فقط یک بار داده‌ها را بروز می‌کنیم
+            const fetchData = async () => {
+                // برای محدود کردن فراخوانی‌های متوالی، فاصله زمانی را بررسی می‌کنیم
+                const now = Date.now();
+                const lastFetch = (window as any)._userMenuLastFetch || 0;
+                
+                // حداقل 5 ثانیه بین درخواست‌ها فاصله باشد
+                if (now - lastFetch < 5000) {
+                    console.log('[UserMenu] فراخوانی throttled - درخواست قبلی بسیار نزدیک است');
+                    return;
+                }
+                
+                try {
+                    (window as any)._userMenuLastFetch = now;
+                    await refreshUserData();
+                } catch (error) {
+                    console.error('[UserMenu] خطا در به‌روزرسانی اطلاعات کاربر:', error);
+                }
+            };
+            
+            // فقط اگر کاربر احراز هویت شده، داده‌ها را به‌روز کن
+            if (isAuthenticated) {
+                fetchData();
+            }
+        }
+        
+        // ذخیره وضعیت فعلی منو برای مقایسه در رندر بعدی
+        prevOpenStateRef.current = open;
+    }, [open, isAuthenticated]); // حذف refreshUserData از وابستگی‌ها
+
+    // تعیین وضعیت ورود کاربر (اولویت با context است)
+    const isLoggedIn = isAuthenticated || propIsLoggedIn;
 
     // ترکیب اطلاعات کاربر از props و context
     const currentUser = {
@@ -57,6 +98,9 @@ export default function UserMenu({ user: propUser, isLoggedIn }: UserMenuProps) 
         avatar: propUser?.avatar || '',
         role: authUser?.user_type || propUser?.role || '',
     };
+
+    // بررسی اینکه کاربر کارفرما است یا خیر - اطمینان از بررسی هر دو حالت ممکن
+    const isEmployer = currentUser.role === 'EM' || currentUser.role === 'employer';
 
     // تبدیل نوع کاربر به فارسی
     const getUserRoleText = (role: string) => {
@@ -334,12 +378,12 @@ export default function UserMenu({ user: propUser, isLoggedIn }: UserMenuProps) 
                     
                     <Typography 
                         variant="caption" 
-                        color="primary.main" 
+                        color={isEmployer ? "employer.main" : "primary.main"} 
                         sx={{ 
                             mt: 0.8, 
                             display: 'inline-block', 
                             fontSize: '0.75rem',
-                            backgroundColor: `${theme.palette.primary.main}15`,
+                            backgroundColor: isEmployer ? `${theme.palette.employer.main}15` : `${theme.palette.primary.main}15`,
                             px: 1,
                             py: 0.3,
                             borderRadius: '10px',
@@ -352,59 +396,8 @@ export default function UserMenu({ user: propUser, isLoggedIn }: UserMenuProps) 
 
                 {/* آیتم‌های منو */}
                 <Box sx={{ py: 1 }}>
-                    <MenuItem component={Link} href="/profile" onClick={handleClose} sx={{ 
-                        py: 1.2,
-                        mx: 0.5,
-                        borderRadius: '8px',
-                        transition: 'all 0.2s ease',
-                        '&:hover': {
-                            backgroundColor: `${theme.palette.primary.main}10`,
-                            '& .MuiListItemIcon-root': {
-                                color: theme.palette.primary.main,
-                                transform: 'scale(1.1)',
-                            }
-                        }
-                    }}>
-                        <ListItemIcon sx={{ 
-                            transition: 'all 0.2s ease',
-                            minWidth: '35px'
-                        }}>
-                            <FontAwesomeIcon icon={faUser} style={{ 
-                                fontSize: '1rem', 
-                                color: theme.palette.primary.main 
-                            }} />
-                        </ListItemIcon>
-                        مشاهده پروفایل
-                    </MenuItem>
-
-                    {(currentUser.role === 'candidate' || currentUser.role === 'JS') && (
-                        <MenuItem component={Link} href="/resume" onClick={handleClose} sx={{ 
-                            py: 1.2,
-                            mx: 0.5,
-                            borderRadius: '8px',
-                            transition: 'all 0.2s ease',
-                            '&:hover': {
-                                backgroundColor: `${theme.palette.candidate.main}10`,
-                                '& .MuiListItemIcon-root': {
-                                    color: theme.palette.candidate.main,
-                                    transform: 'scale(1.1)',
-                                }
-                            }
-                        }}>
-                            <ListItemIcon sx={{ 
-                                transition: 'all 0.2s ease',
-                                minWidth: '35px'
-                            }}>
-                                <FontAwesomeIcon icon={faFileAlt} style={{ 
-                                    fontSize: '1rem', 
-                                    color: theme.palette.candidate.main 
-                                }} />
-                            </ListItemIcon>
-                            رزومه من
-                        </MenuItem>
-                    )}
-
-                    {(currentUser.role === 'employer' || currentUser.role === 'EM') && (
+                    {/* بخش منوی کارفرما */}
+                    {isEmployer && (
                         <>
                             <MenuItem component={Link} href="/employer/dashboard" onClick={handleClose} sx={{ 
                                 py: 1.2,
@@ -455,7 +448,7 @@ export default function UserMenu({ user: propUser, isLoggedIn }: UserMenuProps) 
                                 </ListItemIcon>
                                 مدیریت آگهی‌ها
                             </MenuItem>
-
+                            
                             <MenuItem component={Link} href="/employer/applications" onClick={handleClose} sx={{ 
                                 py: 1.2,
                                 mx: 0.5,
@@ -473,14 +466,14 @@ export default function UserMenu({ user: propUser, isLoggedIn }: UserMenuProps) 
                                     transition: 'all 0.2s ease',
                                     minWidth: '35px'
                                 }}>
-                                    <FontAwesomeIcon icon={faUsers} style={{ 
+                                    <FontAwesomeIcon icon={faClipboardList} style={{ 
                                         fontSize: '1rem', 
                                         color: theme.palette.employer.main 
                                     }} />
                                 </ListItemIcon>
                                 درخواست‌های استخدام
                             </MenuItem>
-
+                            
                             <MenuItem component={Link} href="/employer/profile" onClick={handleClose} sx={{ 
                                 py: 1.2,
                                 mx: 0.5,
@@ -505,63 +498,12 @@ export default function UserMenu({ user: propUser, isLoggedIn }: UserMenuProps) 
                                 </ListItemIcon>
                                 پروفایل شرکت
                             </MenuItem>
-
-                            <MenuItem component={Link} href="/employer/companies" onClick={handleClose} sx={{ 
-                                py: 1.2,
-                                mx: 0.5,
-                                borderRadius: '8px', 
-                                transition: 'all 0.2s ease',
-                                '&:hover': {
-                                    backgroundColor: `${theme.palette.employer.main}10`,
-                                    '& .MuiListItemIcon-root': {
-                                        color: theme.palette.employer.main,
-                                        transform: 'scale(1.1)',
-                                    }
-                                }
-                            }}>
-                                <ListItemIcon sx={{ 
-                                    transition: 'all 0.2s ease',
-                                    minWidth: '35px'
-                                }}>
-                                    <FontAwesomeIcon icon={faBuildingUser} style={{ 
-                                        fontSize: '1rem', 
-                                        color: theme.palette.employer.main 
-                                    }} />
-                                </ListItemIcon>
-                                مدیریت شرکت‌ها
-                            </MenuItem>
+                            
+                            <Divider sx={{ my: 1 }} />
                         </>
                     )}
 
-                    <MenuItem component={Link} href="/settings" onClick={handleClose} sx={{ 
-                        py: 1.2,
-                        mx: 0.5,
-                        borderRadius: '8px',
-                        transition: 'all 0.2s ease',
-                        '&:hover': {
-                            backgroundColor: `${theme.palette.grey[500]}10`,
-                            '& .MuiListItemIcon-root': {
-                                color: theme.palette.grey[800],
-                                transform: 'scale(1.1)',
-                            }
-                        }
-                    }}>
-                        <ListItemIcon sx={{ 
-                            transition: 'all 0.2s ease',
-                            minWidth: '35px'
-                        }}>
-                            <FontAwesomeIcon icon={faCog} style={{ 
-                                fontSize: '1rem', 
-                                color: theme.palette.grey[700] 
-                            }} />
-                        </ListItemIcon>
-                        تنظیمات
-                    </MenuItem>
-                </Box>
-
-                <Divider sx={{ my: 0.5 }} />
-
-                <Box sx={{ py: 1 }}>
+                    {/* دکمه خروج از حساب کاربری */}
                     <MenuItem onClick={handleLogout} sx={{ 
                         py: 1.2,
                         mx: 0.5,

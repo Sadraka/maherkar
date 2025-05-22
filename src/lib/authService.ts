@@ -1,9 +1,6 @@
 import axios from 'axios';
 import { toast } from 'react-hot-toast';
 
-// آدرس API احراز هویت
-const AUTH_URL = process.env.NEXT_PUBLIC_AUTH_URL || 'http://localhost:8000/auth';
-
 // استفاده نسبی از ماژول‌ها برای حل مشکل لینتر
 import cookieService, { COOKIE_NAMES } from '../lib/cookieService';
 
@@ -89,52 +86,52 @@ const translateNetworkError = (error: any): string => {
     return error.message || 'خطای نامشخص در ارتباط با سرور. لطفاً دوباره تلاش کنید.';
 };
 
+// تابع رمزگشایی از توکن JWT
+const decodeToken = (token: string): any => {
+    try {
+        // توکن JWT از سه بخش تشکیل شده که با نقطه از هم جدا شده‌اند
+        const parts = token.split('.');
+        if (parts.length !== 3) {
+            return null;
+        }
+        
+        // بخش دوم توکن حاوی اطلاعات کاربر است (payload)
+        const payload = parts[1];
+        
+        // رمزگشایی بخش payload با استفاده از atob و JSON.parse
+        const decoded = JSON.parse(atob(payload));
+        return decoded;
+    } catch (e) {
+        console.error('خطا در رمزگشایی توکن:', e);
+        return null;
+    }
+};
+
 // سرویس احراز هویت
 const authService = {
+    // استفاده از تابع رمزگشایی توکن
+    decodeToken,
+
     // بررسی وجود شماره تلفن در دیتابیس با استفاده از API ورود
     checkPhoneExists: async (phone: string): Promise<boolean> => {
         try {
-            // ارسال درخواست ورود با شماره تلفن و یک رمز عبور اشتباه
-            await axios.post(`${AUTH_URL}/login/`, {
-                phone: phone,
-                password: 'incorrect_password_123456'
+            const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:8000';
+            
+            // تلاش برای ارسال کد OTP به شماره تلفن
+            // اگر شماره تلفن وجود داشته باشد، کد OTP ارسال می‌شود
+            // اگر شماره تلفن وجود نداشته باشد، خطای 404 یا 400 برگردانده می‌شود
+            const response = await axios.post(`${BASE_URL}/auth/login-otp/`, {
+                phone: phone
             });
 
-            // اگر به اینجا برسیم، یعنی درخواست موفقیت‌آمیز بوده که غیرمنطقی است
-            // console.log('خطا: درخواست بررسی وجود شماره تلفن نباید موفقیت‌آمیز باشد');
-            return false; // در هر صورت فرض می‌کنیم شماره تلفن وجود ندارد
+            // اگر به اینجا برسیم، یعنی شماره تلفن در دیتابیس وجود دارد
+            console.log('[authService] شماره تلفن در دیتابیس وجود دارد');
+            return true;
         } catch (error: any) {
-            if (error.response) {
-                const responseData = error.response.data;
-
-                // خطای مربوط به شماره تلفن
-                if (responseData?.phone) {
-                    const phoneError = Array.isArray(responseData.phone)
-                        ? responseData.phone[0]
-                        : responseData.phone;
-
-                    // اگر پیام خطا "شماره تلفن موجود نیست" باشد
-                    if (typeof phoneError === 'string' &&
-                        (phoneError.includes('شماره تلفن موجود نیست') ||
-                            phoneError.includes('موجود نیست'))) {
-                        // console.log('شماره تلفن در دیتابیس وجود ندارد');
-                        return false;
-                    }
-                }
-
-                // خطای رمز عبور اشتباه - یعنی شماره تلفن صحیح است
-                if (responseData?.non_field_errors) {
-                    const errors = Array.isArray(responseData.non_field_errors)
-                        ? responseData.non_field_errors
-                        : [responseData.non_field_errors];
-
-                    for (const err of errors) {
-                        if (typeof err === 'string' && err.includes('رمز عبور اشتباه است')) {
-                            // console.log('شماره تلفن در دیتابیس وجود دارد');
-                            return true;
-                        }
-                    }
-                }
+            // اگر خطای 404 یا 400 دریافت شد، یعنی شماره تلفن وجود ندارد
+            if (error.response && (error.response.status === 404 || error.response.status === 400)) {
+                console.log('[authService] شماره تلفن در دیتابیس وجود ندارد');
+                return false;
             }
 
             // در صورت خطای شبکه، پیامی را نمایش می‌دهیم و خطا را مجدداً پرتاب می‌کنیم
@@ -142,9 +139,8 @@ const authService = {
                 throw new Error(translateNetworkError(error));
             }
 
-            // در صورت عدم تشخیص دقیق، پیش‌فرض: شماره تلفن وجود ندارد
-            // console.log('خطا در بررسی وجود شماره تلفن:', error);
-            return false;
+            // در صورت دریافت سایر خطاها، آن را مجدداً پرتاب می‌کنیم
+            throw error;
         }
     },
 
@@ -152,9 +148,10 @@ const authService = {
     registerOtp: async (userData: RegisterData): Promise<string> => {
         try {
             // console.log('ارسال درخواست کد تایید با اطلاعات کاربر:', userData);
+            const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:8000';
 
             const response = await axios.post<RegisterOtpResponse>(
-                `${AUTH_URL}/register-otp/`,
+                `${BASE_URL}/auth/register-otp/`,
                 userData
             );
 
@@ -233,10 +230,11 @@ const authService = {
             //     codeLength: code.length,
             //     timestamp: new Date().toISOString()
             // });
+            const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:8000';
 
             // تنظیم تایم‌اوت برای درخواست
             const response = await axios.post<RegisterValidateResponse>(
-                `${AUTH_URL}/register-otp-validate/${token}/`,
+                `${BASE_URL}/auth/register-otp-validate/${token}/`,
                 { code },
                 {
                     timeout: 10000, // 10 ثانیه تایم‌اوت
@@ -267,16 +265,6 @@ const authService = {
 
                 cookieService.setCookie(COOKIE_NAMES.ACCESS_TOKEN, access, 30);
                 cookieService.setCookie(COOKIE_NAMES.REFRESH_TOKEN, refresh, 30);
-
-                // ذخیره اطلاعات کاربر با مدت انقضای 30 روز
-                if (response.data.Detail && response.data.Detail.User) {
-                    cookieService.setObjectCookie(COOKIE_NAMES.USER_DATA, response.data.Detail.User, 30);
-                    // console.log('اطلاعات کاربر با موفقیت ذخیره شد:', {
-                    //     phone: response.data.Detail.User.phone,
-                    //     userType: response.data.Detail.User.user_type,
-                    //     timestamp: new Date().toISOString()
-                    // });
-                }
 
                 // ثبت لاگ اطلاعات کاربر برای بررسی نوع کاربر
                 if (response.data.Detail && response.data.Detail.User && response.data.Detail.User.user_type) {
@@ -345,6 +333,10 @@ const authService = {
                     });
                     throw new Error('خطای سرور در تایید کد. لطفاً چند دقیقه صبر کنید و دوباره تلاش کنید.');
                 }
+                // اضافه کردن بررسی خاص برای خطای 400 
+                else if (error.response.status === 400) {
+                    throw new Error('کد تایید نامعتبر است. لطفاً کد صحیح را وارد کنید.');
+                }
             } else if (error.code === 'ECONNABORTED') {
                 throw new Error('زمان درخواست به پایان رسید. لطفاً دوباره تلاش کنید.');
             }
@@ -358,15 +350,22 @@ const authService = {
     updateUserType: async (user_type: string): Promise<UserData> => {
         try {
             // console.log(`شروع فرآیند بروزرسانی نوع کاربر به ${user_type}`);
+            const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:8000';
 
             const accessToken = cookieService.getCookie(COOKIE_NAMES.ACCESS_TOKEN);
             if (!accessToken) {
                 throw new Error('خطا در دسترسی: توکن معتبر یافت نشد');
             }
 
+            // ابتدا از JWT توکن اطلاعات اولیه کاربر را استخراج می‌کنیم
+            const jwtData = authService.decodeToken(accessToken);
+            if (!jwtData || !jwtData.user_id) {
+                throw new Error('خطا در دسترسی: اطلاعات کاربر یافت نشد');
+            }
+
             // ارسال درخواست به API بروزرسانی پروفایل
             const response = await axios.patch<UserData>(
-                `${AUTH_URL}/user/update-profile/`,
+                `${BASE_URL}/users/user/${jwtData.username}/`,
                 { user_type },
                 {
                     headers: {
@@ -379,15 +378,13 @@ const authService = {
             if (response.status === 200) {
                 // console.log('نوع کاربر با موفقیت بروزرسانی شد:', response.data);
 
-                // بروزرسانی اطلاعات کاربر در کوکی
-                const userData = cookieService.getObjectCookie<UserData>(COOKIE_NAMES.USER_DATA);
-                if (userData) {
-                    const updatedUserData = { ...userData, user_type };
-                    cookieService.setObjectCookie(COOKIE_NAMES.USER_DATA, updatedUserData, 30);
-                }
-
                 // نمایش پیام موفقیت‌آمیز
                 toast.success('نوع کاربری شما با موفقیت تغییر یافت');
+
+                // بازخوانی مجدد اطلاعات کاربر برای اعمال تغییرات
+                setTimeout(async () => {
+                    await authService.getUserData();
+                }, 1000);
 
                 return response.data;
             } else {
@@ -414,9 +411,10 @@ const authService = {
     loginOtp: async (phone: string): Promise<string> => {
         try {
             // console.log('ارسال درخواست OTP برای ورود با شماره:', phone);
+            const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:8000';
 
             const response = await axios.post<RegisterOtpResponse>(
-                `${AUTH_URL}/login-otp/`,
+                `${BASE_URL}/auth/login-otp/`,
                 { phone }
             );
 
@@ -479,18 +477,19 @@ const authService = {
     // تایید OTP برای ورود
     validateLoginOtp: async (token: string, code: string): Promise<UserData> => {
         try {
-            // console.log('شروع فرآیند تایید OTP برای ورود:', {
-            //     token: token.substring(0, 10) + '...',
-            //     codeLength: code.length,
-            //     timestamp: new Date().toISOString()
-            // });
+            console.log('[authService] شروع فرآیند تایید OTP برای ورود', { 
+                tokenExists: !!token, 
+                codeLength: code?.length 
+            });
+
+            const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:8000';
 
             // تنظیم تایم‌اوت برای درخواست
             const response = await axios.post<TokenResponse | any>(
-                `${AUTH_URL}/login-validate-otp/${token}/`,
+                `${BASE_URL}/auth/login-validate-otp/${token}/`,
                 { code },
                 {
-                    timeout: 10000, // 10 ثانیه تایم‌اوت
+                    timeout: 15000, // 15 ثانیه تایم‌اوت
                     headers: {
                         'Content-Type': 'application/json',
                         'Accept': 'application/json'
@@ -498,15 +497,16 @@ const authService = {
                 }
             );
 
-            // console.log('پاسخ دریافتی از API پس از تایید کد OTP برای ورود:', {
-            //     status: response.status,
-            //     data: response.data,
-            //     timestamp: new Date().toISOString()
-            // });
+            console.log('[authService] پاسخ دریافتی از API تایید OTP:', {
+                status: response.status,
+                hasTokenData: !!(response.data?.access || response.data?.Detail?.Token),
+                hasUserData: !!(response.data?.Detail?.User),
+            });
 
             // بررسی ساختار پاسخ سرور
             let accessToken = '';
             let refreshToken = '';
+            let userData: UserData | null = null;
 
             // اگر پاسخ به صورت متعارف باشد (توکن‌ها در سطح بالایی)
             if (response.data && response.data.access && response.data.refresh) {
@@ -517,102 +517,73 @@ const authService = {
             else if (response.data?.Detail?.Token) {
                 accessToken = response.data.Detail.Token.access;
                 refreshToken = response.data.Detail.Token.refresh;
+                
+                // اگر اطلاعات کاربر در پاسخ وجود داشته باشد
+                if (response.data.Detail.User) {
+                    userData = response.data.Detail.User;
+                    console.log('[authService] اطلاعات کاربر از پاسخ:', {
+                        userType: userData?.user_type || 'نامشخص',
+                        phone: userData?.phone ? userData.phone.substring(0, 4) + '****' : 'نامشخص'
+                    });
+                }
             }
             // اگر هیچ توکنی یافت نشد
             else {
+                console.error('[authService] ساختار پاسخ سرور نامعتبر است:', response.data);
                 throw new Error('ساختار پاسخ سرور نامعتبر است. لطفاً دوباره تلاش کنید.');
             }
 
             // اطمینان از وجود توکن‌ها
             if (!accessToken || !refreshToken) {
-                console.error('توکن‌ها در پاسخ سرور یافت نشد:', response.data);
+                console.error('[authService] توکن‌ها در پاسخ سرور یافت نشد:', response.data);
                 throw new Error('دریافت توکن با شکست مواجه شد. لطفاً دوباره تلاش کنید.');
             }
 
-            // ذخیره توکن‌ها در کوکی با مدت انقضای 30 روز
-            cookieService.setCookie(COOKIE_NAMES.ACCESS_TOKEN, accessToken, 30);
-            cookieService.setCookie(COOKIE_NAMES.REFRESH_TOKEN, refreshToken, 60);
+            // ذخیره توکن‌ها در کوکی با مدت انقضای مناسب
+            cookieService.setCookie(COOKIE_NAMES.ACCESS_TOKEN, accessToken, 1); // اکسس توکن برای 1 روز
+            cookieService.setCookie(COOKIE_NAMES.REFRESH_TOKEN, refreshToken, 30); // رفرش توکن برای 30 روز
 
-            // اول بررسی می‌کنیم آیا اطلاعات کاربر در پاسخ وجود دارد
-            if (response.data?.Detail?.User) {
-                const userData = response.data.Detail.User;
-                cookieService.setObjectCookie(COOKIE_NAMES.USER_DATA, userData, 30);
-                // console.log('اطلاعات کاربر از پاسخ سرور دریافت شد:', userData);
+            // اگر اطلاعات کاربر در پاسخ وجود داشت، از آن استفاده می‌کنیم
+            if (userData) {
+                // بررسی و مپ کردن نوع کاربر
+                if (userData.user_type === 'EM') {
+                    return {
+                        ...userData,
+                        user_type_original: userData.user_type,
+                        user_type: 'employer'
+                    };
+                }
                 return userData;
             }
 
-            // دریافت اطلاعات کاربر با استفاده از توکن دسترسی
+            // دریافت اطلاعات کاربر با استفاده از توکن
             try {
-                // تنظیم هدر authorization برای درخواست بعدی
-                const userResponse = await axios.get<UserData>(`${AUTH_URL}/user/`, {
-                    headers: {
-                        'Authorization': `Bearer ${accessToken}`
-                    }
-                });
-
-                // console.log('اطلاعات کاربر دریافت شد:', userResponse.data);
-
-                // ذخیره اطلاعات کاربر در کوکی
-                cookieService.setObjectCookie(COOKIE_NAMES.USER_DATA, userResponse.data, 30);
-
-                // برگرداندن اطلاعات کاربر
-                return userResponse.data;
+                console.log('[authService] تلاش برای دریافت اطلاعات کاربر با تابع getUserData');
+                const userInfo = await authService.getUserData();
+                
+                if (userInfo) {
+                    console.log('[authService] اطلاعات کاربر با موفقیت دریافت شد');
+                    return userInfo;
+                } else {
+                    throw new Error('دریافت اطلاعات کاربر ناموفق بود');
+                }
             } catch (userError: any) {
-                console.error('خطا در دریافت اطلاعات کاربر:', userError);
-
-                // بررسی خطاهای شبکه در درخواست دوم
-                if (!userError.response && (userError.code === 'ERR_NETWORK' || userError.message?.includes('Network Error') || userError.code === 'ECONNABORTED')) {
-                    throw new Error(translateNetworkError(userError));
-                }
-
-                // تلاش برای استخراج اطلاعات اساسی کاربر از پیلود JWT
-                try {
-                    const payloadBase64 = accessToken.split('.')[1];
-                    const payload = JSON.parse(atob(payloadBase64));
-                    // console.log('استخراج اطلاعات از JWT:', payload);
-
-                    // ساخت اطلاعات اولیه کاربر از طریق پیلود JWT
-                    const basicUserData: UserData = {
-                        username: payload.username || '',
-                        email: payload.email || '',
-                        phone: payload.phone || '',
-                        user_type: payload.user_type || 'JS', // نوع کاربر پیش‌فرض
-                        full_name: payload.full_name || '',
-                        user_type_original: payload.user_type || 'JS'
-                    };
-
-                    // ذخیره اطلاعات پایه در کوکی
-                    cookieService.setObjectCookie(COOKIE_NAMES.USER_DATA, basicUserData, 30);
-
-                    // console.log('اطلاعات پایه کاربر استخراج و ذخیره شد:', basicUserData);
-
-                    // برگرداندن اطلاعات پایه کاربر
-                    return basicUserData;
-                } catch (jwtError) {
-                    console.error('خطا در استخراج اطلاعات از JWT:', jwtError);
-
-                    // در صورت نبود هیچ داده‌ای، یک ساختار پایه برمی‌گردانیم تا حداقل ورود موفق باشد
-                    const emptyUserData: UserData = {
-                        username: '',
-                        email: '',
-                        phone: '',
-                        user_type: 'JS',
-                        user_type_original: 'JS'
-                    };
-
-                    // ذخیره اطلاعات خالی در کوکی
-                    cookieService.setObjectCookie(COOKIE_NAMES.USER_DATA, emptyUserData, 30);
-
-                    // بازگرداندن اطلاعات خالی کاربر
-                    return emptyUserData;
-                }
+                console.error('[authService] خطا در دریافت اطلاعات کاربر:', userError.message);
+                
+                // بازگرداندن یک اطلاعات کاربر پایه برای جلوگیری از شکست کامل فرآیند ورود
+                return {
+                    username: "user",
+                    email: "",
+                    phone: "",
+                    user_type: "JS", // کاربر پیش‌فرض به عنوان جوینده کار
+                    full_name: "کاربر ماهرکار"
+                };
             }
         } catch (error: any) {
-            console.error('خطا در تایید کد OTP برای ورود:', {
+            console.error('[authService] خطا در تایید کد OTP برای ورود:', {
                 error: error.message,
                 response: error.response?.data,
-                status: error.response?.status,
-                timestamp: new Date().toISOString()
+                status: error.response?.status
             });
 
             // بررسی خطاهای شبکه
@@ -620,59 +591,31 @@ const authService = {
                 throw new Error(translateNetworkError(error));
             }
 
-            // بهبود مدیریت خطاها
-            if (error.response) {
-                // بررسی ساختار پاسخ خطا
-                if (error.response.data) {
-                    // خطای اعتبارسنجی کد OTP
-                    if (error.response.data.code) {
-                        const codeError = Array.isArray(error.response.data.code)
-                            ? error.response.data.code[0]
-                            : error.response.data.code;
-                        throw new Error(codeError);
+            // بررسی خطاهای اعتبارسنجی
+            if (error.response?.data?.Detail) {
+                const errorDetail = error.response.data.Detail;
+                if (typeof errorDetail === 'string') {
+                    if (errorDetail.includes('کد وارد شده اشتباه است') || 
+                        errorDetail.includes('Invalid code') || 
+                        errorDetail.includes('expired')) {
+                        throw new Error('کد تایید وارد شده نامعتبر یا منقضی شده است. لطفاً دوباره تلاش کنید.');
                     }
-
-                    // خطاهای ساختار Detail
-                    if (error.response.data.Detail) {
-                        if (typeof error.response.data.Detail === 'string') {
-                            throw new Error(error.response.data.Detail);
-                        } else if (typeof error.response.data.Detail === 'object') {
-                            if (error.response.data.Detail.code) {
-                                const codeError = Array.isArray(error.response.data.Detail.code)
-                                    ? error.response.data.Detail.code[0]
-                                    : error.response.data.Detail.code;
-                                throw new Error(codeError);
-                            }
-                        }
-                    }
-
-                    // خطاهای non_field_errors
-                    if (error.response.data.non_field_errors) {
-                        const nonFieldError = Array.isArray(error.response.data.non_field_errors)
-                            ? error.response.data.non_field_errors[0]
-                            : error.response.data.non_field_errors;
-                        throw new Error(nonFieldError);
-                    }
+                    throw new Error(errorDetail);
                 }
-
-                // خطای OTP غیرفعال
-                if (error.response.status === 400 || error.response.status === 401) {
-                    throw new Error('کد تایید نامعتبر است یا منقضی شده است. لطفاً کد جدید درخواست کنید.');
-                }
-                // خطای توکن نامعتبر
-                else if (error.response.status === 404) {
-                    throw new Error('توکن نامعتبر است. لطفاً دوباره درخواست کد تایید کنید.');
-                }
-                // خطای سرور
-                else if (error.response.status === 500) {
-                    throw new Error('خطای سرور در تایید کد. لطفاً چند دقیقه صبر کنید و دوباره تلاش کنید.');
-                }
-            } else if (error.code === 'ECONNABORTED') {
-                throw new Error('زمان درخواست به پایان رسید. لطفاً دوباره تلاش کنید.');
             }
-
-            // در صورت بروز سایر خطاها
-            throw error;
+            
+            // بررسی کدهای وضعیت HTTP
+            if (error.response) {
+                if (error.response.status === 400) {
+                    throw new Error('کد تایید نامعتبر است. لطفاً کد صحیح را وارد کنید.');
+                } else if (error.response.status === 401) {
+                    throw new Error('کد تایید منقضی شده است. لطفاً دوباره درخواست کد کنید.');
+                } else if (error.response.status === 404) {
+                    throw new Error('درخواست نامعتبر است. لطفاً دوباره تلاش کنید.');
+                }
+            }
+            
+            throw new Error(error.message || 'خطا در تایید کد. لطفاً دوباره تلاش کنید.');
         }
     },
 
@@ -690,30 +633,271 @@ const authService = {
         return !!cookieService.getCookie(COOKIE_NAMES.ACCESS_TOKEN);
     },
 
-    // دریافت اطلاعات کاربر از کوکی
-    getUserData: (): UserData | null => {
+    // دریافت اطلاعات کاربر از سرور - با پیاده‌سازی بهینه‌شده
+    getUserData: async (): Promise<UserData | null> => {
         try {
-            const userData = cookieService.getObjectCookie<UserData>(COOKIE_NAMES.USER_DATA);
+            console.log('[authService] شروع فرآیند دریافت اطلاعات کاربر');
+            let accessToken = cookieService.getCookie(COOKIE_NAMES.ACCESS_TOKEN);
+            const refreshToken = cookieService.getCookie(COOKIE_NAMES.REFRESH_TOKEN);
             
-            // نگاشت نوع کاربر ارسال شده از سرور به مقادیر مورد نیاز فرانت‌اند
-            if (userData) {
-                console.log('[authService] getUserData - نوع کاربر خوانده شده از کوکی:', userData.user_type);
-                
-                // اگر کاربر نوع EM باشد، برای استفاده در فرانت‌اند باید به employer تبدیل شود
-                // این تغییر فقط روی داده بازگشتی اعمال می‌شود و اصل داده در کوکی تغییر نمی‌کند
-                if (userData.user_type === 'EM') {
-                    return {
-                        ...userData,
-                        user_type_original: userData.user_type, // حفظ مقدار اصلی برای دیباگ
-                        user_type: 'employer' // تبدیل به مقدار مورد نیاز فرانت‌اند
-                    };
+            if (!accessToken && !refreshToken) {
+                console.log('[authService] توکن‌ها موجود نیستند');
+                return null;
+            }
+            
+            // اگر اکسس توکن نداریم ولی رفرش توکن داریم، تلاش می‌کنیم اکسس توکن جدید بگیریم
+            if (!accessToken && refreshToken) {
+                try {
+                    console.log('[authService] تلاش برای دریافت توکن جدید با رفرش توکن');
+                    accessToken = await authService.refreshAccessToken();
+                    
+                    if (!accessToken) {
+                        throw new Error('دریافت توکن جدید ناموفق بود');
+                    }
+                } catch (refreshError: any) {
+                    console.error('[authService] خطا در رفرش توکن:', refreshError.message);
+                    // اگر رفرش توکن منقضی شده، کوکی‌های مربوطه را حذف می‌کنیم
+                    cookieService.deleteCookie(COOKIE_NAMES.ACCESS_TOKEN);
+                    cookieService.deleteCookie(COOKIE_NAMES.REFRESH_TOKEN);
+                    cookieService.deleteCookie(COOKIE_NAMES.USER_DATA);
+                    return null;
                 }
             }
             
-            return userData;
-        } catch (error) {
-            console.error('خطا در بازیابی اطلاعات کاربر از کوکی:', error);
+            if (!accessToken) {
+                console.error('[authService] اکسس توکن همچنان در دسترس نیست');
+                return null;
+            }
+
+            // دریافت اطلاعات از API بر اساس مستندات بک‌اند
+            const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:8000';
+            
+            // بر اساس مستندات API، ابتدا از مسیر اصلی کاربران استفاده می‌کنیم
+            try {
+                console.log(`[authService] دریافت اطلاعات کاربر از مسیر اصلی`);
+                
+                const response = await axios.get(`${BASE_URL}/users/user/`, {
+                    headers: {
+                        'Authorization': `Bearer ${accessToken}`
+                    },
+                    timeout: 8000
+                });
+                
+                if (response.status === 200 && response.data) {
+                    const userData = response.data;
+                    
+                    console.log('[authService] اطلاعات کاربر با موفقیت دریافت شد:', {
+                        userType: userData.user_type,
+                        hasUsername: !!userData.username
+                    });
+                    
+                    // ذخیره اطلاعات کاربر در کوکی برای دسترسی آفلاین
+                    cookieService.setObjectCookie(COOKIE_NAMES.USER_DATA, userData, 7); // ذخیره برای 7 روز
+                    
+                    // بررسی و مپ کردن نوع کاربر
+                    if (userData.user_type === 'EM') {
+                        return {
+                            ...userData,
+                            user_type: 'employer',
+                            user_type_original: userData.user_type
+                        };
+                    }
+                    
+                    return userData;
+                }
+            } catch (error: any) {
+                console.warn(`[authService] خطا در دریافت اطلاعات کاربر از مسیر اصلی:`, {
+                    message: error.message,
+                    status: error.response?.status
+                });
+                
+                // اگر خطای 401 (توکن منقضی شده) دریافت کردیم، تلاش می‌کنیم توکن را رفرش کنیم
+                if (error.response?.status === 401 && refreshToken) {
+                    try {
+                        console.log('[authService] تلاش مجدد با توکن رفرش شده');
+                        const newAccessToken = await authService.refreshAccessToken();
+                        
+                        if (newAccessToken) {
+                            // تلاش دوباره با توکن جدید
+                            const retryResponse = await axios.get(`${BASE_URL}/users/user/`, {
+                                headers: {
+                                    'Authorization': `Bearer ${newAccessToken}`
+                                },
+                                timeout: 8000
+                            });
+                            
+                            if (retryResponse.status === 200 && retryResponse.data) {
+                                const userData = retryResponse.data;
+                                
+                                // ذخیره اطلاعات کاربر در کوکی برای دسترسی آفلاین
+                                cookieService.setObjectCookie(COOKIE_NAMES.USER_DATA, userData, 7);
+                                
+                                if (userData.user_type === 'EM') {
+                                    return {
+                                        ...userData,
+                                        user_type: 'employer',
+                                        user_type_original: userData.user_type
+                                    };
+                                }
+                                
+                                return userData;
+                            }
+                        }
+                    } catch (retryError) {
+                        console.error('[authService] تلاش مجدد نیز با شکست مواجه شد:', retryError);
+                    }
+                }
+            }
+            
+            // اگر به اینجا رسیدیم، یعنی نتوانستیم اطلاعات کاربر را از سرور دریافت کنیم
+            // تلاش می‌کنیم از اطلاعات ذخیره شده در کوکی استفاده کنیم
+            const cachedUserData = cookieService.getObjectCookie<UserData>(COOKIE_NAMES.USER_DATA);
+            
+            if (cachedUserData) {
+                console.log('[authService] استفاده از اطلاعات کاربر ذخیره شده در کوکی');
+                return cachedUserData;
+            }
+            
+            // آخرین راه: استخراج اطلاعات اولیه از توکن JWT
+            if (accessToken) {
+                const jwtData = authService.decodeToken(accessToken);
+                
+                if (jwtData) {
+                    console.log('[authService] استخراج اطلاعات اولیه از توکن JWT');
+                    
+                    const userData: UserData = {
+                        username: jwtData.username || jwtData.user_id || 'user',
+                        email: jwtData.email || '',
+                        phone: jwtData.phone || '',
+                        user_type: jwtData.user_type === 'EM' ? 'employer' : (jwtData.user_type || 'JS'),
+                        full_name: jwtData.full_name || jwtData.name || 'کاربر ماهرکار'
+                    };
+                    
+                    if (jwtData.user_type === 'EM') {
+                        userData.user_type_original = jwtData.user_type;
+                    }
+                    
+                    return userData;
+                }
+            }
+            
             return null;
+        } catch (error: any) {
+            console.error('[authService] خطای کلی در دریافت اطلاعات کاربر:', error.message);
+            return null;
+        }
+    },
+
+    // نوسازی توکن دسترسی با استفاده از توکن رفرش - پیاده‌سازی بهینه‌شده
+    refreshAccessToken: async (): Promise<string | null> => {
+        try {
+            const refreshToken = cookieService.getCookie(COOKIE_NAMES.REFRESH_TOKEN);
+            
+            if (!refreshToken) {
+                console.log('[authService] رفرش توکن موجود نیست');
+                return null;
+            }
+            
+            console.log('[authService] تلاش برای نوسازی توکن دسترسی');
+            const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:8000';
+            
+            // استفاده از مسیر صحیح API برای رفرش توکن
+            const response = await axios.post<{ access: string }>(
+                `${BASE_URL}/api/token/refresh/`,
+                { refresh: refreshToken },
+                {
+                    timeout: 8000,
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    }
+                }
+            );
+            
+            if (response.status === 200 && response.data.access) {
+                const newAccessToken = response.data.access;
+                
+                // ذخیره توکن جدید با تاریخ انقضای کوتاه‌تر (1 روز)
+                cookieService.setCookie(COOKIE_NAMES.ACCESS_TOKEN, newAccessToken, 1);
+                console.log('[authService] توکن دسترسی با موفقیت نوسازی شد');
+                
+                return newAccessToken;
+            }
+            
+            console.error('[authService] پاسخ نامعتبر از سرور برای رفرش توکن:', response);
+            return null;
+        } catch (error: any) {
+            console.error('[authService] خطا در نوسازی توکن دسترسی:', error.message);
+            
+            // مدیریت خطاهای HTTP
+            if (error.response) {
+                const status = error.response.status;
+                
+                // اگر خطای اعتبارسنجی رخ داده است (401: توکن نامعتبر، 403: دسترسی ممنوع)
+                if (status === 401 || status === 403) {
+                    console.log('[authService] توکن رفرش نامعتبر است، کوکی‌ها را حذف می‌کنیم');
+                    cookieService.deleteCookie(COOKIE_NAMES.REFRESH_TOKEN);
+                    cookieService.deleteCookie(COOKIE_NAMES.ACCESS_TOKEN);
+                    cookieService.deleteCookie(COOKIE_NAMES.USER_DATA);
+                    
+                    // انتشار رویداد خروج برای به‌روزرسانی وضعیت احراز هویت در برنامه
+                    if (typeof window !== 'undefined') {
+                        window.dispatchEvent(new Event('logout'));
+                    }
+                }
+                
+                // خطاهای شبکه و سرور
+                if (status >= 500) {
+                    console.error('[authService] خطای سرور در فرآیند رفرش توکن:', error.response.data);
+                }
+            } else if (error.request) {
+                // خطای شبکه (بدون پاسخ از سرور)
+                console.error('[authService] خطای شبکه در فرآیند رفرش توکن - بدون پاسخ از سرور');
+            }
+            
+            return null;
+        }
+    },
+
+    // بررسی اعتبار توکن فعلی و رفرش در صورت نیاز
+    validateAndRefreshTokenIfNeeded: async (): Promise<boolean> => {
+        try {
+            const accessToken = cookieService.getCookie(COOKIE_NAMES.ACCESS_TOKEN);
+            
+            // اگر توکن نداریم، نیازی به بررسی نیست
+            if (!accessToken) {
+                return false;
+            }
+            
+            // بررسی اعتبار توکن با استفاده از decode
+            const tokenData = authService.decodeToken(accessToken);
+            
+            if (!tokenData) {
+                console.log('[authService] توکن قابل decode نیست، احتمالاً نامعتبر است');
+                return false;
+            }
+            
+            // بررسی تاریخ انقضا (exp در JWT)
+            if (tokenData.exp) {
+                const expirationTime = tokenData.exp * 1000; // تبدیل به میلی‌ثانیه
+                const currentTime = Date.now();
+                
+                // اگر کمتر از 5 دقیقه به انقضا مانده، توکن را رفرش می‌کنیم
+                if (expirationTime - currentTime < 5 * 60 * 1000) {
+                    console.log('[authService] توکن در حال انقضا است، تلاش برای رفرش');
+                    const newToken = await authService.refreshAccessToken();
+                    return !!newToken;
+                }
+                
+                // توکن معتبر است
+                return true;
+            }
+            
+            // اگر exp نداشت، به طور پیش‌فرض نامعتبر در نظر می‌گیریم
+            return false;
+        } catch (error) {
+            console.error('[authService] خطا در بررسی اعتبار توکن:', error);
+            return false;
         }
     },
 

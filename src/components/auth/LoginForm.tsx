@@ -13,7 +13,7 @@ import {
     useMediaQuery,
     useTheme
 } from '@mui/material';
-import { useAuth } from '@/contexts/AuthContext';
+import { useAuthStore, useAuthActions, useAuthStatus } from '@/store/authStore';
 import { useRouter, useSearchParams } from 'next/navigation';
 import PhoneIcon from '@mui/icons-material/Phone';
 import VerifiedUserIcon from '@mui/icons-material/VerifiedUser';
@@ -25,7 +25,11 @@ import OtpInput from '@/components/common/OtpInput';
 
 // Wrapper component for parts that need useSearchParams
 const LoginFormContent = ({ onSuccess }: { onSuccess?: () => void }) => {
-    const { loginOtp, validateLoginOtp, loading } = useAuth();
+    // استفاده از Zustand به جای Context API
+    const { loginOtp, validateLoginOtp } = useAuthActions();
+    const { loading, loginError } = useAuthStatus();
+    const isAuthenticated = useAuthStore(state => state.isAuthenticated);
+    
     const router = useRouter();
     const searchParams = useSearchParams();
     const [phone, setPhone] = useState('');
@@ -104,6 +108,7 @@ const LoginFormContent = ({ onSuccess }: { onSuccess?: () => void }) => {
     const theme = useTheme();
     const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
     const isTablet = useMediaQuery(theme.breakpoints.between('sm', 'md'));
+    const employerColors = EMPLOYER_THEME;
 
     // پاک کردن خطاهای فرم هنگام تغییر مقادیر
     const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -446,8 +451,6 @@ const LoginFormContent = ({ onSuccess }: { onSuccess?: () => void }) => {
         return `${formattedMins}:${formattedSecs}`;
     };
 
-    const employerColors = EMPLOYER_THEME;
-
     useEffect(() => {
         // بررسی خطای شماره تلفن در هر دو فیلد phone و non_field_errors
         const phoneError = formErrors.phone;
@@ -463,41 +466,36 @@ const LoginFormContent = ({ onSuccess }: { onSuccess?: () => void }) => {
     }, [formErrors.phone, formErrors.non_field_errors, router]);
 
     return (
-        <Paper
-            elevation={3}
-            sx={{
-                p: { xs: 2, sm: 3, md: 5 },
-                px: { xs: 2.5, sm: 3, md: 5 },
-                borderRadius: { xs: isMobile ? 0 : 1, sm: 2 },
-                border: isMobile ? 'none' : `1px solid ${employerColors.bgLight}`,
-                width: { xs: '100%', sm: '100%', md: '600px' },
-                maxWidth: '100%',
-                mx: 'auto',
-                mb: { xs: 0, md: 4 },
+        <Paper 
+            elevation={isMobile ? 0 : 3} 
+            sx={{ 
+                p: { xs: 2, sm: 4 },
+                borderRadius: { xs: 0, sm: 2 },
                 display: 'flex',
                 flexDirection: 'column',
-                flexGrow: isMobile ? 1 : 0,
-                boxShadow: isMobile ? 'none' : 3,
-                height: isMobile ? '100vh' : 'auto',
-                overflow: 'auto',
-                justifyContent: isMobile ? 'center' : 'flex-start'
+                justifyContent: 'center',
+                width: '100%',
+                boxShadow: isMobile ? 'none' : '0px 3px 15px rgba(0, 0, 0, 0.1)',
+                mt: isMobile ? 2 : 0,
+                mb: 'auto',
+                mx: 'auto',
+                maxWidth: isMobile ? '100%' : '500px'
             }}
         >
-            <Typography
-                variant={isMobile ? "h5" : "h4"}
-                component="h1"
-                align="center"
-                gutterBottom
-                fontWeight="bold"
-                color={employerColors.primary}
-                sx={{
-                    mb: { xs: 4, sm: 4, md: 5 },
-                    mt: isMobile ? 4 : 0,
-                    fontSize: { xs: '1.5rem', sm: '1.75rem', md: '2rem' }
-                }}
-            >
-                ورود به ماهرکار
-            </Typography>
+            <Box sx={{ mb: 3, textAlign: 'center' }}>
+                <Typography 
+                    variant="h5" 
+                    component="h1" 
+                    sx={{ 
+                        fontWeight: 'bold', 
+                        color: EMPLOYER_THEME.primary,
+                        mb: 1,
+                        fontSize: { xs: '1.5rem', sm: '1.75rem' }
+                    }}
+                >
+                    ورود به ماهرکار
+                </Typography>
+            </Box>
 
             {/* نمایش خطاهای عمومی */}
             {formErrors.non_field_errors && (
@@ -683,9 +681,25 @@ interface LoginFormProps {
 }
 
 export default function LoginForm({ onSuccess }: LoginFormProps) {
+    const theme = useTheme();
+    const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+    
     return (
-        <Suspense fallback={<Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '200px' }}><CircularProgress /></Box>}>
-            <LoginFormContent onSuccess={onSuccess} />
-        </Suspense>
+        <Box
+            sx={{
+                display: 'flex',
+                flexDirection: 'column',
+                width: '100%',
+                alignItems: 'center',
+                justifyContent: 'flex-start',
+                minHeight: isMobile ? 'calc(100vh - 100px)' : 'auto', 
+                py: isMobile ? 0 : 2,
+                mt: isMobile ? 0 : 2
+            }}
+        >
+            <Suspense fallback={<Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '200px' }}><CircularProgress /></Box>}>
+                <LoginFormContent onSuccess={onSuccess} />
+            </Suspense>
+        </Box>
     );
 } 

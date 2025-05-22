@@ -31,14 +31,18 @@ import {
 import { useHeaderContext } from '@/contexts/HeaderContext';
 import { styled } from '@mui/material/styles';
 import { useRouter } from 'next/navigation';
-import { useState } from 'react';
+import { useState, memo } from 'react';
 import UserMenu from './UserMenu';
-import { useAuth } from '@/contexts/AuthContext';
+import { useAuthStore } from '@/store/authStore';
 
 // کامپوننت AppBar اصلی
-export default function AppHeaderNew() {
+function AppHeaderNew() {
   const theme = useTheme();
-  const { isAuthenticated, user } = useAuth();
+  
+  // استفاده از selectorهای جداگانه برای کاهش رندرهای غیرضروری
+  const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
+  const user = useAuthStore((state) => state.user);
+  
   const {
     isMobile,
     mobileOpen,
@@ -460,4 +464,7 @@ export default function AppHeaderNew() {
       </Container>
     </AppBar>
   );
-} 
+}
+
+// استفاده از memo برای کاهش رندرهای غیرضروری
+export default memo(AppHeaderNew); 
