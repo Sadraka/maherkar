@@ -3,7 +3,7 @@
 import React from 'react';
 import { redirect } from 'next/navigation';
 import EmployerAuthRequired from '@/components/auth/EmployerAuthRequired';
-import { useAuth } from '@/contexts/AuthContext';
+import { useAuth } from '@/store/authStore';
 
 export default function EmployerPage() {
   const { isAuthenticated, user } = useAuth();

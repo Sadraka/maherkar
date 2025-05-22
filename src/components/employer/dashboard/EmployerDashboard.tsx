@@ -9,9 +9,13 @@ import AddIcon from '@mui/icons-material/Add';
 import DoneIcon from '@mui/icons-material/Done';
 import NotInterestedIcon from '@mui/icons-material/NotInterested';
 import HourglassEmptyIcon from '@mui/icons-material/HourglassEmpty';
+import RefreshIcon from '@mui/icons-material/Refresh';
 import { EMPLOYER_BLUE, EMPLOYER_THEME } from '../../../constants/colors';
 import { apiGet } from '../../../lib/axios';
 import { useRouter } from 'next/navigation';
+import { useAuth } from '@/store/authStore';
+import authService from '@/lib/authService';
+import { toast } from 'react-hot-toast';
 
 interface DashboardStats {
   totalJobs: number;
@@ -51,80 +55,159 @@ export default function EmployerDashboard() {
   const [recentApplications, setRecentApplications] = useState<RecentApplication[]>([]);
   const [jobs, setJobs] = useState<JobAdvertisement[]>([]);
   const [error, setError] = useState<string | null>(null);
+  const { isAuthenticated, user } = useAuth();
 
+  // کنترل نوع کاربر (کارفرما)
   useEffect(() => {
-    const fetchDashboardData = async () => {
+    if (isAuthenticated && user) {
+      if (!user.user_type || (user.user_type !== 'employer' && user.user_type !== 'EM')) {
+        setError('شما دسترسی به پنل کارفرما را ندارید. لطفاً با یک حساب کارفرما وارد شوید.');
+        setLoading(false);
+        return;
+      }
+    }
+  }, [isAuthenticated, user]);
+
+  const fetchDashboardData = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      
+      // بررسی اعتبار توکن و تمدید در صورت نیاز
+      const isValid = await authService.validateAndRefreshTokenIfNeeded();
+      
+      if (!isValid) {
+        console.error('توکن احراز هویت نامعتبر است');
+        setError('نشست شما منقضی شده است. لطفاً دوباره وارد شوید.');
+        setLoading(false);
+        return;
+      }
+
+      const baseApiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+      
+      // دریافت آگهی‌های کارفرما
+      let jobsData: JobAdvertisement[] = [];
       try {
-        setLoading(true);
-        const baseApiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
-        
-        const jobsResponse = await apiGet<JobAdvertisement[]>(`${baseApiUrl}/job/`);
-        
-        const applicationsResponse = await apiGet<RecentApplication[]>(`${baseApiUrl}/applications/`);
-        
-        const activeJobs = jobsResponse.data.filter(job => job.advertisement.status === 'Approved').length;
-        const totalApplicationsCount = applicationsResponse.data.length;
-        
-        setStats({
-          totalJobs: jobsResponse.data.length,
-          activeJobs: activeJobs,
-          totalApplications: totalApplicationsCount,
-          viewCount: 120,
-          recentActivity: applicationsResponse.data.slice(0, 5).map(app => ({
-            id: app.id,
-            type: 'application',
-            title: `درخواست جدید برای آگهی ${app.job_title}`,
-            date: formatDate(app.created_at)
-          }))
-        });
-        
-        setJobs(jobsResponse.data);
-        
-        setRecentApplications(applicationsResponse.data.slice(0, 5).map(app => ({
+        const jobsResponse = await apiGet<{results: JobAdvertisement[]}>(`${baseApiUrl}/jobs/employer/`);
+        console.log('پاسخ API آگهی‌ها:', jobsResponse.data);
+        jobsData = jobsResponse.data.results || [];
+        setJobs(jobsData);
+      } catch (jobError: any) {
+        console.error('خطا در دریافت آگهی‌ها:', jobError);
+        setJobs([]);
+        // ادامه اجرا برای بقیه داده‌ها
+      }
+      
+      // دریافت درخواست‌های کارفرما
+      let applicationsData: RecentApplication[] = [];
+      try {
+        const applicationsResponse = await apiGet<{results: RecentApplication[]}>(`${baseApiUrl}/applications/employer/`);
+        console.log('پاسخ API درخواست‌ها:', applicationsResponse.data);
+        applicationsData = applicationsResponse.data.results || [];
+        setRecentApplications(applicationsData.slice(0, 5).map(app => ({
           id: app.id,
           job_title: app.job_title,
           applicant_name: app.applicant_name,
           created_at: formatDate(app.created_at),
           status: app.status
         })));
-        
-        setLoading(false);
-        setError(null);
-      } catch (error) {
-        console.error('خطا در دریافت اطلاعات داشبورد:', error);
-        setError('خطا در دریافت اطلاعات از سرور. لطفاً دوباره تلاش کنید.');
-        
-        setStats({
-          totalJobs: 3,
-          activeJobs: 2,
-          totalApplications: 5,
-          viewCount: 120,
-          recentActivity: []
-        });
-        
-        setRecentApplications([
-          {
-            id: 1,
-            job_title: 'برنامه‌نویس فرانت‌اند',
-            applicant_name: 'علی محمدی',
-            created_at: '۱۴۰۲/۰۴/۱۵',
-            status: 'pending'
-          },
-          {
-            id: 2,
-            job_title: 'طراح گرافیک',
-            applicant_name: 'مریم احمدی',
-            created_at: '۱۴۰۲/۰۴/۱۴',
-            status: 'viewed'
-          }
-        ]);
-        
-        setLoading(false);
+      } catch (appError: any) {
+        console.error('خطا در دریافت درخواست‌ها:', appError);
+        setRecentApplications([]);
+        // ادامه اجرا برای بقیه داده‌ها
       }
-    };
+      
+      // محاسبه آمار داشبورد
+      const activeJobs = jobsData.filter(job => job.advertisement.status === 'Approved').length;
+      const totalApplicationsCount = applicationsData.length;
+      
+      // دریافت تعداد بازدید (می‌تواند از API جداگانه دریافت شود)
+      let viewCount = 0;
+      try {
+        const statsResponse = await apiGet<{view_count: number}>(`${baseApiUrl}/employer/dashboard/`);
+        viewCount = statsResponse.data.view_count || 0;
+      } catch (statsError) {
+        console.error('خطا در دریافت آمار بازدید:', statsError);
+        viewCount = 0;
+        // استفاده از مقدار پیش‌فرض
+      }
+      
+      // تنظیم داده‌های آماری داشبورد
+      setStats({
+        totalJobs: jobsData.length,
+        activeJobs: activeJobs,
+        totalApplications: totalApplicationsCount,
+        viewCount: viewCount || 0,
+        recentActivity: applicationsData.slice(0, 5).map(app => ({
+          id: app.id,
+          type: 'application',
+          title: `درخواست جدید برای آگهی ${app.job_title}`,
+          date: formatDate(app.created_at)
+        }))
+      });
+      
+      setLoading(false);
+      
+    } catch (error: any) {
+      console.error('خطا در دریافت اطلاعات داشبورد:', error);
+      
+      // مدیریت خطا بر اساس نوع و کد HTTP
+      if (error.response) {
+        switch (error.response.status) {
+          case 401:
+            setError('نشست شما منقضی شده است. لطفاً دوباره وارد شوید.');
+            // ذخیره مسیر فعلی و هدایت به صفحه ورود
+            localStorage.setItem('redirectAfterLogin', '/employer/dashboard');
+            router.push('/auth/login');
+            break;
+          case 403:
+            setError('شما دسترسی لازم برای مشاهده این اطلاعات را ندارید.');
+            break;
+          case 404:
+            setError('اطلاعات درخواستی یافت نشد.');
+            break;
+          case 500:
+            setError('خطای داخلی سرور. لطفاً بعداً دوباره تلاش کنید.');
+            break;
+          default:
+            setError(`خطا در دریافت اطلاعات از سرور. (کد ${error.response.status}) لطفاً دوباره تلاش کنید.`);
+        }
+      } else if (error.request) {
+        // خطای شبکه - عدم دریافت پاسخ
+        setError('خطا در برقراری ارتباط با سرور. لطفاً اتصال اینترنت خود را بررسی کنید.');
+      } else {
+        // سایر خطاها
+        setError('خطای غیرمنتظره در دریافت اطلاعات. لطفاً دوباره تلاش کنید.');
+      }
+      
+      // نمایش داده‌های نمونه در صورت خطا
+      setStats({
+        totalJobs: 0,
+        activeJobs: 0,
+        totalApplications: 0,
+        viewCount: 0,
+        recentActivity: []
+      });
+      
+      setRecentApplications([]);
+      setLoading(false);
+    }
+  };
 
+  // اجرای فراخوانی داده‌ها در ابتدا و تغییر وضعیت احراز هویت
+  useEffect(() => {
+    if (isAuthenticated && user) {
+      fetchDashboardData();
+    } else {
+      setLoading(false);
+      setError('لطفاً برای دسترسی به پنل کارفرما وارد شوید.');
+    }
+  }, [isAuthenticated, user]);
+  
+  const handleRefresh = () => {
+    toast.success('در حال به‌روزرسانی اطلاعات...');
     fetchDashboardData();
-  }, []);
+  };
   
   const formatDate = (dateString: string): string => {
     try {
@@ -181,10 +264,49 @@ export default function EmployerDashboard() {
     router.push('/employer/jobs/new');
   };
 
+  // نمایش حالت بارگذاری
   if (loading) {
     return (
       <Box display="flex" justifyContent="center" alignItems="center" minHeight="400px">
         <CircularProgress sx={{ color: EMPLOYER_BLUE }} />
+      </Box>
+    );
+  }
+  
+  // نمایش خطای عدم دسترسی یا احراز هویت
+  if (!isAuthenticated || !user) {
+    return (
+      <Box mb={4}>
+        <Paper 
+          elevation={0} 
+          sx={{ 
+            p: 3, 
+            bgcolor: '#ffebee', 
+            borderRadius: '12px',
+            border: '1px solid #ffcdd2'
+          }}
+        >
+          <Box display="flex" alignItems="center">
+            <Box color="#d32f2f" mr={1}>
+              <NotInterestedIcon />
+            </Box>
+            <Typography color="#d32f2f">لطفاً برای دسترسی به پنل کارفرما وارد حساب کاربری خود شوید.</Typography>
+          </Box>
+          <Box mt={2}>
+            <Button 
+              variant="outlined" 
+              size="small" 
+              onClick={() => router.push('/auth/login')}
+              sx={{ 
+                color: '#d32f2f', 
+                borderColor: '#d32f2f',
+                '&:hover': { borderColor: '#d32f2f', bgcolor: 'rgba(211, 47, 47, 0.04)' }
+              }}
+            >
+              ورود به حساب کاربری
+            </Button>
+          </Box>
+        </Paper>
       </Box>
     );
   }
@@ -195,19 +317,34 @@ export default function EmployerDashboard() {
         <Typography variant="h5" fontWeight="bold" sx={{ color: EMPLOYER_THEME.dark }}>
           داشبورد کارفرما
         </Typography>
-        <Button 
-          variant="contained" 
-          startIcon={<AddIcon />}
-          onClick={handleAddNewJob}
-          sx={{ 
-            bgcolor: EMPLOYER_BLUE,
-            '&:hover': { bgcolor: EMPLOYER_THEME.dark },
-            borderRadius: '8px',
-            boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)'
-          }}
-        >
-          افزودن آگهی جدید
-        </Button>
+        <Box display="flex" gap={2}>
+          <Button 
+            variant="outlined" 
+            startIcon={<RefreshIcon />}
+            onClick={handleRefresh}
+            sx={{ 
+              color: EMPLOYER_BLUE,
+              borderColor: EMPLOYER_BLUE,
+              '&:hover': { borderColor: EMPLOYER_THEME.dark },
+              borderRadius: '8px',
+            }}
+          >
+            به‌روزرسانی
+          </Button>
+          <Button 
+            variant="contained" 
+            startIcon={<AddIcon />}
+            onClick={handleAddNewJob}
+            sx={{ 
+              bgcolor: EMPLOYER_BLUE,
+              '&:hover': { bgcolor: EMPLOYER_THEME.dark },
+              borderRadius: '8px',
+              boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)'
+            }}
+          >
+            افزودن آگهی جدید
+          </Button>
+        </Box>
       </Box>
       
       {error && (
@@ -231,7 +368,7 @@ export default function EmployerDashboard() {
               <Button 
                 variant="outlined" 
                 size="small" 
-                onClick={() => window.location.reload()}
+                onClick={handleRefresh}
                 sx={{ 
                   color: '#d32f2f', 
                   borderColor: '#d32f2f',

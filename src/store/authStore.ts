@@ -93,6 +93,16 @@ export const useAuthStore = create<AuthState>()(
                 try {
                     set({ loading: true });
                     
+                    // بررسی توکن‌ها از طریق کوکی بدون نیاز به خواندن اطلاعات کاربر از کوکی
+                    const accessToken = cookieService.getCookie(COOKIE_NAMES.ACCESS_TOKEN);
+                    const refreshToken = cookieService.getCookie(COOKIE_NAMES.REFRESH_TOKEN);
+                    
+                    if (!accessToken && !refreshToken) {
+                        console.log('[AuthStore] توکن‌های دسترسی و بازیابی موجود نیست، کاربر احراز هویت نشده است');
+                        set({ user: null, isAuthenticated: false });
+                        return;
+                    }
+                    
                     // بررسی اعتبار توکن فعلی و رفرش در صورت نیاز
                     await authService.validateAndRefreshTokenIfNeeded();
                     
@@ -300,7 +310,14 @@ export const useAuthStore = create<AuthState>()(
                     set({ loading: true });
                     
                     // بررسی اعتبار توکن فعلی و رفرش در صورت نیاز
-                    await authService.validateAndRefreshTokenIfNeeded();
+                    const isValid = await authService.validateAndRefreshTokenIfNeeded();
+                    
+                    if (!isValid) {
+                        console.log('[AuthStore] توکن نامعتبر است و رفرش ناموفق بود، خروج از سیستم');
+                        set({ user: null, isAuthenticated: false });
+                        authService.logout();
+                        return;
+                    }
                     
                     // دریافت اطلاعات کاربر با استفاده از سرویس احراز هویت
                     const userData = await authService.getUserData();

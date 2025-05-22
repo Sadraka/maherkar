@@ -1,47 +1,60 @@
 'use client';
 
-import { useEffect } from 'react';
+import React, { useEffect } from 'react';
 import { useAuthStore } from '@/store/authStore';
 
 /**
- * کامپوننت AuthInitializer
+ * کامپوننت مدیریت وضعیت احراز هویت
+ * این کامپوننت در هنگام لود اولیه برنامه، وضعیت احراز هویت را بررسی می‌کند
+ * و اطلاعات کاربر را از API دریافت می‌کند.
  * 
- * این کامپوننت مسئولیت بررسی وضعیت احراز هویت کاربر در زمان بارگذاری اولیه برنامه را بر عهده دارد.
- * با قرار دادن این کامپوننت در layout اصلی، می‌توانیم از فراخوانی‌های متعدد و تکراری fetchUserData
- * در کامپوننت‌های مختلف جلوگیری کنیم و حلقه‌های بی‌نهایت را کاهش دهیم.
+ * مزیت استفاده از این کامپوننت:
+ * 1. مدیریت متمرکز احراز هویت
+ * 2. جلوگیری از فراخوانی‌های مکرر API
+ * 3. کاهش اثر waterfall در فراخوانی‌های API
  */
 export default function AuthInitializer() {
-  // استفاده مستقیم از توابع store به جای hook های جداگانه
-  const fetchUserData = useAuthStore((state) => state.fetchUserData);
+    const fetchUserData = useAuthStore(state => state.fetchUserData);
 
-  useEffect(() => {
-    // آیا این اولین بار است که صفحه بارگذاری می‌شود؟
-    const isFirstLoad = !(window as any)._authInitialized;
-    
-    if (isFirstLoad) {
-      // فقط یک بار در زمان بارگذاری اولیه، وضعیت احراز هویت را بررسی می‌کنیم
-      const initAuth = async () => {
-        try {
-          console.log('[AuthInitializer] شروع بارگذاری اطلاعات کاربر...');
-          
-          // ثبت زمان فراخوانی برای جلوگیری از حلقه‌های بی‌نهایت
-          (window as any)._lastUserDataFetch = Date.now();
-          
-          await fetchUserData();
-          console.log('[AuthInitializer] اطلاعات کاربر با موفقیت بارگذاری شد');
-        } catch (error) {
-          console.error('[AuthInitializer] خطا در بارگذاری اطلاعات کاربر:', error);
-        } finally {
-          // علامت‌گذاری که مقداردهی اولیه انجام شده است
-          (window as any)._authInitialized = true;
+    useEffect(() => {
+        // بررسی آیا اولین بار لود صفحه است
+        const isFirstLoad = sessionStorage.getItem('auth_initialized') !== 'true';
+        
+        console.log('[AuthInitializer] راه‌اندازی کامپوننت، وضعیت اولین لود:', isFirstLoad);
+        
+        // در هنگام لود اولیه برنامه، وضعیت احراز هویت را بررسی می‌کنیم
+        if (isFirstLoad) {
+            sessionStorage.setItem('auth_initialized', 'true');
+            console.log('[AuthInitializer] دریافت اطلاعات کاربر در لود اولیه');
+            
+            // اطلاعات کاربر را از API دریافت می‌کنیم، نه از کوکی
+            fetchUserData();
         }
-      };
-      
-      // اجرای با تأخیر برای اطمینان از اینکه DOM کاملاً آماده است
-      setTimeout(initAuth, 100);
-    }
-  }, [fetchUserData]);
 
-  // این کامپوننت هیچ چیزی رندر نمی‌کند
-  return null;
+        // تنظیم یک interval برای به‌روزرسانی دوره‌ای اطلاعات کاربر
+        // این کار از منقضی شدن توکن جلوگیری می‌کند
+        const tokenRefreshInterval = setInterval(() => {
+            console.log('[AuthInitializer] بررسی دوره‌ای وضعیت توکن و دریافت اطلاعات کاربر');
+            fetchUserData();
+        }, 15 * 60 * 1000); // هر 15 دقیقه
+        
+        // تعریف یک event listener برای رویدادهای storage
+        // این برای همگام‌سازی بین تب‌های مرورگر مفید است
+        const handleStorageChange = (event: StorageEvent) => {
+            if (event.key === 'auth_logout') {
+                console.log('[AuthInitializer] رویداد خروج از سیستم شناسایی شد');
+                fetchUserData();
+            }
+        };
+        
+        window.addEventListener('storage', handleStorageChange);
+        
+        return () => {
+            clearInterval(tokenRefreshInterval);
+            window.removeEventListener('storage', handleStorageChange);
+        };
+    }, [fetchUserData]);
+
+    // این کامپوننت هیچ UI خاصی ندارد و فقط برای مدیریت وضعیت احراز هویت استفاده می‌شود
+    return null;
 } 

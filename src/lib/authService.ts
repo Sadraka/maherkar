@@ -620,11 +620,20 @@ const authService = {
     },
 
     // خروج کاربر
-    logout: () => {
-        cookieService.deleteCookie(COOKIE_NAMES.ACCESS_TOKEN);
-        cookieService.deleteCookie(COOKIE_NAMES.REFRESH_TOKEN);
-        cookieService.deleteCookie(COOKIE_NAMES.USER_DATA);
-        window.dispatchEvent(new Event('logout'));
+    logout: (): void => {
+        try {
+            // پاک کردن تمام کوکی‌های احراز هویت
+            cookieService.deleteCookie(COOKIE_NAMES.ACCESS_TOKEN);
+            cookieService.deleteCookie(COOKIE_NAMES.REFRESH_TOKEN);
+            // حذف ارجاع به کوکی اطلاعات کاربر که دیگر استفاده نمی‌شود
+            
+            // انتشار رویداد خروج برای به‌روزرسانی وضعیت احراز هویت در برنامه
+            if (typeof window !== 'undefined') {
+                window.dispatchEvent(new Event('logout'));
+            }
+        } catch (error) {
+            console.error('[authService] خطا در خروج از سیستم:', error);
+        }
     },
 
     // بررسی احراز هویت کاربر
@@ -633,157 +642,106 @@ const authService = {
         return !!cookieService.getCookie(COOKIE_NAMES.ACCESS_TOKEN);
     },
 
-    // دریافت اطلاعات کاربر از سرور - با پیاده‌سازی بهینه‌شده
+    // دریافت اطلاعات کاربر
     getUserData: async (): Promise<UserData | null> => {
         try {
-            console.log('[authService] شروع فرآیند دریافت اطلاعات کاربر');
-            let accessToken = cookieService.getCookie(COOKIE_NAMES.ACCESS_TOKEN);
+            const accessToken = cookieService.getCookie(COOKIE_NAMES.ACCESS_TOKEN);
             const refreshToken = cookieService.getCookie(COOKIE_NAMES.REFRESH_TOKEN);
-            
-            if (!accessToken && !refreshToken) {
-                console.log('[authService] توکن‌ها موجود نیستند');
-                return null;
-            }
-            
-            // اگر اکسس توکن نداریم ولی رفرش توکن داریم، تلاش می‌کنیم اکسس توکن جدید بگیریم
-            if (!accessToken && refreshToken) {
-                try {
-                    console.log('[authService] تلاش برای دریافت توکن جدید با رفرش توکن');
-                    accessToken = await authService.refreshAccessToken();
-                    
-                    if (!accessToken) {
-                        throw new Error('دریافت توکن جدید ناموفق بود');
+
+            if (!accessToken) {
+                // اگر توکن دسترسی موجود نیست، ابتدا تلاش می‌کنیم با توکن رفرش، توکن جدید بگیریم
+                if (refreshToken) {
+                    try {
+                        console.log('[authService] تلاش برای دریافت توکن جدید با رفرش توکن');
+                        const newAccessToken = await authService.refreshAccessToken();
+                        
+                        if (!newAccessToken) {
+                            throw new Error('دریافت توکن جدید ناموفق بود');
+                        }
+                        
+                        // از توکن جدید استفاده می‌کنیم
+                        return await authService.fetchUserDataFromAPI(newAccessToken);
+                    } catch (refreshError: any) {
+                        console.error('[authService] خطا در رفرش توکن:', refreshError.message);
+                        // اگر رفرش توکن منقضی شده، کوکی‌های مربوطه را حذف می‌کنیم
+                        cookieService.deleteCookie(COOKIE_NAMES.ACCESS_TOKEN);
+                        cookieService.deleteCookie(COOKIE_NAMES.REFRESH_TOKEN);
+                        // دیگر اطلاعات کاربر را در کوکی ذخیره نمی‌کنیم
+                        return null;
                     }
-                } catch (refreshError: any) {
-                    console.error('[authService] خطا در رفرش توکن:', refreshError.message);
-                    // اگر رفرش توکن منقضی شده، کوکی‌های مربوطه را حذف می‌کنیم
-                    cookieService.deleteCookie(COOKIE_NAMES.ACCESS_TOKEN);
-                    cookieService.deleteCookie(COOKIE_NAMES.REFRESH_TOKEN);
-                    cookieService.deleteCookie(COOKIE_NAMES.USER_DATA);
+                } else {
+                    console.error('[authService] توکن دسترسی و رفرش توکن موجود نیست');
                     return null;
                 }
             }
             
-            if (!accessToken) {
-                console.error('[authService] اکسس توکن همچنان در دسترس نیست');
-                return null;
-            }
-
-            // دریافت اطلاعات از API بر اساس مستندات بک‌اند
-            const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:8000';
-            
-            // بر اساس مستندات API، ابتدا از مسیر اصلی کاربران استفاده می‌کنیم
-            try {
-                console.log(`[authService] دریافت اطلاعات کاربر از مسیر اصلی`);
-                
-                const response = await axios.get(`${BASE_URL}/users/user/`, {
-                    headers: {
-                        'Authorization': `Bearer ${accessToken}`
-                    },
-                    timeout: 8000
-                });
-                
-                if (response.status === 200 && response.data) {
-                    const userData = response.data;
-                    
-                    console.log('[authService] اطلاعات کاربر با موفقیت دریافت شد:', {
-                        userType: userData.user_type,
-                        hasUsername: !!userData.username
-                    });
-                    
-                    // ذخیره اطلاعات کاربر در کوکی برای دسترسی آفلاین
-                    cookieService.setObjectCookie(COOKIE_NAMES.USER_DATA, userData, 7); // ذخیره برای 7 روز
-                    
-                    // بررسی و مپ کردن نوع کاربر
-                    if (userData.user_type === 'EM') {
-                        return {
-                            ...userData,
-                            user_type: 'employer',
-                            user_type_original: userData.user_type
-                        };
-                    }
-                    
-                    return userData;
-                }
-            } catch (error: any) {
-                console.warn(`[authService] خطا در دریافت اطلاعات کاربر از مسیر اصلی:`, {
-                    message: error.message,
-                    status: error.response?.status
-                });
-                
-                // اگر خطای 401 (توکن منقضی شده) دریافت کردیم، تلاش می‌کنیم توکن را رفرش کنیم
-                if (error.response?.status === 401 && refreshToken) {
-                    try {
-                        console.log('[authService] تلاش مجدد با توکن رفرش شده');
-                        const newAccessToken = await authService.refreshAccessToken();
-                        
-                        if (newAccessToken) {
-                            // تلاش دوباره با توکن جدید
-                            const retryResponse = await axios.get(`${BASE_URL}/users/user/`, {
-                                headers: {
-                                    'Authorization': `Bearer ${newAccessToken}`
-                                },
-                                timeout: 8000
-                            });
-                            
-                            if (retryResponse.status === 200 && retryResponse.data) {
-                                const userData = retryResponse.data;
-                                
-                                // ذخیره اطلاعات کاربر در کوکی برای دسترسی آفلاین
-                                cookieService.setObjectCookie(COOKIE_NAMES.USER_DATA, userData, 7);
-                                
-                                if (userData.user_type === 'EM') {
-                                    return {
-                                        ...userData,
-                                        user_type: 'employer',
-                                        user_type_original: userData.user_type
-                                    };
-                                }
-                                
-                                return userData;
-                            }
-                        }
-                    } catch (retryError) {
-                        console.error('[authService] تلاش مجدد نیز با شکست مواجه شد:', retryError);
-                    }
-                }
-            }
-            
-            // اگر به اینجا رسیدیم، یعنی نتوانستیم اطلاعات کاربر را از سرور دریافت کنیم
-            // تلاش می‌کنیم از اطلاعات ذخیره شده در کوکی استفاده کنیم
-            const cachedUserData = cookieService.getObjectCookie<UserData>(COOKIE_NAMES.USER_DATA);
-            
-            if (cachedUserData) {
-                console.log('[authService] استفاده از اطلاعات کاربر ذخیره شده در کوکی');
-                return cachedUserData;
-            }
-            
-            // آخرین راه: استخراج اطلاعات اولیه از توکن JWT
-            if (accessToken) {
-                const jwtData = authService.decodeToken(accessToken);
-                
-                if (jwtData) {
-                    console.log('[authService] استخراج اطلاعات اولیه از توکن JWT');
-                    
-                    const userData: UserData = {
-                        username: jwtData.username || jwtData.user_id || 'user',
-                        email: jwtData.email || '',
-                        phone: jwtData.phone || '',
-                        user_type: jwtData.user_type === 'EM' ? 'employer' : (jwtData.user_type || 'JS'),
-                        full_name: jwtData.full_name || jwtData.name || 'کاربر ماهرکار'
-                    };
-                    
-                    if (jwtData.user_type === 'EM') {
-                        userData.user_type_original = jwtData.user_type;
-                    }
-                    
-                    return userData;
-                }
-            }
-            
-            return null;
+            // از توکن موجود استفاده می‌کنیم
+            return await authService.fetchUserDataFromAPI(accessToken);
         } catch (error: any) {
             console.error('[authService] خطای کلی در دریافت اطلاعات کاربر:', error.message);
+            return null;
+        }
+    },
+
+    // تابع جدید برای دریافت اطلاعات کاربر از API
+    fetchUserDataFromAPI: async (accessToken: string): Promise<UserData | null> => {
+        try {
+            const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:8000';
+            
+            const response = await axios.get(`${BASE_URL}/users/user/`, {
+                headers: {
+                    'Authorization': `Bearer ${accessToken}`
+                },
+                timeout: 8000
+            });
+            
+            if (response.status === 200 && response.data) {
+                const userData = response.data;
+                
+                console.log('[authService] اطلاعات کاربر با موفقیت دریافت شد:', {
+                    userType: userData.user_type,
+                    hasUsername: !!userData.username
+                });
+                
+                // دیگر اطلاعات کاربر را در کوکی ذخیره نمی‌کنیم
+                
+                // بررسی و مپ کردن نوع کاربر
+                if (userData.user_type === 'EM') {
+                    return {
+                        ...userData,
+                        user_type: 'employer',
+                        user_type_original: userData.user_type
+                    };
+                }
+                
+                return userData;
+            }
+            
+            // اگر به اینجا رسیدیم، یعنی پاسخ معتبر نبوده است
+            console.error('[authService] پاسخ نامعتبر از API کاربر');
+            return null;
+        } catch (error: any) {
+            console.error('[authService] خطا در فراخوانی API کاربر:', error.message);
+            
+            // اگر خطای 401 داشتیم، یعنی توکن منقضی شده است
+            if (error.response?.status === 401) {
+                // تلاش می‌کنیم با رفرش توکن، توکن جدید بگیریم
+                try {
+                    const newToken = await authService.refreshAccessToken();
+                    
+                    if (newToken) {
+                        // تلاش مجدد با توکن جدید
+                        return await authService.fetchUserDataFromAPI(newToken);
+                    }
+                } catch (refreshError: any) {
+                    console.error('[authService] خطا در رفرش توکن پس از 401:', refreshError.message);
+                }
+                
+                // اگر نتوانستیم توکن را رفرش کنیم، کوکی‌ها را پاک می‌کنیم
+                cookieService.deleteCookie(COOKIE_NAMES.ACCESS_TOKEN);
+                cookieService.deleteCookie(COOKIE_NAMES.REFRESH_TOKEN);
+            }
+            
             return null;
         }
     },
@@ -838,7 +796,7 @@ const authService = {
                     console.log('[authService] توکن رفرش نامعتبر است، کوکی‌ها را حذف می‌کنیم');
                     cookieService.deleteCookie(COOKIE_NAMES.REFRESH_TOKEN);
                     cookieService.deleteCookie(COOKIE_NAMES.ACCESS_TOKEN);
-                    cookieService.deleteCookie(COOKIE_NAMES.USER_DATA);
+                    // حذف ارجاع به کوکی اطلاعات کاربر که دیگر استفاده نمی‌شود
                     
                     // انتشار رویداد خروج برای به‌روزرسانی وضعیت احراز هویت در برنامه
                     if (typeof window !== 'undefined') {
@@ -859,44 +817,44 @@ const authService = {
         }
     },
 
-    // بررسی اعتبار توکن فعلی و رفرش در صورت نیاز
+    // تایید اعتبار توکن فعلی و تازه کردن آن در صورت نیاز
     validateAndRefreshTokenIfNeeded: async (): Promise<boolean> => {
         try {
             const accessToken = cookieService.getCookie(COOKIE_NAMES.ACCESS_TOKEN);
             
-            // اگر توکن نداریم، نیازی به بررسی نیست
+            // اگر توکن وجود ندارد، نمی‌توانیم ادامه دهیم
             if (!accessToken) {
+                console.log('[authService] توکن دسترسی موجود نیست، تلاش برای رفرش');
+                
+                // تلاش برای رفرش توکن
+                const newToken = await authService.refreshAccessToken();
+                return !!newToken;
+            }
+            
+            // بررسی اعتبار توکن با رمزگشایی آن و بررسی زمان انقضا
+            const decoded = authService.decodeToken(accessToken);
+            
+            if (!decoded || !decoded.exp) {
+                console.warn('[authService] توکن JWT فاقد زمان انقضا است');
                 return false;
             }
             
-            // بررسی اعتبار توکن با استفاده از decode
-            const tokenData = authService.decodeToken(accessToken);
+            // زمان انقضای توکن را به میلی‌ثانیه تبدیل می‌کنیم
+            const expirationTime = decoded.exp * 1000;
+            const currentTime = Date.now();
             
-            if (!tokenData) {
-                console.log('[authService] توکن قابل decode نیست، احتمالاً نامعتبر است');
-                return false;
+            // اگر کمتر از 5 دقیقه به انقضای توکن مانده، آن را رفرش می‌کنیم
+            if (expirationTime - currentTime < 5 * 60 * 1000) {
+                console.log('[authService] توکن نزدیک به انقضا است، تلاش برای رفرش');
+                
+                const newToken = await authService.refreshAccessToken();
+                return !!newToken;
             }
             
-            // بررسی تاریخ انقضا (exp در JWT)
-            if (tokenData.exp) {
-                const expirationTime = tokenData.exp * 1000; // تبدیل به میلی‌ثانیه
-                const currentTime = Date.now();
-                
-                // اگر کمتر از 5 دقیقه به انقضا مانده، توکن را رفرش می‌کنیم
-                if (expirationTime - currentTime < 5 * 60 * 1000) {
-                    console.log('[authService] توکن در حال انقضا است، تلاش برای رفرش');
-                    const newToken = await authService.refreshAccessToken();
-                    return !!newToken;
-                }
-                
-                // توکن معتبر است
-                return true;
-            }
-            
-            // اگر exp نداشت، به طور پیش‌فرض نامعتبر در نظر می‌گیریم
-            return false;
-        } catch (error) {
-            console.error('[authService] خطا در بررسی اعتبار توکن:', error);
+            // توکن معتبر است
+            return true;
+        } catch (error: any) {
+            console.error('[authService] خطا در بررسی اعتبار توکن:', error.message);
             return false;
         }
     },

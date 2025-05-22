@@ -7,7 +7,6 @@
 export const COOKIE_NAMES = {
     ACCESS_TOKEN: 'access_token',
     REFRESH_TOKEN: 'refresh_token',
-    USER_DATA: 'user_data',
     REMEMBER_ME: 'remember_me',
     PROMO_BAR_CLOSED: 'promo_bar_closed',
 };
@@ -105,7 +104,6 @@ const cookieService = {
     clearAuthCookies: (): void => {
         cookieService.deleteCookie(COOKIE_NAMES.ACCESS_TOKEN);
         cookieService.deleteCookie(COOKIE_NAMES.REFRESH_TOKEN);
-        cookieService.deleteCookie(COOKIE_NAMES.USER_DATA);
     },
 
     /**

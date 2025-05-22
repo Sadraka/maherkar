@@ -10,7 +10,8 @@ import {
     Divider,
     IconButton,
     Tooltip,
-    Typography
+    Typography,
+    Skeleton
 } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
 import { useRouter } from 'next/navigation';
@@ -47,16 +48,50 @@ export default function UserMenu({ user: propUser, isLoggedIn: propIsLoggedIn }:
     const isAuthenticated = useAuthStore(state => state.isAuthenticated);
     const { logout: authLogout, refreshUserData } = useAuthActions();
     const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+    const [menuLoading, setMenuLoading] = useState(false);
     const open = Boolean(anchorEl);
     const menuOpenedRef = useRef(false);
     const prevOpenStateRef = useRef(open);
+    const hasInitialLoadedRef = useRef(false);
 
-    // بروزرسانی اطلاعات کاربر فقط زمانی که منو باز می‌شود (نه در هر رندر)
+    // لود اولیه اطلاعات کاربر در زمان مانت کامپوننت
+    useEffect(() => {
+        const preloadUserData = async () => {
+            // فقط اگر کاربر لاگین کرده و هنوز دیتا پیش‌لود نشده، اطلاعات را بارگیری کنیم
+            if (isAuthenticated && !hasInitialLoadedRef.current) {
+                try {
+                    // ثبت زمان آخرین درخواست
+                    (window as any)._userMenuLastFetch = Date.now();
+                    
+                    // بارگیری اطلاعات از سرور
+                    await refreshUserData();
+                    
+                    // یادداشت می‌کنیم که بارگیری اولیه انجام شده
+                    hasInitialLoadedRef.current = true;
+                } catch (error) {
+                    console.error('[UserMenu] خطا در پیش‌بارگیری اطلاعات کاربر:', error);
+                }
+            }
+        };
+        
+        preloadUserData();
+    }, [isAuthenticated]); // وابستگی به وضعیت احراز هویت
+
+    // بروزرسانی اطلاعات کاربر فقط زمانی که منو باز می‌شود (اگر از آخرین بارگیری زمان زیادی گذشته باشد)
     useEffect(() => {
         // فقط اگر وضعیت منو از بسته به باز تغییر کرده، اطلاعات را به‌روز کن
         if (open && !prevOpenStateRef.current && isAuthenticated) {
             // ثبت اینکه منو باز شده است، برای جلوگیری از بروزرسانی‌های مکرر
             menuOpenedRef.current = true;
+            
+            // اگر از قبل داده‌ها بارگیری شده‌اند، نیازی به نمایش اسکلتون نیست
+            const now = Date.now();
+            const lastFetch = (window as any)._userMenuLastFetch || 0;
+            const shouldShowLoading = now - lastFetch > 30000; // اگر بیش از 30 ثانیه گذشته، حالت لودینگ نشان بده
+            
+            if (shouldShowLoading) {
+                setMenuLoading(true);
+            }
             
             // برای جلوگیری از حلقه بی‌نهایت، فقط یک بار داده‌ها را بروز می‌کنیم
             const fetchData = async () => {
@@ -64,9 +99,10 @@ export default function UserMenu({ user: propUser, isLoggedIn: propIsLoggedIn }:
                 const now = Date.now();
                 const lastFetch = (window as any)._userMenuLastFetch || 0;
                 
-                // حداقل 5 ثانیه بین درخواست‌ها فاصله باشد
-                if (now - lastFetch < 5000) {
-                    console.log('[UserMenu] فراخوانی throttled - درخواست قبلی بسیار نزدیک است');
+                // حداقل 15 ثانیه بین درخواست‌ها فاصله باشد (کاهش از 5 ثانیه به 15 ثانیه)
+                if (now - lastFetch < 15000) {
+                    console.log('[UserMenu] فراخوانی throttled - درخواست قبلی اخیراً انجام شده است');
+                    setMenuLoading(false);
                     return;
                 }
                 
@@ -75,12 +111,20 @@ export default function UserMenu({ user: propUser, isLoggedIn: propIsLoggedIn }:
                     await refreshUserData();
                 } catch (error) {
                     console.error('[UserMenu] خطا در به‌روزرسانی اطلاعات کاربر:', error);
+                } finally {
+                    // تاخیر کوتاه برای جلوگیری از چشمک زدن رابط کاربری
+                    // کاهش تاخیر از 500ms به 200ms
+                    setTimeout(() => {
+                        setMenuLoading(false);
+                    }, 200);
                 }
             };
             
             // فقط اگر کاربر احراز هویت شده، داده‌ها را به‌روز کن
             if (isAuthenticated) {
                 fetchData();
+            } else {
+                setMenuLoading(false);
             }
         }
         
@@ -352,183 +396,213 @@ export default function UserMenu({ user: propUser, isLoggedIn: propIsLoggedIn }:
                     borderColor: 'divider',
                     background: `linear-gradient(to right, ${theme.palette.primary.main}15, ${theme.palette.primary.light}05)`
                 }}>
-                    <Typography variant="subtitle1" fontWeight={700} sx={{ 
-                        color: theme.palette.primary.dark,
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: 0.5 
-                    }}>
-                        {currentUser.name || 'کاربر ماهرکار'}
-                    </Typography>
-                    
-                    <Box sx={{ display: 'flex', alignItems: 'center', mt: 0.8 }}>
-                        <FontAwesomeIcon icon={faPhone} style={{ 
-                            fontSize: '0.75rem', 
-                            color: theme.palette.text.secondary,
-                            marginLeft: '5px' 
-                        }} />
-                        <Typography variant="body2" color="text.secondary" sx={{ 
-                            direction: 'ltr',
-                            textAlign: 'right',
-                            fontSize: '0.85rem'
-                        }}>
-                            {currentUser.phone || 'شماره تلفن نامشخص'}
-                        </Typography>
-                    </Box>
-                    
-                    <Typography 
-                        variant="caption" 
-                        color={isEmployer ? "employer.main" : "primary.main"} 
-                        sx={{ 
-                            mt: 0.8, 
-                            display: 'inline-block', 
-                            fontSize: '0.75rem',
-                            backgroundColor: isEmployer ? `${theme.palette.employer.main}15` : `${theme.palette.primary.main}15`,
-                            px: 1,
-                            py: 0.3,
-                            borderRadius: '10px',
-                            fontWeight: 500
-                        }}
-                    >
-                        {getUserRoleText(currentUser.role)}
-                    </Typography>
+                    {menuLoading ? (
+                        <>
+                            <Skeleton variant="text" width={150} height={30} animation="wave" />
+                            <Skeleton variant="text" width={120} height={25} animation="wave" sx={{ mt: 0.8 }} />
+                            <Skeleton variant="rounded" width={80} height={22} animation="wave" sx={{ mt: 0.8 }} />
+                        </>
+                    ) : (
+                        <>
+                            <Typography variant="subtitle1" fontWeight={700} sx={{ 
+                                color: theme.palette.primary.dark,
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: 0.5 
+                            }}>
+                                {currentUser.name || 'کاربر ماهرکار'}
+                            </Typography>
+                            
+                            <Box sx={{ display: 'flex', alignItems: 'center', mt: 0.8 }}>
+                                <FontAwesomeIcon icon={faPhone} style={{ 
+                                    fontSize: '0.75rem', 
+                                    color: theme.palette.text.secondary,
+                                    marginLeft: '5px' 
+                                }} />
+                                <Typography variant="body2" color="text.secondary" sx={{ 
+                                    direction: 'ltr',
+                                    textAlign: 'right',
+                                    fontSize: '0.85rem'
+                                }}>
+                                    {currentUser.phone || 'شماره تلفن نامشخص'}
+                                </Typography>
+                            </Box>
+                            
+                            <Typography 
+                                variant="caption" 
+                                color={isEmployer ? "employer.main" : "primary.main"} 
+                                sx={{ 
+                                    mt: 0.8, 
+                                    display: 'inline-block', 
+                                    fontSize: '0.75rem',
+                                    backgroundColor: isEmployer ? `${theme.palette.employer.main}15` : `${theme.palette.primary.main}15`,
+                                    px: 1,
+                                    py: 0.3,
+                                    borderRadius: '10px',
+                                    fontWeight: 500
+                                }}
+                            >
+                                {getUserRoleText(currentUser.role)}
+                            </Typography>
+                        </>
+                    )}
                 </Box>
 
                 {/* آیتم‌های منو */}
                 <Box sx={{ py: 1 }}>
-                    {/* بخش منوی کارفرما */}
-                    {isEmployer && (
+                    {menuLoading ? (
                         <>
-                            <MenuItem component={Link} href="/employer/dashboard" onClick={handleClose} sx={{ 
-                                py: 1.2,
-                                mx: 0.5,
-                                borderRadius: '8px', 
-                                transition: 'all 0.2s ease',
-                                '&:hover': {
-                                    backgroundColor: `${theme.palette.employer.main}10`,
-                                    '& .MuiListItemIcon-root': {
-                                        color: theme.palette.employer.main,
-                                        transform: 'scale(1.1)',
-                                    }
-                                }
-                            }}>
-                                <ListItemIcon sx={{ 
-                                    transition: 'all 0.2s ease',
-                                    minWidth: '35px'
-                                }}>
-                                    <FontAwesomeIcon icon={faTachometerAlt} style={{ 
-                                        fontSize: '1rem', 
-                                        color: theme.palette.employer.main 
-                                    }} />
-                                </ListItemIcon>
-                                داشبورد کارفرما
-                            </MenuItem>
-
-                            <MenuItem component={Link} href="/employer/jobs" onClick={handleClose} sx={{ 
-                                py: 1.2,
-                                mx: 0.5,
-                                borderRadius: '8px', 
-                                transition: 'all 0.2s ease',
-                                '&:hover': {
-                                    backgroundColor: `${theme.palette.employer.main}10`,
-                                    '& .MuiListItemIcon-root': {
-                                        color: theme.palette.employer.main,
-                                        transform: 'scale(1.1)',
-                                    }
-                                }
-                            }}>
-                                <ListItemIcon sx={{ 
-                                    transition: 'all 0.2s ease',
-                                    minWidth: '35px'
-                                }}>
-                                    <FontAwesomeIcon icon={faListAlt} style={{ 
-                                        fontSize: '1rem', 
-                                        color: theme.palette.employer.main 
-                                    }} />
-                                </ListItemIcon>
-                                مدیریت آگهی‌ها
-                            </MenuItem>
-                            
-                            <MenuItem component={Link} href="/employer/applications" onClick={handleClose} sx={{ 
-                                py: 1.2,
-                                mx: 0.5,
-                                borderRadius: '8px', 
-                                transition: 'all 0.2s ease',
-                                '&:hover': {
-                                    backgroundColor: `${theme.palette.employer.main}10`,
-                                    '& .MuiListItemIcon-root': {
-                                        color: theme.palette.employer.main,
-                                        transform: 'scale(1.1)',
-                                    }
-                                }
-                            }}>
-                                <ListItemIcon sx={{ 
-                                    transition: 'all 0.2s ease',
-                                    minWidth: '35px'
-                                }}>
-                                    <FontAwesomeIcon icon={faClipboardList} style={{ 
-                                        fontSize: '1rem', 
-                                        color: theme.palette.employer.main 
-                                    }} />
-                                </ListItemIcon>
-                                درخواست‌های استخدام
-                            </MenuItem>
-                            
-                            <MenuItem component={Link} href="/employer/profile" onClick={handleClose} sx={{ 
-                                py: 1.2,
-                                mx: 0.5,
-                                borderRadius: '8px', 
-                                transition: 'all 0.2s ease',
-                                '&:hover': {
-                                    backgroundColor: `${theme.palette.employer.main}10`,
-                                    '& .MuiListItemIcon-root': {
-                                        color: theme.palette.employer.main,
-                                        transform: 'scale(1.1)',
-                                    }
-                                }
-                            }}>
-                                <ListItemIcon sx={{ 
-                                    transition: 'all 0.2s ease',
-                                    minWidth: '35px'
-                                }}>
-                                    <FontAwesomeIcon icon={faBuilding} style={{ 
-                                        fontSize: '1rem', 
-                                        color: theme.palette.employer.main 
-                                    }} />
-                                </ListItemIcon>
-                                پروفایل شرکت
-                            </MenuItem>
-                            
+                            <Box sx={{ px: 2, py: 0.8 }}>
+                                <Skeleton variant="text" height={40} animation="wave" />
+                            </Box>
+                            <Box sx={{ px: 2, py: 0.8 }}>
+                                <Skeleton variant="text" height={40} animation="wave" />
+                            </Box>
+                            <Box sx={{ px: 2, py: 0.8 }}>
+                                <Skeleton variant="text" height={40} animation="wave" />
+                            </Box>
                             <Divider sx={{ my: 1 }} />
+                            <Box sx={{ px: 2, py: 0.8 }}>
+                                <Skeleton variant="text" height={40} animation="wave" />
+                            </Box>
+                        </>
+                    ) : (
+                        <>
+                            {/* بخش منوی کارفرما */}
+                            {isEmployer && (
+                                <>
+                                    <MenuItem component={Link} href="/employer/dashboard" onClick={handleClose} sx={{ 
+                                        py: 1.2,
+                                        mx: 0.5,
+                                        borderRadius: '8px', 
+                                        transition: 'all 0.2s ease',
+                                        '&:hover': {
+                                            backgroundColor: `${theme.palette.employer.main}10`,
+                                            '& .MuiListItemIcon-root': {
+                                                color: theme.palette.employer.main,
+                                                transform: 'scale(1.1)',
+                                            }
+                                        }
+                                    }}>
+                                        <ListItemIcon sx={{ 
+                                            transition: 'all 0.2s ease',
+                                            minWidth: '35px'
+                                        }}>
+                                            <FontAwesomeIcon icon={faTachometerAlt} style={{ 
+                                                fontSize: '1rem', 
+                                                color: theme.palette.employer.main 
+                                            }} />
+                                        </ListItemIcon>
+                                        داشبورد کارفرما
+                                    </MenuItem>
+
+                                    <MenuItem component={Link} href="/employer/jobs" onClick={handleClose} sx={{ 
+                                        py: 1.2,
+                                        mx: 0.5,
+                                        borderRadius: '8px', 
+                                        transition: 'all 0.2s ease',
+                                        '&:hover': {
+                                            backgroundColor: `${theme.palette.employer.main}10`,
+                                            '& .MuiListItemIcon-root': {
+                                                color: theme.palette.employer.main,
+                                                transform: 'scale(1.1)',
+                                            }
+                                        }
+                                    }}>
+                                        <ListItemIcon sx={{ 
+                                            transition: 'all 0.2s ease',
+                                            minWidth: '35px'
+                                        }}>
+                                            <FontAwesomeIcon icon={faListAlt} style={{ 
+                                                fontSize: '1rem', 
+                                                color: theme.palette.employer.main 
+                                            }} />
+                                        </ListItemIcon>
+                                        مدیریت آگهی‌ها
+                                    </MenuItem>
+                                    
+                                    <MenuItem component={Link} href="/employer/applications" onClick={handleClose} sx={{ 
+                                        py: 1.2,
+                                        mx: 0.5,
+                                        borderRadius: '8px', 
+                                        transition: 'all 0.2s ease',
+                                        '&:hover': {
+                                            backgroundColor: `${theme.palette.employer.main}10`,
+                                            '& .MuiListItemIcon-root': {
+                                                color: theme.palette.employer.main,
+                                                transform: 'scale(1.1)',
+                                            }
+                                        }
+                                    }}>
+                                        <ListItemIcon sx={{ 
+                                            transition: 'all 0.2s ease',
+                                            minWidth: '35px'
+                                        }}>
+                                            <FontAwesomeIcon icon={faClipboardList} style={{ 
+                                                fontSize: '1rem', 
+                                                color: theme.palette.employer.main 
+                                            }} />
+                                        </ListItemIcon>
+                                        درخواست‌های استخدام
+                                    </MenuItem>
+                                    
+                                    <MenuItem component={Link} href="/employer/profile" onClick={handleClose} sx={{ 
+                                        py: 1.2,
+                                        mx: 0.5,
+                                        borderRadius: '8px', 
+                                        transition: 'all 0.2s ease',
+                                        '&:hover': {
+                                            backgroundColor: `${theme.palette.employer.main}10`,
+                                            '& .MuiListItemIcon-root': {
+                                                color: theme.palette.employer.main,
+                                                transform: 'scale(1.1)',
+                                            }
+                                        }
+                                    }}>
+                                        <ListItemIcon sx={{ 
+                                            transition: 'all 0.2s ease',
+                                            minWidth: '35px'
+                                        }}>
+                                            <FontAwesomeIcon icon={faBuilding} style={{ 
+                                                fontSize: '1rem', 
+                                                color: theme.palette.employer.main 
+                                            }} />
+                                        </ListItemIcon>
+                                        پروفایل شرکت
+                                    </MenuItem>
+                                    
+                                    <Divider sx={{ my: 1 }} />
+                                </>
+                            )}
+
+                            {/* دکمه خروج از حساب کاربری */}
+                            <MenuItem onClick={handleLogout} sx={{ 
+                                py: 1.2,
+                                mx: 0.5,
+                                borderRadius: '8px',
+                                color: '#d32f2f',
+                                transition: 'all 0.2s ease',
+                                '&:hover': {
+                                    backgroundColor: 'rgba(211, 47, 47, 0.08)',
+                                    '& .MuiListItemIcon-root': {
+                                        transform: 'scale(1.1) rotate(10deg)',
+                                    }
+                                }
+                            }}>
+                                <ListItemIcon sx={{ 
+                                    color: 'inherit',
+                                    transition: 'all 0.2s ease',
+                                    minWidth: '35px'
+                                }}>
+                                    <FontAwesomeIcon icon={faSignOutAlt} style={{ 
+                                        fontSize: '1rem', 
+                                        color: '#d32f2f' 
+                                    }} />
+                                </ListItemIcon>
+                                خروج از حساب
+                            </MenuItem>
                         </>
                     )}
-
-                    {/* دکمه خروج از حساب کاربری */}
-                    <MenuItem onClick={handleLogout} sx={{ 
-                        py: 1.2,
-                        mx: 0.5,
-                        borderRadius: '8px',
-                        color: '#d32f2f',
-                        transition: 'all 0.2s ease',
-                        '&:hover': {
-                            backgroundColor: 'rgba(211, 47, 47, 0.08)',
-                            '& .MuiListItemIcon-root': {
-                                transform: 'scale(1.1) rotate(10deg)',
-                            }
-                        }
-                    }}>
-                        <ListItemIcon sx={{ 
-                            color: 'inherit',
-                            transition: 'all 0.2s ease',
-                            minWidth: '35px'
-                        }}>
-                            <FontAwesomeIcon icon={faSignOutAlt} style={{ 
-                                fontSize: '1rem', 
-                                color: '#d32f2f' 
-                            }} />
-                        </ListItemIcon>
-                        خروج از حساب
-                    </MenuItem>
                 </Box>
             </Menu>
         </>

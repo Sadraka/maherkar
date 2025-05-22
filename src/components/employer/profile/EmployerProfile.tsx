@@ -17,7 +17,8 @@ import {
   IconButton,
   Snackbar,
   Alert,
-  Chip
+  Chip,
+  Skeleton
 } from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
 import SaveIcon from '@mui/icons-material/Save';
@@ -86,6 +87,7 @@ interface ProfileFormData {
 
 export default function EmployerProfile() {
   const [loading, setLoading] = useState(true);
+  const [dataLoading, setDataLoading] = useState(true);
   const [editMode, setEditMode] = useState(false);
   const [employerData, setEmployerData] = useState<EmployerData>({
     firstName: '',
@@ -121,6 +123,8 @@ export default function EmployerProfile() {
 
   useEffect(() => {
     const fetchProfile = async () => {
+      setLoading(true);
+      setDataLoading(true);
       try {
         const baseApiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
         const response = await apiGet<ProfileFormData>(`${baseApiUrl}/companies/profile/`);
@@ -128,7 +132,6 @@ export default function EmployerProfile() {
         if (response.data.logo) {
           setLogoPreview(`${baseApiUrl}${response.data.logo}`);
         }
-        setLoading(false);
       } catch (error) {
         console.error('خطا در دریافت اطلاعات پروفایل:', error);
         // در صورت خطا، داده‌های نمونه نمایش داده می‌شود
@@ -142,7 +145,15 @@ export default function EmployerProfile() {
           address: 'تهران، خیابان ولیعصر',
           logo: null,
         });
-        setLoading(false);
+      } finally {
+        // تاخیر کوتاه برای جلوگیری از چشمک زدن رابط کاربری
+        setTimeout(() => {
+          setDataLoading(false);
+          // کمی تاخیر بیشتر برای نمایش کامل صفحه
+          setTimeout(() => {
+            setLoading(false);
+          }, 300);
+        }, 500);
       }
     };
     
@@ -232,8 +243,34 @@ export default function EmployerProfile() {
 
   if (loading) {
     return (
-      <Box display="flex" justifyContent="center" alignItems="center" minHeight="200px">
-        <CircularProgress />
+      <Box>
+        <Typography variant="h5" fontWeight="bold" mb={4}>
+          پروفایل کارفرما
+        </Typography>
+
+        <Paper sx={{ borderRadius: 2 }}>
+          <Box sx={{ py: 6, px: 3, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+            <Skeleton variant="circular" width={120} height={120} animation="wave" />
+            <Skeleton variant="text" width={200} height={40} sx={{ mt: 2 }} animation="wave" />
+            <Skeleton variant="text" width={150} height={24} sx={{ mt: 1 }} animation="wave" />
+          </Box>
+          
+          <Divider />
+          
+          <Box sx={{ p: 3 }}>
+            <Skeleton variant="rectangular" height={50} sx={{ mb: 2, borderRadius: 1 }} animation="wave" />
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2 }}>
+              <Skeleton variant="rectangular" width="48%" height={60} sx={{ borderRadius: 1 }} animation="wave" />
+              <Skeleton variant="rectangular" width="48%" height={60} sx={{ borderRadius: 1 }} animation="wave" />
+            </Box>
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2 }}>
+              <Skeleton variant="rectangular" width="48%" height={60} sx={{ borderRadius: 1 }} animation="wave" />
+              <Skeleton variant="rectangular" width="48%" height={60} sx={{ borderRadius: 1 }} animation="wave" />
+            </Box>
+            <Skeleton variant="rectangular" height={120} sx={{ borderRadius: 1, mb: 2 }} animation="wave" />
+            <Skeleton variant="rectangular" width={120} height={40} sx={{ borderRadius: 1 }} animation="wave" />
+          </Box>
+        </Paper>
       </Box>
     );
   }

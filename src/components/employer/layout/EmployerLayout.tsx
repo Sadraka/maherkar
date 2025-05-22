@@ -1,6 +1,6 @@
 "use client"
-import React, { ReactNode } from 'react';
-import { Box, Drawer, AppBar, Toolbar, IconButton, Typography, Divider, List, ListItem, ListItemButton, ListItemIcon, ListItemText, Container, useMediaQuery } from '@mui/material';
+import React, { ReactNode, useState, useEffect } from 'react';
+import { Box, Drawer, AppBar, Toolbar, IconButton, Typography, Divider, List, ListItem, ListItemButton, ListItemIcon, ListItemText, Container, useMediaQuery, CircularProgress, Skeleton } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
 import MenuIcon from '@mui/icons-material/Menu';
 import DashboardIcon from '@mui/icons-material/Dashboard';
@@ -10,6 +10,8 @@ import LogoutIcon from '@mui/icons-material/Logout';
 import { useRouter, usePathname } from 'next/navigation';
 import Link from 'next/link';
 import { EMPLOYER_BLUE } from '../../../constants/colors';
+import { useAuthActions, useAuth } from '@/store/authStore';
+import authService from '@/lib/authService';
 
 const drawerWidth = 240;
 
@@ -25,20 +27,52 @@ const menuItems = [
 ];
 
 export default function EmployerLayout({ children }: EmployerLayoutProps) {
-  const [mobileOpen, setMobileOpen] = React.useState(false);
+  const [mobileOpen, setMobileOpen] = useState(false);
+  const [headerLoading, setHeaderLoading] = useState(true);
+  const [pageTitle, setPageTitle] = useState('پنل کارفرمایان');
   const theme = useTheme();
   const router = useRouter();
   const pathname = usePathname();
   const isSmScreen = useMediaQuery(theme.breakpoints.down('md'));
+  const { logout } = useAuthActions();
+  const { user, isAuthenticated } = useAuth();
+
+  // بارگذاری اطلاعات کاربر در ابتدای کار
+  useEffect(() => {
+    const loadUserData = async () => {
+      setHeaderLoading(true);
+      try {
+        if (isAuthenticated) {
+          // بررسی اعتبار توکن و دریافت اطلاعات کاربر در صورت نیاز
+          await authService.validateAndRefreshTokenIfNeeded();
+          
+          // تنظیم عنوان صفحه براساس مسیر
+          const currentMenuItem = menuItems.find(item => pathname === item.path);
+          if (currentMenuItem) {
+            setPageTitle(currentMenuItem.text);
+          }
+        }
+      } catch (error) {
+        console.error('خطا در بارگذاری اطلاعات کاربر:', error);
+      } finally {
+        // پس از یک تاخیر کوتاه برای جلوگیری از چشمک زدن، لودینگ را پایان می‌دهیم
+        setTimeout(() => {
+          setHeaderLoading(false);
+        }, 500);
+      }
+    };
+    
+    loadUserData();
+  }, [pathname, isAuthenticated]);
 
   const handleDrawerToggle = () => {
     setMobileOpen(!mobileOpen);
   };
 
   const handleLogout = () => {
-    // منطق خروج از حساب کاربری
-    console.log('خروج از حساب کاربری');
-    // پاک کردن کوکی‌ها و انتقال به صفحه اصلی
+    // منطق خروج از حساب کاربری با استفاده از Zustand
+    logout();
+    // انتقال به صفحه اصلی
     router.push('/');
   };
 
@@ -117,9 +151,23 @@ export default function EmployerLayout({ children }: EmployerLayoutProps) {
           >
             <MenuIcon />
           </IconButton>
-          <Typography variant="h6" noWrap component="div">
-            {menuItems.find(item => pathname === item.path)?.text || 'پنل کارفرمایان'}
-          </Typography>
+          {headerLoading ? (
+            <Box sx={{ display: 'flex', alignItems: 'center' }}>
+              <CircularProgress size={20} sx={{ color: EMPLOYER_BLUE, mr: 2 }} />
+              <Skeleton variant="text" width={150} height={32} animation="wave" />
+            </Box>
+          ) : (
+            <Box sx={{ display: 'flex', alignItems: 'center' }}>
+              <Typography variant="h6" noWrap component="div">
+                {pageTitle}
+              </Typography>
+              {user && (
+                <Typography variant="body2" sx={{ mr: 2, opacity: 0.7 }}>
+                  {user.username || user.email}
+                </Typography>
+              )}
+            </Box>
+          )}
         </Toolbar>
       </AppBar>
       <Box
@@ -163,7 +211,14 @@ export default function EmployerLayout({ children }: EmployerLayoutProps) {
         }}
       >
         <Container maxWidth="lg" sx={{ py: 2 }}>
-          {children}
+          {headerLoading ? (
+            <Box sx={{ pt: 2 }}>
+              <Skeleton variant="rectangular" height={200} sx={{ mb: 2, borderRadius: 2 }} />
+              <Skeleton variant="rectangular" height={400} sx={{ borderRadius: 2 }} />
+            </Box>
+          ) : (
+            children
+          )}
         </Container>
       </Box>
     </Box>

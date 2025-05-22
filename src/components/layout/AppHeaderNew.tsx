@@ -12,7 +12,7 @@ import {
   Avatar,
   MenuItem,
   IconButton,
-  Tooltip,
+  Tooltip
 } from '@mui/material';
 import Link from 'next/link';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -31,9 +31,10 @@ import {
 import { useHeaderContext } from '@/contexts/HeaderContext';
 import { styled } from '@mui/material/styles';
 import { useRouter } from 'next/navigation';
-import { useState, memo } from 'react';
+import { useState, memo, useEffect, useRef } from 'react';
 import UserMenu from './UserMenu';
-import { useAuthStore } from '@/store/authStore';
+import { useAuthStore, useAuthActions } from '@/store/authStore';
+import authService from '@/lib/authService';
 
 // کامپوننت AppBar اصلی
 function AppHeaderNew() {
@@ -42,6 +43,8 @@ function AppHeaderNew() {
   // استفاده از selectorهای جداگانه برای کاهش رندرهای غیرضروری
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
   const user = useAuthStore((state) => state.user);
+  const { refreshUserData } = useAuthActions();
+  const dataLoadedRef = useRef(false);
   
   const {
     isMobile,
@@ -57,6 +60,33 @@ function AppHeaderNew() {
     isEmployerHovered,
     isCandidateHovered,
   } = useHeaderContext();
+
+  // بارگذاری اطلاعات کاربر در ابتدای لود هدر
+  useEffect(() => {
+    const loadUserData = async () => {
+      try {
+        if (isAuthenticated && !dataLoadedRef.current) {
+          // بررسی اعتبار توکن و دریافت اطلاعات کاربر در صورت نیاز
+          await Promise.all([
+            authService.validateAndRefreshTokenIfNeeded(),
+            refreshUserData()
+          ]);
+          
+          // ذخیره زمان بارگذاری داده‌ها برای استفاده در کامپوننت UserMenu
+          (window as any)._userMenuLastFetch = Date.now();
+          
+          // ثبت اینکه داده‌ها حداقل یک بار بارگیری شده‌اند
+          dataLoadedRef.current = true;
+          
+          console.log('[AppHeader] اطلاعات کاربر با موفقیت بارگیری شد');
+        }
+      } catch (error) {
+        console.error('خطا در بارگذاری اطلاعات کاربر در هدر:', error);
+      }
+    };
+    
+    loadUserData();
+  }, [isAuthenticated, refreshUserData]);
 
   // اطلاعات منوها - با استایل یکسان با منوی موبایل
   const navItems = [
@@ -450,7 +480,7 @@ function AppHeaderNew() {
                 </Tooltip>
               )}
 
-              {/* کامپوننت منوی کاربر */}
+              {/* مکان آواتار و منوی کاربر */}
               <UserMenu
                 isLoggedIn={isAuthenticated}
                 user={user ? {

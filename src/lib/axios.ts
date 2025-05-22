@@ -1,5 +1,5 @@
 import axios, { AxiosError, AxiosRequestConfig, AxiosResponse } from 'axios';
-import Cookies from 'js-cookie';
+import cookieService, { COOKIE_NAMES } from './cookieService';
 
 // تنظیمات پایه برای axios
 const axiosInstance = axios.create({
@@ -14,7 +14,7 @@ const axiosInstance = axios.create({
 // اضافه کردن توکن به هدر درخواست‌ها در صورت وجود
 axiosInstance.interceptors.request.use(
     (config) => {
-        const accessToken = Cookies.get('access_token');
+        const accessToken = cookieService.getCookie(COOKIE_NAMES.ACCESS_TOKEN);
         if (accessToken) {
             config.headers.Authorization = `Bearer ${accessToken}`;
         }
