@@ -18,28 +18,34 @@ interface OtpInputProps {
 const StyledInput = styled('input')(({ theme }) => ({
   width: '100%',
   height: '100%',
-  border: `1px solid ${theme.palette.grey[300]}`,
-  borderRadius: theme.shape.borderRadius,
-  fontSize: '1.2rem',
+  border: `1.5px solid ${theme.palette.grey[300]}`,
+  borderRadius: '8px',
+  fontSize: '1.3rem',
   fontWeight: 'bold',
   textAlign: 'center',
   caretColor: theme.palette.primary.main,
   outline: 'none',
   padding: 0,
+  backgroundColor: theme.palette.background.paper,
+  transition: 'all 0.2s ease-in-out',
   '&:focus': {
     border: `2px solid ${theme.palette.primary.main}`,
-    boxShadow: `0 0 0 1px ${theme.palette.primary.main}30`,
+    boxShadow: `0 0 0 3px ${theme.palette.primary.main}20`,
+    transform: 'translateY(-2px)',
   },
   '&.error': {
-    border: `1px solid ${theme.palette.error.main}`,
+    border: `1.5px solid ${theme.palette.error.main}`,
+    backgroundColor: `${theme.palette.error.main}05`,
     '&:focus': {
       border: `2px solid ${theme.palette.error.main}`,
-      boxShadow: `0 0 0 1px ${theme.palette.error.main}30`,
+      boxShadow: `0 0 0 3px ${theme.palette.error.main}20`,
+      transform: 'translateY(-2px)',
     },
   },
   '&:disabled': {
     backgroundColor: theme.palette.action.disabledBackground,
     color: theme.palette.text.disabled,
+    border: `1.5px solid ${theme.palette.grey[200]}`,
   },
 }));
 
@@ -50,11 +56,12 @@ const ErrorMessage = ({ message }: { message: string }) => {
       width: '100%',
       textAlign: 'center',
       color: '#d32f2f', // رنگ خطای Material UI
-      fontSize: '0.75rem',
-      marginTop: '20px',
+      fontSize: '0.8rem',
+      marginTop: '12px',
       fontFamily: 'inherit',
       direction: 'rtl',
-      position: 'relative'
+      position: 'relative',
+      animation: 'fadeIn 0.3s ease-in-out',
     }} dir="rtl">
       {message}
     </div>
@@ -75,6 +82,26 @@ const OtpInput: React.FC<OtpInputProps> = ({
   const [localValue, setLocalValue] = useState<string[]>(
     value.split('').concat(Array(length - value.length).fill(''))
   );
+
+  // تبدیل اعداد فارسی به انگلیسی
+  const convertPersianToEnglish = (str: string): string => {
+    if (!str) return str;
+    
+    // تبدیل اعداد فارسی به انگلیسی (کد یونیکد ۰۶۰۰-۰۶۶۹)
+    const persianDigits = ['۰', '۱', '۲', '۳', '۴', '۵', '۶', '۷', '۸', '۹'];
+    // تبدیل اعداد عربی به انگلیسی (کد یونیکد ۰۶۶۰-۰۶۶۹)
+    const arabicDigits = ['٠', '١', '٢', '٣', '٤', '٥', '٦', '٧', '٨', '٩'];
+    
+    let result = str;
+    
+    // تبدیل اعداد فارسی
+    result = result.replace(/[۰-۹]/g, match => String(persianDigits.indexOf(match)));
+    
+    // تبدیل اعداد عربی
+    result = result.replace(/[٠-٩]/g, match => String(arabicDigits.indexOf(match)));
+    
+    return result;
+  };
 
   // ایجاد رفرنس برای هر سلول
   useEffect(() => {
@@ -131,6 +158,50 @@ const OtpInput: React.FC<OtpInputProps> = ({
   // مدیریت کلیدهای خاص مانند Backspace, Delete, Arrow keys
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>, index: number) => {
     const target = e.target as HTMLInputElement;
+    
+    // بررسی اعداد فارسی و عربی در هنگام تایپ مستقیم
+    const persianDigits = ['۰', '۱', '۲', '۳', '۴', '۵', '۶', '۷', '۸', '۹'];
+    const arabicDigits = ['٠', '١', '٢', '٣', '٤', '٥', '٦', '٧', '٨', '٩'];
+    
+    if (persianDigits.includes(e.key)) {
+      // جلوگیری از رفتار پیش‌فرض برای اعداد فارسی
+      e.preventDefault();
+      
+      // تبدیل عدد فارسی به انگلیسی
+      const englishDigit = String(persianDigits.indexOf(e.key));
+      
+      // اعمال تغییر به صورت دستی
+      const newValues = [...localValue];
+      newValues[index] = englishDigit;
+      setLocalValue(newValues);
+      onChange(newValues.join(''));
+      
+      // حرکت به سلول بعدی
+      if (index < length - 1) {
+        inputRefs.current[index + 1]?.focus();
+      }
+      
+      return;
+    } else if (arabicDigits.includes(e.key)) {
+      // جلوگیری از رفتار پیش‌فرض برای اعداد عربی
+      e.preventDefault();
+      
+      // تبدیل عدد عربی به انگلیسی
+      const englishDigit = String(arabicDigits.indexOf(e.key));
+      
+      // اعمال تغییر به صورت دستی
+      const newValues = [...localValue];
+      newValues[index] = englishDigit;
+      setLocalValue(newValues);
+      onChange(newValues.join(''));
+      
+      // حرکت به سلول بعدی
+      if (index < length - 1) {
+        inputRefs.current[index + 1]?.focus();
+      }
+      
+      return;
+    }
     
     switch (e.key) {
       case 'Backspace':
@@ -213,8 +284,12 @@ const OtpInput: React.FC<OtpInputProps> = ({
         <Box 
           key={i} 
           sx={{ 
-            width: { xs: '40px', sm: '48px' },
-            height: { xs: '46px', sm: '54px' }
+            width: { xs: '42px', sm: '50px' },
+            height: { xs: '50px', sm: '58px' },
+            transition: 'transform 0.2s ease',
+            '&:hover': {
+              transform: 'translateY(-1px)'
+            }
           }}
         >
           <StyledInput
@@ -249,9 +324,9 @@ const OtpInput: React.FC<OtpInputProps> = ({
         sx={{ 
           display: 'flex',
           direction: 'ltr',
-          justifyContent: 'space-between',
-          gap: { xs: 1, sm: 2 },
-          marginY: 1 
+          justifyContent: 'center',
+          gap: { xs: 1.5, sm: 2.5 },
+          marginY: 2
         }}
       >
         {renderInputs()}

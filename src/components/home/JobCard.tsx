@@ -26,7 +26,10 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faBuilding, faDollarSign, faBriefcase } from '@fortawesome/free-solid-svg-icons';
 import { useJobSeekerTheme } from '@/contexts/JobSeekerThemeContext';
 import { EMPLOYER_THEME } from '@/constants/colors';
-import { CSSProperties } from 'react';
+import { CSSProperties, useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { useAuth } from '@/contexts/AuthContext';
+import AuthRequiredModal from '../common/AuthRequiredModal';
 
 // تعریف تایپ جاب
 export type JobType = {
@@ -177,261 +180,296 @@ export default function JobCard({ job }: JobCardProps) {
   const jobSeekerColors = useJobSeekerTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   const isTablet = useMediaQuery(theme.breakpoints.between('sm', 'md'));
+  const router = useRouter();
+  const { isAuthenticated } = useAuth();
 
   // استفاده از رنگ‌های کارفرما
   const employerColors = EMPLOYER_THEME;
+  
+  // وضعیت نمایش مدال
+  const [loginModalOpen, setLoginModalOpen] = useState(false);
+  
+  // تابع کلیک بر روی دکمه مشاهده آگهی
+  const handleViewJob = () => {
+    if (isAuthenticated) {
+      // اگر کاربر وارد شده باشد، به صفحه آگهی برو
+      router.push(`/job/${job.id}`);
+    } else {
+      // اگر کاربر وارد نشده باشد، مدال لاگین را نمایش بده
+      setLoginModalOpen(true);
+    }
+  };
+  
+  // بستن مدال
+  const handleCloseModal = () => {
+    setLoginModalOpen(false);
+  };
 
   return (
-    <Card
-      sx={{
-        height: '100%',
-        display: 'flex',
-        flexDirection: 'column',
-        borderRadius: { xs: 2, sm: 2.5, md: 3 },
-        border: `1px solid #E0E0E0`,
-        boxShadow: '0 2px 8px rgba(0,0,0,0.05)',
-        overflow: 'hidden',
-        position: 'relative',
-        backgroundColor: theme.palette.background.paper,
-        transition: 'all 0.25s ease-in-out',
-        p: 0,
-        width: '100%',
-        mx: 'auto',
-        '&:hover': {
-          transform: 'translateY(-4px)',
-          boxShadow: '0 6px 15px rgba(0,0,0,0.1)',
-        }
-      }}
-    >
-      <CardContent sx={{ p: 0, pb: "0px !important" }}>
-        {/* هدر کارت با نمایش عنوان و برچسب نردبان */}
-        <Box
-          sx={{
-            p: 1.2,
-            pb: 0.8,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            borderBottom: `1px solid ${theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.05)'}`,
-            minHeight: { xs: 45, sm: 50 },
-            px: { xs: 1, sm: 1.2 },
-          }}
-        >
-          <Typography
-            variant="subtitle1"
-            component="h3"
+    <>
+      <Card
+        sx={{
+          height: '100%',
+          display: 'flex',
+          flexDirection: 'column',
+          borderRadius: { xs: 2, sm: 2.5, md: 3 },
+          border: `1px solid #E0E0E0`,
+          boxShadow: '0 2px 8px rgba(0,0,0,0.05)',
+          overflow: 'hidden',
+          position: 'relative',
+          backgroundColor: theme.palette.background.paper,
+          transition: 'all 0.25s ease-in-out',
+          p: 0,
+          width: '100%',
+          mx: 'auto',
+          '&:hover': {
+            transform: 'translateY(-4px)',
+            boxShadow: '0 6px 15px rgba(0,0,0,0.1)',
+          }
+        }}
+      >
+        <CardContent sx={{ p: 0, pb: "0px !important" }}>
+          {/* هدر کارت با نمایش عنوان و برچسب نردبان */}
+          <Box
             sx={{
-              fontWeight: 700,
-              fontSize: { xs: '0.9rem', sm: '0.95rem', md: '1rem' },
-              color: 'text.primary',
-              lineHeight: 1.3,
-              overflow: 'hidden',
-              textOverflow: 'ellipsis',
-              whiteSpace: 'nowrap',
-              height: 'auto',
-              maxWidth: '85%',
-              flexGrow: 1,
-              mr: 1,
+              p: 1.2,
+              pb: 0.8,
               display: 'flex',
               alignItems: 'center',
+              justifyContent: 'space-between',
+              borderBottom: `1px solid ${theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.05)'}`,
+              minHeight: { xs: 45, sm: 50 },
+              px: { xs: 1, sm: 1.2 },
             }}
           >
-            {job.title}
-          </Typography>
-
-          {/* نمایش برچسب نردبان با طراحی بهتر */}
-          {job.subscriptionStatus === 'special' && (
-            <Box
-              component="span"
+            <Typography
+              variant="subtitle1"
+              component="h3"
               sx={{
-                bgcolor: '#e53935',
-                color: '#fff',
-                fontSize: { xs: '0.7rem', sm: '0.75rem' },
                 fontWeight: 700,
-                px: 0.8,
-                py: 0.3,
-                borderRadius: 0.7,
+                fontSize: { xs: '0.9rem', sm: '0.95rem', md: '1rem' },
+                color: 'text.primary',
+                lineHeight: 1.3,
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                whiteSpace: 'nowrap',
+                height: 'auto',
+                maxWidth: '85%',
+                flexGrow: 1,
+                mr: 1,
                 display: 'flex',
                 alignItems: 'center',
-                justifyContent: 'center',
-                minWidth: 'auto',
-                height: { xs: 20, sm: 22 },
-                whiteSpace: 'nowrap',
-                flexShrink: 0,
-                mr: 0.5,
-                alignSelf: 'center',
               }}
             >
-              نردبان
-            </Box>
-          )}
-        </Box>
+              {job.title}
+            </Typography>
 
-        {/* بدنه کارت - اطلاعات شغلی با فاصله کمتر */}
-        <Box sx={{ px: { xs: 1, sm: 1.2 }, py: { xs: 0.8, sm: 1 }, flex: 1, display: 'flex', flexDirection: 'column' }}>
-          <Box sx={{ display: 'grid', gap: { xs: 1, sm: 1.2 } }}>
-            {/* محل کار */}
-            <Box sx={{ display: 'flex', alignItems: 'center' }}>
+            {/* نمایش برچسب نردبان با طراحی بهتر */}
+            {job.subscriptionStatus === 'special' && (
               <Box
+                component="span"
                 sx={{
-                  backgroundColor: 'rgba(25, 118, 210, 0.08)',
-                  color: '#1976d2',
-                  width: { xs: 28, sm: 32 },
-                  height: { xs: 28, sm: 32 },
-                  borderRadius: '50%',
+                  bgcolor: '#e53935',
+                  color: '#fff',
+                  fontSize: { xs: '0.7rem', sm: '0.75rem' },
+                  fontWeight: 700,
+                  px: 0.8,
+                  py: 0.3,
+                  borderRadius: 0.7,
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  ml: 0.5,
-                  mr: { xs: 0.8, sm: 1 },
-                }}
-              >
-                <LocationOnOutlinedIcon sx={{ fontSize: { xs: '1rem', sm: '1.1rem' } }} />
-              </Box>
-              <Typography
-                variant="body2"
-                sx={{
-                  color: 'text.primary',
-                  fontSize: { xs: '0.85rem', sm: '0.9rem' },
-                  display: 'flex',
-                  alignItems: 'center',
-                  overflow: 'hidden',
-                  textOverflow: 'ellipsis',
+                  minWidth: 'auto',
+                  height: { xs: 20, sm: 22 },
                   whiteSpace: 'nowrap',
-                  maxWidth: '100%'
+                  flexShrink: 0,
+                  mr: 0.5,
+                  alignSelf: 'center',
                 }}
               >
-                {job.location}
-              </Typography>
-            </Box>
+                نردبان
+              </Box>
+            )}
+          </Box>
 
-            {/* زمان انتشار */}
-            <Box sx={{ display: 'flex', alignItems: 'center' }}>
-              <Box
-                sx={{
-                  backgroundColor: 'rgba(25, 118, 210, 0.08)',
-                  color: '#1976d2',
-                  width: { xs: 28, sm: 32 },
-                  height: { xs: 28, sm: 32 },
-                  borderRadius: '50%',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  ml: 0.5,
-                  mr: { xs: 0.8, sm: 1 },
-                }}
-              >
-                <AccessTimeOutlinedIcon sx={{ fontSize: { xs: '1rem', sm: '1.1rem' } }} />
+          {/* بدنه کارت - اطلاعات شغلی با فاصله کمتر */}
+          <Box sx={{ px: { xs: 1, sm: 1.2 }, py: { xs: 0.8, sm: 1 }, flex: 1, display: 'flex', flexDirection: 'column' }}>
+            <Box sx={{ display: 'grid', gap: { xs: 1, sm: 1.2 } }}>
+              {/* محل کار */}
+              <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                <Box
+                  sx={{
+                    backgroundColor: 'rgba(25, 118, 210, 0.08)',
+                    color: '#1976d2',
+                    width: { xs: 28, sm: 32 },
+                    height: { xs: 28, sm: 32 },
+                    borderRadius: '50%',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    ml: 0.5,
+                    mr: { xs: 0.8, sm: 1 },
+                  }}
+                >
+                  <LocationOnOutlinedIcon sx={{ fontSize: { xs: '1rem', sm: '1.1rem' } }} />
+                </Box>
+                <Typography
+                  variant="body2"
+                  sx={{
+                    color: 'text.primary',
+                    fontSize: { xs: '0.85rem', sm: '0.9rem' },
+                    display: 'flex',
+                    alignItems: 'center',
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                    whiteSpace: 'nowrap',
+                    maxWidth: '100%'
+                  }}
+                >
+                  {job.location}
+                </Typography>
               </Box>
-              <Typography
-                variant="body2"
-                sx={{
-                  color: 'text.secondary',
-                  fontSize: { xs: '0.85rem', sm: '0.9rem' },
-                  overflow: 'hidden',
-                  textOverflow: 'ellipsis',
-                  whiteSpace: 'nowrap',
-                  maxWidth: '100%'
-                }}
-              >
-                {job.timePosted || (job.created_at ? new Date(job.created_at).toLocaleDateString('fa-IR') : '')}
-              </Typography>
-            </Box>
 
-            {/* نوع کار */}
-            <Box sx={{ display: 'flex', alignItems: 'center' }}>
-              <Box
-                sx={{
-                  backgroundColor: 'rgba(25, 118, 210, 0.08)',
-                  color: '#1976d2',
-                  width: { xs: 28, sm: 32 },
-                  height: { xs: 28, sm: 32 },
-                  borderRadius: '50%',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  ml: 0.5,
-                  mr: { xs: 0.8, sm: 1 },
-                }}
-              >
-                <WorkOutlineIcon sx={{ fontSize: { xs: '1rem', sm: '1.1rem' } }} />
+              {/* زمان انتشار */}
+              <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                <Box
+                  sx={{
+                    backgroundColor: 'rgba(25, 118, 210, 0.08)',
+                    color: '#1976d2',
+                    width: { xs: 28, sm: 32 },
+                    height: { xs: 28, sm: 32 },
+                    borderRadius: '50%',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    ml: 0.5,
+                    mr: { xs: 0.8, sm: 1 },
+                  }}
+                >
+                  <AccessTimeOutlinedIcon sx={{ fontSize: { xs: '1rem', sm: '1.1rem' } }} />
+                </Box>
+                <Typography
+                  variant="body2"
+                  sx={{
+                    color: 'text.secondary',
+                    fontSize: { xs: '0.85rem', sm: '0.9rem' },
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                    whiteSpace: 'nowrap',
+                    maxWidth: '100%'
+                  }}
+                >
+                  {job.timePosted || (job.created_at ? new Date(job.created_at).toLocaleDateString('fa-IR') : '')}
+                </Typography>
               </Box>
-              <Typography
-                variant="body2"
-                sx={{
-                  color: 'text.secondary',
-                  fontSize: { xs: '0.85rem', sm: '0.9rem' },
-                  overflow: 'hidden',
-                  textOverflow: 'ellipsis',
-                  whiteSpace: 'nowrap',
-                  maxWidth: '100%'
-                }}
-              >
-                {getJobTypeText(job.jobType)}
-              </Typography>
-            </Box>
 
-            {/* حقوق */}
-            <Box sx={{ display: 'flex', alignItems: 'center' }}>
-              <Box
-                sx={{
-                  backgroundColor: 'rgba(25, 118, 210, 0.08)',
-                  color: '#1976d2',
-                  width: { xs: 28, sm: 32 },
-                  height: { xs: 28, sm: 32 },
-                  borderRadius: '50%',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  ml: 0.5,
-                  mr: { xs: 0.8, sm: 1 },
-                }}
-              >
-                <PaidOutlinedIcon sx={{ fontSize: { xs: '1rem', sm: '1.1rem' } }} />
+              {/* نوع کار */}
+              <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                <Box
+                  sx={{
+                    backgroundColor: 'rgba(25, 118, 210, 0.08)',
+                    color: '#1976d2',
+                    width: { xs: 28, sm: 32 },
+                    height: { xs: 28, sm: 32 },
+                    borderRadius: '50%',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    ml: 0.5,
+                    mr: { xs: 0.8, sm: 1 },
+                  }}
+                >
+                  <WorkOutlineIcon sx={{ fontSize: { xs: '1rem', sm: '1.1rem' } }} />
+                </Box>
+                <Typography
+                  variant="body2"
+                  sx={{
+                    color: 'text.secondary',
+                    fontSize: { xs: '0.85rem', sm: '0.9rem' },
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                    whiteSpace: 'nowrap',
+                    maxWidth: '100%'
+                  }}
+                >
+                  {getJobTypeText(job.jobType)}
+                </Typography>
               </Box>
-              <Typography
-                variant="body2"
-                sx={{
-                  color: '#1976d2',
-                  fontSize: { xs: '0.85rem', sm: '0.9rem' },
-                  fontWeight: 600,
-                  overflow: 'hidden',
-                  textOverflow: 'ellipsis',
-                  whiteSpace: 'nowrap',
-                  maxWidth: '100%'
-                }}
-              >
-                {getSalaryText(job.salary)}
-              </Typography>
+
+              {/* حقوق */}
+              <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                <Box
+                  sx={{
+                    backgroundColor: 'rgba(25, 118, 210, 0.08)',
+                    color: '#1976d2',
+                    width: { xs: 28, sm: 32 },
+                    height: { xs: 28, sm: 32 },
+                    borderRadius: '50%',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    ml: 0.5,
+                    mr: { xs: 0.8, sm: 1 },
+                  }}
+                >
+                  <PaidOutlinedIcon sx={{ fontSize: { xs: '1rem', sm: '1.1rem' } }} />
+                </Box>
+                <Typography
+                  variant="body2"
+                  sx={{
+                    color: '#1976d2',
+                    fontSize: { xs: '0.85rem', sm: '0.9rem' },
+                    fontWeight: 600,
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                    whiteSpace: 'nowrap',
+                    maxWidth: '100%'
+                  }}
+                >
+                  {getSalaryText(job.salary)}
+                </Typography>
+              </Box>
             </Box>
           </Box>
-        </Box>
 
-        {/* دکمه مشاهده آگهی با آیکون چشم - به صورت مستطیلی */}
-        <Box sx={{ px: { xs: 1, sm: 1.2 }, pb: { xs: 1.2, sm: 1.5 }, pt: 0.5 }}>
-          <Button
-            fullWidth
-            variant="contained"
-            disableElevation
-            startIcon={<VisibilityOutlinedIcon fontSize="small" />}
-            sx={{
-              py: { xs: 0.8, sm: 1 },
-              fontWeight: 'bold',
-              borderRadius: 1.5,
-              fontSize: { xs: '0.85rem', sm: '0.9rem' },
-              backgroundColor: '#4299e1',
-              color: '#fff',
-              transition: 'all 0.2s ease',
-              '&:hover': {
-                backgroundColor: '#1976d2',
-                boxShadow: '0 4px 8px rgba(25, 118, 210, 0.3)',
-              }
-            }}
-          >
-            مشاهده آگهی
-          </Button>
-        </Box>
-      </CardContent>
-    </Card>
+          {/* دکمه مشاهده آگهی با آیکون چشم - به صورت مستطیلی */}
+          <Box sx={{ px: { xs: 1, sm: 1.2 }, pb: { xs: 1.2, sm: 1.5 }, pt: 0.5 }}>
+            <Button
+              fullWidth
+              variant="contained"
+              disableElevation
+              startIcon={<VisibilityOutlinedIcon fontSize="small" />}
+              onClick={handleViewJob}
+              sx={{
+                py: { xs: 0.8, sm: 1 },
+                fontWeight: 'bold',
+                borderRadius: 1.5,
+                fontSize: { xs: '0.85rem', sm: '0.9rem' },
+                backgroundColor: '#4299e1',
+                color: '#fff',
+                transition: 'all 0.2s ease',
+                '&:hover': {
+                  backgroundColor: '#1976d2',
+                  boxShadow: '0 4px 8px rgba(25, 118, 210, 0.3)',
+                }
+              }}
+            >
+              مشاهده آگهی
+            </Button>
+          </Box>
+        </CardContent>
+      </Card>
+      
+      {/* استفاده از کامپوننت مدال احراز هویت با تم کارفرما */}
+      <AuthRequiredModal
+        open={loginModalOpen}
+        onClose={handleCloseModal}
+        redirectUrl={`/job/${job.id}`}
+        themeType="employer" 
+        title="ورود به حساب کاربری"
+        message="برای مشاهده جزئیات این آگهی شغلی، لازم است وارد حساب کاربری خود شوید."
+        submessage="پس از ورود، می‌توانید به تمامی جزئیات این آگهی شغلی دسترسی داشته باشید."
+      />
+    </>
   );
 } 

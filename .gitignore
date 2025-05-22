@@ -26,6 +26,11 @@ backend_api_documentation.md
 .DS_Store
 *.pem
 
+/test_user_type.py
+/test_api.py
+/test_api_final.py
+/test_api_fixed.py
+/گزارش کامل پنل کارفرما.md
 # debug
 npm-debug.log*
 yarn-debug.log*

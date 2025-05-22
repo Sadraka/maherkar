@@ -22,6 +22,7 @@ import { EMPLOYER_THEME } from '@/constants/colors';
 import { ErrorHandler } from '@/components/common/ErrorHandler';
 import toast from 'react-hot-toast';
 import OtpInput from '@/components/common/OtpInput';
+import NumberTextField from '../common/NumberTextField';
 
 // Wrapper component for parts that need useSearchParams
 const LoginFormContent = ({ onSuccess }: { onSuccess?: () => void }) => {
@@ -516,7 +517,7 @@ const LoginFormContent = ({ onSuccess }: { onSuccess?: () => void }) => {
                     width: '100%'
                 }}>
                     <Box>
-                        <TextField
+                        <NumberTextField
                             fullWidth
                             id="phone"
                             label="شماره تلفن"
@@ -535,7 +536,7 @@ const LoginFormContent = ({ onSuccess }: { onSuccess?: () => void }) => {
                             placeholder="۰۹۱۲۳۴۵۶۷۸۹"
                             inputProps={{ dir: "ltr" }}
                             size={isMobile ? "medium" : "medium"}
-                                autoFocus
+                            autoFocus
                         />
                     </Box>
 

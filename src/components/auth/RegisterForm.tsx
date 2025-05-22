@@ -33,6 +33,8 @@ import Link from 'next/link';
 import { EMPLOYER_THEME } from '@/constants/colors';
 import { toast } from 'react-hot-toast';
 import OtpInput from '@/components/common/OtpInput';
+import { alpha } from '@mui/material/styles';
+import NumberTextField from '../common/NumberTextField';
 
 // کامپوننت آیکون مراحل با اعداد فارسی
 const PersianStepIcon = (props: StepIconProps) => {
@@ -63,6 +65,80 @@ const PersianStepIcon = (props: StepIconProps) => {
                     {getPersianNumber(Number(icon))}
                 </Typography>
             )}
+        </Box>
+    );
+};
+
+// کامپوننت نقطه‌ای برای نمایش مراحل در موبایل
+const MobileDotStepper = ({ activeStep, steps }: { activeStep: number, steps: string[] }) => {
+    return (
+        <Box sx={{ 
+            display: 'flex', 
+            flexDirection: 'column',
+            alignItems: 'center',
+            my: 2
+        }}>
+            {/* نمایش عنوان مرحله فعلی */}
+            <Typography 
+                variant="subtitle2" 
+                sx={{ 
+                    color: EMPLOYER_THEME.primary,
+                    fontWeight: 600,
+                    mb: 2,
+                    fontSize: '0.9rem'
+                }}
+            >
+                {steps[activeStep]}
+            </Typography>
+
+            {/* نمایش نقطه‌ها */}
+            <Box sx={{ 
+                display: 'flex', 
+                justifyContent: 'center', 
+                alignItems: 'center',
+                gap: 2,
+                position: 'relative'
+            }}>
+                {steps.map((_, index) => {
+                    const isActive = index === activeStep;
+                    const isCompleted = index < activeStep;
+                    
+                    return (
+                        <Box
+                            key={index}
+                            sx={{
+                                width: isActive ? 14 : 10,
+                                height: isActive ? 14 : 10,
+                                borderRadius: '50%',
+                                backgroundColor: isActive 
+                                    ? EMPLOYER_THEME.primary 
+                                    : isCompleted 
+                                        ? alpha(EMPLOYER_THEME.primary, 0.7)
+                                        : alpha(EMPLOYER_THEME.primary, 0.2),
+                                transition: 'all 0.4s cubic-bezier(0.68, -0.55, 0.27, 1.55)',
+                                transform: isActive ? 'scale(1.1)' : 'scale(1)',
+                                boxShadow: isActive 
+                                    ? `0 0 0 2px ${alpha(EMPLOYER_THEME.primary, 0.2)}, 0 2px 4px ${alpha(EMPLOYER_THEME.primary, 0.3)}` 
+                                    : 'none',
+                                position: 'relative',
+                                '&::after': index < steps.length - 1 ? {
+                                    content: '""',
+                                    position: 'absolute',
+                                    top: '50%',
+                                    left: '100%',
+                                    width: 16,
+                                    height: 2,
+                                    backgroundColor: isCompleted && index + 1 <= activeStep
+                                        ? alpha(EMPLOYER_THEME.primary, 0.7)
+                                        : alpha(EMPLOYER_THEME.primary, 0.2),
+                                    transform: 'translateY(-50%)',
+                                    transition: 'background-color 0.4s ease'
+                                } : {}
+                            }}
+                        />
+                    );
+                })}
+            </Box>
         </Box>
     );
 };
@@ -572,9 +648,9 @@ export default function RegisterForm({ onSuccess }: RegisterFormProps) {
     const renderPhoneForm = () => {
         return (
             <Box component="form" onSubmit={handlePhoneSubmit}>
-                <Box sx={{ display: 'flex', flexDirection: 'column', gap: { xs: 3, sm: 3 } }}>
+                <Box sx={{ display: 'flex', flexDirection: 'column', gap: { xs: 2.5, sm: 2.5 } }}>
                     <Box>
-                        <TextField
+                        <NumberTextField
                             fullWidth
                             name="phone"
                             label="شماره همراه"
@@ -598,8 +674,16 @@ export default function RegisterForm({ onSuccess }: RegisterFormProps) {
                     </Box>
 
                     {/* متن شرایط و قوانین بدون چک‌باکس */}
-                    <Box sx={{ textAlign: 'center' }}>
-                        <Typography variant={isMobile ? "body2" : "body1"} color="text.secondary" sx={{ lineHeight: 1.6 }}>
+                    <Box sx={{ textAlign: 'center', mt: -0.5 }}>
+                        <Typography 
+                            variant="caption" 
+                            color="text.secondary" 
+                            sx={{ 
+                                lineHeight: 1.6,
+                                fontSize: { xs: '0.7rem', sm: '0.75rem' },
+                                opacity: 0.9
+                            }}
+                        >
                             با ثبت‌نام در ماهرکار، <MuiLink component={Link} href="/terms" target="_blank" underline="hover">شرایط و قوانین</MuiLink> و <MuiLink component={Link} href="/privacy" target="_blank" underline="hover">بیانیه حریم خصوصی</MuiLink> را می‌پذیرید
                         </Typography>
                     </Box>
@@ -609,17 +693,17 @@ export default function RegisterForm({ onSuccess }: RegisterFormProps) {
                             fullWidth
                             type="submit"
                             variant="contained"
-                            size={isMobile ? "large" : "large"}
+                            size={isMobile ? "large" : "medium"}
                             disabled={isSubmitting}
                             sx={{
                                 mt: 2,
-                                py: 1.5,
+                                py: { xs: 1.5, sm: 1.2 },
                                 backgroundColor: employerColors.primary,
                                 '&:hover': {
                                     backgroundColor: employerColors.dark,
                                 },
                                 borderRadius: 2,
-                                fontSize: { xs: '1rem', sm: '1rem' }
+                                fontSize: { xs: '1rem', sm: '0.95rem' }
                             }}
                         >
                             {isSubmitting ? <CircularProgress size={24} color="inherit" /> : 'ادامه'}
@@ -648,7 +732,7 @@ export default function RegisterForm({ onSuccess }: RegisterFormProps) {
     const renderUserInfoForm = () => {
         return (
             <Box component="form" onSubmit={handleUserInfoSubmit}>
-                <Box sx={{ display: 'flex', flexDirection: 'column', gap: { xs: 3, sm: 3 } }}>
+                <Box sx={{ display: 'flex', flexDirection: 'column', gap: { xs: 2.5, sm: 2.5 } }}>
                     <Box>
                         <TextField
                             fullWidth
@@ -710,17 +794,17 @@ export default function RegisterForm({ onSuccess }: RegisterFormProps) {
                             onClick={() => setActiveStep(0)}
                             disabled={isSubmitting}
                             fullWidth={isMobile}
-                            size={isMobile ? "large" : "large"}
+                            size={isMobile ? "large" : "medium"}
                             sx={{
                                 order: { xs: 2, sm: 1 }, // در موبایل پایین باشد
-                                py: { xs: 1.5, sm: 1.5 },
+                                py: { xs: 1.5, sm: 1.2 },
                                 borderColor: employerColors.primary,
                                 color: employerColors.primary,
                                 '&:hover': {
                                     borderColor: employerColors.dark,
                                     backgroundColor: 'rgba(0, 0, 0, 0.04)',
                                 },
-                                fontSize: { xs: '1rem', sm: '1rem' }
+                                fontSize: { xs: '1rem', sm: '0.95rem' }
                             }}
                         >
                             بازگشت
@@ -731,15 +815,15 @@ export default function RegisterForm({ onSuccess }: RegisterFormProps) {
                             variant="contained"
                             disabled={isSubmitting}
                             fullWidth={isMobile}
-                            size={isMobile ? "large" : "large"}
+                            size={isMobile ? "large" : "medium"}
                             sx={{
                                 order: { xs: 1, sm: 2 }, // در موبایل بالا باشد
-                                py: { xs: 1.5, sm: 1.5 },
+                                py: { xs: 1.5, sm: 1.2 },
                                 backgroundColor: employerColors.primary,
                                 '&:hover': {
                                     backgroundColor: employerColors.dark,
                                 },
-                                fontSize: { xs: '1rem', sm: '1rem' }
+                                fontSize: { xs: '1rem', sm: '0.95rem' }
                             }}
                         >
                             {isSubmitting ? <CircularProgress size={24} color="inherit" /> : 'دریافت کد تایید'}
@@ -754,15 +838,24 @@ export default function RegisterForm({ onSuccess }: RegisterFormProps) {
     const renderOtpForm = () => {
         return (
             <Box component="form" onSubmit={handleOtpSubmit}>
-                <Box sx={{ display: 'flex', flexDirection: 'column', gap: { xs: 3, sm: 3 } }}>
-                    <Typography variant={isMobile ? "body1" : "body1"} gutterBottom>
+                <Box sx={{ display: 'flex', flexDirection: 'column', gap: { xs: 2.5, sm: 2 } }}>
+                    <Typography 
+                        variant={isMobile ? "body1" : "body1"} 
+                        sx={{ textAlign: 'center', mb: { xs: 0, sm: 0 } }}
+                        gutterBottom
+                    >
                         کد تایید به شماره {formData.phone} ارسال شد.
                     </Typography>
-                    <Typography variant={isMobile ? "body2" : "body1"} color="text.secondary" gutterBottom>
-                        لطفاً کد دریافتی را وارد کنید. با تایید این کد، ثبت‌نام شما تکمیل خواهد شد.
+                    <Typography 
+                        variant={isMobile ? "body2" : "body1"} 
+                        color="text.secondary" 
+                        sx={{ textAlign: 'center', mt: { xs: 0, sm: -1 } }}
+                        gutterBottom
+                    >
+                        لطفاً کد دریافتی را وارد کنید
                     </Typography>
 
-                    <Box>
+                    <Box sx={{ mt: { xs: 0, sm: -0.5 } }}>
                         <OtpInput
                             value={phoneOtpCode}
                             onChange={handleOtpChange}
@@ -779,24 +872,24 @@ export default function RegisterForm({ onSuccess }: RegisterFormProps) {
                         flexDirection: { xs: 'column', sm: 'row' },
                         justifyContent: 'space-between',
                         gap: { xs: 2, sm: 2 },
-                        mt: { xs: 1, sm: 2 }
+                        mt: { xs: 1, sm: 1 }
                     }}>
                         <Button
                             variant="outlined"
                             onClick={() => setActiveStep(1)}
                             disabled={isSubmitting}
                             fullWidth={isMobile}
-                            size={isMobile ? "large" : "large"}
+                            size={isMobile ? "large" : "medium"}
                             sx={{
                                 order: { xs: 2, sm: 1 }, // در موبایل پایین باشد
-                                py: { xs: 1.5, sm: 1.5 },
+                                py: { xs: 1.5, sm: 1.2 },
                                 borderColor: employerColors.primary,
                                 color: employerColors.primary,
                                 '&:hover': {
                                     borderColor: employerColors.dark,
                                     backgroundColor: 'rgba(0, 0, 0, 0.04)',
                                 },
-                                fontSize: { xs: '1rem', sm: '1rem' }
+                                fontSize: { xs: '1rem', sm: '0.95rem' }
                             }}
                         >
                             بازگشت
@@ -807,15 +900,15 @@ export default function RegisterForm({ onSuccess }: RegisterFormProps) {
                             variant="contained"
                             disabled={isSubmitting}
                             fullWidth={isMobile}
-                            size={isMobile ? "large" : "large"}
+                            size={isMobile ? "large" : "medium"}
                             sx={{
                                 order: { xs: 1, sm: 2 }, // در موبایل بالا باشد
-                                py: { xs: 1.5, sm: 1.5 },
+                                py: { xs: 1.5, sm: 1.2 },
                                 backgroundColor: employerColors.primary,
                                 '&:hover': {
                                     backgroundColor: employerColors.dark,
                                 },
-                                fontSize: { xs: '1rem', sm: '1rem' }
+                                fontSize: { xs: '1rem', sm: '0.95rem' }
                             }}
                         >
                             {isSubmitting ? <CircularProgress size={24} color="inherit" /> : 'تایید کد'}
@@ -865,37 +958,40 @@ export default function RegisterForm({ onSuccess }: RegisterFormProps) {
                 width: '100%',
                 alignItems: 'center',
                 justifyContent: 'flex-start',
-                minHeight: isMobile ? 'calc(100vh - 100px)' : 'auto',
-                py: isMobile ? 0 : 2,
-                mt: isMobile ? 0 : 2
+                minHeight: isMobile ? 'calc(100vh - 80px)' : 'auto',
+                py: isMobile ? 0 : 1.5,
+                mt: isMobile ? 0 : 1
             }}
         >
             <Paper 
                 elevation={isMobile ? 0 : 3} 
                 sx={{ 
-                    p: { xs: 2, sm: 4 },
+                    p: { xs: 2.5, sm: 3 },
+                    pt: { xs: 2, sm: 3 },
+                    pb: { xs: 4, sm: 3 },
                     borderRadius: { xs: 0, sm: 2 },
                     display: 'flex',
                     flexDirection: 'column',
                     justifyContent: 'center',
                     width: '100%',
                     boxShadow: isMobile ? 'none' : '0px 3px 15px rgba(0, 0, 0, 0.1)',
-                    mt: isMobile ? 2 : 0,
+                    mt: isMobile ? 0 : 0,
                     mb: 'auto',
                     mx: 'auto',
-                    maxWidth: isMobile ? '100%' : '600px'
+                    maxWidth: isMobile ? '100%' : '480px'
                 }}
             >
                 {/* عنوان با استایل بهبود یافته */}
-                <Box sx={{ mb: 3, textAlign: 'center' }}>
+                <Box sx={{ mb: isMobile ? 2.5 : 2, textAlign: 'center' }}>
                     <Typography 
                         variant="h5" 
                         component="h1" 
                         sx={{ 
                             fontWeight: 'bold', 
                             color: EMPLOYER_THEME.primary,
-                            mb: 1,
-                            fontSize: { xs: '1.5rem', sm: '1.75rem' }
+                            mb: 0.5,
+                            fontSize: { xs: '1.4rem', sm: '1.6rem' },
+                            letterSpacing: '0.01em'
                         }}
                     >
                         ثبت‌نام در ماهرکار
@@ -903,13 +999,20 @@ export default function RegisterForm({ onSuccess }: RegisterFormProps) {
                 </Box>
 
                 {/* استپر */}
-                <Stepper activeStep={activeStep} sx={{ mb: 4 }}>
-                    {['شماره تلفن', 'اطلاعات کاربری', 'تایید کد'].map((label, index) => (
-                        <Step key={label}>
-                            <StepLabel StepIconComponent={PersianStepIcon}>{label}</StepLabel>
-                        </Step>
-                    ))}
-                </Stepper>
+                {isMobile ? (
+                    <MobileDotStepper 
+                        activeStep={activeStep} 
+                        steps={['شماره تلفن', 'اطلاعات کاربری', 'تایید کد']} 
+                    />
+                ) : (
+                    <Stepper activeStep={activeStep} sx={{ mb: 3, maxWidth: '500px', mx: 'auto', width: '100%' }}>
+                        {['شماره تلفن', 'اطلاعات کاربری', 'تایید کد'].map((label, index) => (
+                            <Step key={label}>
+                                <StepLabel StepIconComponent={PersianStepIcon}>{label}</StepLabel>
+                            </Step>
+                        ))}
+                    </Stepper>
+                )}
 
                 {/* فرم‌ها */}
                 {activeStep === 0 && renderPhoneForm()}
