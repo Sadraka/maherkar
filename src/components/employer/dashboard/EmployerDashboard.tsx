@@ -1,732 +1,718 @@
 "use client"
 import React, { useState, useEffect } from 'react';
-import { Card, CardContent, Typography, Box, IconButton, CircularProgress, Button, Paper, CardHeader, CardActions } from '@mui/material';
-import PeopleAltIcon from '@mui/icons-material/PeopleAlt';
-import WorkIcon from '@mui/icons-material/Work';
-import TrendingUpIcon from '@mui/icons-material/TrendingUp';
-import VisibilityIcon from '@mui/icons-material/Visibility';
-import AddIcon from '@mui/icons-material/Add';
-import DoneIcon from '@mui/icons-material/Done';
-import NotInterestedIcon from '@mui/icons-material/NotInterested';
-import HourglassEmptyIcon from '@mui/icons-material/HourglassEmpty';
-import RefreshIcon from '@mui/icons-material/Refresh';
-import { EMPLOYER_BLUE, EMPLOYER_THEME } from '../../../constants/colors';
-import { apiGet } from '../../../lib/axios';
-import { useRouter } from 'next/navigation';
-import { useAuth } from '@/store/authStore';
+import {
+  Box,
+  Grid,
+  Paper,
+  Typography,
+  Card,
+  CardContent,
+  CardHeader,
+  Divider,
+  Button,
+  Avatar,
+  CircularProgress,
+  Alert,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Skeleton,
+  Chip,
+  IconButton,
+  Tooltip
+} from '@mui/material';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import {
+  faBriefcase,
+  faUsers,
+  faFileAlt,
+  faCheckCircle,
+  faExclamationCircle,
+  faSync,
+  faChevronLeft,
+  faEye
+} from '@fortawesome/free-solid-svg-icons';
+import { useAuthStore } from '@/store/authStore';
 import authService from '@/lib/authService';
-import { toast } from 'react-hot-toast';
+import { useRouter } from 'next/navigation';
+import Link from 'next/link';
+import { format } from 'date-fns-jalali';
+import { EmployerDashboardStats } from '../layout/EmployerLayout';
 
-interface DashboardStats {
-  totalJobs: number;
-  activeJobs: number;
-  totalApplications: number;
-  viewCount: number;
-  recentActivity: Array<{
-    id: number;
-    type: string;
-    title: string;
-    date: string;
-  }>;
+interface Job {
+  id: number;
+  title: string;
+  company_name: string;
+  status: string;
+  created_at: string;
+  applications_count: number;
+  is_urgent: boolean;
 }
 
-interface RecentApplication {
+interface Application {
   id: number;
   job_title: string;
-  applicant_name: string;
-  created_at: string;
+  candidate_name: string;
   status: string;
-}
-
-interface JobAdvertisement {
-  id: number;
-  advertisement: {
-    title: string;
-    slug: string;
-    status: string;
-    created_at: string;
-  };
+  applied_at: string;
 }
 
 export default function EmployerDashboard() {
+  const { stats, loading: statsLoading, error: statsError } = EmployerDashboardStats();
+  const [jobs, setJobs] = useState<Job[]>([]);
+  const [applications, setApplications] = useState<Application[]>([]);
+  const [loadingJobs, setLoadingJobs] = useState(true);
+  const [loadingApplications, setLoadingApplications] = useState(true);
+  const [errorJobs, setErrorJobs] = useState<string | null>(null);
+  const [errorApplications, setErrorApplications] = useState<string | null>(null);
+
+  const user = useAuthStore(state => state.user);
   const router = useRouter();
-  const [loading, setLoading] = useState(true);
-  const [stats, setStats] = useState<DashboardStats | null>(null);
-  const [recentApplications, setRecentApplications] = useState<RecentApplication[]>([]);
-  const [jobs, setJobs] = useState<JobAdvertisement[]>([]);
-  const [error, setError] = useState<string | null>(null);
-  const { isAuthenticated, user } = useAuth();
 
-  // کنترل نوع کاربر (کارفرما)
   useEffect(() => {
-    if (isAuthenticated && user) {
-      if (!user.user_type || (user.user_type !== 'employer' && user.user_type !== 'EM')) {
-        setError('شما دسترسی به پنل کارفرما را ندارید. لطفاً با یک حساب کارفرما وارد شوید.');
-        setLoading(false);
-        return;
-      }
+    // بررسی دسترسی کاربر
+    if (user && user.user_type !== 'employer' && user.user_type !== 'EM') {
+      router.push('/');
+      return;
     }
-  }, [isAuthenticated, user]);
-
-  const fetchDashboardData = async () => {
-    try {
-      setLoading(true);
-      setError(null);
+    
+    // دریافت آگهی‌های شغلی
+    const fetchJobs = async () => {
+      setLoadingJobs(true);
+      setErrorJobs(null);
       
-      // بررسی اعتبار توکن و تمدید در صورت نیاز
-      const isValid = await authService.validateAndRefreshTokenIfNeeded();
-      
-      if (!isValid) {
-        console.error('توکن احراز هویت نامعتبر است');
-        setError('نشست شما منقضی شده است. لطفاً دوباره وارد شوید.');
-        setLoading(false);
-        return;
-      }
-
-      const baseApiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
-      
-      // دریافت آگهی‌های کارفرما
-      let jobsData: JobAdvertisement[] = [];
       try {
-        const jobsResponse = await apiGet<{results: JobAdvertisement[]}>(`${baseApiUrl}/jobs/employer/`);
-        console.log('پاسخ API آگهی‌ها:', jobsResponse.data);
-        jobsData = jobsResponse.data.results || [];
-        setJobs(jobsData);
-      } catch (jobError: any) {
-        console.error('خطا در دریافت آگهی‌ها:', jobError);
-        setJobs([]);
-        // ادامه اجرا برای بقیه داده‌ها
-      }
-      
-      // دریافت درخواست‌های کارفرما
-      let applicationsData: RecentApplication[] = [];
-      try {
-        const applicationsResponse = await apiGet<{results: RecentApplication[]}>(`${baseApiUrl}/applications/employer/`);
-        console.log('پاسخ API درخواست‌ها:', applicationsResponse.data);
-        applicationsData = applicationsResponse.data.results || [];
-        setRecentApplications(applicationsData.slice(0, 5).map(app => ({
-          id: app.id,
-          job_title: app.job_title,
-          applicant_name: app.applicant_name,
-          created_at: formatDate(app.created_at),
-          status: app.status
-        })));
-      } catch (appError: any) {
-        console.error('خطا در دریافت درخواست‌ها:', appError);
-        setRecentApplications([]);
-        // ادامه اجرا برای بقیه داده‌ها
-      }
-      
-      // محاسبه آمار داشبورد
-      const activeJobs = jobsData.filter(job => job.advertisement.status === 'Approved').length;
-      const totalApplicationsCount = applicationsData.length;
-      
-      // دریافت تعداد بازدید (می‌تواند از API جداگانه دریافت شود)
-      let viewCount = 0;
-      try {
-        const statsResponse = await apiGet<{view_count: number}>(`${baseApiUrl}/employer/dashboard/`);
-        viewCount = statsResponse.data.view_count || 0;
-      } catch (statsError) {
-        console.error('خطا در دریافت آمار بازدید:', statsError);
-        viewCount = 0;
-        // استفاده از مقدار پیش‌فرض
-      }
-      
-      // تنظیم داده‌های آماری داشبورد
-      setStats({
-        totalJobs: jobsData.length,
-        activeJobs: activeJobs,
-        totalApplications: totalApplicationsCount,
-        viewCount: viewCount || 0,
-        recentActivity: applicationsData.slice(0, 5).map(app => ({
-          id: app.id,
-          type: 'application',
-          title: `درخواست جدید برای آگهی ${app.job_title}`,
-          date: formatDate(app.created_at)
-        }))
-      });
-      
-      setLoading(false);
-      
-    } catch (error: any) {
-      console.error('خطا در دریافت اطلاعات داشبورد:', error);
-      
-      // مدیریت خطا بر اساس نوع و کد HTTP
-      if (error.response) {
-        switch (error.response.status) {
-          case 401:
-            setError('نشست شما منقضی شده است. لطفاً دوباره وارد شوید.');
-            // ذخیره مسیر فعلی و هدایت به صفحه ورود
-            localStorage.setItem('redirectAfterLogin', '/employer/dashboard');
-            router.push('/auth/login');
-            break;
-          case 403:
-            setError('شما دسترسی لازم برای مشاهده این اطلاعات را ندارید.');
-            break;
-          case 404:
-            setError('اطلاعات درخواستی یافت نشد.');
-            break;
-          case 500:
-            setError('خطای داخلی سرور. لطفاً بعداً دوباره تلاش کنید.');
-            break;
-          default:
-            setError(`خطا در دریافت اطلاعات از سرور. (کد ${error.response.status}) لطفاً دوباره تلاش کنید.`);
+        await authService.validateAndRefreshTokenIfNeeded();
+        
+        const response = await fetch('/api/jobs/employer/recent', {
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('token')}`
+          }
+        });
+        
+        if (!response.ok) {
+          let errorMessage = 'خطا در دریافت آگهی‌های شغلی';
+          
+          if (response.status === 401) {
+            errorMessage = 'لطفاً مجدداً وارد حساب کاربری خود شوید';
+          } else if (response.status === 403) {
+            errorMessage = 'شما به این بخش دسترسی ندارید';
+          } else if (response.status === 404) {
+            errorMessage = 'اطلاعاتی یافت نشد';
+          } else if (response.status >= 500) {
+            errorMessage = 'خطای سرور، لطفاً بعداً تلاش کنید';
+          }
+          
+          throw new Error(errorMessage);
         }
-      } else if (error.request) {
-        // خطای شبکه - عدم دریافت پاسخ
-        setError('خطا در برقراری ارتباط با سرور. لطفاً اتصال اینترنت خود را بررسی کنید.');
-      } else {
-        // سایر خطاها
-        setError('خطای غیرمنتظره در دریافت اطلاعات. لطفاً دوباره تلاش کنید.');
+        
+        const data = await response.json();
+        setJobs(data.jobs || []);
+      } catch (error) {
+        console.error('خطا در دریافت آگهی‌های شغلی:', error);
+        setErrorJobs(error instanceof Error ? error.message : 'خطا در دریافت آگهی‌های شغلی');
+      } finally {
+        setLoadingJobs(false);
       }
+    };
+    
+    // دریافت درخواست‌های استخدام
+    const fetchApplications = async () => {
+      setLoadingApplications(true);
+      setErrorApplications(null);
       
-      // نمایش داده‌های نمونه در صورت خطا
-      setStats({
-        totalJobs: 0,
-        activeJobs: 0,
-        totalApplications: 0,
-        viewCount: 0,
-        recentActivity: []
+      try {
+        await authService.validateAndRefreshTokenIfNeeded();
+        
+        const response = await fetch('/api/applications/employer/recent', {
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('token')}`
+          }
+        });
+        
+        if (!response.ok) {
+          let errorMessage = 'خطا در دریافت درخواست‌های استخدام';
+          
+          if (response.status === 401) {
+            errorMessage = 'لطفاً مجدداً وارد حساب کاربری خود شوید';
+          } else if (response.status === 403) {
+            errorMessage = 'شما به این بخش دسترسی ندارید';
+          } else if (response.status === 404) {
+            errorMessage = 'اطلاعاتی یافت نشد';
+          } else if (response.status >= 500) {
+            errorMessage = 'خطای سرور، لطفاً بعداً تلاش کنید';
+          }
+          
+          throw new Error(errorMessage);
+        }
+        
+        const data = await response.json();
+        setApplications(data.applications || []);
+      } catch (error) {
+        console.error('خطا در دریافت درخواست‌های استخدام:', error);
+        setErrorApplications(error instanceof Error ? error.message : 'خطا در دریافت درخواست‌های استخدام');
+      } finally {
+        setLoadingApplications(false);
+      }
+    };
+    
+    fetchJobs();
+    fetchApplications();
+  }, [user, router]);
+
+  // بارگذاری مجدد داده‌ها
+  const handleRefresh = async () => {
+    // دریافت مجدد آمار، آگهی‌ها و درخواست‌ها
+    setLoadingJobs(true);
+    setLoadingApplications(true);
+    setErrorJobs(null);
+    setErrorApplications(null);
+    
+    try {
+      await authService.validateAndRefreshTokenIfNeeded();
+      
+      // دریافت آگهی‌های شغلی
+      const jobsResponse = await fetch('/api/jobs/employer/recent', {
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        }
       });
       
-      setRecentApplications([]);
-      setLoading(false);
+      if (jobsResponse.ok) {
+        const jobsData = await jobsResponse.json();
+        setJobs(jobsData.jobs || []);
+      } else {
+        throw new Error('خطا در دریافت آگهی‌های شغلی');
+      }
+      
+      // دریافت درخواست‌های استخدام
+      const applicationsResponse = await fetch('/api/applications/employer/recent', {
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        }
+      });
+      
+      if (applicationsResponse.ok) {
+        const applicationsData = await applicationsResponse.json();
+        setApplications(applicationsData.applications || []);
+      } else {
+        throw new Error('خطا در دریافت درخواست‌های استخدام');
+      }
+    } catch (error) {
+      console.error('خطا در بروزرسانی داده‌ها:', error);
+    } finally {
+      setLoadingJobs(false);
+      setLoadingApplications(false);
     }
   };
 
-  // اجرای فراخوانی داده‌ها در ابتدا و تغییر وضعیت احراز هویت
-  useEffect(() => {
-    if (isAuthenticated && user) {
-      fetchDashboardData();
-    } else {
-      setLoading(false);
-      setError('لطفاً برای دسترسی به پنل کارفرما وارد شوید.');
-    }
-  }, [isAuthenticated, user]);
-  
-  const handleRefresh = () => {
-    toast.success('در حال به‌روزرسانی اطلاعات...');
-    fetchDashboardData();
-  };
-  
-  const formatDate = (dateString: string): string => {
-    try {
-      const date = new Date(dateString);
-      return new Intl.DateTimeFormat('fa-IR').format(date);
-    } catch (e) {
-      return dateString;
-    }
-  };
-
-  const getStatusColor = (status: string) => {
+  // وضعیت آگهی شغلی
+  const getJobStatusChip = (status: string) => {
     switch (status.toLowerCase()) {
-      case 'pe':
-      case 'pending': return '#f39c12';
-      case 'ir':
-      case 'viewed': return '#3498db';
-      case 'ac':
-      case 'accepted': return '#2ecc71';
-      case 're':
-      case 'rejected': return '#e74c3c';
-      default: return '#777';
+      case 'active':
+      case 'فعال':
+        return <Chip 
+          label="فعال" 
+          size="small" 
+          color="success" 
+          sx={{ fontWeight: 500 }} 
+        />;
+      case 'pending':
+      case 'در انتظار تایید':
+        return <Chip 
+          label="در انتظار تایید" 
+          size="small" 
+          color="warning" 
+          sx={{ fontWeight: 500 }} 
+        />;
+      case 'expired':
+      case 'منقضی شده':
+        return <Chip 
+          label="منقضی شده" 
+          size="small" 
+          color="error" 
+          sx={{ fontWeight: 500 }} 
+        />;
+      default:
+        return <Chip 
+          label={status} 
+          size="small" 
+          color="default" 
+          sx={{ fontWeight: 500 }} 
+        />;
     }
   };
 
-  const getStatusText = (status: string) => {
+  // وضعیت درخواست استخدام
+  const getApplicationStatusChip = (status: string) => {
     switch (status.toLowerCase()) {
-      case 'pe':
-      case 'pending': return 'در انتظار بررسی';
-      case 'ir':
-      case 'viewed': return 'مشاهده شده';
-      case 'ac':
-      case 'accepted': return 'پذیرفته شده';
-      case 're':
-      case 'rejected': return 'رد شده';
-      default: return status;
+      case 'pending':
+      case 'در انتظار بررسی':
+        return <Chip 
+          label="در انتظار بررسی" 
+          size="small" 
+          color="warning" 
+          sx={{ fontWeight: 500 }} 
+        />;
+      case 'shortlisted':
+      case 'منتخب':
+        return <Chip 
+          label="منتخب" 
+          size="small" 
+          color="info" 
+          sx={{ fontWeight: 500 }} 
+        />;
+      case 'interviewed':
+      case 'مصاحبه شده':
+        return <Chip 
+          label="مصاحبه شده" 
+          size="small" 
+          color="primary" 
+          sx={{ fontWeight: 500 }} 
+        />;
+      case 'rejected':
+      case 'رد شده':
+        return <Chip 
+          label="رد شده" 
+          size="small" 
+          color="error" 
+          sx={{ fontWeight: 500 }} 
+        />;
+      case 'hired':
+      case 'استخدام شده':
+        return <Chip 
+          label="استخدام شده" 
+          size="small" 
+          color="success" 
+          sx={{ fontWeight: 500 }} 
+        />;
+      default:
+        return <Chip 
+          label={status} 
+          size="small" 
+          color="default" 
+          sx={{ fontWeight: 500 }} 
+        />;
     }
-  };
-  
-  const getStatusIcon = (status: string) => {
-    switch (status.toLowerCase()) {
-      case 'pe':
-      case 'pending': return <HourglassEmptyIcon fontSize="small" />;
-      case 'ir':
-      case 'viewed': return <VisibilityIcon fontSize="small" />;
-      case 'ac':
-      case 'accepted': return <DoneIcon fontSize="small" />;
-      case 're':
-      case 'rejected': return <NotInterestedIcon fontSize="small" />;
-      default: return <HourglassEmptyIcon fontSize="small" />;
-    }
-  };
-  
-  const handleAddNewJob = () => {
-    router.push('/employer/jobs/new');
   };
 
-  // نمایش حالت بارگذاری
-  if (loading) {
-    return (
-      <Box display="flex" justifyContent="center" alignItems="center" minHeight="400px">
-        <CircularProgress sx={{ color: EMPLOYER_BLUE }} />
-      </Box>
-    );
-  }
-  
-  // نمایش خطای عدم دسترسی یا احراز هویت
-  if (!isAuthenticated || !user) {
-    return (
-      <Box mb={4}>
-        <Paper 
-          elevation={0} 
-          sx={{ 
-            p: 3, 
-            bgcolor: '#ffebee', 
-            borderRadius: '12px',
-            border: '1px solid #ffcdd2'
-          }}
-        >
-          <Box display="flex" alignItems="center">
-            <Box color="#d32f2f" mr={1}>
-              <NotInterestedIcon />
-            </Box>
-            <Typography color="#d32f2f">لطفاً برای دسترسی به پنل کارفرما وارد حساب کاربری خود شوید.</Typography>
-          </Box>
-          <Box mt={2}>
-            <Button 
-              variant="outlined" 
-              size="small" 
-              onClick={() => router.push('/auth/login')}
-              sx={{ 
-                color: '#d32f2f', 
-                borderColor: '#d32f2f',
-                '&:hover': { borderColor: '#d32f2f', bgcolor: 'rgba(211, 47, 47, 0.04)' }
-              }}
-            >
-              ورود به حساب کاربری
-            </Button>
-          </Box>
-        </Paper>
-      </Box>
-    );
-  }
+  // نمایش اسکلتون برای کارت‌های آمار
+  const renderStatsSkeletons = () => (
+    <Grid container spacing={3}>
+      {[1, 2, 3, 4].map((item) => (
+        <Grid item xs={12} sm={6} md={3} key={item}>
+          <Paper sx={{ p: 2, display: 'flex', flexDirection: 'column', height: '100%' }}>
+            <Skeleton variant="text" width="60%" height={30} />
+            <Skeleton variant="text" width="40%" height={50} sx={{ mb: 1 }} />
+            <Skeleton variant="rectangular" height={50} />
+          </Paper>
+        </Grid>
+      ))}
+    </Grid>
+  );
+
+  // نمایش اسکلتون برای جدول‌ها
+  const renderTableSkeleton = () => (
+    <TableContainer component={Paper}>
+      <Table>
+        <TableHead>
+          <TableRow>
+            {[1, 2, 3, 4, 5].map((item) => (
+              <TableCell key={item}>
+                <Skeleton variant="text" />
+              </TableCell>
+            ))}
+          </TableRow>
+        </TableHead>
+        <TableBody>
+          {[1, 2, 3].map((row) => (
+            <TableRow key={row}>
+              {[1, 2, 3, 4, 5].map((col) => (
+                <TableCell key={col}>
+                  <Skeleton variant="text" />
+                </TableCell>
+              ))}
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
+    </TableContainer>
+  );
 
   return (
-    <Box sx={{ maxWidth: '1200px', mx: 'auto' }}>
-      <Box display="flex" justifyContent="space-between" alignItems="center" mb={4}>
-        <Typography variant="h5" fontWeight="bold" sx={{ color: EMPLOYER_THEME.dark }}>
+    <Box>
+      {/* هدر داشبورد */}
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
+        <Typography variant="h4" component="h1" sx={{ fontWeight: 700 }}>
           داشبورد کارفرما
         </Typography>
-        <Box display="flex" gap={2}>
-          <Button 
-            variant="outlined" 
-            startIcon={<RefreshIcon />}
-            onClick={handleRefresh}
-            sx={{ 
-              color: EMPLOYER_BLUE,
-              borderColor: EMPLOYER_BLUE,
-              '&:hover': { borderColor: EMPLOYER_THEME.dark },
-              borderRadius: '8px',
-            }}
-          >
-            به‌روزرسانی
-          </Button>
-          <Button 
-            variant="contained" 
-            startIcon={<AddIcon />}
-            onClick={handleAddNewJob}
-            sx={{ 
-              bgcolor: EMPLOYER_BLUE,
-              '&:hover': { bgcolor: EMPLOYER_THEME.dark },
-              borderRadius: '8px',
-              boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)'
-            }}
-          >
-            افزودن آگهی جدید
-          </Button>
-        </Box>
+        <Button
+          variant="outlined"
+          color="primary"
+          startIcon={<FontAwesomeIcon icon={faSync} />}
+          onClick={handleRefresh}
+          disabled={statsLoading || loadingJobs || loadingApplications}
+        >
+          بروزرسانی
+        </Button>
       </Box>
-      
-      {error && (
-        <Box mb={4}>
-          <Paper 
-            elevation={0} 
-            sx={{ 
-              p: 3, 
-              bgcolor: '#ffebee', 
-              borderRadius: '12px',
-              border: '1px solid #ffcdd2'
-            }}
-          >
-            <Box display="flex" alignItems="center">
-              <Box color="#d32f2f" mr={1}>
-                <NotInterestedIcon />
+
+      {/* کارت‌های آمار */}
+      {statsLoading ? (
+        renderStatsSkeletons()
+      ) : statsError ? (
+        <Alert severity="error" sx={{ mb: 3 }}>{statsError}</Alert>
+      ) : (
+        <Grid container spacing={3} sx={{ mb: 4 }}>
+          <Grid item xs={12} sm={6} md={3}>
+            <Paper 
+              sx={{ 
+                p: 2, 
+                display: 'flex', 
+                flexDirection: 'column', 
+                height: '100%',
+                background: 'linear-gradient(135deg, #2E5BFF 0%, #4F7CFF 100%)',
+                color: 'white',
+                borderRadius: '12px'
+              }}
+            >
+              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <Typography variant="subtitle1" sx={{ fontWeight: 500 }}>
+                  کل آگهی‌ها
+                </Typography>
+                <Avatar sx={{ bgcolor: 'rgba(255, 255, 255, 0.2)' }}>
+                  <FontAwesomeIcon icon={faBriefcase} />
+                </Avatar>
               </Box>
-              <Typography color="#d32f2f">{error}</Typography>
-            </Box>
-            <Box mt={2}>
+              <Typography variant="h3" component="div" sx={{ py: 2, fontWeight: 700 }}>
+                {stats.totalJobs}
+              </Typography>
               <Button 
-                variant="outlined" 
-                size="small" 
-                onClick={handleRefresh}
+                component={Link} 
+                href="/employer/jobs"
+                color="inherit"
+                size="small"
+                endIcon={<FontAwesomeIcon icon={faChevronLeft} />}
                 sx={{ 
-                  color: '#d32f2f', 
-                  borderColor: '#d32f2f',
-                  '&:hover': { borderColor: '#d32f2f', bgcolor: 'rgba(211, 47, 47, 0.04)' }
+                  mt: 'auto', 
+                  alignSelf: 'flex-start',
+                  bgcolor: 'rgba(255, 255, 255, 0.1)',
+                  '&:hover': { bgcolor: 'rgba(255, 255, 255, 0.2)' }
                 }}
               >
-                تلاش مجدد
+                مشاهده همه
               </Button>
-            </Box>
-          </Paper>
-        </Box>
+            </Paper>
+          </Grid>
+          
+          <Grid item xs={12} sm={6} md={3}>
+            <Paper 
+              sx={{ 
+                p: 2, 
+                display: 'flex', 
+                flexDirection: 'column', 
+                height: '100%',
+                background: 'linear-gradient(135deg, #33AC2E 0%, #4CD147 100%)',
+                color: 'white',
+                borderRadius: '12px'
+              }}
+            >
+              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <Typography variant="subtitle1" sx={{ fontWeight: 500 }}>
+                  آگهی‌های فعال
+                </Typography>
+                <Avatar sx={{ bgcolor: 'rgba(255, 255, 255, 0.2)' }}>
+                  <FontAwesomeIcon icon={faCheckCircle} />
+                </Avatar>
+              </Box>
+              <Typography variant="h3" component="div" sx={{ py: 2, fontWeight: 700 }}>
+                {stats.activeJobs}
+              </Typography>
+              <Button 
+                component={Link} 
+                href="/employer/jobs?status=active"
+                color="inherit"
+                size="small"
+                endIcon={<FontAwesomeIcon icon={faChevronLeft} />}
+                sx={{ 
+                  mt: 'auto', 
+                  alignSelf: 'flex-start',
+                  bgcolor: 'rgba(255, 255, 255, 0.1)',
+                  '&:hover': { bgcolor: 'rgba(255, 255, 255, 0.2)' }
+                }}
+              >
+                مشاهده فعال
+              </Button>
+            </Paper>
+          </Grid>
+          
+          <Grid item xs={12} sm={6} md={3}>
+            <Paper 
+              sx={{ 
+                p: 2, 
+                display: 'flex', 
+                flexDirection: 'column', 
+                height: '100%',
+                background: 'linear-gradient(135deg, #7747FF 0%, #976FFF 100%)',
+                color: 'white',
+                borderRadius: '12px'
+              }}
+            >
+              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <Typography variant="subtitle1" sx={{ fontWeight: 500 }}>
+                  کل درخواست‌ها
+                </Typography>
+                <Avatar sx={{ bgcolor: 'rgba(255, 255, 255, 0.2)' }}>
+                  <FontAwesomeIcon icon={faFileAlt} />
+                </Avatar>
+              </Box>
+              <Typography variant="h3" component="div" sx={{ py: 2, fontWeight: 700 }}>
+                {stats.totalApplications}
+              </Typography>
+              <Button 
+                component={Link} 
+                href="/employer/applications"
+                color="inherit"
+                size="small"
+                endIcon={<FontAwesomeIcon icon={faChevronLeft} />}
+                sx={{ 
+                  mt: 'auto', 
+                  alignSelf: 'flex-start',
+                  bgcolor: 'rgba(255, 255, 255, 0.1)',
+                  '&:hover': { bgcolor: 'rgba(255, 255, 255, 0.2)' }
+                }}
+              >
+                مشاهده همه
+              </Button>
+            </Paper>
+          </Grid>
+          
+          <Grid item xs={12} sm={6} md={3}>
+            <Paper 
+              sx={{ 
+                p: 2, 
+                display: 'flex', 
+                flexDirection: 'column', 
+                height: '100%',
+                background: 'linear-gradient(135deg, #FF6B2B 0%, #FF8F5C 100%)',
+                color: 'white',
+                borderRadius: '12px'
+              }}
+            >
+              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <Typography variant="subtitle1" sx={{ fontWeight: 500 }}>
+                  درخواست‌های جدید
+                </Typography>
+                <Avatar sx={{ bgcolor: 'rgba(255, 255, 255, 0.2)' }}>
+                  <FontAwesomeIcon icon={faUsers} />
+                </Avatar>
+              </Box>
+              <Typography variant="h3" component="div" sx={{ py: 2, fontWeight: 700 }}>
+                {stats.newApplications}
+              </Typography>
+              <Button 
+                component={Link} 
+                href="/employer/applications?status=new"
+                color="inherit"
+                size="small"
+                endIcon={<FontAwesomeIcon icon={faChevronLeft} />}
+                sx={{ 
+                  mt: 'auto', 
+                  alignSelf: 'flex-start',
+                  bgcolor: 'rgba(255, 255, 255, 0.1)',
+                  '&:hover': { bgcolor: 'rgba(255, 255, 255, 0.2)' }
+                }}
+              >
+                مشاهده جدید
+              </Button>
+            </Paper>
+          </Grid>
+        </Grid>
       )}
 
-      <Box 
-        display="flex" 
-        flexWrap="wrap" 
-        sx={{ 
-          mx: -1.5,
-          mb: 4 
-        }}
-      >
-        <Box sx={{ width: { xs: '100%', sm: '50%', lg: '25%' }, p: 1.5 }}>
-          <Card sx={{ 
-            bgcolor: 'white',
-            boxShadow: '0px 4px 12px rgba(0, 0, 0, 0.08)',
-            borderRadius: '12px',
-            transition: 'transform 0.3s, box-shadow 0.3s',
-            '&:hover': { 
-              transform: 'translateY(-5px)',
-              boxShadow: '0px 8px 16px rgba(0, 0, 0, 0.12)'
-            }
-          }}>
-            <CardContent>
-              <Box display="flex" justifyContent="space-between">
-                <Box>
-                  <Typography color="text.secondary" fontSize={14} fontWeight="medium">
-                    کل آگهی‌ها
-                  </Typography>
-                  <Typography variant="h4" fontWeight="bold" mt={1} sx={{ color: EMPLOYER_THEME.dark }}>
-                    {stats?.totalJobs ?? 0}
-                  </Typography>
-                </Box>
-                <Box bgcolor={EMPLOYER_THEME.bgVeryLight} display="flex" alignItems="center" justifyContent="center" width={60} height={60} borderRadius="50%">
-                  <WorkIcon sx={{ color: EMPLOYER_BLUE, fontSize: 30 }} />
-                </Box>
-              </Box>
-            </CardContent>
-          </Card>
-        </Box>
-
-        <Box sx={{ width: { xs: '100%', sm: '50%', lg: '25%' }, p: 1.5 }}>
-          <Card sx={{ 
-            bgcolor: 'white',
-            boxShadow: '0px 4px 12px rgba(0, 0, 0, 0.08)',
-            borderRadius: '12px',
-            transition: 'transform 0.3s, box-shadow 0.3s',
-            '&:hover': { 
-              transform: 'translateY(-5px)',
-              boxShadow: '0px 8px 16px rgba(0, 0, 0, 0.12)'
-            }
-          }}>
-            <CardContent>
-              <Box display="flex" justifyContent="space-between">
-                <Box>
-                  <Typography color="text.secondary" fontSize={14} fontWeight="medium">
-                    آگهی‌های فعال
-                  </Typography>
-                  <Typography variant="h4" fontWeight="bold" mt={1} sx={{ color: EMPLOYER_THEME.dark }}>
-                    {stats?.activeJobs ?? 0}
-                  </Typography>
-                </Box>
-                <Box bgcolor={EMPLOYER_THEME.bgVeryLight} display="flex" alignItems="center" justifyContent="center" width={60} height={60} borderRadius="50%">
-                  <TrendingUpIcon sx={{ color: EMPLOYER_BLUE, fontSize: 30 }} />
-                </Box>
-              </Box>
-            </CardContent>
-          </Card>
-        </Box>
-
-        <Box sx={{ width: { xs: '100%', sm: '50%', lg: '25%' }, p: 1.5 }}>
-          <Card sx={{ 
-            bgcolor: 'white',
-            boxShadow: '0px 4px 12px rgba(0, 0, 0, 0.08)',
-            borderRadius: '12px',
-            transition: 'transform 0.3s, box-shadow 0.3s',
-            '&:hover': { 
-              transform: 'translateY(-5px)',
-              boxShadow: '0px 8px 16px rgba(0, 0, 0, 0.12)'
-            }
-          }}>
-            <CardContent>
-              <Box display="flex" justifyContent="space-between">
-                <Box>
-                  <Typography color="text.secondary" fontSize={14} fontWeight="medium">
-                    درخواست‌ها
-                  </Typography>
-                  <Typography variant="h4" fontWeight="bold" mt={1} sx={{ color: EMPLOYER_THEME.dark }}>
-                    {stats?.totalApplications ?? 0}
-                  </Typography>
-                </Box>
-                <Box bgcolor={EMPLOYER_THEME.bgVeryLight} display="flex" alignItems="center" justifyContent="center" width={60} height={60} borderRadius="50%">
-                  <PeopleAltIcon sx={{ color: EMPLOYER_BLUE, fontSize: 30 }} />
-                </Box>
-              </Box>
-            </CardContent>
-          </Card>
-        </Box>
-
-        <Box sx={{ width: { xs: '100%', sm: '50%', lg: '25%' }, p: 1.5 }}>
-          <Card sx={{ 
-            bgcolor: 'white',
-            boxShadow: '0px 4px 12px rgba(0, 0, 0, 0.08)',
-            borderRadius: '12px',
-            transition: 'transform 0.3s, box-shadow 0.3s',
-            '&:hover': { 
-              transform: 'translateY(-5px)',
-              boxShadow: '0px 8px 16px rgba(0, 0, 0, 0.12)'
-            }
-          }}>
-            <CardContent>
-              <Box display="flex" justifyContent="space-between">
-                <Box>
-                  <Typography color="text.secondary" fontSize={14} fontWeight="medium">
-                    بازدیدها
-                  </Typography>
-                  <Typography variant="h4" fontWeight="bold" mt={1} sx={{ color: EMPLOYER_THEME.dark }}>
-                    {stats?.viewCount ?? 0}
-                  </Typography>
-                </Box>
-                <Box bgcolor={EMPLOYER_THEME.bgVeryLight} display="flex" alignItems="center" justifyContent="center" width={60} height={60} borderRadius="50%">
-                  <VisibilityIcon sx={{ color: EMPLOYER_BLUE, fontSize: 30 }} />
-                </Box>
-              </Box>
-            </CardContent>
-          </Card>
-        </Box>
-      </Box>
-
-      <Card sx={{ 
-        boxShadow: '0px 4px 12px rgba(0, 0, 0, 0.08)',
-        borderRadius: '12px',
-        mb: 4,
-        overflow: 'hidden'
-      }}>
-        <Box sx={{ 
-          bgcolor: EMPLOYER_THEME.bgLight, 
-          p: 2, 
-          px: 3,
-          borderBottom: '1px solid #f0f0f0'
-        }}>
-          <Box display="flex" justifyContent="space-between" alignItems="center">
-            <Typography variant="h6" fontWeight="bold" sx={{ color: EMPLOYER_THEME.dark }}>
-              درخواست‌های اخیر
+      {/* آگهی‌های شغلی اخیر */}
+      <Card sx={{ mb: 4 }}>
+        <CardHeader 
+          title={
+            <Typography variant="h6" fontWeight={600}>
+              آگهی‌های شغلی اخیر
             </Typography>
+          }
+          action={
             <Button 
-              onClick={() => router.push('/employer/applications')}
-              size="small" 
-              sx={{ 
-                color: EMPLOYER_BLUE,
-                '&:hover': { bgcolor: 'rgba(0, 0, 0, 0.04)' }
-              }}
+              component={Link}
+              href="/employer/jobs"
+              endIcon={<FontAwesomeIcon icon={faChevronLeft} />}
+              color="primary"
             >
               مشاهده همه
             </Button>
-          </Box>
-        </Box>
-
-        <CardContent sx={{ p: 0 }}>
-          {recentApplications.length === 0 ? (
-            <Box 
-              display="flex" 
-              flexDirection="column"
-              alignItems="center" 
-              justifyContent="center" 
-              py={5}
-              px={3}
-              textAlign="center"
-            >
-              <PeopleAltIcon sx={{ fontSize: 60, color: '#ccc', mb: 2 }} />
-              <Typography color="text.secondary" gutterBottom>
-                هیچ درخواستی وجود ندارد
-              </Typography>
-              <Typography variant="body2" color="text.secondary" maxWidth="400px" mb={2}>
-                هنوز هیچ درخواستی برای آگهی‌های شما ثبت نشده است. پس از دریافت درخواست، آن‌ها را در اینجا مشاهده خواهید کرد.
+          }
+        />
+        <Divider />
+        <CardContent>
+          {errorJobs && <Alert severity="error" sx={{ mb: 2 }}>{errorJobs}</Alert>}
+          
+          {loadingJobs ? (
+            renderTableSkeleton()
+          ) : jobs.length === 0 ? (
+            <Box sx={{ p: 3, textAlign: 'center' }}>
+              <Typography color="textSecondary">
+                هنوز هیچ آگهی شغلی ثبت نکرده‌اید.
               </Typography>
               <Button 
-                variant="outlined" 
-                size="small" 
-                onClick={() => router.push('/employer/jobs')}
-                sx={{ 
-                  color: EMPLOYER_BLUE, 
-                  borderColor: EMPLOYER_BLUE,
-                  '&:hover': { borderColor: EMPLOYER_BLUE, bgcolor: 'rgba(33, 150, 243, 0.04)' }
-                }}
+                component={Link}
+                href="/employer/jobs/add"
+                variant="contained" 
+                color="primary"
+                sx={{ mt: 2 }}
               >
-                مدیریت آگهی‌ها
+                ایجاد آگهی جدید
               </Button>
             </Box>
           ) : (
-            <Box>
-              {recentApplications.map((application, index) => (
-                <Box 
-                  key={application.id} 
-                  display="flex" 
-                  justifyContent="space-between" 
-                  alignItems="center" 
-                  p={2.5} 
-                  px={3}
-                  sx={{
-                    borderBottom: index < recentApplications.length - 1 ? '1px solid #f0f0f0' : 'none',
-                    transition: 'background-color 0.2s',
-                    '&:hover': { bgcolor: 'rgba(0, 0, 0, 0.02)' }
-                  }}
-                >
-                  <Box>
-                    <Typography fontWeight="medium" color={EMPLOYER_THEME.dark}>
-                      {application.job_title}
-                    </Typography>
-                    <Typography color="text.secondary" fontSize={14}>
-                      {application.applicant_name} - {application.created_at}
-                    </Typography>
-                  </Box>
-                  <Box display="flex" alignItems="center">
-                    <Typography 
-                      fontSize={13} 
-                      fontWeight="medium" 
-                      sx={{ 
-                        color: getStatusColor(application.status),
-                        bgcolor: `${getStatusColor(application.status)}15`,
-                        px: 1.5,
-                        py: 0.5,
-                        borderRadius: 2,
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: 0.5
-                      }}
-                    >
-                      {getStatusIcon(application.status)}
-                      {getStatusText(application.status)}
-                    </Typography>
-                    <IconButton 
-                      size="small" 
-                      sx={{ 
-                        ml: 1,
-                        color: EMPLOYER_BLUE,
-                        '&:hover': { bgcolor: 'rgba(33, 150, 243, 0.08)' }
-                      }}
-                      onClick={() => router.push(`/employer/applications/${application.id}`)}
-                    >
-                      <VisibilityIcon fontSize="small" />
-                    </IconButton>
-                  </Box>
-                </Box>
-              ))}
-              
-              <Box display="flex" justifyContent="center" p={3}>
-                <Button 
-                  variant="outlined" 
-                  onClick={() => router.push('/employer/applications')}
-                  sx={{ 
-                    color: EMPLOYER_BLUE, 
-                    borderColor: EMPLOYER_BLUE,
-                    borderRadius: '8px',
-                    px: 3,
-                    '&:hover': { 
-                      borderColor: EMPLOYER_BLUE,
-                      bgcolor: EMPLOYER_THEME.bgVeryLight
-                    }
-                  }}
-                >
-                  مشاهده همه درخواست‌ها
-                </Button>
-              </Box>
-            </Box>
+            <TableContainer>
+              <Table size="medium">
+                <TableHead>
+                  <TableRow>
+                    <TableCell>عنوان شغلی</TableCell>
+                    <TableCell>وضعیت</TableCell>
+                    <TableCell>تعداد درخواست‌ها</TableCell>
+                    <TableCell>تاریخ ایجاد</TableCell>
+                    <TableCell>عملیات</TableCell>
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {jobs.map((job) => (
+                    <TableRow key={job.id}>
+                      <TableCell>
+                        <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                          <Typography variant="body2" fontWeight={500}>
+                            {job.title}
+                          </Typography>
+                          {job.is_urgent && (
+                            <Chip 
+                              label="فوری" 
+                              size="small" 
+                              color="error" 
+                              sx={{ mr: 1, fontWeight: 500, ml: 1 }} 
+                            />
+                          )}
+                        </Box>
+                      </TableCell>
+                      <TableCell>{getJobStatusChip(job.status)}</TableCell>
+                      <TableCell>{job.applications_count}</TableCell>
+                      <TableCell>
+                        {job.created_at ? format(new Date(job.created_at), 'yyyy/MM/dd') : '-'}
+                      </TableCell>
+                      <TableCell>
+                        <Tooltip title="مشاهده آگهی">
+                          <IconButton 
+                            size="small" 
+                            component={Link}
+                            href={`/employer/jobs/${job.id}`}
+                            color="primary"
+                          >
+                            <FontAwesomeIcon icon={faEye} />
+                          </IconButton>
+                        </Tooltip>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </TableContainer>
           )}
         </CardContent>
       </Card>
 
-      <Card 
-        sx={{ 
-          p: 3, 
-          mt: 4, 
-          borderRadius: '12px',
-          boxShadow: '0px 4px 12px rgba(0, 0, 0, 0.08)'
-        }}
-      >
-        <Typography variant="h6" fontWeight="bold" sx={{ mb: 3, color: EMPLOYER_THEME.dark }}>
-          فعالیت‌های اخیر
-        </Typography>
-        
-        <Box 
-          display="flex" 
-          flexWrap="wrap"
-          sx={{ mx: -1.5 }}
-        >
-          {(!stats?.recentActivity || stats.recentActivity.length === 0) ? (
-            <Box 
-              width="100%" 
-              textAlign="center" 
-              py={4}
+      {/* درخواست‌های استخدام اخیر */}
+      <Card>
+        <CardHeader 
+          title={
+            <Typography variant="h6" fontWeight={600}>
+              درخواست‌های استخدام اخیر
+            </Typography>
+          }
+          action={
+            <Button 
+              component={Link}
+              href="/employer/applications"
+              endIcon={<FontAwesomeIcon icon={faChevronLeft} />}
+              color="primary"
             >
-              <Typography color="text.secondary">
-                هیچ فعالیتی ثبت نشده است.
+              مشاهده همه
+            </Button>
+          }
+        />
+        <Divider />
+        <CardContent>
+          {errorApplications && <Alert severity="error" sx={{ mb: 2 }}>{errorApplications}</Alert>}
+          
+          {loadingApplications ? (
+            renderTableSkeleton()
+          ) : applications.length === 0 ? (
+            <Box sx={{ p: 3, textAlign: 'center' }}>
+              <Typography color="textSecondary">
+                هنوز هیچ درخواست استخدامی دریافت نکرده‌اید.
               </Typography>
-              <Typography variant="body2" color="text.secondary" mt={1}>
-                پس از دریافت درخواست‌ها یا فعالیت‌های جدید، آن‌ها در اینجا نمایش داده می‌شوند.
-              </Typography>
+              <Button 
+                component={Link}
+                href="/employer/jobs/add"
+                variant="outlined" 
+                color="primary"
+                sx={{ mt: 2 }}
+              >
+                ایجاد آگهی شغلی جدید
+              </Button>
             </Box>
           ) : (
-            stats.recentActivity.map((activity) => (
-              <Box 
-                key={activity.id} 
-                sx={{ 
-                  width: { xs: '100%', md: '50%' },
-                  p: 1.5
-                }}
-              >
-                <Card 
-                  variant="outlined"
-                  sx={{
-                    borderRadius: '8px',
-                    transition: 'transform 0.2s, box-shadow 0.2s',
-                    '&:hover': { 
-                      transform: 'translateY(-3px)',
-                      boxShadow: '0px 4px 8px rgba(0, 0, 0, 0.1)'
-                    }
-                  }}
-                >
-                  <CardHeader
-                    title={activity.title}
-                    subheader={activity.date}
-                    titleTypographyProps={{ fontSize: 16, fontWeight: 'medium', color: EMPLOYER_THEME.dark }}
-                    subheaderTypographyProps={{ fontSize: 13 }}
-                    sx={{ pb: 0 }}
-                  />
-                  <CardContent sx={{ pt: 1 }}>
-                    <Typography variant="body2" color="text.secondary">
-                      {activity.type === 'application' && 'یک درخواست جدید دریافت کرده‌اید.'}
-                      {activity.type === 'view' && 'آگهی شما بازدید جدید داشته است.'}
-                      {activity.type === 'job' && 'وضعیت آگهی شما تغییر کرده است.'}
-                    </Typography>
-                  </CardContent>
-                  <CardActions sx={{ pt: 0 }}>
-                    <Button 
-                      size="small" 
-                      sx={{ color: EMPLOYER_BLUE }}
-                      onClick={() => activity.type === 'application' ? 
-                        router.push('/employer/applications') : 
-                        router.push('/employer/jobs')}
-                    >
-                      مشاهده جزئیات
-                    </Button>
-                  </CardActions>
-                </Card>
-              </Box>
-            ))
+            <TableContainer>
+              <Table size="medium">
+                <TableHead>
+                  <TableRow>
+                    <TableCell>نام کارجو</TableCell>
+                    <TableCell>عنوان شغلی</TableCell>
+                    <TableCell>وضعیت</TableCell>
+                    <TableCell>تاریخ درخواست</TableCell>
+                    <TableCell>عملیات</TableCell>
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {applications.map((application) => (
+                    <TableRow key={application.id}>
+                      <TableCell>
+                        <Typography variant="body2" fontWeight={500}>
+                          {application.candidate_name}
+                        </Typography>
+                      </TableCell>
+                      <TableCell>{application.job_title}</TableCell>
+                      <TableCell>{getApplicationStatusChip(application.status)}</TableCell>
+                      <TableCell>
+                        {application.applied_at ? format(new Date(application.applied_at), 'yyyy/MM/dd') : '-'}
+                      </TableCell>
+                      <TableCell>
+                        <Tooltip title="مشاهده درخواست">
+                          <IconButton 
+                            size="small" 
+                            component={Link}
+                            href={`/employer/applications/${application.id}`}
+                            color="primary"
+                          >
+                            <FontAwesomeIcon icon={faEye} />
+                          </IconButton>
+                        </Tooltip>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </TableContainer>
           )}
-        </Box>
+        </CardContent>
       </Card>
     </Box>
   );
