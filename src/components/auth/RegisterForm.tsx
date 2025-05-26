@@ -336,12 +336,12 @@ export default function RegisterForm({ onSuccess }: RegisterFormProps) {
 
         // بررسی خالی نبودن شماره تلفن
         if (!formData.phone.trim()) {
-            errors.phone = 'شماره همراه الزامی است';
+            errors.phone = 'شماره تلفن الزامی است';
             isValid = false;
         }
         // بررسی فرمت شماره تلفن (۱۱ رقم و شروع با ۰۹)
         else if (!/^09\d{9}$/.test(formData.phone.trim())) {
-            errors.phone = 'شماره همراه باید ۱۱ رقم و با ۰۹ شروع شود';
+            errors.phone = 'شماره تلفن باید ۱۱ رقم و با ۰۹ شروع شود';
             isValid = false;
         }
 
@@ -653,7 +653,7 @@ export default function RegisterForm({ onSuccess }: RegisterFormProps) {
                         <NumberTextField
                             fullWidth
                             name="phone"
-                            label="شماره همراه"
+                            label="شماره تلفن"
                             variant="outlined"
                             value={formData.phone}
                             onChange={handleChange}

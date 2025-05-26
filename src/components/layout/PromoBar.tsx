@@ -94,6 +94,7 @@ export default function PromoBar() {
 
       <Box
         ref={barRef}
+        data-testid="promo-bar"
         sx={{
           bgcolor: theme.palette.primary.main,
           color: 'white',

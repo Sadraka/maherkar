@@ -30,12 +30,12 @@ export interface TokenResponse {
 
 export interface UserData {
     username: string;
-    email: string;
     phone: string;
     user_type: string;
     full_name?: string;
     last_login?: string;
     user_type_original?: string;
+    company_name?: string;
 }
 
 export interface RegisterValidateResponse {
@@ -573,7 +573,6 @@ const authService = {
                 // بازگرداندن یک اطلاعات کاربر پایه برای جلوگیری از شکست کامل فرآیند ورود
                 return {
                     username: "user",
-                    email: "",
                     phone: "",
                     user_type: "JS", // کاربر پیش‌فرض به عنوان جوینده کار
                     full_name: "کاربر ماهرکار"

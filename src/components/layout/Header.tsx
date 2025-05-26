@@ -9,7 +9,10 @@ import MenuPopover from './MenuPopover';
 export default function Header() {
   return (
     <HeaderProvider>
-      <Box sx={{ position: 'sticky', top: 0, zIndex: (theme) => theme.zIndex.appBar }}>
+      <Box 
+        sx={{ position: 'sticky', top: 0, zIndex: (theme) => theme.zIndex.appBar }}
+        data-testid="main-header"
+      >
         <AppHeaderNew />
         <MenuPopover />
       </Box>

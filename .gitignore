@@ -10,7 +10,7 @@
 !.yarn/plugins
 !.yarn/releases
 !.yarn/versions
-
+.gitignore
 # testing
 /coverage
 backend_api_documentation.md
@@ -25,7 +25,8 @@ backend_api_documentation.md
 # misc
 .DS_Store
 *.pem
-
+/test_api.py
+Employerpanel.md
 /test_user_type.py
 /test_api.py
 /test_api_final.py
