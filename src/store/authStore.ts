@@ -66,29 +66,24 @@ export const useAuthStore = create<AuthState>()(
             // Thunks
             fetchUserData: async () => {
                 // بررسی وضعیت قبل از شروع به کار برای جلوگیری از حلقه‌های بی‌نهایت
-                const state = get();
                 
-                // اگر در حال بارگذاری هستیم یا فراخوانی دیگری در حال اجراست، درخواست جدیدی انجام ندهیم
-                if (state.loading || isUserDataFetchInProgress) {
-                    console.log('[AuthStore] درخواست fetchUserData رد شد - در حال بارگذاری یا فراخوانی دیگری در جریان است');
+                // اگر فراخوانی قبلی هنوز در حال اجراست، از اجرای مجدد خودداری می‌کنیم
+                if (isUserDataFetchInProgress) {
+                    console.log('[AuthStore] فراخوانی قبلی هنوز در حال اجراست، از اجرای مجدد خودداری می‌شود');
                     return;
                 }
                 
-                // اضافه کردن throttling بر اساس زمان آخرین فراخوانی
+                // اگر کمتر از 2 ثانیه از آخرین فراخوانی گذشته باشد، از اجرای مجدد خودداری می‌کنیم
                 const now = Date.now();
                 const lastFetch = (window as any)._lastUserDataFetch || 0;
-                
-                // اگر کمتر از 2 ثانیه از آخرین فراخوانی گذشته، از فراخوانی جدید جلوگیری کنیم
                 if (now - lastFetch < 2000) {
-                    console.log('[AuthStore] فراخوانی fetchUserData مکرر محدود شد');
+                    console.log('[AuthStore] فاصله زمانی تا فراخوانی قبلی کمتر از حد مجاز است، از اجرای مجدد خودداری می‌شود');
                     return;
                 }
                 
-                // ثبت زمان فراخوانی فعلی
-                (window as any)._lastUserDataFetch = now;
-                
-                // علامت‌گذاری شروع فراخوانی
+                // شروع فراخوانی
                 isUserDataFetchInProgress = true;
+                (window as any)._lastUserDataFetch = now;
                 
                 try {
                     set({ loading: true });
@@ -98,7 +93,6 @@ export const useAuthStore = create<AuthState>()(
                     const refreshToken = cookieService.getCookie(COOKIE_NAMES.REFRESH_TOKEN);
                     
                     if (!accessToken && !refreshToken) {
-                        console.log('[AuthStore] توکن‌های دسترسی و بازیابی موجود نیست، کاربر احراز هویت نشده است');
                         set({ user: null, isAuthenticated: false });
                         return;
                     }
@@ -110,21 +104,14 @@ export const useAuthStore = create<AuthState>()(
                     const userData = await authService.getUserData();
                     
                     if (userData) {
-                        console.log('[AuthStore] اطلاعات کاربر دریافت شد:', {
-                            userType: userData.user_type,
-                            isEmployer: userData.user_type === 'employer' || userData.user_type === 'EM'
-                        });
-                        
                         set({ user: userData, isAuthenticated: true });
                     } else {
-                        console.log('[AuthStore] اطلاعات کاربر دریافت نشد، کاربر احراز هویت نشده است');
                         set({ user: null, isAuthenticated: false });
                         
                         // پاک کردن کوکی‌های احتمالی قدیمی
                         authService.logout();
                     }
                 } catch (error) {
-                    console.error('[AuthStore] خطا در دریافت اطلاعات کاربر:', error);
                     set({ user: null, isAuthenticated: false });
                     
                     // در صورت خطا، کوکی‌ها را پاک می‌کنیم
@@ -282,29 +269,25 @@ export const useAuthStore = create<AuthState>()(
             
             refreshUserData: async () => {
                 // بررسی وضعیت قبل از شروع به کار
-                const state = get();
                 
-                // اگر در حال بارگذاری هستیم یا کاربر احراز هویت نشده یا فراخوانی دیگری در حال اجراست، فراخوانی نکنیم
-                if (state.loading || !state.isAuthenticated || isUserDataFetchInProgress) {
-                    console.log('[AuthStore] رد درخواست refreshUserData - loading یا عدم احراز هویت یا فراخوانی دیگری در جریان است');
+                // اگر فراخوانی قبلی هنوز در حال اجراست، از اجرای مجدد خودداری می‌کنیم
+                if (isUserDataFetchInProgress) {
+                    console.log('[AuthStore] فراخوانی قبلی هنوز در حال اجراست، از اجرای مجدد خودداری می‌شود');
                     return;
                 }
                 
-                // استفاده از timestamp برای محدود کردن فراخوانی‌های مکرر
+                // اگر کمتر از 1 ثانیه از آخرین فراخوانی گذشته باشد، از اجرای مجدد خودداری می‌کنیم
+                // برای refreshUserData زمان کمتری در نظر می‌گیریم چون ممکن است به صورت مستقیم فراخوانی شود
                 const now = Date.now();
                 const lastFetch = (window as any)._lastUserDataFetch || 0;
-                
-                // حداقل 5 ثانیه بین درخواست‌ها فاصله باشد
-                if (now - lastFetch < 5000) {
-                    console.log('[AuthStore] فراخوانی refreshUserData محدود شد - زمان کافی از درخواست قبلی نگذشته است');
+                if (now - lastFetch < 1000) {
+                    console.log('[AuthStore] فاصله زمانی تا فراخوانی قبلی کمتر از حد مجاز است، از اجرای مجدد خودداری می‌شود');
                     return;
                 }
                 
-                // ثبت زمان فراخوانی فعلی
-                (window as any)._lastUserDataFetch = now;
-                
-                // علامت‌گذاری شروع فراخوانی
+                // شروع فراخوانی
                 isUserDataFetchInProgress = true;
+                (window as any)._lastUserDataFetch = now;
                 
                 try {
                     set({ loading: true });
@@ -313,7 +296,6 @@ export const useAuthStore = create<AuthState>()(
                     const isValid = await authService.validateAndRefreshTokenIfNeeded();
                     
                     if (!isValid) {
-                        console.log('[AuthStore] توکن نامعتبر است و رفرش ناموفق بود، خروج از سیستم');
                         set({ user: null, isAuthenticated: false });
                         authService.logout();
                         return;
@@ -323,15 +305,12 @@ export const useAuthStore = create<AuthState>()(
                     const userData = await authService.getUserData();
                     
                     if (userData) {
-                        console.log('[AuthStore] اطلاعات کاربر با موفقیت به‌روزرسانی شد');
                         set({ user: userData, isAuthenticated: true });
                     } else {
-                        console.log('[AuthStore] اطلاعات کاربر دریافت نشد، کاربر احراز هویت نشده است');
                         set({ user: null, isAuthenticated: false });
                         authService.logout();
                     }
                 } catch (error) {
-                    console.error('[AuthStore] خطا در به‌روزرسانی اطلاعات کاربر:', error);
                     set({ user: null, isAuthenticated: false });
                     authService.logout();
                 } finally {

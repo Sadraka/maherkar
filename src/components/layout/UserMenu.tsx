@@ -112,13 +112,13 @@ export default function UserMenu({ user: propUser, isLoggedIn: propIsLoggedIn }:
                            document.querySelector('[role="banner"]');
             
             // چاپ اطلاعات برای دیباگ
-            console.log('Header element found:', header);
+            //('Header element found:', header);
             
             if (header) {
                 const headerRect = header.getBoundingClientRect();
                 // استفاده از bottom برای محاسبه کل ارتفاع هدر + PromoBar
                 const totalHeight = headerRect.bottom;
-                console.log('Header total height calculated:', totalHeight);
+                //('Header total height calculated:', totalHeight);
                 setHeaderHeight(totalHeight);
             } else {
                 console.warn('Header element not found, using default height:', 60);
@@ -129,9 +129,9 @@ export default function UserMenu({ user: propUser, isLoggedIn: propIsLoggedIn }:
             const promoBar = document.querySelector('[data-testid="promo-bar"]') || 
                             document.querySelector('.promo-bar');
             if (promoBar) {
-                console.log('PromoBar found:', promoBar);
+                //('PromoBar found:', promoBar);
             } else {
-                console.log('PromoBar not found separately');
+                //('PromoBar not found separately');
             }
         };
 
@@ -204,7 +204,7 @@ export default function UserMenu({ user: propUser, isLoggedIn: propIsLoggedIn }:
                 
                 // حداقل 15 ثانیه بین درخواست‌ها فاصله باشد (کاهش از 5 ثانیه به 15 ثانیه)
                 if (now - lastFetch < 15000) {
-                    console.log('[UserMenu] فراخوانی throttled - درخواست قبلی اخیراً انجام شده است');
+                    //('[UserMenu] فراخوانی throttled - درخواست قبلی اخیراً انجام شده است');
                     setMenuLoading(false);
                     return;
                 }

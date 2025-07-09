@@ -16,7 +16,8 @@ import {
   AccordionSummary, 
   AccordionDetails,
   Alert,
-  CircularProgress
+  CircularProgress,
+  ListSubheader
 } from '@mui/material';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import BusinessIcon from '@mui/icons-material/Business';
@@ -24,16 +25,42 @@ import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
 import { EMPLOYER_THEME } from '@/constants/colors';
 
+/**
+ * تایپ استان برای TypeScript
+ */
+type Province = {
+  id: number;
+  name: string;
+};
+
+/**
+ * تایپ صنعت برای TypeScript
+ */
 type Industry = {
   id: number;
   name: string;
+  category?: {
+    id: number;
+    name: string;
+  };
+  icon?: string;
 };
 
+/**
+ * تایپ شهر برای TypeScript
+ */
 type City = {
   id: number;
   name: string;
+  province?: {
+    id: number;
+    name: string;
+  };
 };
 
+/**
+ * ورودی‌های فرم ثبت شرکت
+ */
 interface CompanyFormInputs {
   name: string;
   location: number;
@@ -61,6 +88,7 @@ export default function CreateCompanyForm() {
   const router = useRouter();
   const [industries, setIndustries] = useState<Industry[]>([]);
   const [cities, setCities] = useState<City[]>([]);
+  const [provinces, setProvinces] = useState<Province[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
@@ -122,12 +150,14 @@ export default function CreateCompanyForm() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [industriesResponse, citiesResponse] = await Promise.all([
-          apiGet('/industry/'),
-          apiGet('/locations/cities/')
+        const [industriesResponse, citiesResponse, provincesResponse] = await Promise.all([
+          apiGet('/industries/industries/'),
+          apiGet('/locations/cities/'),
+          apiGet('/locations/provinces/')
         ]);
         setIndustries(industriesResponse.data as Industry[]);
         setCities(citiesResponse.data as City[]);
+        setProvinces(provincesResponse.data as Province[]);
       } catch (err) {
         console.error('خطا در دریافت اطلاعات:', err);
         setError('خطا در دریافت اطلاعات مورد نیاز. لطفاً دوباره تلاش کنید.');
@@ -135,27 +165,66 @@ export default function CreateCompanyForm() {
     };
 
     fetchData();
+   
   }, []);
+
+  // گروه‌بندی شهرها بر اساس استان
+  const groupedCities = React.useMemo(() => {
+    // اگر شهرها یا استان‌ها دریافت نشده باشند، آرایه خالی برگردان
+    if (!cities.length || !provinces.length) return [];
+
+    // ایجاد یک آرایه از استان‌ها با شهرهای مربوط به هر کدام
+    return provinces.map(province => ({
+      province,
+      cities: cities.filter(city => city.province?.id === province.id)
+    })).filter(group => group.cities.length > 0); // فقط استان‌هایی که شهر دارند
+  }, [cities, provinces]);
 
   const onSubmit: SubmitHandler<CompanyFormInputs> = async (data) => {
     setLoading(true);
     setError(null);
 
+    // بررسی فیلدهای اجباری
+    if (!data.name || !data.name.trim()) {
+      setError('لطفاً نام شرکت را وارد کنید');
+      setLoading(false);
+      return;
+    }
+
+    if (!data.location || data.location === 0) {
+      setError('لطفاً شهر محل فعالیت شرکت را انتخاب کنید');
+      setLoading(false);
+      return;
+    }
+
     try {
       const formDataToSend = new FormData();
       
-      // اضافه کردن فیلدهای متنی به FormData
-      Object.entries(data).forEach(([key, value]) => {
-        if (value !== null && 
-            key !== 'logo' && 
-            key !== 'banner' && 
-            key !== 'intro_video' &&
-            value !== undefined && 
-            value !== '') {
-          formDataToSend.append(key, String(value));
+      // اضافه کردن فقط فیلدهای مورد نیاز به FormData (و نه همه فیلدها)
+      // نام شرکت - اجباری
+      formDataToSend.append('name', data.name);
+      
+      // شهر - اجباری (با همان نام location که سرور انتظار دارد)
+      if (data.location && data.location !== 0) {
+        formDataToSend.append('location', String(data.location));
+      }
+      
+      // صنعت - اختیاری (فقط در صورتی که مقدار معتبر داشته باشد)
+      if (data.industry && data.industry !== 0) {
+        formDataToSend.append('industry', String(data.industry));
+      }
+      
+      // اضافه کردن سایر فیلدهای متنی اختیاری
+      const optionalTextFields = ['description', 'website', 'email', 'phone_number', 'address', 
+                                 'postal_code', 'founded_date', 'number_of_employees',
+                                 'linkedin', 'twitter', 'instagram'];
+                                 
+      optionalTextFields.forEach(field => {
+        if (data[field as keyof CompanyFormInputs] && String(data[field as keyof CompanyFormInputs]).trim() !== '') {
+          formDataToSend.append(field, String(data[field as keyof CompanyFormInputs]));
         }
       });
-
+      
       // اضافه کردن فایل‌ها به FormData
       if (data.logo && data.logo.length > 0) {
         formDataToSend.append('logo', data.logo[0]);
@@ -167,6 +236,12 @@ export default function CreateCompanyForm() {
       
       if (data.intro_video && data.intro_video.length > 0) {
         formDataToSend.append('intro_video', data.intro_video[0]);
+      }
+
+      // چاپ داده‌های ارسالی برای اشکال‌زدایی
+      console.log('داده‌های ارسالی به سرور:');
+      for (let pair of formDataToSend.entries()) {
+        console.log(pair[0] + ': ' + (pair[1] instanceof File ? pair[1].name : pair[1]));
       }
 
       const response = await apiPost('/companies/', formDataToSend, {
@@ -182,7 +257,41 @@ export default function CreateCompanyForm() {
       }, 2000);
     } catch (err: any) {
       console.error('خطا در ثبت شرکت:', err);
-      setError(err.response?.data?.Message || 'خطا در ثبت شرکت. لطفاً دوباره تلاش کنید.');
+      
+      // نمایش دقیق‌تر خطاهای سرور
+      if (err.response?.data) {
+        console.log('جزئیات خطای سرور:', err.response.data);
+        
+        // بررسی ساختار خطا و استخراج پیام مناسب
+        if (typeof err.response.data === 'object') {
+          // استخراج پیام‌های خطا از فیلدهای مختلف
+          const errorMessages = [];
+          
+          for (const [field, message] of Object.entries(err.response.data)) {
+            if (Array.isArray(message)) {
+              errorMessages.push(`${field}: ${message.join(', ')}`);
+            } else if (typeof message === 'string') {
+              errorMessages.push(`${field}: ${message}`);
+            } else if (typeof message === 'object' && message !== null) {
+              errorMessages.push(`${field}: ${JSON.stringify(message)}`);
+            }
+          }
+          
+          if (errorMessages.length > 0) {
+            setError(`خطا در ثبت شرکت: ${errorMessages.join(' | ')}`);
+          } else if (err.response.data.Message) {
+            setError(err.response.data.Message);
+          } else {
+            setError('خطا در ثبت شرکت. لطفاً فیلدها را بررسی کنید.');
+          }
+        } else if (typeof err.response.data === 'string') {
+          setError(`خطا در ثبت شرکت: ${err.response.data}`);
+        } else {
+          setError('خطا در ثبت شرکت. لطفاً دوباره تلاش کنید.');
+        }
+      } else {
+        setError('خطا در ارتباط با سرور. لطفاً دوباره تلاش کنید.');
+      }
     } finally {
       setLoading(false);
     }
@@ -198,21 +307,22 @@ export default function CreateCompanyForm() {
         border: '1px solid #f0f0f0',
         overflow: 'hidden'
       }}
+      dir="rtl"
     >
       <Box sx={{ mb: 4, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         <Box>
-          <Typography variant="h5" component="h1" fontWeight="bold" sx={{ mb: 1, textAlign: 'right' }}>
+          <Typography variant="h5" component="h1" fontWeight="bold" sx={{ mb: 1 }}>
             ثبت شرکت جدید
           </Typography>
-          <Typography variant="body2" color="text.secondary" sx={{ textAlign: 'right' }}>
-            لطفاً اطلاعات ضروری شرکت خود را وارد کنید
+          <Typography variant="body2" color="text.secondary">
+            تنها فیلدهای نام شرکت و شهر اجباری هستند. سایر اطلاعات اختیاری می‌باشند، اما پر کردن آنها به تکمیل پروفایل شرکتی شما کمک می‌کند.
           </Typography>
         </Box>
-        <BusinessIcon sx={{ fontSize: 42, color: EMPLOYER_THEME.primary, ml: 2 }} />
+        <BusinessIcon sx={{ fontSize: 42, color: EMPLOYER_THEME.primary, mr: 2 }} />
       </Box>
 
       {error && (
-        <Alert severity="error" sx={{ mb: 3, textAlign: 'right' }}>
+        <Alert severity="error" sx={{ mb: 3 }}>
           {error}
         </Alert>
       )}
@@ -221,7 +331,7 @@ export default function CreateCompanyForm() {
         <Alert 
           icon={<CheckCircleOutlineIcon fontSize="inherit" />}
           severity="success" 
-          sx={{ mb: 3, textAlign: 'right' }}
+          sx={{ mb: 3 }}
         >
           شرکت با موفقیت ثبت شد. در حال انتقال به صفحه شرکت‌ها...
         </Alert>
@@ -238,17 +348,20 @@ export default function CreateCompanyForm() {
               mb: 3, 
               pb: 1, 
               borderBottom: '1px solid #f0f0f0',
-              color: EMPLOYER_THEME.primary,
-              textAlign: 'right'
+              color: EMPLOYER_THEME.primary
             }}
           >
-            اطلاعات ضروری شرکت
+            اطلاعات ضروری شرکت (اجباری)
+          </Typography>
+
+          <Typography variant="body2" sx={{ mb: 3, color: 'text.secondary' }}>
+            این اطلاعات برای ثبت شرکت الزامی هستند و باید تکمیل شوند.
           </Typography>
 
           <Box sx={{ display: 'flex', flexWrap: 'wrap', mx: -1.5 }}>
             {/* نام شرکت - اجباری */}
             <Box sx={{ px: 1.5, mb: 3, width: { xs: '100%', md: '50%' } }}>
-              <Box sx={{ textAlign: 'right' }}>
+              <Box>
                 <Typography variant="body2" fontWeight="medium" sx={{ mb: 1 }}>
                   نام شرکت <Box component="span" sx={{ color: 'error.main' }}>*</Box>
                 </Typography>
@@ -267,10 +380,8 @@ export default function CreateCompanyForm() {
                       error={Boolean(errors.name)}
                       helperText={errors.name?.message}
                       variant="outlined"
-                      inputProps={{ dir: 'rtl' }}
                       sx={{ 
-                        '& .MuiOutlinedInput-root': { borderRadius: 2 },
-                        textAlign: 'right'
+                        '& .MuiOutlinedInput-root': { borderRadius: 2 }
                       }}
                     />
                   )}
@@ -280,7 +391,7 @@ export default function CreateCompanyForm() {
 
             {/* شهر - اجباری */}
             <Box sx={{ px: 1.5, mb: 3, width: { xs: '100%', md: '50%' } }}>
-              <Box sx={{ textAlign: 'right' }}>
+              <Box>
                 <Typography variant="body2" fontWeight="medium" sx={{ mb: 1 }}>
                   شهر <Box component="span" sx={{ color: 'error.main' }}>*</Box>
                 </Typography>
@@ -298,67 +409,53 @@ export default function CreateCompanyForm() {
                       error={Boolean(errors.location)}
                       helperText={errors.location?.message}
                       variant="outlined"
-                      inputProps={{ dir: 'rtl' }}
                       sx={{ 
-                        '& .MuiOutlinedInput-root': { borderRadius: 2 },
-                        textAlign: 'right'
+                        '& .MuiOutlinedInput-root': { borderRadius: 2 }
+                      }}
+                      SelectProps={{
+                        MenuProps: {
+                          anchorOrigin: {
+                            vertical: 'bottom',
+                            horizontal: 'right'
+                          },
+                          transformOrigin: {
+                            vertical: 'top',
+                            horizontal: 'right'
+                          },
+                          PaperProps: {
+                            style: {
+                              maxHeight: 300
+                            }
+                          }
+                        }
                       }}
                     >
                       <MenuItem value={0}>انتخاب شهر</MenuItem>
-                      {cities.map(city => (
-                        <MenuItem key={city.id} value={city.id}>
-                          {city.name}
-                        </MenuItem>
-                      ))}
+                      {groupedCities.map((group) => [
+                        <ListSubheader key={`province-${group.province.id}`} sx={{ 
+                          backgroundColor: '#f5f5f5', 
+                          fontWeight: 'bold',
+                          color: EMPLOYER_THEME.primary 
+                        }}>
+                          {group.province.name}
+                        </ListSubheader>,
+                        ...group.cities.map(city => (
+                          <MenuItem key={city.id} value={city.id} sx={{ pr: 4 }}>
+                            {city.name}
+                          </MenuItem>
+                        ))
+                      ])}
                     </TextField>
                   )}
                 />
               </Box>
             </Box>
 
-            {/* صنعت */}
-            <Box sx={{ px: 1.5, mb: 3, width: { xs: '100%', md: '50%' } }}>
-              <Box sx={{ textAlign: 'right' }}>
+            {/* لوگوی شرکت - اختیاری */}
+            <Box sx={{ px: 1.5, mb: 3, width: { xs: '100%', md: '100%' } }}>
+              <Box>
                 <Typography variant="body2" fontWeight="medium" sx={{ mb: 1 }}>
-                  صنعت <Box component="span" sx={{ color: 'error.main' }}>*</Box>
-                </Typography>
-                <Controller
-                  name="industry"
-                  control={control}
-                  rules={{ 
-                    validate: value => value !== 0 || 'انتخاب صنعت الزامی است' 
-                  }}
-                  render={({ field }) => (
-                    <TextField
-                      {...field}
-                      fullWidth
-                      select
-                      error={Boolean(errors.industry)}
-                      helperText={errors.industry?.message}
-                      variant="outlined"
-                      inputProps={{ dir: 'rtl' }}
-                      sx={{ 
-                        '& .MuiOutlinedInput-root': { borderRadius: 2 },
-                        textAlign: 'right'
-                      }}
-                    >
-                      <MenuItem value={0}>انتخاب صنعت</MenuItem>
-                      {industries.map(industry => (
-                        <MenuItem key={industry.id} value={industry.id}>
-                          {industry.name}
-                        </MenuItem>
-                      ))}
-                    </TextField>
-                  )}
-                />
-              </Box>
-            </Box>
-
-            {/* لوگوی شرکت - مهم */}
-            <Box sx={{ px: 1.5, mb: 3, width: { xs: '100%', md: '50%' } }}>
-              <Box sx={{ textAlign: 'right' }}>
-                <Typography variant="body2" fontWeight="medium" sx={{ mb: 1 }}>
-                  لوگوی شرکت <Box component="span" sx={{ color: 'error.main' }}>*</Box>
+                  لوگوی شرکت
                 </Typography>
                 <Box
                   sx={{
@@ -378,7 +475,7 @@ export default function CreateCompanyForm() {
                     type="file"
                     id="logo-input"
                     style={{ display: 'none' }}
-                    {...register('logo', { required: 'لوگوی شرکت الزامی است' })}
+                    {...register('logo')}
                     accept="image/*"
                   />
                   
@@ -438,13 +535,16 @@ export default function CreateCompanyForm() {
             </Typography>
           </AccordionSummary>
           <AccordionDetails>
+            <Typography variant="body2" sx={{ mb: 3, color: 'text.secondary' }}>
+              تکمیل این اطلاعات اختیاری است، اما به کارجویان کمک می‌کند تا شناخت بهتری از شرکت شما داشته باشند.
+            </Typography>
             <Box sx={{ display: 'flex', flexWrap: 'wrap', mx: -1.5, mt: 1 }}>
               {/* اطلاعات تماس */}
               <Box sx={{ px: 1.5, mb: 3, width: '100%' }}>
                 <Typography 
                   variant="subtitle1" 
                   fontWeight="medium" 
-                  sx={{ mb: 2, color: 'text.primary', textAlign: 'right' }}
+                  sx={{ mb: 2, color: 'text.primary' }}
                 >
                   اطلاعات تماس
                 </Typography>
@@ -452,7 +552,7 @@ export default function CreateCompanyForm() {
                 <Box sx={{ display: 'flex', flexWrap: 'wrap', mx: -1, mb: 2 }}>
                   {/* ایمیل */}
                   <Box sx={{ px: 1, mb: 2, width: { xs: '100%', md: '50%' } }}>
-                    <Box sx={{ textAlign: 'right' }}>
+                    <Box>
                       <Typography variant="body2" fontWeight="medium" sx={{ mb: 1 }}>
                         ایمیل شرکت
                       </Typography>
@@ -473,10 +573,9 @@ export default function CreateCompanyForm() {
                             error={Boolean(errors.email)}
                             helperText={errors.email?.message}
                             variant="outlined"
-                            inputProps={{ dir: 'ltr' }}
                             sx={{ 
                               '& .MuiOutlinedInput-root': { borderRadius: 2 },
-                              textAlign: 'right'
+                              '& .MuiInputBase-input': { textAlign: 'left', direction: 'ltr' }
                             }}
                           />
                         )}
@@ -486,7 +585,7 @@ export default function CreateCompanyForm() {
 
                   {/* شماره تماس */}
                   <Box sx={{ px: 1, mb: 2, width: { xs: '100%', md: '50%' } }}>
-                    <Box sx={{ textAlign: 'right' }}>
+                    <Box>
                       <Typography variant="body2" fontWeight="medium" sx={{ mb: 1 }}>
                         شماره تماس
                       </Typography>
@@ -507,10 +606,9 @@ export default function CreateCompanyForm() {
                             error={Boolean(errors.phone_number)}
                             helperText={errors.phone_number?.message}
                             variant="outlined"
-                            inputProps={{ dir: 'ltr' }}
                             sx={{ 
                               '& .MuiOutlinedInput-root': { borderRadius: 2 },
-                              textAlign: 'right'
+                              '& .MuiInputBase-input': { textAlign: 'left', direction: 'ltr' }
                             }}
                           />
                         )}
@@ -520,7 +618,7 @@ export default function CreateCompanyForm() {
 
                   {/* وب سایت */}
                   <Box sx={{ px: 1, mb: 2, width: { xs: '100%', md: '50%' } }}>
-                    <Box sx={{ textAlign: 'right' }}>
+                    <Box>
                       <Typography variant="body2" fontWeight="medium" sx={{ mb: 1 }}>
                         وب‌سایت
                       </Typography>
@@ -541,10 +639,9 @@ export default function CreateCompanyForm() {
                             error={Boolean(errors.website)}
                             helperText={errors.website?.message}
                             variant="outlined"
-                            inputProps={{ dir: 'ltr' }}
                             sx={{ 
                               '& .MuiOutlinedInput-root': { borderRadius: 2 },
-                              textAlign: 'right'
+                              '& .MuiInputBase-input': { textAlign: 'left', direction: 'ltr' }
                             }}
                           />
                         )}
@@ -554,7 +651,7 @@ export default function CreateCompanyForm() {
 
                   {/* کد پستی */}
                   <Box sx={{ px: 1, mb: 2, width: { xs: '100%', md: '50%' } }}>
-                    <Box sx={{ textAlign: 'right' }}>
+                    <Box>
                       <Typography variant="body2" fontWeight="medium" sx={{ mb: 1 }}>
                         کد پستی
                       </Typography>
@@ -575,10 +672,9 @@ export default function CreateCompanyForm() {
                             error={Boolean(errors.postal_code)}
                             helperText={errors.postal_code?.message}
                             variant="outlined"
-                            inputProps={{ dir: 'ltr' }}
                             sx={{ 
                               '& .MuiOutlinedInput-root': { borderRadius: 2 },
-                              textAlign: 'right'
+                              '& .MuiInputBase-input': { textAlign: 'left', direction: 'ltr' }
                             }}
                           />
                         )}
@@ -593,15 +689,60 @@ export default function CreateCompanyForm() {
                 <Typography 
                   variant="subtitle1" 
                   fontWeight="medium" 
-                  sx={{ mb: 2, color: 'text.primary', textAlign: 'right' }}
+                  sx={{ mb: 2, color: 'text.primary' }}
                 >
                   اطلاعات شرکت
                 </Typography>
 
                 <Box sx={{ display: 'flex', flexWrap: 'wrap', mx: -1, mb: 2 }}>
+                  {/* صنعت - اختیاری */}
+                  <Box sx={{ px: 1, mb: 2, width: { xs: '100%', md: '50%' } }}>
+                    <Box>
+                      <Typography variant="body2" fontWeight="medium" sx={{ mb: 1 }}>
+                        صنعت
+                      </Typography>
+                      <Controller
+                        name="industry"
+                        control={control}
+                        render={({ field }) => (
+                          <TextField
+                            {...field}
+                            fullWidth
+                            select
+                            error={Boolean(errors.industry)}
+                            helperText={errors.industry?.message}
+                            variant="outlined"
+                            sx={{ 
+                              '& .MuiOutlinedInput-root': { borderRadius: 2 }
+                            }}
+                            SelectProps={{
+                              MenuProps: {
+                                anchorOrigin: {
+                                  vertical: 'bottom',
+                                  horizontal: 'right'
+                                },
+                                transformOrigin: {
+                                  vertical: 'top',
+                                  horizontal: 'right'
+                                }
+                              }
+                            }}
+                          >
+                            <MenuItem value={0}>انتخاب صنعت</MenuItem>
+                            {industries.map(industry => (
+                              <MenuItem key={industry.id} value={industry.id}>
+                                {industry.name}
+                              </MenuItem>
+                            ))}
+                          </TextField>
+                        )}
+                      />
+                    </Box>
+                  </Box>
+
                   {/* تعداد کارمندان */}
                   <Box sx={{ px: 1, mb: 2, width: { xs: '100%', md: '50%' } }}>
-                    <Box sx={{ textAlign: 'right' }}>
+                    <Box>
                       <Typography variant="body2" fontWeight="medium" sx={{ mb: 1 }}>
                         تعداد کارمندان
                       </Typography>
@@ -623,10 +764,10 @@ export default function CreateCompanyForm() {
                             helperText={errors.number_of_employees?.message}
                             variant="outlined"
                             type="number"
-                            inputProps={{ min: 1, dir: 'ltr' }}
+                            inputProps={{ min: 1 }}
                             sx={{ 
                               '& .MuiOutlinedInput-root': { borderRadius: 2 },
-                              textAlign: 'right'
+                              '& .MuiInputBase-input': { textAlign: 'left', direction: 'ltr' }
                             }}
                           />
                         )}
@@ -636,7 +777,7 @@ export default function CreateCompanyForm() {
 
                   {/* تاریخ تاسیس */}
                   <Box sx={{ px: 1, mb: 2, width: { xs: '100%', md: '50%' } }}>
-                    <Box sx={{ textAlign: 'right' }}>
+                    <Box>
                       <Typography variant="body2" fontWeight="medium" sx={{ mb: 1 }}>
                         تاریخ تاسیس
                       </Typography>
@@ -654,7 +795,7 @@ export default function CreateCompanyForm() {
                             InputLabelProps={{ shrink: true }}
                             sx={{ 
                               '& .MuiOutlinedInput-root': { borderRadius: 2 },
-                              textAlign: 'right'
+                              '& .MuiInputBase-input': { textAlign: 'left', direction: 'ltr' }
                             }}
                           />
                         )}
@@ -664,7 +805,7 @@ export default function CreateCompanyForm() {
 
                   {/* آدرس */}
                   <Box sx={{ px: 1, mb: 2, width: '100%' }}>
-                    <Box sx={{ textAlign: 'right' }}>
+                    <Box>
                       <Typography variant="body2" fontWeight="medium" sx={{ mb: 1 }}>
                         آدرس
                       </Typography>
@@ -681,10 +822,8 @@ export default function CreateCompanyForm() {
                             variant="outlined"
                             multiline
                             rows={3}
-                            inputProps={{ dir: 'rtl' }}
                             sx={{ 
-                              '& .MuiOutlinedInput-root': { borderRadius: 2 },
-                              textAlign: 'right'
+                              '& .MuiOutlinedInput-root': { borderRadius: 2 }
                             }}
                           />
                         )}
@@ -694,7 +833,7 @@ export default function CreateCompanyForm() {
 
                   {/* توضیحات */}
                   <Box sx={{ px: 1, mb: 2, width: '100%' }}>
-                    <Box sx={{ textAlign: 'right' }}>
+                    <Box>
                       <Typography variant="body2" fontWeight="medium" sx={{ mb: 1 }}>
                         توضیحات شرکت
                       </Typography>
@@ -711,10 +850,8 @@ export default function CreateCompanyForm() {
                             variant="outlined"
                             multiline
                             rows={5}
-                            inputProps={{ dir: 'rtl' }}
                             sx={{ 
-                              '& .MuiOutlinedInput-root': { borderRadius: 2 },
-                              textAlign: 'right'
+                              '& .MuiOutlinedInput-root': { borderRadius: 2 }
                             }}
                           />
                         )}
@@ -729,7 +866,7 @@ export default function CreateCompanyForm() {
                 <Typography 
                   variant="subtitle1" 
                   fontWeight="medium" 
-                  sx={{ mb: 2, color: 'text.primary', textAlign: 'right' }}
+                  sx={{ mb: 2, color: 'text.primary' }}
                 >
                   شبکه‌های اجتماعی
                 </Typography>
@@ -737,7 +874,7 @@ export default function CreateCompanyForm() {
                 <Box sx={{ display: 'flex', flexWrap: 'wrap', mx: -1, mb: 2 }}>
                   {/* لینکدین */}
                   <Box sx={{ px: 1, mb: 2, width: { xs: '100%', md: '33.33%' } }}>
-                    <Box sx={{ textAlign: 'right' }}>
+                    <Box>
                       <Typography variant="body2" fontWeight="medium" sx={{ mb: 1 }}>
                         لینکدین
                       </Typography>
@@ -752,10 +889,9 @@ export default function CreateCompanyForm() {
                             error={Boolean(errors.linkedin)}
                             helperText={errors.linkedin?.message}
                             variant="outlined"
-                            inputProps={{ dir: 'ltr' }}
                             sx={{ 
                               '& .MuiOutlinedInput-root': { borderRadius: 2 },
-                              textAlign: 'right'
+                              '& .MuiInputBase-input': { textAlign: 'left', direction: 'ltr' }
                             }}
                           />
                         )}
@@ -765,7 +901,7 @@ export default function CreateCompanyForm() {
 
                   {/* توییتر */}
                   <Box sx={{ px: 1, mb: 2, width: { xs: '100%', md: '33.33%' } }}>
-                    <Box sx={{ textAlign: 'right' }}>
+                    <Box>
                       <Typography variant="body2" fontWeight="medium" sx={{ mb: 1 }}>
                         توییتر
                       </Typography>
@@ -780,10 +916,9 @@ export default function CreateCompanyForm() {
                             error={Boolean(errors.twitter)}
                             helperText={errors.twitter?.message}
                             variant="outlined"
-                            inputProps={{ dir: 'ltr' }}
                             sx={{ 
                               '& .MuiOutlinedInput-root': { borderRadius: 2 },
-                              textAlign: 'right'
+                              '& .MuiInputBase-input': { textAlign: 'left', direction: 'ltr' }
                             }}
                           />
                         )}
@@ -793,7 +928,7 @@ export default function CreateCompanyForm() {
 
                   {/* اینستاگرام */}
                   <Box sx={{ px: 1, mb: 2, width: { xs: '100%', md: '33.33%' } }}>
-                    <Box sx={{ textAlign: 'right' }}>
+                    <Box>
                       <Typography variant="body2" fontWeight="medium" sx={{ mb: 1 }}>
                         اینستاگرام
                       </Typography>
@@ -808,10 +943,9 @@ export default function CreateCompanyForm() {
                             error={Boolean(errors.instagram)}
                             helperText={errors.instagram?.message}
                             variant="outlined"
-                            inputProps={{ dir: 'ltr' }}
                             sx={{ 
                               '& .MuiOutlinedInput-root': { borderRadius: 2 },
-                              textAlign: 'right'
+                              '& .MuiInputBase-input': { textAlign: 'left', direction: 'ltr' }
                             }}
                           />
                         )}
@@ -826,7 +960,7 @@ export default function CreateCompanyForm() {
                 <Typography 
                   variant="subtitle1" 
                   fontWeight="medium" 
-                  sx={{ mb: 2, color: 'text.primary', textAlign: 'right' }}
+                  sx={{ mb: 2, color: 'text.primary' }}
                 >
                   تصاویر و رسانه
                 </Typography>
@@ -834,7 +968,7 @@ export default function CreateCompanyForm() {
                 <Box sx={{ display: 'flex', flexWrap: 'wrap', mx: -1, mb: 2 }}>
                   {/* بنر */}
                   <Box sx={{ px: 1, mb: 2, width: { xs: '100%', md: '50%' } }}>
-                    <Box sx={{ textAlign: 'right' }}>
+                    <Box>
                       <Typography variant="body2" fontWeight="medium" sx={{ mb: 1 }}>
                         بنر شرکت
                       </Typography>
@@ -881,7 +1015,7 @@ export default function CreateCompanyForm() {
 
                   {/* ویدیوی معرفی */}
                   <Box sx={{ px: 1, mb: 2, width: { xs: '100%', md: '50%' } }}>
-                    <Box sx={{ textAlign: 'right' }}>
+                    <Box>
                       <Typography variant="body2" fontWeight="medium" sx={{ mb: 1 }}>
                         ویدیوی معرفی
                       </Typography>
@@ -919,7 +1053,7 @@ export default function CreateCompanyForm() {
           </AccordionDetails>
         </Accordion>
 
-        <Box sx={{ textAlign: 'left', mt: 4 }}>
+        <Box sx={{ textAlign: 'right', mt: 4 }}>
           <Button
             type="submit"
             variant="contained"
@@ -936,7 +1070,7 @@ export default function CreateCompanyForm() {
           >
             {loading ? (
               <>
-                <CircularProgress size={20} color="inherit" sx={{ mr: 1 }} />
+                <CircularProgress size={20} color="inherit" sx={{ ml: 1 }} />
                 در حال ثبت...
               </>
             ) : 'ثبت شرکت'}

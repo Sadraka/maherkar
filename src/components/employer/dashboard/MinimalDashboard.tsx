@@ -608,19 +608,38 @@ export default function MinimalDashboard() {
             py: 1.5,
             borderBottom: '1px solid #f0f0f0'
           }}>
-            <Link href="/employer/companies" style={{ textDecoration: 'none' }}>
-              <Box sx={{ 
-                display: 'flex', 
-                alignItems: 'center', 
-                color: EMPLOYER_THEME.primary,
-                '&:hover': {
-                  color: EMPLOYER_THEME.dark
-                }
-              }}>
-                <KeyboardArrowLeftIcon sx={{ fontSize: 18, mt: 0.2, ml: 0.5 }} />
-                <Typography variant="body2" sx={{ fontWeight: 500 }}>همه شرکت‌ها</Typography>
-              </Box>
-            </Link>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+              <Link href="/employer/companies" style={{ textDecoration: 'none' }}>
+                <Box sx={{ 
+                  display: 'flex', 
+                  alignItems: 'center', 
+                  color: EMPLOYER_THEME.primary,
+                  '&:hover': {
+                    color: EMPLOYER_THEME.dark
+                  }
+                }}>
+                  <KeyboardArrowLeftIcon sx={{ fontSize: 18, mt: 0.2, ml: 0.5 }} />
+                  <Typography variant="body2" sx={{ fontWeight: 500 }}>همه شرکت‌ها</Typography>
+                </Box>
+              </Link>
+              <Link href="/employer/companies/create" style={{ textDecoration: 'none' }}>
+                <Button
+                  variant="contained"
+                  size="small"
+                  sx={{
+                    bgcolor: EMPLOYER_THEME.primary,
+                    '&:hover': { bgcolor: EMPLOYER_THEME.dark },
+                    borderRadius: 2,
+                    px: 2,
+                    py: 0.5,
+                    fontWeight: 'medium',
+                    fontSize: '0.75rem'
+                  }}
+                >
+                  ثبت شرکت جدید
+                </Button>
+              </Link>
+            </Box>
             <Box sx={{ display: 'flex', alignItems: 'center' }}>
               <BusinessIcon sx={{ color: EMPLOYER_THEME.primary, ml: 1.5, fontSize: 24 }} />
               <Typography variant="h6" fontWeight="bold" sx={{ fontSize: '1.1rem' }}>

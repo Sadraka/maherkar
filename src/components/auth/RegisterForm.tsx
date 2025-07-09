@@ -434,38 +434,15 @@ export default function RegisterForm({ onSuccess }: RegisterFormProps) {
         e.preventDefault();
         if (!validateUserInfoStep()) return;
 
-        // بررسی اگر تایمر از قبل فعال بود
-        const phoneKey = formData.phone.trim();
-        try {
-            const storedData = localStorage.getItem(`reg_otp_timer_${phoneKey}`);
-            if (storedData) {
-                const { endTime } = JSON.parse(storedData);
-                const now = new Date().getTime();
-                const remainingTime = Math.round((endTime - now) / 1000);
-                
-                if (remainingTime > 0) {
-                    // اگر تایمر فعال است و توکن ذخیره شده وجود دارد، مستقیم به مرحله OTP برو
-                    const otpToken = localStorage.getItem(`reg_otp_token_${phoneKey}`);
-                    if (otpToken) {
-                        setPhoneOtpToken(otpToken);
-                        setResendTimer(remainingTime);
-                        setActiveStep(2);
-                        return;
-                    }
-                } else {
-                    // تایمر منقضی شده، پاکش کن
-                    localStorage.removeItem(`reg_otp_timer_${phoneKey}`);
-                    localStorage.removeItem(`reg_otp_token_${phoneKey}`);
-                }
-            }
-        } catch (error) {
-            console.error('خطا در بررسی تایمر ثبت‌نام:', error);
-        }
-
         setIsSubmitting(true);
 
         try {
-            // ارسال اطلاعات به API برای دریافت OTP
+            // پاک کردن توکن قبلی ثبت شده در localStorage - حتی اگر تایمر هنوز فعال است
+            const phoneKey = formData.phone.trim();
+            localStorage.removeItem(`reg_otp_timer_${phoneKey}`);
+            localStorage.removeItem(`reg_otp_token_${phoneKey}`);
+            
+            // همیشه یک OTP جدید درخواست کن با اطلاعات به‌روز
             const otpToken = await registerOtp({
                 phone: formData.phone,
                 full_name: formData.full_name,
@@ -545,7 +522,8 @@ export default function RegisterForm({ onSuccess }: RegisterFormProps) {
                     onSuccess();
                 } else {
                     setTimeout(() => {
-                        router.push('/change-user-type');
+                        // استفاده از window.location.href به جای router.push برای ریلود کامل صفحه
+                        window.location.href = '/change-user-type';
                     }, 1500);
                 }
                 return;
@@ -553,11 +531,20 @@ export default function RegisterForm({ onSuccess }: RegisterFormProps) {
                 toast.success('ثبت‌نام با موفقیت انجام شد، اکنون می‌توانید از امکانات سایت استفاده کنید');
             }
 
+            // بازیابی اطلاعات کامل کاربر از سرور - همانند فرایند لاگین
+            try {
+                await useAuthStore.getState().fetchUserData();
+                console.log('اطلاعات کاربر با موفقیت پس از ثبت‌نام بازیابی شد');
+            } catch (fetchError) {
+                console.error('خطا در بازیابی اطلاعات کاربر پس از ثبت‌نام:', fetchError);
+            }
+
             // هدایت کاربر به صفحه اصلی یا فراخوانی تابع onSuccess
             if (onSuccess) {
                 onSuccess();
             } else {
-                router.push('/');
+                // استفاده از window.location.href به جای router.push برای ریلود کامل صفحه
+                window.location.href = '/';
             }
         } catch (error: any) {
             console.error('خطا در تایید کد:', error);
@@ -876,7 +863,13 @@ export default function RegisterForm({ onSuccess }: RegisterFormProps) {
                     }}>
                         <Button
                             variant="outlined"
-                            onClick={() => setActiveStep(1)}
+                            onClick={() => {
+                                // پاک کردن توکن OTP قبلی هنگام بازگشت به مرحله قبل
+                                const phoneKey = formData.phone.trim();
+                                localStorage.removeItem(`reg_otp_timer_${phoneKey}`);
+                                localStorage.removeItem(`reg_otp_token_${phoneKey}`);
+                                setActiveStep(1);  // برگشت به مرحله اطلاعات کاربر (مرحله قبلی)
+                            }}
                             disabled={isSubmitting}
                             fullWidth={isMobile}
                             size={isMobile ? "large" : "medium"}

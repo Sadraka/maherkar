@@ -710,7 +710,7 @@ def main():
     base_url = os.environ.get('API_BASE_URL', 'http://localhost:8000')
     
     # Get test phone number from environment or use default
-    test_phone = os.environ.get('TEST_PHONE', '09141242222')
+    test_phone = os.environ.get('TEST_PHONE', '09389489305')
     
     tester = MaherkarAPITester(base_url=base_url)
     tester.run_all_tests(phone_number=test_phone)

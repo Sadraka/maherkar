@@ -4,10 +4,9 @@ import cookieService, { COOKIE_NAMES } from './cookieService';
 // تنظیمات پایه برای axios
 const axiosInstance = axios.create({
     baseURL: process.env.NEXT_PUBLIC_API_URL,
-    timeout: Number(process.env.NEXT_PUBLIC_API_TIMEOUT) || 15000,
     headers: {
         'Content-Type': 'application/json',
-        'Accept': 'application/json',
+        'Accept': 'application/json'
     },
 });
 
@@ -18,6 +17,16 @@ axiosInstance.interceptors.request.use(
         if (accessToken) {
             config.headers.Authorization = `Bearer ${accessToken}`;
         }
+        
+        // اضافه کردن پارامتر timestamp به URL برای جلوگیری از کش شدن درخواست‌ها
+        // این روش با محدودیت‌های CORS تداخل ندارد
+        if (config.method?.toLowerCase() === 'get') {
+            // اطمینان از اینکه params وجود دارد
+            config.params = config.params || {};
+            // اضافه کردن timestamp به پارامترها
+            config.params._t = new Date().getTime();
+        }
+        
         return config;
     },
     (error) => {

@@ -107,6 +107,11 @@ const decodeToken = (token: string): any => {
     }
 };
 
+// متغیر کش برای ذخیره موقت اطلاعات کاربر
+let userDataCache: UserData | null = null;
+let userDataCacheTime: number = 0;
+const CACHE_DURATION = 5 * 60 * 1000; // 5 دقیقه به میلی‌ثانیه
+
 // سرویس احراز هویت
 const authService = {
     // استفاده از تابع رمزگشایی توکن
@@ -147,15 +152,12 @@ const authService = {
     // مرحله اول ثبت‌نام: درخواست کد OTP
     registerOtp: async (userData: RegisterData): Promise<string> => {
         try {
-            // console.log('ارسال درخواست کد تایید با اطلاعات کاربر:', userData);
             const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:8000';
 
             const response = await axios.post<RegisterOtpResponse>(
                 `${BASE_URL}/auth/register-otp/`,
                 userData
             );
-
-            // console.log('پاسخ API برای درخواست کد تایید:', response.data);
 
             // نمایش کد تایید در صورت وجود
             if (response.data.Detail && response.data.Detail.code) {
@@ -225,11 +227,6 @@ const authService = {
     // مرحله دوم ثبت‌نام: تایید کد OTP
     validateOtp: async (token: string, code: string): Promise<RegisterValidateResponse> => {
         try {
-            // console.log('شروع فرآیند تایید OTP:', {
-            //     token: token.substring(0, 10) + '...',
-            //     codeLength: code.length,
-            //     timestamp: new Date().toISOString()
-            // });
             const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:8000';
 
             // تنظیم تایم‌اوت برای درخواست
@@ -237,7 +234,6 @@ const authService = {
                 `${BASE_URL}/auth/register-otp-validate/${token}/`,
                 { code },
                 {
-                    timeout: 10000, // 10 ثانیه تایم‌اوت
                     headers: {
                         'Content-Type': 'application/json',
                         'Accept': 'application/json'
@@ -245,24 +241,11 @@ const authService = {
                 }
             );
 
-            // console.log('پاسخ دریافتی از API پس از تایید کد OTP:', {
-            //     status: response.status,
-            //     hasToken: !!response.data?.Detail?.Token,
-            //     hasUser: !!response.data?.Detail?.User,
-            //     timestamp: new Date().toISOString()
-            // });
-
             // فقط در صورت دریافت پاسخ با وضعیت موفق، توکن‌ها و اطلاعات کاربر را ذخیره کنیم
             if (response.status >= 200 && response.status < 300 && response.data.Detail && response.data.Detail.Token) {
                 const { access, refresh } = response.data.Detail.Token;
 
                 // لاگ کردن وضعیت ذخیره توکن‌ها
-                // console.log('ذخیره توکن‌های دسترسی:', {
-                //     hasAccessToken: !!access,
-                //     hasRefreshToken: !!refresh,
-                //     timestamp: new Date().toISOString()
-                // });
-
                 cookieService.setCookie(COOKIE_NAMES.ACCESS_TOKEN, access, 30);
                 cookieService.setCookie(COOKIE_NAMES.REFRESH_TOKEN, refresh, 30);
 
@@ -275,8 +258,6 @@ const authService = {
                 } else {
                     console.warn('[authService] نوع کاربر در پاسخ سرور یافت نشد');
                 }
-
-                // console.log('ثبت‌نام با موفقیت تکمیل شد و کاربر احراز هویت شد');
             } else {
                 console.error('پاسخ نامعتبر از سرور:', {
                     status: response.status,
@@ -349,7 +330,6 @@ const authService = {
     // تابع بروزرسانی نوع کاربر
     updateUserType: async (user_type: string): Promise<UserData> => {
         try {
-            // console.log(`شروع فرآیند بروزرسانی نوع کاربر به ${user_type}`);
             const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:8000';
 
             const accessToken = cookieService.getCookie(COOKIE_NAMES.ACCESS_TOKEN);
@@ -365,7 +345,7 @@ const authService = {
 
             // ارسال درخواست به API بروزرسانی پروفایل
             const response = await axios.patch<UserData>(
-                `${BASE_URL}/users/user/${jwtData.username}/`,
+                `${BASE_URL}/users/${jwtData.username}/`,
                 { user_type },
                 {
                     headers: {
@@ -376,8 +356,6 @@ const authService = {
             );
 
             if (response.status === 200) {
-                // console.log('نوع کاربر با موفقیت بروزرسانی شد:', response.data);
-
                 // نمایش پیام موفقیت‌آمیز
                 toast.success('نوع کاربری شما با موفقیت تغییر یافت');
 
@@ -410,15 +388,12 @@ const authService = {
     // درخواست OTP برای ورود
     loginOtp: async (phone: string): Promise<string> => {
         try {
-            // console.log('ارسال درخواست OTP برای ورود با شماره:', phone);
             const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:8000';
 
             const response = await axios.post<RegisterOtpResponse>(
                 `${BASE_URL}/auth/login-otp/`,
                 { phone }
             );
-
-            // console.log('پاسخ API برای درخواست OTP ورود:', response.data);
 
             // نمایش کد تایید در صورت وجود
             if (response.data.Detail && response.data.Detail.code) {
@@ -477,31 +452,18 @@ const authService = {
     // تایید OTP برای ورود
     validateLoginOtp: async (token: string, code: string): Promise<UserData> => {
         try {
-            console.log('[authService] شروع فرآیند تایید OTP برای ورود', { 
-                tokenExists: !!token, 
-                codeLength: code?.length 
-            });
-
             const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:8000';
 
-            // تنظیم تایم‌اوت برای درخواست
             const response = await axios.post<TokenResponse | any>(
                 `${BASE_URL}/auth/login-validate-otp/${token}/`,
                 { code },
                 {
-                    timeout: 15000, // 15 ثانیه تایم‌اوت
                     headers: {
                         'Content-Type': 'application/json',
                         'Accept': 'application/json'
                     }
                 }
             );
-
-            console.log('[authService] پاسخ دریافتی از API تایید OTP:', {
-                status: response.status,
-                hasTokenData: !!(response.data?.access || response.data?.Detail?.Token),
-                hasUserData: !!(response.data?.Detail?.User),
-            });
 
             // بررسی ساختار پاسخ سرور
             let accessToken = '';
@@ -521,55 +483,56 @@ const authService = {
                 // اگر اطلاعات کاربر در پاسخ وجود داشته باشد
                 if (response.data.Detail.User) {
                     userData = response.data.Detail.User;
-                    console.log('[authService] اطلاعات کاربر از پاسخ:', {
-                        userType: userData?.user_type || 'نامشخص',
-                        phone: userData?.phone ? userData.phone.substring(0, 4) + '****' : 'نامشخص'
-                    });
                 }
             }
             // اگر هیچ توکنی یافت نشد
             else {
-                console.error('[authService] ساختار پاسخ سرور نامعتبر است:', response.data);
                 throw new Error('ساختار پاسخ سرور نامعتبر است. لطفاً دوباره تلاش کنید.');
             }
 
             // اطمینان از وجود توکن‌ها
             if (!accessToken || !refreshToken) {
-                console.error('[authService] توکن‌ها در پاسخ سرور یافت نشد:', response.data);
                 throw new Error('دریافت توکن با شکست مواجه شد. لطفاً دوباره تلاش کنید.');
             }
 
             // ذخیره توکن‌ها در کوکی با مدت انقضای مناسب
-            cookieService.setCookie(COOKIE_NAMES.ACCESS_TOKEN, accessToken, 1); // اکسس توکن برای 1 روز
+            cookieService.setCookie(COOKIE_NAMES.ACCESS_TOKEN, accessToken, 30); // اکسس توکن برای 30 روز
             cookieService.setCookie(COOKIE_NAMES.REFRESH_TOKEN, refreshToken, 30); // رفرش توکن برای 30 روز
 
             // اگر اطلاعات کاربر در پاسخ وجود داشت، از آن استفاده می‌کنیم
             if (userData) {
                 // بررسی و مپ کردن نوع کاربر
                 if (userData.user_type === 'EM') {
-                    return {
+                    const mappedUserData = {
                         ...userData,
                         user_type_original: userData.user_type,
                         user_type: 'employer'
                     };
+                    
+                    // ذخیره در کش
+                    userDataCache = mappedUserData;
+                    userDataCacheTime = Date.now();
+                    
+                    return mappedUserData;
                 }
+                
+                // ذخیره در کش
+                userDataCache = userData;
+                userDataCacheTime = Date.now();
+                
                 return userData;
             }
 
             // دریافت اطلاعات کاربر با استفاده از توکن
             try {
-                console.log('[authService] تلاش برای دریافت اطلاعات کاربر با تابع getUserData');
                 const userInfo = await authService.getUserData();
                 
                 if (userInfo) {
-                    console.log('[authService] اطلاعات کاربر با موفقیت دریافت شد');
                     return userInfo;
                 } else {
                     throw new Error('دریافت اطلاعات کاربر ناموفق بود');
                 }
             } catch (userError: any) {
-                console.error('[authService] خطا در دریافت اطلاعات کاربر:', userError.message);
-                
                 // بازگرداندن یک اطلاعات کاربر پایه برای جلوگیری از شکست کامل فرآیند ورود
                 return {
                     username: "user",
@@ -579,12 +542,6 @@ const authService = {
                 };
             }
         } catch (error: any) {
-            console.error('[authService] خطا در تایید کد OTP برای ورود:', {
-                error: error.message,
-                response: error.response?.data,
-                status: error.response?.status
-            });
-
             // بررسی خطاهای شبکه
             if (!error.response && (error.code === 'ERR_NETWORK' || error.message?.includes('Network Error') || error.code === 'ECONNABORTED')) {
                 throw new Error(translateNetworkError(error));
@@ -624,7 +581,10 @@ const authService = {
             // پاک کردن تمام کوکی‌های احراز هویت
             cookieService.deleteCookie(COOKIE_NAMES.ACCESS_TOKEN);
             cookieService.deleteCookie(COOKIE_NAMES.REFRESH_TOKEN);
-            // حذف ارجاع به کوکی اطلاعات کاربر که دیگر استفاده نمی‌شود
+            
+            // پاک کردن کش
+            userDataCache = null;
+            userDataCacheTime = 0;
             
             // انتشار رویداد خروج برای به‌روزرسانی وضعیت احراز هویت در برنامه
             if (typeof window !== 'undefined') {
@@ -644,6 +604,12 @@ const authService = {
     // دریافت اطلاعات کاربر
     getUserData: async (): Promise<UserData | null> => {
         try {
+            // بررسی کش - اگر اطلاعات کاربر در کش موجود است و منقضی نشده، آن را برگردان
+            const now = Date.now();
+            if (userDataCache && (now - userDataCacheTime) < CACHE_DURATION) {
+                return userDataCache;
+            }
+
             const accessToken = cookieService.getCookie(COOKIE_NAMES.ACCESS_TOKEN);
             const refreshToken = cookieService.getCookie(COOKIE_NAMES.REFRESH_TOKEN);
 
@@ -651,7 +617,6 @@ const authService = {
                 // اگر توکن دسترسی موجود نیست، ابتدا تلاش می‌کنیم با توکن رفرش، توکن جدید بگیریم
                 if (refreshToken) {
                     try {
-                        console.log('[authService] تلاش برای دریافت توکن جدید با رفرش توکن');
                         const newAccessToken = await authService.refreshAccessToken();
                         
                         if (!newAccessToken) {
@@ -659,25 +624,40 @@ const authService = {
                         }
                         
                         // از توکن جدید استفاده می‌کنیم
-                        return await authService.fetchUserDataFromAPI(newAccessToken);
+                        const userData = await authService.fetchUserDataFromAPI(newAccessToken);
+                        
+                        // ذخیره در کش
+                        if (userData) {
+                            userDataCache = userData;
+                            userDataCacheTime = Date.now();
+                        }
+                        
+                        return userData;
                     } catch (refreshError: any) {
-                        console.error('[authService] خطا در رفرش توکن:', refreshError.message);
                         // اگر رفرش توکن منقضی شده، کوکی‌های مربوطه را حذف می‌کنیم
                         cookieService.deleteCookie(COOKIE_NAMES.ACCESS_TOKEN);
                         cookieService.deleteCookie(COOKIE_NAMES.REFRESH_TOKEN);
-                        // دیگر اطلاعات کاربر را در کوکی ذخیره نمی‌کنیم
+                        // کش را هم پاک می‌کنیم
+                        userDataCache = null;
+                        userDataCacheTime = 0;
                         return null;
                     }
                 } else {
-                    console.error('[authService] توکن دسترسی و رفرش توکن موجود نیست');
                     return null;
                 }
             }
             
             // از توکن موجود استفاده می‌کنیم
-            return await authService.fetchUserDataFromAPI(accessToken);
+            const userData = await authService.fetchUserDataFromAPI(accessToken);
+            
+            // ذخیره در کش
+            if (userData) {
+                userDataCache = userData;
+                userDataCacheTime = Date.now();
+            }
+            
+            return userData;
         } catch (error: any) {
-            console.error('[authService] خطای کلی در دریافت اطلاعات کاربر:', error.message);
             return null;
         }
     },
@@ -687,22 +667,14 @@ const authService = {
         try {
             const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:8000';
             
-            const response = await axios.get(`${BASE_URL}/users/user/`, {
+            const response = await axios.get(`${BASE_URL}/users/`, {
                 headers: {
                     'Authorization': `Bearer ${accessToken}`
-                },
-                timeout: 8000
+                }
             });
             
             if (response.status === 200 && response.data) {
                 const userData = response.data;
-                
-                console.log('[authService] اطلاعات کاربر با موفقیت دریافت شد:', {
-                    userType: userData.user_type,
-                    hasUsername: !!userData.username
-                });
-                
-                // دیگر اطلاعات کاربر را در کوکی ذخیره نمی‌کنیم
                 
                 // بررسی و مپ کردن نوع کاربر
                 if (userData.user_type === 'EM') {
@@ -716,12 +688,8 @@ const authService = {
                 return userData;
             }
             
-            // اگر به اینجا رسیدیم، یعنی پاسخ معتبر نبوده است
-            console.error('[authService] پاسخ نامعتبر از API کاربر');
             return null;
         } catch (error: any) {
-            console.error('[authService] خطا در فراخوانی API کاربر:', error.message);
-            
             // اگر خطای 401 داشتیم، یعنی توکن منقضی شده است
             if (error.response?.status === 401) {
                 // تلاش می‌کنیم با رفرش توکن، توکن جدید بگیریم
@@ -733,7 +701,9 @@ const authService = {
                         return await authService.fetchUserDataFromAPI(newToken);
                     }
                 } catch (refreshError: any) {
-                    console.error('[authService] خطا در رفرش توکن پس از 401:', refreshError.message);
+                    // حذف کش در صورت خطا
+                    userDataCache = null;
+                    userDataCacheTime = 0;
                 }
                 
                 // اگر نتوانستیم توکن را رفرش کنیم، کوکی‌ها را پاک می‌کنیم
@@ -751,11 +721,9 @@ const authService = {
             const refreshToken = cookieService.getCookie(COOKIE_NAMES.REFRESH_TOKEN);
             
             if (!refreshToken) {
-                console.log('[authService] رفرش توکن موجود نیست');
                 return null;
             }
             
-            console.log('[authService] تلاش برای نوسازی توکن دسترسی');
             const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:8000';
             
             // استفاده از مسیر صحیح API برای رفرش توکن
@@ -763,7 +731,6 @@ const authService = {
                 `${BASE_URL}/api/token/refresh/`,
                 { refresh: refreshToken },
                 {
-                    timeout: 8000,
                     headers: {
                         'Content-Type': 'application/json',
                         'Accept': 'application/json'
@@ -774,42 +741,32 @@ const authService = {
             if (response.status === 200 && response.data.access) {
                 const newAccessToken = response.data.access;
                 
-                // ذخیره توکن جدید با تاریخ انقضای کوتاه‌تر (1 روز)
-                cookieService.setCookie(COOKIE_NAMES.ACCESS_TOKEN, newAccessToken, 1);
-                console.log('[authService] توکن دسترسی با موفقیت نوسازی شد');
+                // ذخیره توکن جدید با تاریخ انقضای 30 روز
+                cookieService.setCookie(COOKIE_NAMES.ACCESS_TOKEN, newAccessToken, 30);
                 
                 return newAccessToken;
             }
             
-            console.error('[authService] پاسخ نامعتبر از سرور برای رفرش توکن:', response);
             return null;
         } catch (error: any) {
-            console.error('[authService] خطا در نوسازی توکن دسترسی:', error.message);
-            
             // مدیریت خطاهای HTTP
             if (error.response) {
                 const status = error.response.status;
                 
                 // اگر خطای اعتبارسنجی رخ داده است (401: توکن نامعتبر، 403: دسترسی ممنوع)
                 if (status === 401 || status === 403) {
-                    console.log('[authService] توکن رفرش نامعتبر است، کوکی‌ها را حذف می‌کنیم');
                     cookieService.deleteCookie(COOKIE_NAMES.REFRESH_TOKEN);
                     cookieService.deleteCookie(COOKIE_NAMES.ACCESS_TOKEN);
-                    // حذف ارجاع به کوکی اطلاعات کاربر که دیگر استفاده نمی‌شود
+                    
+                    // پاک کردن کش
+                    userDataCache = null;
+                    userDataCacheTime = 0;
                     
                     // انتشار رویداد خروج برای به‌روزرسانی وضعیت احراز هویت در برنامه
                     if (typeof window !== 'undefined') {
                         window.dispatchEvent(new Event('logout'));
                     }
                 }
-                
-                // خطاهای شبکه و سرور
-                if (status >= 500) {
-                    console.error('[authService] خطای سرور در فرآیند رفرش توکن:', error.response.data);
-                }
-            } else if (error.request) {
-                // خطای شبکه (بدون پاسخ از سرور)
-                console.error('[authService] خطای شبکه در فرآیند رفرش توکن - بدون پاسخ از سرور');
             }
             
             return null;
@@ -823,8 +780,6 @@ const authService = {
             
             // اگر توکن وجود ندارد، نمی‌توانیم ادامه دهیم
             if (!accessToken) {
-                console.log('[authService] توکن دسترسی موجود نیست، تلاش برای رفرش');
-                
                 // تلاش برای رفرش توکن
                 const newToken = await authService.refreshAccessToken();
                 return !!newToken;
@@ -834,7 +789,6 @@ const authService = {
             const decoded = authService.decodeToken(accessToken);
             
             if (!decoded || !decoded.exp) {
-                console.warn('[authService] توکن JWT فاقد زمان انقضا است');
                 return false;
             }
             
@@ -842,18 +796,24 @@ const authService = {
             const expirationTime = decoded.exp * 1000;
             const currentTime = Date.now();
             
-            // اگر کمتر از 5 دقیقه به انقضای توکن مانده، آن را رفرش می‌کنیم
-            if (expirationTime - currentTime < 5 * 60 * 1000) {
-                console.log('[authService] توکن نزدیک به انقضا است، تلاش برای رفرش');
-                
+            // اگر توکن منقضی شده، آن را رفرش می‌کنیم
+            if (expirationTime <= currentTime) {
                 const newToken = await authService.refreshAccessToken();
                 return !!newToken;
+            }
+            
+            // اگر کمتر از 2 ساعت به انقضای توکن مانده، آن را رفرش می‌کنیم
+            if (expirationTime - currentTime < 2 * 60 * 60 * 1000) {
+                // رفرش توکن را در پس‌زمینه انجام می‌دهیم تا باعث تاخیر در UI نشود
+                authService.refreshAccessToken().catch(error => {
+                    // خطا را در کنسول نمایش می‌دهیم اما اجازه می‌دهیم کاربر با توکن فعلی ادامه دهد
+                    console.error('خطا در رفرش توکن در پس‌زمینه:', error);
+                });
             }
             
             // توکن معتبر است
             return true;
         } catch (error: any) {
-            console.error('[authService] خطا در بررسی اعتبار توکن:', error.message);
             return false;
         }
     },
