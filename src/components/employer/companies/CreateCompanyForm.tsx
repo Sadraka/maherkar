@@ -16,13 +16,28 @@ import {
   AccordionSummary, 
   AccordionDetails,
   Alert,
+  AlertTitle,
+  IconButton,
   CircularProgress,
-  ListSubheader
+  ListSubheader,
+  Tooltip,
+  Autocomplete,
+  InputAdornment,
+  Select,
+  FormControl,
+  FormHelperText
 } from '@mui/material';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import BusinessIcon from '@mui/icons-material/Business';
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
+import CloseIcon from '@mui/icons-material/Close';
+import DeleteIcon from '@mui/icons-material/Delete';
+import SearchIcon from '@mui/icons-material/Search';
+import InfoIcon from '@mui/icons-material/Info';
+import DomainAddIcon from '@mui/icons-material/DomainAdd';
+import LocationOnIcon from '@mui/icons-material/LocationOn';
+import ImageIcon from '@mui/icons-material/Image';
 import { EMPLOYER_THEME } from '@/constants/colors';
 
 /**
@@ -63,7 +78,7 @@ type City = {
  */
 interface CompanyFormInputs {
   name: string;
-  location: number;
+  city_id: number;
   description: string;
   website: string;
   email: string;
@@ -81,6 +96,114 @@ interface CompanyFormInputs {
   intro_video: FileList;
 }
 
+// کامپوننت پیش‌نمایش تصویر
+interface ImagePreviewProps {
+  src: string;
+  alt: string;
+  onDelete: () => void;
+  objectFit?: 'contain' | 'cover';
+  aspectRatio?: string;
+}
+
+const ImagePreview: React.FC<ImagePreviewProps> = ({ src, alt, onDelete, objectFit = 'contain', aspectRatio = '1/1' }) => {
+  return (
+    <Box sx={{ position: 'relative', width: '100%', aspectRatio: aspectRatio }}>
+      <Box
+        sx={{
+          position: 'absolute',
+          top: 0,
+          right: 0,
+          left: 0,
+          bottom: 0,
+          borderRadius: 1,
+          overflow: 'hidden'
+        }}
+      >
+        <Image
+          src={src}
+          alt={alt}
+          fill
+          style={{ objectFit }}
+        />
+        <Tooltip title="حذف" arrow>
+          <IconButton
+            onClick={(e) => {
+              e.stopPropagation();
+              onDelete();
+            }}
+            sx={{
+              position: 'absolute',
+              top: 8,
+              right: 8,
+              color: 'white',
+              bgcolor: 'rgba(0,0,0,0.5)',
+              '&:hover': {
+                bgcolor: 'rgba(0,0,0,0.7)'
+              },
+              zIndex: 2
+            }}
+            size="small"
+          >
+            <DeleteIcon fontSize="small" />
+          </IconButton>
+        </Tooltip>
+      </Box>
+    </Box>
+  );
+};
+
+// کامپوننت پیش‌نمایش ویدیو
+interface VideoPreviewProps {
+  src: string;
+  onDelete: () => void;
+}
+
+const VideoPreview: React.FC<VideoPreviewProps> = ({ src, onDelete }) => {
+  return (
+    <Box sx={{ position: 'relative', width: '100%', aspectRatio: '16/9' }}>
+      <Box
+        sx={{
+          position: 'absolute',
+          top: 0,
+          right: 0,
+          left: 0,
+          bottom: 0,
+          borderRadius: 1,
+          overflow: 'hidden'
+        }}
+      >
+        <video
+          src={src}
+          style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+          controls
+        />
+        <Tooltip title="حذف" arrow>
+          <IconButton
+            onClick={(e) => {
+              e.stopPropagation();
+              onDelete();
+            }}
+            sx={{
+              position: 'absolute',
+              top: 8,
+              right: 8,
+              color: 'white',
+              bgcolor: 'rgba(0,0,0,0.5)',
+              '&:hover': {
+                bgcolor: 'rgba(0,0,0,0.7)'
+              },
+              zIndex: 2
+            }}
+            size="small"
+          >
+            <DeleteIcon fontSize="small" />
+          </IconButton>
+        </Tooltip>
+      </Box>
+    </Box>
+  );
+};
+
 /**
  * کامپوننت فرم ثبت شرکت جدید
  */
@@ -90,23 +213,25 @@ export default function CreateCompanyForm() {
   const [cities, setCities] = useState<City[]>([]);
   const [provinces, setProvinces] = useState<Province[]>([]);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [errors, setErrors] = useState<string[]>([]);
   const [success, setSuccess] = useState(false);
   const [logoPreview, setLogoPreview] = useState<string | null>(null);
   const [bannerPreview, setBannerPreview] = useState<string | null>(null);
+  const [videoPreview, setVideoPreview] = useState<string | null>(null);
   const [expandedOptional, setExpandedOptional] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
   
   const { 
     register, 
     handleSubmit, 
     control, 
-    formState: { errors },
+    formState: { errors: formErrors },
     watch,
     setValue
   } = useForm<CompanyFormInputs>({
     defaultValues: {
       name: '',
-      location: 0,
+      city_id: 0,
       industry: 0,
       description: '',
       website: '',
@@ -125,6 +250,51 @@ export default function CreateCompanyForm() {
   // نظارت بر تغییرات فایل‌ها برای نمایش پیش‌نمایش
   const logoFiles = watch('logo');
   const bannerFiles = watch('banner');
+
+  // اعتبارسنجی URL
+  const isValidUrl = (url: string): boolean => {
+    try {
+      new URL(url.startsWith('http') ? url : `https://${url}`);
+      return true;
+    } catch (e) {
+      return false;
+    }
+  };
+
+  // اعتبارسنجی ایمیل
+  const isValidEmail = (email: string): boolean => {
+    return /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i.test(email);
+  };
+
+  // اعتبارسنجی شماره تلفن
+  const isValidPhoneNumber = (phone: string): boolean => {
+    return /^(\+98|0)?[0-9]{10,11}$/.test(phone);
+  };
+
+  // اعتبارسنجی فایل‌ها
+  const validateFile = (file: File, type: 'image' | 'video', maxSizeMB: number): { valid: boolean; error?: string } => {
+    // بررسی اندازه فایل (به مگابایت)
+    const fileSizeMB = file.size / (1024 * 1024);
+    if (fileSizeMB > maxSizeMB) {
+      return { 
+        valid: false, 
+        error: `حجم فایل (${fileSizeMB.toFixed(2)} مگابایت) بیشتر از حد مجاز (${maxSizeMB} مگابایت) است.` 
+      };
+    }
+
+    // بررسی نوع فایل
+    if (type === 'image') {
+      if (!file.type.startsWith('image/')) {
+        return { valid: false, error: 'فایل انتخاب شده باید تصویر باشد.' };
+      }
+    } else if (type === 'video') {
+      if (!file.type.startsWith('video/')) {
+        return { valid: false, error: 'فایل انتخاب شده باید ویدیو باشد.' };
+      }
+    }
+
+    return { valid: true };
+  };
 
   useEffect(() => {
     if (logoFiles && logoFiles.length > 0) {
@@ -146,6 +316,18 @@ export default function CreateCompanyForm() {
     }
   }, [bannerFiles]);
 
+  // اضافه کردن پیش‌نمایش ویدیو
+  const videoFiles = watch('intro_video');
+  useEffect(() => {
+    if (videoFiles && videoFiles.length > 0) {
+      const reader = new FileReader();
+      reader.onload = () => {
+        setVideoPreview(reader.result as string);
+      };
+      reader.readAsDataURL(videoFiles[0]);
+    }
+  }, [videoFiles]);
+
   // لود داده‌های مورد نیاز (صنایع و شهرها)
   useEffect(() => {
     const fetchData = async () => {
@@ -160,7 +342,7 @@ export default function CreateCompanyForm() {
         setProvinces(provincesResponse.data as Province[]);
       } catch (err) {
         console.error('خطا در دریافت اطلاعات:', err);
-        setError('خطا در دریافت اطلاعات مورد نیاز. لطفاً دوباره تلاش کنید.');
+        setErrors(['خطا در دریافت اطلاعات مورد نیاز. لطفاً دوباره تلاش کنید.']);
       }
     };
 
@@ -180,21 +362,91 @@ export default function CreateCompanyForm() {
     })).filter(group => group.cities.length > 0); // فقط استان‌هایی که شهر دارند
   }, [cities, provinces]);
 
+  // تبدیل شهر به آبجکت برای Autocomplete
+  const selectedCity = React.useMemo(() => {
+    const cityId = watch('city_id');
+    return cities.find(city => city.id === cityId) || null;
+  }, [watch('city_id'), cities]);
+
   const onSubmit: SubmitHandler<CompanyFormInputs> = async (data) => {
     setLoading(true);
-    setError(null);
+    setErrors([]);
 
     // بررسی فیلدهای اجباری
     if (!data.name || !data.name.trim()) {
-      setError('لطفاً نام شرکت را وارد کنید');
+      setErrors(['لطفاً نام شرکت را وارد کنید']);
       setLoading(false);
       return;
     }
 
-    if (!data.location || data.location === 0) {
-      setError('لطفاً شهر محل فعالیت شرکت را انتخاب کنید');
+    if (!data.city_id || data.city_id === 0) {
+      setErrors(['لطفاً شهر محل فعالیت شرکت را انتخاب کنید']);
       setLoading(false);
       return;
+    }
+
+    // اعتبارسنجی فایل‌ها
+    if (data.logo && data.logo.length > 0) {
+      const validation = validateFile(data.logo[0], 'image', 2); // حداکثر 2 مگابایت
+      if (!validation.valid) {
+        setErrors([`خطا در لوگو: ${validation.error}`]);
+        setLoading(false);
+        return;
+      }
+    }
+
+    if (data.banner && data.banner.length > 0) {
+      const validation = validateFile(data.banner[0], 'image', 5); // حداکثر 5 مگابایت
+      if (!validation.valid) {
+        setErrors([`خطا در بنر: ${validation.error}`]);
+        setLoading(false);
+        return;
+      }
+    }
+
+    if (data.intro_video && data.intro_video.length > 0) {
+      const validation = validateFile(data.intro_video[0], 'video', 50); // حداکثر 50 مگابایت
+      if (!validation.valid) {
+        setErrors([`خطا در ویدیو: ${validation.error}`]);
+        setLoading(false);
+        return;
+      }
+    }
+
+    // اعتبارسنجی فیلدهای اختیاری در صورت پر شدن
+    if (data.email && !isValidEmail(data.email)) {
+      setErrors(['فرمت ایمیل وارد شده صحیح نیست']);
+      setLoading(false);
+      return;
+    }
+
+    if (data.website && !isValidUrl(data.website)) {
+      setErrors(['آدرس وبسایت وارد شده معتبر نیست']);
+      setLoading(false);
+      return;
+    }
+
+    if (data.phone_number && !isValidPhoneNumber(data.phone_number)) {
+      setErrors(['فرمت شماره تلفن وارد شده صحیح نیست']);
+      setLoading(false);
+      return;
+    }
+
+    if (data.postal_code && !/^[0-9]{10}$/.test(data.postal_code)) {
+      setErrors(['کد پستی باید 10 رقم باشد']);
+      setLoading(false);
+      return;
+    }
+
+    // بررسی فرمت آدرس‌های شبکه‌های اجتماعی
+    const socialMediaFields = ['linkedin', 'twitter', 'instagram'];
+    for (const field of socialMediaFields) {
+      const value = data[field as keyof CompanyFormInputs] as string;
+      if (value && value.trim() !== '' && !isValidUrl(value)) {
+        setErrors([`آدرس ${field} وارد شده معتبر نیست`]);
+        setLoading(false);
+        return;
+      }
     }
 
     try {
@@ -204,9 +456,9 @@ export default function CreateCompanyForm() {
       // نام شرکت - اجباری
       formDataToSend.append('name', data.name);
       
-      // شهر - اجباری (با همان نام location که سرور انتظار دارد)
-      if (data.location && data.location !== 0) {
-        formDataToSend.append('location', String(data.location));
+      // شهر - اجباری (با نام city_id که سرور انتظار دارد)
+      if (data.city_id && data.city_id !== 0) {
+        formDataToSend.append('city_id', String(data.city_id));
       }
       
       // صنعت - اختیاری (فقط در صورتی که مقدار معتبر داشته باشد)
@@ -258,73 +510,223 @@ export default function CreateCompanyForm() {
     } catch (err: any) {
       console.error('خطا در ثبت شرکت:', err);
       
+      const newErrors: string[] = [];
+      
       // نمایش دقیق‌تر خطاهای سرور
       if (err.response?.data) {
         console.log('جزئیات خطای سرور:', err.response.data);
         
         // بررسی ساختار خطا و استخراج پیام مناسب
         if (typeof err.response.data === 'object') {
-          // استخراج پیام‌های خطا از فیلدهای مختلف
-          const errorMessages = [];
+          const errorMessages: Record<string, Record<string, string>> = {
+            'name': {
+              'unique': 'این نام شرکت قبلاً ثبت شده است. لطفاً نام دیگری انتخاب کنید.',
+              'required': 'نام شرکت الزامی است.',
+              'blank': 'نام شرکت نمی‌تواند خالی باشد.',
+              'default': 'مشکلی در ثبت نام شرکت وجود دارد.'
+            },
+            'city_id': {
+              'required': 'انتخاب شهر الزامی است.',
+              'invalid': 'شهر انتخابی معتبر نیست.',
+              'does_not_exist': 'شهر انتخاب شده در سیستم وجود ندارد.',
+              'default': 'مشکلی در انتخاب شهر وجود دارد.'
+            },
+            'logo': {
+              'invalid': 'فرمت لوگو معتبر نیست. لطفاً از فرمت‌های JPG یا PNG استفاده کنید.',
+              'too_large': 'حجم لوگو بیش از حد مجاز است (حداکثر 2 مگابایت).',
+              'default': 'مشکلی در آپلود لوگو وجود دارد.'
+            },
+            'banner': {
+              'invalid': 'فرمت بنر معتبر نیست. لطفاً از فرمت‌های JPG یا PNG استفاده کنید.',
+              'too_large': 'حجم بنر بیش از حد مجاز است (حداکثر 5 مگابایت).',
+              'default': 'مشکلی در آپلود بنر وجود دارد.'
+            },
+            'intro_video': {
+              'invalid': 'فرمت ویدیو معتبر نیست.',
+              'too_large': 'حجم ویدیو بیش از حد مجاز است (حداکثر 50 مگابایت).',
+              'default': 'مشکلی در آپلود ویدیو وجود دارد.'
+            },
+            'email': {
+              'invalid': 'فرمت ایمیل وارد شده صحیح نیست.',
+              'default': 'ایمیل وارد شده معتبر نیست.'
+            },
+            'website': {
+              'invalid': 'آدرس وبسایت معتبر نیست.',
+              'default': 'مشکلی در ثبت وبسایت وجود دارد.'
+            },
+            'phone_number': {
+              'invalid': 'شماره تلفن معتبر نیست.',
+              'default': 'مشکلی در ثبت شماره تلفن وجود دارد.'
+            },
+            'default': {'message': 'خطا در ثبت اطلاعات شرکت. لطفا دوباره تلاش کنید.'}
+          };
           
-          for (const [field, message] of Object.entries(err.response.data)) {
-            if (Array.isArray(message)) {
-              errorMessages.push(`${field}: ${message.join(', ')}`);
-            } else if (typeof message === 'string') {
-              errorMessages.push(`${field}: ${message}`);
-            } else if (typeof message === 'object' && message !== null) {
-              errorMessages.push(`${field}: ${JSON.stringify(message)}`);
+          // بررسی خطاها و نمایش پیام‌های مناسب
+          for (const [field, errors] of Object.entries(err.response.data)) {
+            if (Array.isArray(errors)) {
+              const errorMsg = errors[0]?.toLowerCase() || '';
+              
+              if (field === 'name' && (errorMsg.includes('unique') || errorMsg.includes('already exists'))) {
+                newErrors.push(errorMessages.name.unique);
+              } else if (field === 'city_id' && errorMsg.includes('does not exist')) {
+                newErrors.push(errorMessages.city_id.does_not_exist);
+              } else if (field === 'city_id' && (errorMsg.includes('required') || errorMsg.includes('null'))) {
+                newErrors.push(errorMessages.city_id.required);
+              } else if (errorMessages[field as keyof typeof errorMessages]) {
+                // بررسی نوع خطا برای هر فیلد
+                const fieldErrors = errorMessages[field as keyof typeof errorMessages];
+                let foundSpecificError = false;
+                
+                for (const [errorType, message] of Object.entries(fieldErrors)) {
+                  if (errorType !== 'default' && errorMsg.includes(errorType)) {
+                    newErrors.push(message);
+                    foundSpecificError = true;
+                    break;
+                  }
+                }
+                
+                // اگر خطای خاصی تشخیص داده نشد، پیام پیش‌فرض را نمایش بده
+                if (!foundSpecificError && fieldErrors.default) {
+                  newErrors.push(fieldErrors.default);
+                }
+              } else {
+                // برای سایر خطاها، پیام خام را نمایش بده
+                const fieldName = field === 'non_field_errors' ? '' : `${field}: `;
+                errors.forEach((msg: string) => newErrors.push(`${fieldName}${msg}`));
+              }
             }
           }
-          
-          if (errorMessages.length > 0) {
-            setError(`خطا در ثبت شرکت: ${errorMessages.join(' | ')}`);
-          } else if (err.response.data.Message) {
-            setError(err.response.data.Message);
-          } else {
-            setError('خطا در ثبت شرکت. لطفاً فیلدها را بررسی کنید.');
-          }
-        } else if (typeof err.response.data === 'string') {
-          setError(`خطا در ثبت شرکت: ${err.response.data}`);
-        } else {
-          setError('خطا در ثبت شرکت. لطفاً دوباره تلاش کنید.');
         }
-      } else {
-        setError('خطا در ارتباط با سرور. لطفاً دوباره تلاش کنید.');
+      } else if (err.message) {
+        newErrors.push(`خطا: ${err.message}`);
       }
+      
+      if (newErrors.length === 0) {
+        newErrors.push('خطا در ارتباط با سرور. لطفاً دوباره تلاش کنید.');
+      }
+      
+      setErrors(newErrors);
     } finally {
       setLoading(false);
     }
+  };
+
+  // حذف یک خطا از لیست خطاها
+  const removeError = (index: number) => {
+    setErrors(errors.filter((_, i) => i !== index));
+  };
+
+  // تابع حذف لوگو
+  const handleDeleteLogo = () => {
+    setValue('logo', undefined as any);
+    setLogoPreview(null);
+  };
+
+  // تابع حذف بنر
+  const handleDeleteBanner = () => {
+    setValue('banner', undefined as any);
+    setBannerPreview(null);
+  };
+
+  // تابع حذف ویدیو
+  const handleDeleteVideo = () => {
+    setValue('intro_video', undefined as any);
+    setVideoPreview(null);
   };
 
   return (
     <Paper 
       elevation={0} 
       sx={{ 
-        p: { xs: 3, md: 5 }, 
-        borderRadius: 3,
+        p: { xs: 2, sm: 3, md: 5 }, 
+        borderRadius: { xs: 2, md: 3 },
         boxShadow: '0 3px 10px rgba(0,0,0,0.08)',
         border: '1px solid #f0f0f0',
         overflow: 'hidden'
       }}
       dir="rtl"
     >
-      <Box sx={{ mb: 4, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-        <Box>
-          <Typography variant="h5" component="h1" fontWeight="bold" sx={{ mb: 1 }}>
+      <Box sx={{ 
+        mb: { xs: 3, md: 4 }, 
+        display: 'flex', 
+        flexDirection: 'column',
+        gap: 2
+      }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+          <DomainAddIcon sx={{ 
+            fontSize: { xs: 32, md: 42 }, 
+            color: EMPLOYER_THEME.primary,
+            transform: 'translateY(-2px)'
+          }} />
+          <Typography variant="h5" component="h1" fontWeight="bold" sx={{ 
+            fontSize: { xs: '1.25rem', md: '1.5rem' },
+            color: EMPLOYER_THEME.primary
+          }}>
             ثبت شرکت جدید
           </Typography>
-          <Typography variant="body2" color="text.secondary">
-            تنها فیلدهای نام شرکت و شهر اجباری هستند. سایر اطلاعات اختیاری می‌باشند، اما پر کردن آنها به تکمیل پروفایل شرکتی شما کمک می‌کند.
-          </Typography>
         </Box>
-        <BusinessIcon sx={{ fontSize: 42, color: EMPLOYER_THEME.primary, mr: 2 }} />
+        <Alert 
+          severity="info" 
+          icon={<InfoIcon />}
+          sx={{ 
+            '& .MuiAlert-message': {
+              width: '100%'
+            }
+          }}
+        >
+          <Box>
+            تنها نام شرکت و شهر اجباری هستند. تکمیل سایر اطلاعات به معرفی بهتر شرکت کمک می‌کند.
+          </Box>
+        </Alert>
       </Box>
 
-      {error && (
-        <Alert severity="error" sx={{ mb: 3 }}>
-          {error}
-        </Alert>
+      {errors.length > 0 && (
+        <Box sx={{ mb: 3 }}>
+          <Alert 
+            severity="error" 
+            sx={{ mb: errors.length > 1 ? 2 : 0 }}
+            action={
+              <IconButton
+                aria-label="close"
+                color="inherit"
+                size="small"
+                onClick={() => setErrors([])}
+              >
+                <CloseIcon fontSize="inherit" />
+              </IconButton>
+            }
+          >
+            <AlertTitle>خطا در ثبت شرکت</AlertTitle>
+            {errors.length === 1 ? errors[0] : 'لطفاً موارد زیر را بررسی کنید:'}
+          </Alert>
+          
+          {errors.length > 1 && (
+            <Box component="ul" sx={{ m: 0, pr: 3 }}>
+              {errors.map((error, index) => (
+                <Box 
+                  component="li" 
+                  key={index} 
+                  sx={{ 
+                    mb: 1,
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center'
+                  }}
+                >
+                  <Typography variant="body2">{error}</Typography>
+                  <IconButton
+                    aria-label="حذف خطا"
+                    color="inherit"
+                    size="small"
+                    onClick={() => removeError(index)}
+                  >
+                    <CloseIcon fontSize="inherit" />
+                  </IconButton>
+                </Box>
+              ))}
+            </Box>
+          )}
+        </Box>
       )}
 
       {success && (
@@ -338,7 +740,7 @@ export default function CreateCompanyForm() {
       )}
 
       <form onSubmit={handleSubmit(onSubmit)}>
-        {/* فیلدهای اجباری - براساس مدل بک‌اند */}
+        {/* فیلدهای اجباری */}
         <Box sx={{ mb: 4 }}>
           <Typography 
             variant="h6" 
@@ -355,16 +757,24 @@ export default function CreateCompanyForm() {
           </Typography>
 
           <Typography variant="body2" sx={{ mb: 3, color: 'text.secondary' }}>
-            این اطلاعات برای ثبت شرکت الزامی هستند و باید تکمیل شوند.
+            این بخش‌ها برای ثبت شرکت الزامی هستند و باید تکمیل شوند.
           </Typography>
 
-          <Box sx={{ display: 'flex', flexWrap: 'wrap', mx: -1.5 }}>
-            {/* نام شرکت - اجباری */}
-            <Box sx={{ px: 1.5, mb: 3, width: { xs: '100%', md: '50%' } }}>
-              <Box>
-                <Typography variant="body2" fontWeight="medium" sx={{ mb: 1 }}>
-                  نام شرکت <Box component="span" sx={{ color: 'error.main' }}>*</Box>
-                </Typography>
+          <Box sx={{ 
+            display: 'flex', 
+            flexDirection: { xs: 'column', md: 'row' }, 
+            gap: 3,
+            alignItems: 'flex-start'
+          }}>
+            {/* بخش‌های سمت راست */}
+            <Box sx={{ flex: 1 }}>
+              <Box sx={{ mb: 4 }}>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
+                  <BusinessIcon sx={{ color: EMPLOYER_THEME.primary, fontSize: 20 }} />
+                  <Typography variant="body2" fontWeight="medium">
+                    نام شرکت <Box component="span" sx={{ color: 'error.main' }}>*</Box>
+                  </Typography>
+                </Box>
                 <Controller
                   name="name"
                   control={control}
@@ -377,130 +787,187 @@ export default function CreateCompanyForm() {
                       {...field}
                       fullWidth
                       placeholder="نام شرکت را وارد کنید"
-                      error={Boolean(errors.name)}
-                      helperText={errors.name?.message}
+                      error={Boolean(formErrors.name)}
+                      helperText={formErrors.name?.message}
                       variant="outlined"
                       sx={{ 
-                        '& .MuiOutlinedInput-root': { borderRadius: 2 }
+                        '& .MuiOutlinedInput-root': { 
+                          borderRadius: 2,
+                          '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                            borderColor: EMPLOYER_THEME.primary
+                          }
+                        }
                       }}
                     />
                   )}
                 />
               </Box>
-            </Box>
 
-            {/* شهر - اجباری */}
-            <Box sx={{ px: 1.5, mb: 3, width: { xs: '100%', md: '50%' } }}>
-              <Box>
-                <Typography variant="body2" fontWeight="medium" sx={{ mb: 1 }}>
-                  شهر <Box component="span" sx={{ color: 'error.main' }}>*</Box>
-                </Typography>
+              <Box sx={{ mb: 3 }}>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
+                  <LocationOnIcon sx={{ color: EMPLOYER_THEME.primary, fontSize: 20 }} />
+                  <Typography variant="body2" fontWeight="medium">
+                    شهر <Box component="span" sx={{ color: 'error.main' }}>*</Box>
+                  </Typography>
+                </Box>
                 <Controller
-                  name="location"
+                  name="city_id"
                   control={control}
                   rules={{ 
                     validate: value => value !== 0 || 'انتخاب شهر الزامی است' 
                   }}
-                  render={({ field }) => (
-                    <TextField
-                      {...field}
-                      fullWidth
-                      select
-                      error={Boolean(errors.location)}
-                      helperText={errors.location?.message}
-                      variant="outlined"
-                      sx={{ 
-                        '& .MuiOutlinedInput-root': { borderRadius: 2 }
-                      }}
-                      SelectProps={{
-                        MenuProps: {
-                          anchorOrigin: {
-                            vertical: 'bottom',
-                            horizontal: 'right'
-                          },
-                          transformOrigin: {
-                            vertical: 'top',
-                            horizontal: 'right'
-                          },
-                          PaperProps: {
-                            style: {
-                              maxHeight: 300
-                            }
-                          }
-                        }
-                      }}
-                    >
-                      <MenuItem value={0}>انتخاب شهر</MenuItem>
-                      {groupedCities.map((group) => [
-                        <ListSubheader key={`province-${group.province.id}`} sx={{ 
-                          backgroundColor: '#f5f5f5', 
-                          fontWeight: 'bold',
-                          color: EMPLOYER_THEME.primary 
-                        }}>
-                          {group.province.name}
-                        </ListSubheader>,
-                        ...group.cities.map(city => (
-                          <MenuItem key={city.id} value={city.id} sx={{ pr: 4 }}>
+                  render={({ field: { onChange, value, ref } }) => (
+                    <FormControl fullWidth error={Boolean(formErrors.city_id)}>
+                      <Autocomplete
+                        value={cities.find(city => city.id === value) || null}
+                        onChange={(_, newValue) => onChange(newValue ? newValue.id : 0)}
+                        options={cities}
+                        groupBy={(city) => city.province?.name || ''}
+                        getOptionLabel={(city) => city.name}
+                        filterOptions={(options, state) => {
+                          const inputValue = state.inputValue.trim();
+                          if (!inputValue) return options;
+                          
+                          const normalizedInput = inputValue
+                            .replace(/ي/g, 'ی')
+                            .replace(/ك/g, 'ک');
+                            
+                          return options.filter(city => {
+                            const normalizedCityName = city.name
+                              .replace(/ي/g, 'ی')
+                              .replace(/ك/g, 'ک');
+                              
+                            const normalizedProvinceName = (city.province?.name || '')
+                              .replace(/ي/g, 'ی')
+                              .replace(/ك/g, 'ک');
+                              
+                            return normalizedCityName.includes(normalizedInput) || 
+                                   normalizedProvinceName.includes(normalizedInput);
+                          });
+                        }}
+                        noOptionsText="شهری یافت نشد"
+                        loadingText="در حال جستجو..."
+                        renderOption={(props, city) => (
+                          <Box component="li" {...props} key={city.id} sx={{
+                            py: 1,
+                            '&:hover': { bgcolor: 'rgba(0,0,0,0.04)' }
+                          }}>
                             {city.name}
-                          </MenuItem>
-                        ))
-                      ])}
-                    </TextField>
+                          </Box>
+                        )}
+                        renderGroup={(params) => (
+                          <li key={params.key}>
+                            <ListSubheader
+                              sx={{ 
+                                bgcolor: '#f5f5f5',
+                                fontWeight: 'bold',
+                                color: EMPLOYER_THEME.primary
+                              }}
+                            >
+                              {params.group}
+                            </ListSubheader>
+                            {params.children}
+                          </li>
+                        )}
+                        renderInput={(params) => (
+                          <TextField
+                            {...params}
+                            inputRef={ref}
+                            placeholder="جستجو و انتخاب شهر"
+                            error={Boolean(formErrors.city_id)}
+                            InputProps={{
+                              ...params.InputProps,
+                              startAdornment: (
+                                <InputAdornment position="start">
+                                  <SearchIcon />
+                                </InputAdornment>
+                              )
+                            }}
+                            sx={{
+                              '& .MuiOutlinedInput-root': {
+                                borderRadius: 2,
+                                '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                                  borderColor: EMPLOYER_THEME.primary,
+                                  borderWidth: 2
+                                }
+                              }
+                            }}
+                          />
+                        )}
+                      />
+                      {formErrors.city_id && (
+                        <FormHelperText>{formErrors.city_id.message}</FormHelperText>
+                      )}
+                    </FormControl>
                   )}
                 />
               </Box>
             </Box>
 
-            {/* لوگوی شرکت - اختیاری */}
-            <Box sx={{ px: 1.5, mb: 3, width: { xs: '100%', md: '100%' } }}>
-              <Box>
-                <Typography variant="body2" fontWeight="medium" sx={{ mb: 1 }}>
+            {/* لوگو - سمت چپ */}
+            <Box sx={{ width: { xs: '100%', sm: '250px', md: 250 }, maxWidth: { xs: '250px', sm: '100%' }, mx: { xs: 'auto', md: 0 } }}>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
+                <ImageIcon sx={{ color: EMPLOYER_THEME.primary, fontSize: 20 }} />
+                <Typography variant="body2" fontWeight="medium">
                   لوگوی شرکت
                 </Typography>
-                <Box
-                  sx={{
-                    border: '1px dashed',
-                    borderColor: errors.logo ? 'error.main' : 'divider',
-                    borderRadius: 2,
-                    p: 2,
-                    textAlign: 'center',
-                    bgcolor: 'background.paper',
-                    position: 'relative',
-                    overflow: 'hidden',
-                    cursor: 'pointer'
-                  }}
-                  onClick={() => document.getElementById('logo-input')?.click()}
-                >
-                  <input
-                    type="file"
-                    id="logo-input"
-                    style={{ display: 'none' }}
-                    {...register('logo')}
-                    accept="image/*"
+              </Box>
+              <Box
+                sx={{
+                  border: '1px dashed',
+                  borderColor: formErrors.logo ? 'error.main' : 'divider',
+                  borderRadius: 2,
+                  p: 2,
+                  textAlign: 'center',
+                  bgcolor: 'background.paper',
+                  position: 'relative',
+                  overflow: 'hidden',
+                  cursor: 'pointer',
+                  aspectRatio: '1/1',
+                  width: '100%',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  transition: 'all 0.2s ease',
+                  '&:hover': {
+                    borderColor: EMPLOYER_THEME.primary,
+                    bgcolor: 'rgba(0,0,0,0.01)'
+                  }
+                }}
+                onClick={() => document.getElementById('logo-input')?.click()}
+              >
+                <input
+                  type="file"
+                  id="logo-input"
+                  style={{ display: 'none' }}
+                  {...register('logo')}
+                  accept="image/*"
+                />
+                
+                {logoPreview ? (
+                  <ImagePreview
+                    src={logoPreview}
+                    alt="پیش‌نمایش لوگو"
+                    onDelete={handleDeleteLogo}
+                    objectFit="contain"
+                    aspectRatio="1/1"
                   />
-                  
-                  {logoPreview ? (
-                    <Box sx={{ position: 'relative', width: '100%', height: 120 }}>
-                      <Image
-                        src={logoPreview}
-                        alt="پیش‌نمایش لوگو"
-                        fill
-                        style={{ objectFit: 'contain' }}
-                      />
-                    </Box>
-                  ) : (
-                    <>
-                      <CloudUploadIcon sx={{ fontSize: 40, color: 'primary.main', mb: 1 }} />
-                      <Typography>برای آپلود لوگو کلیک کنید</Typography>
-                    </>
-                  )}
-                </Box>
-                {errors.logo && (
-                  <Typography variant="caption" color="error.main" sx={{ mt: 1, display: 'block' }}>
-                    {errors.logo.message}
-                  </Typography>
+                ) : (
+                  <Box sx={{ textAlign: 'center' }}>
+                    <CloudUploadIcon sx={{ fontSize: 40, color: EMPLOYER_THEME.primary, mb: 1 }} />
+                    <Typography>برای آپلود لوگو کلیک کنید</Typography>
+                    <Typography variant="caption" color="text.secondary" sx={{ mt: 1, display: 'block' }}>
+                      فرمت‌های مجاز: JPG، PNG - حداکثر حجم: ۲ مگابایت
+                    </Typography>
+                  </Box>
                 )}
               </Box>
+              {formErrors.logo && (
+                <Typography variant="caption" color="error.main" sx={{ mt: 1, display: 'block' }}>
+                  {formErrors.logo.message}
+                </Typography>
+              )}
             </Box>
           </Box>
         </Box>
@@ -538,9 +1005,9 @@ export default function CreateCompanyForm() {
             <Typography variant="body2" sx={{ mb: 3, color: 'text.secondary' }}>
               تکمیل این اطلاعات اختیاری است، اما به کارجویان کمک می‌کند تا شناخت بهتری از شرکت شما داشته باشند.
             </Typography>
-            <Box sx={{ display: 'flex', flexWrap: 'wrap', mx: -1.5, mt: 1 }}>
+            <Box sx={{ display: 'flex', flexWrap: 'wrap', mx: { xs: 0, md: -1 }, mt: 1 }}>
               {/* اطلاعات تماس */}
-              <Box sx={{ px: 1.5, mb: 3, width: '100%' }}>
+              <Box sx={{ px: { xs: 0, md: 1.5 }, mb: 3, width: '100%' }}>
                 <Typography 
                   variant="subtitle1" 
                   fontWeight="medium" 
@@ -548,10 +1015,13 @@ export default function CreateCompanyForm() {
                 >
                   اطلاعات تماس
                 </Typography>
+                <Typography variant="body2" sx={{ mb: 3, color: 'text.secondary' }}>
+                  این بخش‌ها برای تسهیل ارتباط با شرکت شما استفاده می‌شوند.
+                </Typography>
 
-                <Box sx={{ display: 'flex', flexWrap: 'wrap', mx: -1, mb: 2 }}>
+                <Box sx={{ display: 'flex', flexWrap: 'wrap', mx: { xs: 0, md: -1 }, mb: 2 }}>
                   {/* ایمیل */}
-                  <Box sx={{ px: 1, mb: 2, width: { xs: '100%', md: '50%' } }}>
+                  <Box sx={{ px: { xs: 0, md: 1 }, mb: 2, width: { xs: '100%', md: '50%' } }}>
                     <Box>
                       <Typography variant="body2" fontWeight="medium" sx={{ mb: 1 }}>
                         ایمیل شرکت
@@ -569,9 +1039,9 @@ export default function CreateCompanyForm() {
                           <TextField
                             {...field}
                             fullWidth
-                            placeholder="example@domain.com"
-                            error={Boolean(errors.email)}
-                            helperText={errors.email?.message}
+                            placeholder="نمونه: example@domain.com"
+                            error={Boolean(formErrors.email)}
+                            helperText={formErrors.email?.message}
                             variant="outlined"
                             sx={{ 
                               '& .MuiOutlinedInput-root': { borderRadius: 2 },
@@ -584,7 +1054,7 @@ export default function CreateCompanyForm() {
                   </Box>
 
                   {/* شماره تماس */}
-                  <Box sx={{ px: 1, mb: 2, width: { xs: '100%', md: '50%' } }}>
+                  <Box sx={{ px: { xs: 0, md: 1 }, mb: 2, width: { xs: '100%', md: '50%' } }}>
                     <Box>
                       <Typography variant="body2" fontWeight="medium" sx={{ mb: 1 }}>
                         شماره تماس
@@ -602,9 +1072,9 @@ export default function CreateCompanyForm() {
                           <TextField
                             {...field}
                             fullWidth
-                            placeholder="02112345678"
-                            error={Boolean(errors.phone_number)}
-                            helperText={errors.phone_number?.message}
+                            placeholder="نمونه: ۰۲۱۱۲۳۴۵۶۷۸"
+                            error={Boolean(formErrors.phone_number)}
+                            helperText={formErrors.phone_number?.message}
                             variant="outlined"
                             sx={{ 
                               '& .MuiOutlinedInput-root': { borderRadius: 2 },
@@ -617,7 +1087,7 @@ export default function CreateCompanyForm() {
                   </Box>
 
                   {/* وب سایت */}
-                  <Box sx={{ px: 1, mb: 2, width: { xs: '100%', md: '50%' } }}>
+                  <Box sx={{ px: { xs: 0, md: 1 }, mb: 2, width: { xs: '100%', md: '50%' } }}>
                     <Box>
                       <Typography variant="body2" fontWeight="medium" sx={{ mb: 1 }}>
                         وب‌سایت
@@ -635,9 +1105,9 @@ export default function CreateCompanyForm() {
                           <TextField
                             {...field}
                             fullWidth
-                            placeholder="https://example.com"
-                            error={Boolean(errors.website)}
-                            helperText={errors.website?.message}
+                            placeholder="نمونه: www.example.com"
+                            error={Boolean(formErrors.website)}
+                            helperText={formErrors.website?.message}
                             variant="outlined"
                             sx={{ 
                               '& .MuiOutlinedInput-root': { borderRadius: 2 },
@@ -650,7 +1120,7 @@ export default function CreateCompanyForm() {
                   </Box>
 
                   {/* کد پستی */}
-                  <Box sx={{ px: 1, mb: 2, width: { xs: '100%', md: '50%' } }}>
+                  <Box sx={{ px: { xs: 0, md: 1 }, mb: 2, width: { xs: '100%', md: '50%' } }}>
                     <Box>
                       <Typography variant="body2" fontWeight="medium" sx={{ mb: 1 }}>
                         کد پستی
@@ -669,8 +1139,8 @@ export default function CreateCompanyForm() {
                             {...field}
                             fullWidth
                             placeholder="کد پستی 10 رقمی"
-                            error={Boolean(errors.postal_code)}
-                            helperText={errors.postal_code?.message}
+                            error={Boolean(formErrors.postal_code)}
+                            helperText={formErrors.postal_code?.message}
                             variant="outlined"
                             sx={{ 
                               '& .MuiOutlinedInput-root': { borderRadius: 2 },
@@ -685,7 +1155,7 @@ export default function CreateCompanyForm() {
               </Box>
 
               {/* اطلاعات شرکت */}
-              <Box sx={{ px: 1.5, mb: 3, width: '100%' }}>
+              <Box sx={{ px: { xs: 0, md: 1.5 }, mb: 3, width: '100%' }}>
                 <Typography 
                   variant="subtitle1" 
                   fontWeight="medium" 
@@ -693,10 +1163,13 @@ export default function CreateCompanyForm() {
                 >
                   اطلاعات شرکت
                 </Typography>
+                <Typography variant="body2" sx={{ mb: 3, color: 'text.secondary' }}>
+                  این بخش‌ها برای معرفی بهتر شرکت شما به کارجویان استفاده می‌شوند.
+                </Typography>
 
-                <Box sx={{ display: 'flex', flexWrap: 'wrap', mx: -1, mb: 2 }}>
+                <Box sx={{ display: 'flex', flexWrap: 'wrap', mx: { xs: 0, md: -1 }, mb: 2 }}>
                   {/* صنعت - اختیاری */}
-                  <Box sx={{ px: 1, mb: 2, width: { xs: '100%', md: '50%' } }}>
+                  <Box sx={{ px: { xs: 0, md: 1 }, mb: 2, width: { xs: '100%', md: '50%' } }}>
                     <Box>
                       <Typography variant="body2" fontWeight="medium" sx={{ mb: 1 }}>
                         صنعت
@@ -709,8 +1182,8 @@ export default function CreateCompanyForm() {
                             {...field}
                             fullWidth
                             select
-                            error={Boolean(errors.industry)}
-                            helperText={errors.industry?.message}
+                            error={Boolean(formErrors.industry)}
+                            helperText={formErrors.industry?.message}
                             variant="outlined"
                             sx={{ 
                               '& .MuiOutlinedInput-root': { borderRadius: 2 }
@@ -741,7 +1214,7 @@ export default function CreateCompanyForm() {
                   </Box>
 
                   {/* تعداد کارمندان */}
-                  <Box sx={{ px: 1, mb: 2, width: { xs: '100%', md: '50%' } }}>
+                  <Box sx={{ px: { xs: 0, md: 1 }, mb: 2, width: { xs: '100%', md: '50%' } }}>
                     <Box>
                       <Typography variant="body2" fontWeight="medium" sx={{ mb: 1 }}>
                         تعداد کارمندان
@@ -759,9 +1232,9 @@ export default function CreateCompanyForm() {
                           <TextField
                             {...field}
                             fullWidth
-                            placeholder="مثال: 12"
-                            error={Boolean(errors.number_of_employees)}
-                            helperText={errors.number_of_employees?.message}
+                            placeholder="نمونه: 12"
+                            error={Boolean(formErrors.number_of_employees)}
+                            helperText={formErrors.number_of_employees?.message}
                             variant="outlined"
                             type="number"
                             inputProps={{ min: 1 }}
@@ -776,7 +1249,7 @@ export default function CreateCompanyForm() {
                   </Box>
 
                   {/* تاریخ تاسیس */}
-                  <Box sx={{ px: 1, mb: 2, width: { xs: '100%', md: '50%' } }}>
+                  <Box sx={{ px: { xs: 0, md: 1 }, mb: 2, width: { xs: '100%', md: '50%' } }}>
                     <Box>
                       <Typography variant="body2" fontWeight="medium" sx={{ mb: 1 }}>
                         تاریخ تاسیس
@@ -789,8 +1262,8 @@ export default function CreateCompanyForm() {
                             {...field}
                             fullWidth
                             type="date"
-                            error={Boolean(errors.founded_date)}
-                            helperText={errors.founded_date?.message}
+                            error={Boolean(formErrors.founded_date)}
+                            helperText={formErrors.founded_date?.message}
                             variant="outlined"
                             InputLabelProps={{ shrink: true }}
                             sx={{ 
@@ -804,7 +1277,7 @@ export default function CreateCompanyForm() {
                   </Box>
 
                   {/* آدرس */}
-                  <Box sx={{ px: 1, mb: 2, width: '100%' }}>
+                  <Box sx={{ px: { xs: 0, md: 1 }, mb: 2, width: '100%' }}>
                     <Box>
                       <Typography variant="body2" fontWeight="medium" sx={{ mb: 1 }}>
                         آدرس
@@ -816,9 +1289,9 @@ export default function CreateCompanyForm() {
                           <TextField
                             {...field}
                             fullWidth
-                            placeholder="آدرس دقیق شرکت"
-                            error={Boolean(errors.address)}
-                            helperText={errors.address?.message}
+                            placeholder="نشانی دقیق شرکت"
+                            error={Boolean(formErrors.address)}
+                            helperText={formErrors.address?.message}
                             variant="outlined"
                             multiline
                             rows={3}
@@ -832,7 +1305,7 @@ export default function CreateCompanyForm() {
                   </Box>
 
                   {/* توضیحات */}
-                  <Box sx={{ px: 1, mb: 2, width: '100%' }}>
+                  <Box sx={{ px: { xs: 0, md: 1 }, mb: 2, width: '100%' }}>
                     <Box>
                       <Typography variant="body2" fontWeight="medium" sx={{ mb: 1 }}>
                         توضیحات شرکت
@@ -845,8 +1318,8 @@ export default function CreateCompanyForm() {
                             {...field}
                             fullWidth
                             placeholder="توضیحاتی درباره شرکت، فعالیت‌ها و خدمات آن"
-                            error={Boolean(errors.description)}
-                            helperText={errors.description?.message}
+                            error={Boolean(formErrors.description)}
+                            helperText={formErrors.description?.message}
                             variant="outlined"
                             multiline
                             rows={5}
@@ -862,7 +1335,7 @@ export default function CreateCompanyForm() {
               </Box>
 
               {/* شبکه‌های اجتماعی */}
-              <Box sx={{ px: 1.5, mb: 3, width: '100%' }}>
+              <Box sx={{ px: { xs: 0, md: 1.5 }, mb: 3, width: '100%' }}>
                 <Typography 
                   variant="subtitle1" 
                   fontWeight="medium" 
@@ -870,10 +1343,13 @@ export default function CreateCompanyForm() {
                 >
                   شبکه‌های اجتماعی
                 </Typography>
+                <Typography variant="body2" sx={{ mb: 3, color: 'text.secondary' }}>
+                  این بخش‌ها برای نمایش حضور شرکت شما در شبکه‌های اجتماعی استفاده می‌شوند.
+                </Typography>
 
-                <Box sx={{ display: 'flex', flexWrap: 'wrap', mx: -1, mb: 2 }}>
+                <Box sx={{ display: 'flex', flexWrap: 'wrap', mx: { xs: 0, md: -1 }, mb: 2 }}>
                   {/* لینکدین */}
-                  <Box sx={{ px: 1, mb: 2, width: { xs: '100%', md: '33.33%' } }}>
+                  <Box sx={{ px: { xs: 0, md: 1 }, mb: 2, width: { xs: '100%', md: '33.33%' } }}>
                     <Box>
                       <Typography variant="body2" fontWeight="medium" sx={{ mb: 1 }}>
                         لینکدین
@@ -885,9 +1361,9 @@ export default function CreateCompanyForm() {
                           <TextField
                             {...field}
                             fullWidth
-                            placeholder="آدرس لینکدین"
-                            error={Boolean(errors.linkedin)}
-                            helperText={errors.linkedin?.message}
+                            placeholder="نشانی لینکدین"
+                            error={Boolean(formErrors.linkedin)}
+                            helperText={formErrors.linkedin?.message}
                             variant="outlined"
                             sx={{ 
                               '& .MuiOutlinedInput-root': { borderRadius: 2 },
@@ -900,7 +1376,7 @@ export default function CreateCompanyForm() {
                   </Box>
 
                   {/* توییتر */}
-                  <Box sx={{ px: 1, mb: 2, width: { xs: '100%', md: '33.33%' } }}>
+                  <Box sx={{ px: { xs: 0, md: 1 }, mb: 2, width: { xs: '100%', md: '33.33%' } }}>
                     <Box>
                       <Typography variant="body2" fontWeight="medium" sx={{ mb: 1 }}>
                         توییتر
@@ -912,9 +1388,9 @@ export default function CreateCompanyForm() {
                           <TextField
                             {...field}
                             fullWidth
-                            placeholder="آدرس توییتر"
-                            error={Boolean(errors.twitter)}
-                            helperText={errors.twitter?.message}
+                            placeholder="نشانی توییتر"
+                            error={Boolean(formErrors.twitter)}
+                            helperText={formErrors.twitter?.message}
                             variant="outlined"
                             sx={{ 
                               '& .MuiOutlinedInput-root': { borderRadius: 2 },
@@ -927,7 +1403,7 @@ export default function CreateCompanyForm() {
                   </Box>
 
                   {/* اینستاگرام */}
-                  <Box sx={{ px: 1, mb: 2, width: { xs: '100%', md: '33.33%' } }}>
+                  <Box sx={{ px: { xs: 0, md: 1 }, mb: 2, width: { xs: '100%', md: '33.33%' } }}>
                     <Box>
                       <Typography variant="body2" fontWeight="medium" sx={{ mb: 1 }}>
                         اینستاگرام
@@ -939,9 +1415,9 @@ export default function CreateCompanyForm() {
                           <TextField
                             {...field}
                             fullWidth
-                            placeholder="آدرس اینستاگرام"
-                            error={Boolean(errors.instagram)}
-                            helperText={errors.instagram?.message}
+                            placeholder="نشانی اینستاگرام"
+                            error={Boolean(formErrors.instagram)}
+                            helperText={formErrors.instagram?.message}
                             variant="outlined"
                             sx={{ 
                               '& .MuiOutlinedInput-root': { borderRadius: 2 },
@@ -956,7 +1432,7 @@ export default function CreateCompanyForm() {
               </Box>
 
               {/* تصاویر و رسانه */}
-              <Box sx={{ px: 1.5, mb: 3, width: '100%' }}>
+              <Box sx={{ px: { xs: 0, md: 1.5 }, mb: 3, width: '100%' }}>
                 <Typography 
                   variant="subtitle1" 
                   fontWeight="medium" 
@@ -964,88 +1440,141 @@ export default function CreateCompanyForm() {
                 >
                   تصاویر و رسانه
                 </Typography>
+                <Typography variant="body2" sx={{ mb: 3, color: 'text.secondary' }}>
+                  این بخش‌ها برای نمایش بهتر هویت بصری شرکت شما استفاده می‌شوند.
+                </Typography>
 
-                <Box sx={{ display: 'flex', flexWrap: 'wrap', mx: -1, mb: 2 }}>
+                <Box sx={{ 
+                  display: 'flex', 
+                  flexDirection: { xs: 'column', md: 'row' }, 
+                  gap: { xs: 2, md: 3 }
+                }}>
                   {/* بنر */}
-                  <Box sx={{ px: 1, mb: 2, width: { xs: '100%', md: '50%' } }}>
-                    <Box>
-                      <Typography variant="body2" fontWeight="medium" sx={{ mb: 1 }}>
-                        بنر شرکت
-                      </Typography>
-                      <Box
-                        sx={{
-                          border: '1px dashed',
-                          borderColor: 'divider',
-                          borderRadius: 2,
-                          p: 2,
-                          textAlign: 'center',
-                          bgcolor: 'background.paper',
-                          position: 'relative',
-                          overflow: 'hidden',
-                          cursor: 'pointer'
-                        }}
-                        onClick={() => document.getElementById('banner-input')?.click()}
-                      >
-                        <input
-                          type="file"
-                          id="banner-input"
-                          style={{ display: 'none' }}
-                          {...register('banner')}
-                          accept="image/*"
+                  <Box sx={{ 
+                    flex: 1,
+                    width: { xs: '100%', md: 'auto' }
+                  }}>
+                    <Typography variant="body2" fontWeight="medium" sx={{ mb: 1 }}>
+                      بنر شرکت
+                    </Typography>
+                    <Box
+                      sx={{
+                        border: '1px dashed',
+                        borderColor: formErrors.banner ? 'error.main' : 'divider',
+                        borderRadius: 2,
+                        p: 2,
+                        textAlign: 'center',
+                        bgcolor: 'background.paper',
+                        position: 'relative',
+                        overflow: 'hidden',
+                        cursor: 'pointer',
+                        aspectRatio: '16/9',
+                        width: '100%',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        transition: 'all 0.2s ease',
+                        '&:hover': {
+                          borderColor: EMPLOYER_THEME.primary,
+                          bgcolor: 'rgba(0,0,0,0.01)'
+                        }
+                      }}
+                      onClick={() => document.getElementById('banner-input')?.click()}
+                    >
+                      <input
+                        type="file"
+                        id="banner-input"
+                        style={{ display: 'none' }}
+                        {...register('banner')}
+                        accept="image/*"
+                      />
+                      
+                      {bannerPreview ? (
+                        <ImagePreview
+                          src={bannerPreview}
+                          alt="پیش‌نمایش بنر"
+                          onDelete={handleDeleteBanner}
+                          objectFit="cover"
+                          aspectRatio="16/9"
                         />
-                        
-                        {bannerPreview ? (
-                          <Box sx={{ position: 'relative', width: '100%', height: 120 }}>
-                            <Image
-                              src={bannerPreview}
-                              alt="پیش‌نمایش بنر"
-                              fill
-                              style={{ objectFit: 'cover' }}
-                            />
-                          </Box>
-                        ) : (
-                          <>
-                            <CloudUploadIcon sx={{ fontSize: 40, color: 'primary.main', mb: 1 }} />
-                            <Typography>برای آپلود بنر کلیک کنید</Typography>
-                          </>
-                        )}
-                      </Box>
+                      ) : (
+                        <Box sx={{ textAlign: 'center' }}>
+                          <CloudUploadIcon sx={{ fontSize: 40, color: EMPLOYER_THEME.primary, mb: 1 }} />
+                          <Typography>برای آپلود بنر کلیک کنید</Typography>
+                          <Typography variant="caption" color="text.secondary" sx={{ mt: 1, display: 'block' }}>
+                            فرمت‌های مجاز: JPG، PNG - حداکثر حجم: ۵ مگابایت
+                          </Typography>
+                        </Box>
+                      )}
                     </Box>
+                    {formErrors.banner && (
+                      <Typography variant="caption" color="error.main" sx={{ mt: 1, display: 'block' }}>
+                        {formErrors.banner.message}
+                      </Typography>
+                    )}
                   </Box>
 
                   {/* ویدیوی معرفی */}
-                  <Box sx={{ px: 1, mb: 2, width: { xs: '100%', md: '50%' } }}>
-                    <Box>
-                      <Typography variant="body2" fontWeight="medium" sx={{ mb: 1 }}>
-                        ویدیوی معرفی
-                      </Typography>
-                      <Box
-                        sx={{
-                          border: '1px dashed',
-                          borderColor: 'divider',
-                          borderRadius: 2,
-                          p: 2,
-                          textAlign: 'center',
-                          bgcolor: 'background.paper',
-                          height: 120,
-                          display: 'flex',
-                          flexDirection: 'column',
-                          justifyContent: 'center',
-                          cursor: 'pointer'
-                        }}
-                        onClick={() => document.getElementById('video-input')?.click()}
-                      >
-                        <input
-                          type="file"
-                          id="video-input"
-                          style={{ display: 'none' }}
-                          {...register('intro_video')}
-                          accept="video/*"
+                  <Box sx={{ 
+                    flex: 1,
+                    width: { xs: '100%', md: 'auto' }
+                  }}>
+                    <Typography variant="body2" fontWeight="medium" sx={{ mb: 1 }}>
+                      ویدیوی معرفی
+                    </Typography>
+                    <Box
+                      sx={{
+                        border: '1px dashed',
+                        borderColor: formErrors.intro_video ? 'error.main' : 'divider',
+                        borderRadius: 2,
+                        p: 2,
+                        textAlign: 'center',
+                        bgcolor: 'background.paper',
+                        position: 'relative',
+                        overflow: 'hidden',
+                        cursor: 'pointer',
+                        aspectRatio: '16/9',
+                        width: '100%',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        transition: 'all 0.2s ease',
+                        '&:hover': {
+                          borderColor: EMPLOYER_THEME.primary,
+                          bgcolor: 'rgba(0,0,0,0.01)'
+                        }
+                      }}
+                      onClick={() => document.getElementById('video-input')?.click()}
+                    >
+                      <input
+                        type="file"
+                        id="video-input"
+                        style={{ display: 'none' }}
+                        {...register('intro_video')}
+                        accept="video/*"
+                      />
+                      {videoPreview ? (
+                        <VideoPreview
+                          src={videoPreview}
+                          onDelete={handleDeleteVideo}
                         />
-                        <CloudUploadIcon sx={{ fontSize: 40, color: 'primary.main', mb: 1 }} />
-                        <Typography>برای آپلود ویدیوی معرفی کلیک کنید</Typography>
-                      </Box>
+                      ) : (
+                        <Box sx={{ textAlign: 'center' }}>
+                          <CloudUploadIcon sx={{ fontSize: 40, color: EMPLOYER_THEME.primary, mb: 1 }} />
+                          <Typography>برای آپلود ویدیوی معرفی کلیک کنید</Typography>
+                          <Typography variant="caption" color="text.secondary" sx={{ mt: 1, display: 'block' }}>
+                            فرمت‌های مجاز: MP4، WebM - حداکثر حجم: ۵۰ مگابایت
+                          </Typography>
+                        </Box>
+                      )}
                     </Box>
+                    {formErrors.intro_video && (
+                      <Typography variant="caption" color="error.main" sx={{ mt: 1, display: 'block' }}>
+                        {formErrors.intro_video.message}
+                      </Typography>
+                    )}
                   </Box>
                 </Box>
               </Box>
@@ -1053,19 +1582,23 @@ export default function CreateCompanyForm() {
           </AccordionDetails>
         </Accordion>
 
-        <Box sx={{ textAlign: 'right', mt: 4 }}>
+        <Box sx={{ 
+          textAlign: { xs: 'center', sm: 'right' }, 
+          mt: { xs: 3, md: 4 }
+        }}>
           <Button
             type="submit"
             variant="contained"
             disabled={loading}
             sx={{ 
               bgcolor: EMPLOYER_THEME.primary,
-              px: 6,
-              py: 1.5,
+              px: { xs: 4, md: 6 },
+              py: { xs: 1, md: 1.5 },
               borderRadius: 2,
               '&:hover': { bgcolor: EMPLOYER_THEME.dark },
-              fontSize: '1rem',
-              fontWeight: 'medium'
+              fontSize: { xs: '0.875rem', md: '1rem' },
+              fontWeight: 'medium',
+              width: { xs: '100%', sm: 'auto' }
             }}
           >
             {loading ? (
