@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { apiGet, apiPost } from '@/lib/axios';
 import Image from 'next/image';
@@ -38,7 +38,20 @@ import InfoIcon from '@mui/icons-material/Info';
 import DomainAddIcon from '@mui/icons-material/DomainAdd';
 import LocationOnIcon from '@mui/icons-material/LocationOn';
 import ImageIcon from '@mui/icons-material/Image';
+import EmailIcon from '@mui/icons-material/Email';
+import LanguageIcon from '@mui/icons-material/Language';
+import PhoneIcon from '@mui/icons-material/Phone';
+import HomeIcon from '@mui/icons-material/Home';
+import MarkunreadMailboxIcon from '@mui/icons-material/MarkunreadMailbox';
+import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
+import CategoryIcon from '@mui/icons-material/Category';
+import GroupsIcon from '@mui/icons-material/Groups';
+import DescriptionIcon from '@mui/icons-material/Description';
+import LinkedInIcon from '@mui/icons-material/LinkedIn';
+import TwitterIcon from '@mui/icons-material/Twitter';
+import InstagramIcon from '@mui/icons-material/Instagram';
 import { EMPLOYER_THEME } from '@/constants/colors';
+import JalaliDatePicker from '@/components/common/JalaliDatePicker';
 
 /**
  * تایپ استان برای TypeScript
@@ -220,6 +233,9 @@ export default function CreateCompanyForm() {
   const [videoPreview, setVideoPreview] = useState<string | null>(null);
   const [expandedOptional, setExpandedOptional] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
+  const formRef = useRef<HTMLFormElement>(null);
+  const nameInputRef = useRef<HTMLInputElement>(null);
+  const cityInputRef = useRef<HTMLInputElement>(null);
   
   const { 
     register, 
@@ -253,10 +269,31 @@ export default function CreateCompanyForm() {
 
   // اعتبارسنجی URL
   const isValidUrl = (url: string): boolean => {
+    // اگر ورودی خالی باشد، معتبر در نظر گرفته می‌شود (چون اختیاری است)
+    if (!url || url.trim() === '') return true;
+    
+    // حذف فاصله‌های اضافی
+    let trimmedUrl = url.trim();
+    
+    // افزودن http:// به ابتدای URL اگر پروتکل نداشته باشد
+    const urlWithProtocol = trimmedUrl.match(/^https?:\/\//) ? trimmedUrl : `https://${trimmedUrl}`;
+    
     try {
-      new URL(url.startsWith('http') ? url : `https://${url}`);
+      new URL(urlWithProtocol);
       return true;
     } catch (e) {
+      // تلاش برای بررسی فرمت‌های ساده مانند example.com
+      const simpleUrlRegex = /^[a-zA-Z0-9][a-zA-Z0-9-]{1,61}[a-zA-Z0-9]\.[a-zA-Z]{2,}$/;
+      if (simpleUrlRegex.test(trimmedUrl)) {
+        return true;
+      }
+      
+      // تلاش برای بررسی آدرس‌های شبکه‌های اجتماعی
+      const socialMediaRegex = /^(www\.)?(twitter|x|linkedin|instagram|facebook|telegram)\.(com|org)\/[a-zA-Z0-9._-]+\/?$/;
+      if (socialMediaRegex.test(trimmedUrl)) {
+        return true;
+      }
+      
       return false;
     }
   };
@@ -368,6 +405,169 @@ export default function CreateCompanyForm() {
     return cities.find(city => city.id === cityId) || null;
   }, [watch('city_id'), cities]);
 
+  // اسکرول به اولین فیلد خطا بعد از ارسال فرم
+  useEffect(() => {
+    // اسکرول به اولین فیلد خطا بعد از ارسال فرم
+    if (Object.keys(formErrors).length > 0 || errors.length > 0) {
+      // اول به بالای فرم اسکرول کنیم تا خطاها را نمایش دهیم
+      setTimeout(() => {
+        if (formRef.current) {
+          formRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          
+          // تمرکز بر روی پیام خطا
+          const errorAlert = document.querySelector('.MuiAlert-standardError');
+          if (errorAlert) {
+            errorAlert.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          }
+          
+          // اگر فیلد خطا در بخش اختیاری است، آکاردئون را باز کنیم
+          if (Object.keys(formErrors).length > 0) {
+            const firstErrorField = Object.keys(formErrors)[0];
+            if (!['name', 'city_id'].includes(firstErrorField) && !expandedOptional) {
+              setExpandedOptional(true);
+            }
+          }
+        }
+      }, 100);
+    }
+  }, [formErrors, errors, expandedOptional]);
+
+  // تابع جدید برای اسکرول به فیلد خطا
+  const scrollToErrorField = (fieldName: string) => {
+    console.log(`تلاش برای اسکرول به فیلد: ${fieldName}`);
+    
+    // نگاشت نام فیلدها به عناوین فارسی
+    const fieldMappings: Record<string, string> = {
+      'postal_code': 'کد پستی',
+      'email': 'ایمیل شرکت',
+      'phone_number': 'شماره تماس',
+      'website': 'وب‌سایت',
+      'linkedin': 'لینکدین',
+      'twitter': 'توییتر',
+      'instagram': 'اینستاگرام',
+      'description': 'توضیحات شرکت',
+      'address': 'آدرس',
+      'industry': 'صنعت',
+      'number_of_employees': 'تعداد کارمندان',
+      'founded_date': 'تاریخ تاسیس'
+    };
+    
+    // برای فیلدهای خاص که دسترسی مستقیم به المنت آنها داریم
+    if (fieldName === 'name' && nameInputRef.current) {
+      const inputElement = nameInputRef.current.parentElement?.parentElement;
+      if (inputElement) {
+        inputElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        nameInputRef.current.focus();
+      }
+      return;
+    }
+    
+    // برای فیلد شهر که ساختار پیچیده‌تری دارد
+    else if (fieldName === 'city_id' && cityInputRef.current) {
+      const autocompleteElement = cityInputRef.current.closest('.MuiFormControl-root');
+      if (autocompleteElement) {
+        autocompleteElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        cityInputRef.current.focus();
+      }
+      return;
+    }
+    
+    // برای فیلدهای بخش اختیاری
+    if (!['name', 'city_id', 'logo'].includes(fieldName)) {
+      // اطمینان از باز بودن آکاردئون
+      if (!expandedOptional) {
+        // باز کردن آکاردئون
+        setExpandedOptional(true);
+        
+        // صبر برای باز شدن آکاردئون و سپس جستجوی مجدد
+        setTimeout(() => {
+          findAndScrollToField(fieldName, fieldMappings);
+        }, 800); // تاخیر بیشتر برای اطمینان از باز شدن کامل آکاردئون
+        
+        return;
+      }
+    }
+    
+    // اگر آکاردئون باز است یا فیلد در بخش اصلی است
+    findAndScrollToField(fieldName, fieldMappings);
+  };
+  
+  // تابع کمکی برای یافتن و اسکرول به فیلد
+  const findAndScrollToField = (fieldName: string, fieldMappings: Record<string, string>) => {
+    // روش 1: جستجو بر اساس عنوان فیلد
+    if (fieldMappings[fieldName]) {
+      const fieldTitle = fieldMappings[fieldName];
+      const allTypographies = Array.from(document.querySelectorAll('.MuiTypography-root'));
+      
+      for (const typography of allTypographies) {
+        if (typography.textContent?.includes(fieldTitle)) {
+          const container = typography.closest('.MuiBox-root');
+          if (container) {
+            container.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            
+            setTimeout(() => {
+              const input = container.querySelector('input, select, textarea');
+              if (input) {
+                (input as HTMLElement).focus();
+                console.log(`فیلد ${fieldName} با عنوان "${fieldTitle}" پیدا شد و اسکرول انجام شد`);
+              }
+            }, 100);
+            
+            return;
+          }
+        }
+      }
+    }
+    
+    // روش 2: جستجو بر اساس نام فیلد
+    const input = document.querySelector(`input[name="${fieldName}"], select[name="${fieldName}"], textarea[name="${fieldName}"]`);
+    if (input) {
+      const container = input.closest('.MuiBox-root') || input.closest('.MuiFormControl-root');
+      if (container) {
+        container.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        (input as HTMLElement).focus();
+        console.log(`فیلد ${fieldName} با نام مستقیم پیدا شد و اسکرول انجام شد`);
+        return;
+      }
+    }
+    
+    // روش 3: جستجو بر اساس id فیلد
+    const inputById = document.getElementById(fieldName) || document.querySelector(`[id*="${fieldName}"]`);
+    if (inputById) {
+      const container = inputById.closest('.MuiBox-root') || inputById.closest('.MuiFormControl-root') || inputById;
+      if (container) {
+        container.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        if (inputById.tagName === 'INPUT' || inputById.tagName === 'SELECT' || inputById.tagName === 'TEXTAREA') {
+          (inputById as HTMLElement).focus();
+        }
+        console.log(`فیلد ${fieldName} با id پیدا شد و اسکرول انجام شد`);
+        return;
+      }
+    }
+    
+    // روش 4: جستجو در همه کنترل‌های فرم با محتوای لیبل
+    const allFormControls = Array.from(document.querySelectorAll('.MuiFormControl-root'));
+    for (const control of allFormControls) {
+      const label = control.querySelector('label');
+      if (label && fieldMappings[fieldName] && label.textContent?.includes(fieldMappings[fieldName])) {
+        control.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        const input = control.querySelector('input, select, textarea');
+        if (input) {
+          (input as HTMLElement).focus();
+        }
+        console.log(`فیلد ${fieldName} با لیبل پیدا شد و اسکرول انجام شد`);
+        return;
+      }
+    }
+    
+    // اگر هیچ یک از روش‌ها موفق نبود، به بخش اختیاری اسکرول کنیم
+    console.log(`فیلد ${fieldName} پیدا نشد، اسکرول به بخش اختیاری`);
+    const optionalSection = document.querySelector('.MuiAccordionDetails-root');
+    if (optionalSection) {
+      optionalSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  };
+
   const onSubmit: SubmitHandler<CompanyFormInputs> = async (data) => {
     setLoading(true);
     setErrors([]);
@@ -375,12 +575,24 @@ export default function CreateCompanyForm() {
     // بررسی فیلدهای اجباری
     if (!data.name || !data.name.trim()) {
       setErrors(['لطفاً نام شرکت را وارد کنید']);
+      // اسکرول به بالای فرم
+      setTimeout(() => {
+        if (formRef.current) {
+          formRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      }, 100);
       setLoading(false);
       return;
     }
 
     if (!data.city_id || data.city_id === 0) {
       setErrors(['لطفاً شهر محل فعالیت شرکت را انتخاب کنید']);
+      // اسکرول به بالای فرم
+      setTimeout(() => {
+        if (formRef.current) {
+          formRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      }, 100);
       setLoading(false);
       return;
     }
@@ -390,6 +602,12 @@ export default function CreateCompanyForm() {
       const validation = validateFile(data.logo[0], 'image', 2); // حداکثر 2 مگابایت
       if (!validation.valid) {
         setErrors([`خطا در لوگو: ${validation.error}`]);
+        // اسکرول به بالای فرم
+        setTimeout(() => {
+          if (formRef.current) {
+            formRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          }
+        }, 100);
         setLoading(false);
         return;
       }
@@ -399,6 +617,12 @@ export default function CreateCompanyForm() {
       const validation = validateFile(data.banner[0], 'image', 5); // حداکثر 5 مگابایت
       if (!validation.valid) {
         setErrors([`خطا در بنر: ${validation.error}`]);
+        // اسکرول به بالای فرم
+        setTimeout(() => {
+          if (formRef.current) {
+            formRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          }
+        }, 100);
         setLoading(false);
         return;
       }
@@ -408,45 +632,85 @@ export default function CreateCompanyForm() {
       const validation = validateFile(data.intro_video[0], 'video', 50); // حداکثر 50 مگابایت
       if (!validation.valid) {
         setErrors([`خطا در ویدیو: ${validation.error}`]);
+        // اسکرول به بالای فرم
+        setTimeout(() => {
+          if (formRef.current) {
+            formRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          }
+        }, 100);
         setLoading(false);
         return;
       }
     }
 
     // اعتبارسنجی فیلدهای اختیاری در صورت پر شدن
+    const validationErrors: string[] = [];
+    
     if (data.email && !isValidEmail(data.email)) {
-      setErrors(['فرمت ایمیل وارد شده صحیح نیست']);
-      setLoading(false);
-      return;
+      validationErrors.push('فرمت ایمیل وارد شده صحیح نیست');
+      // اگر بخش اختیاری بسته است، آن را باز کنید
+      if (!expandedOptional) setExpandedOptional(true);
     }
 
     if (data.website && !isValidUrl(data.website)) {
-      setErrors(['آدرس وبسایت وارد شده معتبر نیست']);
-      setLoading(false);
-      return;
+      validationErrors.push('آدرس وبسایت وارد شده معتبر نیست');
+      // اگر بخش اختیاری بسته است، آن را باز کنید
+      if (!expandedOptional) setExpandedOptional(true);
     }
 
     if (data.phone_number && !isValidPhoneNumber(data.phone_number)) {
-      setErrors(['فرمت شماره تلفن وارد شده صحیح نیست']);
-      setLoading(false);
-      return;
+      validationErrors.push('فرمت شماره تلفن وارد شده صحیح نیست');
+      // اگر بخش اختیاری بسته است، آن را باز کنید
+      if (!expandedOptional) setExpandedOptional(true);
     }
 
     if (data.postal_code && !/^[0-9]{10}$/.test(data.postal_code)) {
-      setErrors(['کد پستی باید 10 رقم باشد']);
-      setLoading(false);
-      return;
+      validationErrors.push('کد پستی باید 10 رقم باشد');
+      // اگر بخش اختیاری بسته است، آن را باز کنید
+      if (!expandedOptional) setExpandedOptional(true);
     }
 
     // بررسی فرمت آدرس‌های شبکه‌های اجتماعی
     const socialMediaFields = ['linkedin', 'twitter', 'instagram'];
+    const socialMediaLabels = {
+      'linkedin': 'لینکدین',
+      'twitter': 'توییتر',
+      'instagram': 'اینستاگرام'
+    };
+    
     for (const field of socialMediaFields) {
       const value = data[field as keyof CompanyFormInputs] as string;
       if (value && value.trim() !== '' && !isValidUrl(value)) {
-        setErrors([`آدرس ${field} وارد شده معتبر نیست`]);
-        setLoading(false);
-        return;
+        validationErrors.push(`آدرس ${socialMediaLabels[field as keyof typeof socialMediaLabels]} وارد شده معتبر نیست`);
+        // اگر بخش اختیاری بسته است، آن را باز کنید
+        if (!expandedOptional) setExpandedOptional(true);
       }
+    }
+    
+    // اگر خطایی وجود دارد، آنها را نمایش دهید و به کاربر اطلاع دهید
+    if (validationErrors.length > 0) {
+      setErrors(validationErrors);
+      
+      // اسکرول به بالای فرم برای نمایش خطاها
+      setTimeout(() => {
+        if (formRef.current) {
+          formRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          
+          // تمرکز بر روی پیام خطا
+          const errorAlert = document.querySelector('.MuiAlert-standardError');
+          if (errorAlert) {
+            errorAlert.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          }
+          
+          // اگر فیلد خطا در بخش اختیاری است، آکاردئون را باز کنیم
+          if (!expandedOptional) {
+            setExpandedOptional(true);
+          }
+        }
+      }, 100);
+      
+      setLoading(false);
+      return;
     }
 
     try {
@@ -467,13 +731,28 @@ export default function CreateCompanyForm() {
       }
       
       // اضافه کردن سایر فیلدهای متنی اختیاری
-      const optionalTextFields = ['description', 'website', 'email', 'phone_number', 'address', 
-                                 'postal_code', 'founded_date', 'number_of_employees',
-                                 'linkedin', 'twitter', 'instagram'];
+      const optionalTextFields = ['description', 'email', 'phone_number', 'address', 
+                                 'postal_code', 'founded_date', 'number_of_employees'];
                                  
       optionalTextFields.forEach(field => {
         if (data[field as keyof CompanyFormInputs] && String(data[field as keyof CompanyFormInputs]).trim() !== '') {
           formDataToSend.append(field, String(data[field as keyof CompanyFormInputs]));
+        }
+      });
+      
+      // اضافه کردن آدرس‌های وب با اطمینان از داشتن پروتکل https://
+      const urlFields = ['website', 'linkedin', 'twitter', 'instagram'];
+      
+      urlFields.forEach(field => {
+        const value = data[field as keyof CompanyFormInputs] as string;
+        if (value && value.trim() !== '') {
+          // حذف فاصله‌های اضافی
+          let trimmedUrl = value.trim();
+          
+          // افزودن https:// به ابتدای URL اگر پروتکل نداشته باشد
+          const urlWithProtocol = trimmedUrl.match(/^https?:\/\//) ? trimmedUrl : `https://${trimmedUrl}`;
+          
+          formDataToSend.append(field, urlWithProtocol);
         }
       });
       
@@ -503,6 +782,19 @@ export default function CreateCompanyForm() {
       });
 
       setSuccess(true);
+      
+      // اسکرول به بالای فرم بعد از ثبت موفقیت‌آمیز
+      setTimeout(() => {
+        if (formRef.current) {
+          formRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          // تمرکز بر روی پیام موفقیت
+          const successAlert = document.querySelector('.MuiAlert-standardSuccess');
+          if (successAlert) {
+            successAlert.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          }
+        }
+      }, 100);
+      
       // هدایت کاربر به صفحه لیست شرکت‌ها پس از ثبت موفق
       setTimeout(() => {
         router.push('/employer/companies');
@@ -558,6 +850,18 @@ export default function CreateCompanyForm() {
               'invalid': 'شماره تلفن معتبر نیست.',
               'default': 'مشکلی در ثبت شماره تلفن وجود دارد.'
             },
+            'twitter': {
+              'invalid': 'آدرس توییتر معتبر نیست. لطفاً یک آدرس معتبر وارد کنید.',
+              'default': 'مشکلی در ثبت آدرس توییتر وجود دارد.'
+            },
+            'linkedin': {
+              'invalid': 'آدرس لینکدین معتبر نیست. لطفاً یک آدرس معتبر وارد کنید.',
+              'default': 'مشکلی در ثبت آدرس لینکدین وجود دارد.'
+            },
+            'instagram': {
+              'invalid': 'آدرس اینستاگرام معتبر نیست. لطفاً یک آدرس معتبر وارد کنید.',
+              'default': 'مشکلی در ثبت آدرس اینستاگرام وجود دارد.'
+            },
             'default': {'message': 'خطا در ثبت اطلاعات شرکت. لطفا دوباره تلاش کنید.'}
           };
           
@@ -566,12 +870,28 @@ export default function CreateCompanyForm() {
             if (Array.isArray(errors)) {
               const errorMsg = errors[0]?.toLowerCase() || '';
               
+              // اگر خطا مربوط به فیلدهای اختیاری است، بخش اختیاری را باز کنید
+              if (!['name', 'city_id', 'logo', 'non_field_errors'].includes(field) && !expandedOptional) {
+                setExpandedOptional(true);
+              }
+              
+              // ترجمه خطاهای انگلیسی به فارسی
               if (field === 'name' && (errorMsg.includes('unique') || errorMsg.includes('already exists'))) {
                 newErrors.push(errorMessages.name.unique);
               } else if (field === 'city_id' && errorMsg.includes('does not exist')) {
                 newErrors.push(errorMessages.city_id.does_not_exist);
               } else if (field === 'city_id' && (errorMsg.includes('required') || errorMsg.includes('null'))) {
                 newErrors.push(errorMessages.city_id.required);
+              } else if (field === 'twitter' && errorMsg.includes('enter a valid url')) {
+                newErrors.push(errorMessages.twitter.invalid);
+              } else if (field === 'linkedin' && errorMsg.includes('enter a valid url')) {
+                newErrors.push(errorMessages.linkedin.invalid);
+              } else if (field === 'instagram' && errorMsg.includes('enter a valid url')) {
+                newErrors.push(errorMessages.instagram.invalid);
+              } else if (field === 'website' && errorMsg.includes('enter a valid url')) {
+                newErrors.push(errorMessages.website.invalid);
+              } else if (field === 'email' && errorMsg.includes('enter a valid email')) {
+                newErrors.push(errorMessages.email.invalid);
               } else if (errorMessages[field as keyof typeof errorMessages]) {
                 // بررسی نوع خطا برای هر فیلد
                 const fieldErrors = errorMessages[field as keyof typeof errorMessages];
@@ -592,7 +912,20 @@ export default function CreateCompanyForm() {
               } else {
                 // برای سایر خطاها، پیام خام را نمایش بده
                 const fieldName = field === 'non_field_errors' ? '' : `${field}: `;
-                errors.forEach((msg: string) => newErrors.push(`${fieldName}${msg}`));
+                errors.forEach((msg: string) => {
+                  // ترجمه خطاهای انگلیسی رایج
+                  if (typeof msg === 'string') {
+                    if (msg.toLowerCase().includes('enter a valid url')) {
+                      newErrors.push(`آدرس ${field} وارد شده معتبر نیست`);
+                    } else if (msg.toLowerCase().includes('enter a valid email')) {
+                      newErrors.push(`ایمیل وارد شده معتبر نیست`);
+                    } else {
+                      newErrors.push(`${fieldName}${msg}`);
+                    }
+                  } else {
+                    newErrors.push(`${fieldName}${msg}`);
+                  }
+                });
               }
             }
           }
@@ -606,6 +939,27 @@ export default function CreateCompanyForm() {
       }
       
       setErrors(newErrors);
+      
+      // اسکرول به بالای فرم در صورت خطاهای سرور
+      setTimeout(() => {
+        if (formRef.current) {
+          formRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          // تمرکز بر روی اولین خطا
+          const errorAlert = document.querySelector('.MuiAlert-standardError');
+          if (errorAlert) {
+            errorAlert.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          }
+          
+          // اگر خطاهای مربوط به فیلدهای اختیاری وجود دارد، آکاردئون را باز کنیم
+          const optionalFieldErrors = Object.keys(err.response?.data || {}).filter(
+            field => !['name', 'city_id', 'logo', 'non_field_errors'].includes(field)
+          );
+          
+          if (optionalFieldErrors.length > 0 && !expandedOptional) {
+            setExpandedOptional(true);
+          }
+        }
+      }, 100);
     } finally {
       setLoading(false);
     }
@@ -739,7 +1093,7 @@ export default function CreateCompanyForm() {
         </Alert>
       )}
 
-      <form onSubmit={handleSubmit(onSubmit)}>
+      <form ref={formRef} onSubmit={handleSubmit(onSubmit)}>
         {/* فیلدهای اجباری */}
         <Box sx={{ mb: 4 }}>
           <Typography 
@@ -767,7 +1121,7 @@ export default function CreateCompanyForm() {
             alignItems: 'flex-start'
           }}>
             {/* بخش‌های سمت راست */}
-            <Box sx={{ flex: 1 }}>
+            <Box sx={{ flex: 1, width: '100%' }}>
               <Box sx={{ mb: 4 }}>
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
                   <BusinessIcon sx={{ color: EMPLOYER_THEME.primary, fontSize: 20 }} />
@@ -785,6 +1139,7 @@ export default function CreateCompanyForm() {
                   render={({ field }) => (
                     <TextField
                       {...field}
+                      inputRef={nameInputRef}
                       fullWidth
                       placeholder="نام شرکت را وارد کنید"
                       error={Boolean(formErrors.name)}
@@ -872,7 +1227,10 @@ export default function CreateCompanyForm() {
                         renderInput={(params) => (
                           <TextField
                             {...params}
-                            inputRef={ref}
+                            inputRef={(element) => {
+                              ref(element);
+                              cityInputRef.current = element;
+                            }}
                             placeholder="جستجو و انتخاب شهر"
                             error={Boolean(formErrors.city_id)}
                             InputProps={{
@@ -905,7 +1263,12 @@ export default function CreateCompanyForm() {
             </Box>
 
             {/* لوگو - سمت چپ */}
-            <Box sx={{ width: { xs: '100%', sm: '250px', md: 250 }, maxWidth: { xs: '250px', sm: '100%' }, mx: { xs: 'auto', md: 0 } }}>
+            <Box sx={{ 
+              width: { xs: '100%', sm: '250px', md: 250 }, 
+              maxWidth: { xs: '100%', sm: '250px' }, 
+              mx: { xs: 'auto', md: 0 },
+              mt: { xs: 2, md: 0 }
+            }}>
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
                 <ImageIcon sx={{ color: EMPLOYER_THEME.primary, fontSize: 20 }} />
                 <Typography variant="body2" fontWeight="medium">
@@ -925,6 +1288,8 @@ export default function CreateCompanyForm() {
                   cursor: 'pointer',
                   aspectRatio: '1/1',
                   width: '100%',
+                  maxWidth: { xs: '100%', sm: '250px', md: '250px' },
+                  mx: { xs: 'auto', md: 0 },
                   display: 'flex',
                   flexDirection: 'column',
                   alignItems: 'center',
@@ -1023,9 +1388,12 @@ export default function CreateCompanyForm() {
                   {/* ایمیل */}
                   <Box sx={{ px: { xs: 0, md: 1 }, mb: 2, width: { xs: '100%', md: '50%' } }}>
                     <Box>
-                      <Typography variant="body2" fontWeight="medium" sx={{ mb: 1 }}>
-                        ایمیل شرکت
-                      </Typography>
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
+                        <EmailIcon sx={{ color: EMPLOYER_THEME.primary, fontSize: 20 }} />
+                        <Typography variant="body2" fontWeight="medium">
+                          ایمیل شرکت
+                        </Typography>
+                      </Box>
                       <Controller
                         name="email"
                         control={control}
@@ -1056,9 +1424,12 @@ export default function CreateCompanyForm() {
                   {/* شماره تماس */}
                   <Box sx={{ px: { xs: 0, md: 1 }, mb: 2, width: { xs: '100%', md: '50%' } }}>
                     <Box>
-                      <Typography variant="body2" fontWeight="medium" sx={{ mb: 1 }}>
-                        شماره تماس
-                      </Typography>
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
+                        <PhoneIcon sx={{ color: EMPLOYER_THEME.primary, fontSize: 20 }} />
+                        <Typography variant="body2" fontWeight="medium">
+                          شماره تماس
+                        </Typography>
+                      </Box>
                       <Controller
                         name="phone_number"
                         control={control}
@@ -1089,9 +1460,12 @@ export default function CreateCompanyForm() {
                   {/* وب سایت */}
                   <Box sx={{ px: { xs: 0, md: 1 }, mb: 2, width: { xs: '100%', md: '50%' } }}>
                     <Box>
-                      <Typography variant="body2" fontWeight="medium" sx={{ mb: 1 }}>
-                        وب‌سایت
-                      </Typography>
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
+                        <LanguageIcon sx={{ color: EMPLOYER_THEME.primary, fontSize: 20 }} />
+                        <Typography variant="body2" fontWeight="medium">
+                          وب‌سایت
+                        </Typography>
+                      </Box>
                       <Controller
                         name="website"
                         control={control}
@@ -1105,7 +1479,7 @@ export default function CreateCompanyForm() {
                           <TextField
                             {...field}
                             fullWidth
-                            placeholder="نمونه: www.example.com"
+                            placeholder=" example.com یا www.example.com"
                             error={Boolean(formErrors.website)}
                             helperText={formErrors.website?.message}
                             variant="outlined"
@@ -1122,9 +1496,12 @@ export default function CreateCompanyForm() {
                   {/* کد پستی */}
                   <Box sx={{ px: { xs: 0, md: 1 }, mb: 2, width: { xs: '100%', md: '50%' } }}>
                     <Box>
-                      <Typography variant="body2" fontWeight="medium" sx={{ mb: 1 }}>
-                        کد پستی
-                      </Typography>
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
+                        <MarkunreadMailboxIcon sx={{ color: EMPLOYER_THEME.primary, fontSize: 20 }} />
+                        <Typography variant="body2" fontWeight="medium">
+                          کد پستی
+                        </Typography>
+                      </Box>
                       <Controller
                         name="postal_code"
                         control={control}
@@ -1171,9 +1548,12 @@ export default function CreateCompanyForm() {
                   {/* صنعت - اختیاری */}
                   <Box sx={{ px: { xs: 0, md: 1 }, mb: 2, width: { xs: '100%', md: '50%' } }}>
                     <Box>
-                      <Typography variant="body2" fontWeight="medium" sx={{ mb: 1 }}>
-                        صنعت
-                      </Typography>
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
+                        <CategoryIcon sx={{ color: EMPLOYER_THEME.primary, fontSize: 20 }} />
+                        <Typography variant="body2" fontWeight="medium">
+                          صنعت
+                        </Typography>
+                      </Box>
                       <Controller
                         name="industry"
                         control={control}
@@ -1216,9 +1596,12 @@ export default function CreateCompanyForm() {
                   {/* تعداد کارمندان */}
                   <Box sx={{ px: { xs: 0, md: 1 }, mb: 2, width: { xs: '100%', md: '50%' } }}>
                     <Box>
-                      <Typography variant="body2" fontWeight="medium" sx={{ mb: 1 }}>
-                        تعداد کارمندان
-                      </Typography>
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
+                        <GroupsIcon sx={{ color: EMPLOYER_THEME.primary, fontSize: 20 }} />
+                        <Typography variant="body2" fontWeight="medium">
+                          تعداد کارمندان
+                        </Typography>
+                      </Box>
                       <Controller
                         name="number_of_employees"
                         control={control}
@@ -1251,25 +1634,22 @@ export default function CreateCompanyForm() {
                   {/* تاریخ تاسیس */}
                   <Box sx={{ px: { xs: 0, md: 1 }, mb: 2, width: { xs: '100%', md: '50%' } }}>
                     <Box>
-                      <Typography variant="body2" fontWeight="medium" sx={{ mb: 1 }}>
-                        تاریخ تاسیس
-                      </Typography>
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
+                        <CalendarTodayIcon sx={{ color: EMPLOYER_THEME.primary, fontSize: 20 }} />
+                        <Typography variant="body2" fontWeight="medium">
+                          تاریخ تاسیس
+                        </Typography>
+                      </Box>
                       <Controller
                         name="founded_date"
                         control={control}
                         render={({ field }) => (
-                          <TextField
-                            {...field}
+                          <JalaliDatePicker
+                            value={field.value}
+                            onChange={field.onChange}
                             fullWidth
-                            type="date"
                             error={Boolean(formErrors.founded_date)}
                             helperText={formErrors.founded_date?.message}
-                            variant="outlined"
-                            InputLabelProps={{ shrink: true }}
-                            sx={{ 
-                              '& .MuiOutlinedInput-root': { borderRadius: 2 },
-                              '& .MuiInputBase-input': { textAlign: 'left', direction: 'ltr' }
-                            }}
                           />
                         )}
                       />
@@ -1279,9 +1659,12 @@ export default function CreateCompanyForm() {
                   {/* آدرس */}
                   <Box sx={{ px: { xs: 0, md: 1 }, mb: 2, width: '100%' }}>
                     <Box>
-                      <Typography variant="body2" fontWeight="medium" sx={{ mb: 1 }}>
-                        آدرس
-                      </Typography>
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
+                        <HomeIcon sx={{ color: EMPLOYER_THEME.primary, fontSize: 20 }} />
+                        <Typography variant="body2" fontWeight="medium">
+                          آدرس
+                        </Typography>
+                      </Box>
                       <Controller
                         name="address"
                         control={control}
@@ -1307,9 +1690,12 @@ export default function CreateCompanyForm() {
                   {/* توضیحات */}
                   <Box sx={{ px: { xs: 0, md: 1 }, mb: 2, width: '100%' }}>
                     <Box>
-                      <Typography variant="body2" fontWeight="medium" sx={{ mb: 1 }}>
-                        توضیحات شرکت
-                      </Typography>
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
+                        <DescriptionIcon sx={{ color: EMPLOYER_THEME.primary, fontSize: 20 }} />
+                        <Typography variant="body2" fontWeight="medium">
+                          توضیحات شرکت
+                        </Typography>
+                      </Box>
                       <Controller
                         name="description"
                         control={control}
@@ -1351,9 +1737,12 @@ export default function CreateCompanyForm() {
                   {/* لینکدین */}
                   <Box sx={{ px: { xs: 0, md: 1 }, mb: 2, width: { xs: '100%', md: '33.33%' } }}>
                     <Box>
-                      <Typography variant="body2" fontWeight="medium" sx={{ mb: 1 }}>
-                        لینکدین
-                      </Typography>
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
+                        <LinkedInIcon sx={{ color: EMPLOYER_THEME.primary, fontSize: 20 }} />
+                        <Typography variant="body2" fontWeight="medium">
+                          لینکدین
+                        </Typography>
+                      </Box>
                       <Controller
                         name="linkedin"
                         control={control}
@@ -1361,7 +1750,7 @@ export default function CreateCompanyForm() {
                           <TextField
                             {...field}
                             fullWidth
-                            placeholder="نشانی لینکدین"
+                            placeholder="linkedin.com/company"
                             error={Boolean(formErrors.linkedin)}
                             helperText={formErrors.linkedin?.message}
                             variant="outlined"
@@ -1378,9 +1767,12 @@ export default function CreateCompanyForm() {
                   {/* توییتر */}
                   <Box sx={{ px: { xs: 0, md: 1 }, mb: 2, width: { xs: '100%', md: '33.33%' } }}>
                     <Box>
-                      <Typography variant="body2" fontWeight="medium" sx={{ mb: 1 }}>
-                        توییتر
-                      </Typography>
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
+                        <TwitterIcon sx={{ color: EMPLOYER_THEME.primary, fontSize: 20 }} />
+                        <Typography variant="body2" fontWeight="medium">
+                          توییتر
+                        </Typography>
+                      </Box>
                       <Controller
                         name="twitter"
                         control={control}
@@ -1388,7 +1780,7 @@ export default function CreateCompanyForm() {
                           <TextField
                             {...field}
                             fullWidth
-                            placeholder="نشانی توییتر"
+                            placeholder="x.com/company"
                             error={Boolean(formErrors.twitter)}
                             helperText={formErrors.twitter?.message}
                             variant="outlined"
@@ -1405,9 +1797,12 @@ export default function CreateCompanyForm() {
                   {/* اینستاگرام */}
                   <Box sx={{ px: { xs: 0, md: 1 }, mb: 2, width: { xs: '100%', md: '33.33%' } }}>
                     <Box>
-                      <Typography variant="body2" fontWeight="medium" sx={{ mb: 1 }}>
-                        اینستاگرام
-                      </Typography>
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
+                        <InstagramIcon sx={{ color: EMPLOYER_THEME.primary, fontSize: 20 }} />
+                        <Typography variant="body2" fontWeight="medium">
+                          اینستاگرام
+                        </Typography>
+                      </Box>
                       <Controller
                         name="instagram"
                         control={control}
@@ -1415,7 +1810,7 @@ export default function CreateCompanyForm() {
                           <TextField
                             {...field}
                             fullWidth
-                            placeholder="نشانی اینستاگرام"
+                            placeholder="instagram.com/company"
                             error={Boolean(formErrors.instagram)}
                             helperText={formErrors.instagram?.message}
                             variant="outlined"
@@ -1446,13 +1841,13 @@ export default function CreateCompanyForm() {
 
                 <Box sx={{ 
                   display: 'flex', 
-                  flexDirection: { xs: 'column', md: 'row' }, 
+                  flexDirection: { xs: 'column', sm: 'row' }, 
                   gap: { xs: 2, md: 3 }
                 }}>
                   {/* بنر */}
                   <Box sx={{ 
                     flex: 1,
-                    width: { xs: '100%', md: 'auto' }
+                    width: { xs: '100%', sm: 'auto' }
                   }}>
                     <Typography variant="body2" fontWeight="medium" sx={{ mb: 1 }}>
                       بنر شرکت
@@ -1518,7 +1913,7 @@ export default function CreateCompanyForm() {
                   {/* ویدیوی معرفی */}
                   <Box sx={{ 
                     flex: 1,
-                    width: { xs: '100%', md: 'auto' }
+                    width: { xs: '100%', sm: 'auto' }
                   }}>
                     <Typography variant="body2" fontWeight="medium" sx={{ mb: 1 }}>
                       ویدیوی معرفی

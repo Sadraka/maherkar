@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { Container } from '@mui/material';
+import { Container, Pagination, Box } from '@mui/material';
 import { apiGet } from '@/lib/axios';
 
 // کامپوننت‌های اختصاصی
@@ -18,13 +18,18 @@ export default function CompaniesPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [companiesData, setCompaniesData] = useState<any[]>([]);
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const itemsPerPage = 9;
 
   useEffect(() => {
     const fetchCompanies = async () => {
       try {
         setLoading(true);
         const response = await apiGet('/companies/');
-        setCompaniesData(response.data as any[]);
+        const allCompanies = response.data as any[];
+        setCompaniesData(allCompanies);
+        setTotalPages(Math.ceil(allCompanies.length / itemsPerPage));
         setError(null);
       } catch (err: any) {
         console.error('خطا در دریافت اطلاعات شرکت‌ها:', err);
@@ -37,6 +42,18 @@ export default function CompaniesPage() {
     fetchCompanies();
   }, []);
 
+  // گرفتن شرکت‌های مربوط به صفحه جاری
+  const getCurrentPageCompanies = () => {
+    const startIndex = (page - 1) * itemsPerPage;
+    const endIndex = startIndex + itemsPerPage;
+    return companiesData.slice(startIndex, endIndex);
+  };
+
+  // تغییر صفحه
+  const handlePageChange = (event: React.ChangeEvent<unknown>, value: number) => {
+    setPage(value);
+  };
+
   // رندر محتوای اصلی صفحه
   const renderContent = () => {
     if (loading) {
@@ -48,14 +65,30 @@ export default function CompaniesPage() {
     }
 
     if (companiesData.length > 0) {
-      return <CompaniesGrid companies={companiesData} />;
+      return (
+        <>
+          <CompaniesGrid companies={getCurrentPageCompanies()} />
+          {totalPages > 1 && (
+            <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4, dir: 'ltr' }}>
+              <Pagination 
+                count={totalPages} 
+                page={page} 
+                onChange={handlePageChange} 
+                color="primary" 
+                size="large"
+                shape="rounded"
+              />
+            </Box>
+          )}
+        </>
+      );
     }
 
     return <EmptyCompaniesState />;
   };
 
   return (
-    <Container maxWidth="lg" sx={{ py: 6 }}>
+    <Container maxWidth="lg" sx={{ py: 6 }} dir="rtl">
       <CompaniesHeader />
       {renderContent()}
     </Container>

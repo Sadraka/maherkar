@@ -17,6 +17,32 @@ import LocationOnIcon from '@mui/icons-material/LocationOn';
 import SchoolIcon from '@mui/icons-material/School';
 import AccessTimeIcon from '@mui/icons-material/AccessTime';
 import PersonIcon from '@mui/icons-material/Person';
+import CompanyCard from '@/components/employer/companies/CompanyCard';
+import CorporateFareIcon from '@mui/icons-material/CorporateFare';
+import DomainIcon from '@mui/icons-material/Domain';
+
+// تعریف interface برای شرکت
+interface Company {
+  id: string;
+  name: string;
+  description?: string;
+  logo?: string;
+  banner?: string;
+  industry?: {
+    id: number;
+    name: string;
+  };
+  location?: {
+    id: number;
+    name: string;
+    province?: {
+      id: number;
+      name: string;
+    };
+  };
+  number_of_employees?: number;
+  created_at: string;
+}
 
 // تعریف interface برای state ارور
 interface ErrorState {
@@ -34,7 +60,7 @@ export default function MinimalDashboard() {
   const [profileData, setProfileData] = useState<any>(null);
   const [jobsData, setJobsData] = useState<any>(null);
   const [applicationsData, setApplicationsData] = useState<any>(null);
-  const [companiesData, setCompaniesData] = useState<any>(null);
+  const [companiesData, setCompaniesData] = useState<Company[]>([]);
   const [loading, setLoading] = useState({
     profile: true,
     jobs: true,
@@ -62,7 +88,7 @@ export default function MinimalDashboard() {
         setProfileData(profileResponse.data);
         setJobsData(jobsResponse.data);
         setApplicationsData(applicationsResponse.data);
-        setCompaniesData(companiesResponse.data);
+        setCompaniesData(companiesResponse.data as Company[]);
       } catch (err) {
         console.error('خطا در دریافت اطلاعات داشبورد:', err);
         setError({
@@ -196,14 +222,16 @@ export default function MinimalDashboard() {
                 justifyContent: 'center',
                 border: '1px solid #f1f1f1',
                 transition: 'all 0.3s ease',
+                
                 '&:hover': {
                   boxShadow: '0 6px 15px rgba(0,0,0,0.05)',
                   borderColor: '#e6e6e6'
+                  
                 }
               }}
             >
               <Box sx={{ display: 'flex', alignItems: 'center', mb: 1.5 }}>
-                <BusinessIcon sx={{ fontSize: 32, color: EMPLOYER_THEME.primary, ml: 1.5 }} />
+                <CorporateFareIcon sx={{ fontSize: 32, color: EMPLOYER_THEME.primary, ml: 1.5 }} />
                 <Typography variant="h5" component="div" fontWeight="bold">
                   {loading.companies ? '...' : totalCompanies}
                 </Typography>
@@ -272,7 +300,24 @@ export default function MinimalDashboard() {
                 }
               }}>
                 <KeyboardArrowLeftIcon sx={{ fontSize: 18, mt: 0.2, ml: 0.5 }} />
-                <Typography variant="body2" sx={{ fontWeight: 500 }}>همه آگهی‌ها</Typography>
+                <Typography variant="body2" sx={{ fontWeight: 500 }}>
+                  همه آگهی‌ها
+                  {jobsData && jobsData.length > 4 && (
+                    <Box component="span" sx={{ 
+                      direction: 'ltr',
+                      mr: 1,
+                      bgcolor: '#e3f2fd',
+                      color: '#0d47a1',
+                      px: 0.8,
+                      py: 0.2,
+                      borderRadius: 1,
+                      fontSize: '0.7rem',
+                      fontWeight: 'bold'
+                    }}>
+                     + {jobsData.length - 4}
+                    </Box>
+                  )}
+                </Typography>
               </Box>
             </Link>
             <Box sx={{ display: 'flex', alignItems: 'center' }}>
@@ -448,7 +493,24 @@ export default function MinimalDashboard() {
                 }
               }}>
                 <KeyboardArrowLeftIcon sx={{ fontSize: 18, mt: 0.2, ml: 0.5 }} />
-                <Typography variant="body2" sx={{ fontWeight: 500 }}>همه درخواست‌ها</Typography>
+                <Typography variant="body2" sx={{ fontWeight: 500 }}>
+                  همه درخواست‌ها
+                  {applicationsData && applicationsData.length > 4 && (
+                    <Box component="span" sx={{ 
+                      direction: 'ltr',
+                      mr: 1,
+                      bgcolor: '#e3f2fd',
+                      color: '#0d47a1',
+                      px: 0.8,
+                      py: 0.2,
+                      borderRadius: 1,
+                      fontSize: '0.7rem',
+                      fontWeight: 'bold'
+                    }}>
+                 +   {applicationsData.length - 4}
+                    </Box>
+                  )}
+                </Typography>
               </Box>
             </Link>
             <Box sx={{ display: 'flex', alignItems: 'center' }}>
@@ -597,17 +659,17 @@ export default function MinimalDashboard() {
         </Box>
 
         {/* بخش شرکت‌های من */}
-        <Box sx={{ mb: 4 }}>
+        <Box sx={{ mb: 4 }} >
           {/* سربرگ بخش شرکت‌های من */}
           <Box sx={{ 
             display: 'flex', 
             alignItems: 'center', 
-            mb: 4, 
+            mb: 3, 
             justifyContent: 'space-between',
             px: 1,
-            py: 1.5,
-            borderBottom: '1px solid #f0f0f0'
-          }}>
+            py: 2,
+            borderBottom: '1px solid rgba(66, 133, 244, 0.1)'
+          }} >
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
               <Link href="/employer/companies" style={{ textDecoration: 'none' }}>
                 <Box sx={{ 
@@ -619,21 +681,41 @@ export default function MinimalDashboard() {
                   }
                 }}>
                   <KeyboardArrowLeftIcon sx={{ fontSize: 18, mt: 0.2, ml: 0.5 }} />
-                  <Typography variant="body2" sx={{ fontWeight: 500 }}>همه شرکت‌ها</Typography>
+                  <Typography variant="body2" sx={{ fontWeight: 500 }}>
+                    همه شرکت‌ها
+                    {companiesData && companiesData.length > 4 && (
+                      <Box component="span" sx={{ 
+                        direction: 'ltr',
+                        mr: 1,
+                        bgcolor: '#e3f2fd',
+                        color: '#0d47a1',
+                        px: 0.8,
+                        py: 0.2,
+                        borderRadius: 1,
+                        fontSize: '0.7rem',
+                        fontWeight: 'bold'
+                      }}>
+                        +‌{companiesData.length - 4}
+                      
+                      </Box>
+                    )}
+                  </Typography>
                 </Box>
               </Link>
               <Link href="/employer/companies/create" style={{ textDecoration: 'none' }}>
                 <Button
                   variant="contained"
                   size="small"
+                 
                   sx={{
                     bgcolor: EMPLOYER_THEME.primary,
                     '&:hover': { bgcolor: EMPLOYER_THEME.dark },
                     borderRadius: 2,
                     px: 2,
-                    py: 0.5,
+                    py: 0.7,
                     fontWeight: 'medium',
-                    fontSize: '0.75rem'
+                    fontSize: '0.75rem',
+                    boxShadow: '0 2px 8px rgba(66, 133, 244, 0.2)'
                   }}
                 >
                   ثبت شرکت جدید
@@ -641,14 +723,31 @@ export default function MinimalDashboard() {
               </Link>
             </Box>
             <Box sx={{ display: 'flex', alignItems: 'center' }}>
-              <BusinessIcon sx={{ color: EMPLOYER_THEME.primary, ml: 1.5, fontSize: 24 }} />
+              <CorporateFareIcon sx={{ color: EMPLOYER_THEME.primary, ml: 1.5, fontSize: 24 }} />
               <Typography variant="h6" fontWeight="bold" sx={{ fontSize: '1.1rem' }}>
                 شرکت‌های من
               </Typography>
             </Box>
           </Box>
 
-          <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, 1fr)', md: 'repeat(4, 1fr)' }, gap: { xs: 3, sm: 4 } }}>
+          <Box sx={{ 
+            direction: 'ltr',
+            display: 'grid', 
+            gridTemplateColumns: { 
+              xs: '1fr', 
+              sm: 'repeat(2, 1fr)', 
+              md: 'repeat(2, 1fr)',
+              lg: 'repeat(4, 1fr)' 
+            }, 
+            gap: { 
+              xs: 2, 
+              sm: 3 
+            },
+            '& > *': {
+              height: 'auto',
+              maxHeight: { xs: '280px', sm: '300px', md: '320px' }
+            }
+          }}>
             {loading.companies ? (
               // نمایش وضعیت بارگذاری
               Array.from(new Array(4)).map((_, index) => (
@@ -658,13 +757,14 @@ export default function MinimalDashboard() {
                   sx={{ 
                     p: 0, 
                     borderRadius: 3,
-                    boxShadow: '0 3px 10px rgba(0,0,0,0.03)',
-                    border: '1px solid #f1f1f1',
+                    boxShadow: '0 3px 10px rgba(66, 133, 244, 0.05)',
+                    border: '1px solid #e3f2fd',
                     overflow: 'hidden',
-                    height: '100%'
+                    height: '100%',
+                    backgroundColor: 'red'
                   }}
                 >
-                  <Box sx={{ p: 3, bgcolor: '#f9f9f9', height: '120px' }}></Box>
+                  <Box sx={{ p: 3, bgcolor: '#f8fafd', height: '100px' }}></Box>
                 </Paper>
               ))
             ) : error.companies ? (
@@ -674,88 +774,21 @@ export default function MinimalDashboard() {
                 sx={{ 
                   p: 4, 
                   textAlign: 'left',
-                  color: 'red',
+                  color: '#d32f2f',
                   borderRadius: 3,
-                  border: '1px solid #ffdddd',
-                  gridColumn: '1 / -1' // span across all columns
+                  border: '1px solid #ffcdd2',
+                  bgcolor: '#fff5f5',
+                  gridColumn: '1 / -1'
                 }}
               >
                 {error.companies}
               </Paper>
             ) : companiesData && companiesData.length > 0 ? (
-              // نمایش شرکت‌ها
-              companiesData.slice(0, 4).map((company: any, index: number) => (
-                <Paper 
-                  key={company.id || index}
-                  elevation={0} 
-                  sx={{ 
-                    borderRadius: 3,
-                    boxShadow: '0 3px 10px rgba(0,0,0,0.03)',
-                    border: '1px solid #f1f1f1',
-                    overflow: 'hidden',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    transition: 'all 0.3s ease',
-                    '&:hover': {
-                      boxShadow: '0 6px 15px rgba(0,0,0,0.05)',
-                      borderColor: '#e6e6e6'
-                    }
-                  }}
-                >
-                  <Box sx={{ p: 3, borderBottom: '1px solid #f5f5f5', flexGrow: 1 }}>
-                    <Typography fontWeight="bold" sx={{ textAlign: 'left', fontSize: '1rem', mb: 1 }}>
-                      {company.name || 'نام شرکت'}
-                    </Typography>
-                    <Typography variant="body2" color="text.secondary" sx={{ textAlign: 'left' }}>
-                      {company.industry?.name || 'صنعت'}
-                    </Typography>
-                    
-                    <Box sx={{ mt: 3, display: 'flex', alignItems: 'center', justifyContent: 'flex-start' }}>
-                      {company.approved ? (
-                        <Chip 
-                          label="تایید شده" 
-                          size="small"
-                          sx={{ 
-                            bgcolor: 'rgba(76, 175, 80, 0.1)', 
-                            color: '#4caf50',
-                            fontWeight: 500,
-                            borderRadius: 1.5
-                          }} 
-                        />
-                      ) : (
-                        <Chip 
-                          label="در انتظار تایید" 
-                          size="small" 
-                          sx={{ 
-                            bgcolor: 'rgba(255, 152, 0, 0.1)', 
-                            color: '#ff9800',
-                            fontWeight: 500,
-                            borderRadius: 1.5
-                          }} 
-                        />
-                      )}
-                    </Box>
-                  </Box>
-                  <Box sx={{ p: 2, textAlign: 'center', bgcolor: '#f9f9f9', borderTop: '1px solid #f5f5f5' }}>
-                    <Link href={`/employer/companies/${company.id}`} style={{ textDecoration: 'none' }}>
-                      <Button 
-                        fullWidth 
-                        variant="text" 
-                        size="small" 
-                        sx={{ 
-                          color: EMPLOYER_THEME.primary,
-                          fontSize: '0.9rem',
-                          fontWeight: 500,
-                          '&:hover': {
-                            bgcolor: 'rgba(33, 150, 243, 0.05)'
-                          }
-                        }}
-                      >
-                        مشاهده شرکت
-                      </Button>
-                    </Link>
-                  </Box>
-                </Paper>
+              // نمایش شرکت‌ها با استفاده از CompanyCard
+              companiesData.slice(0, 4).map((company: Company, index: number) => (
+                <Link key={company.id} href={`/employer/companies/${company.id}`} style={{ textDecoration: 'none' }}>
+                  <CompanyCard company={company} index={index} />
+                </Link>
               ))
             ) : (
               // نمایش حالت خالی
@@ -765,26 +798,28 @@ export default function MinimalDashboard() {
                   p: 5, 
                   textAlign: 'center',
                   borderRadius: 3,
-                  boxShadow: '0 3px 10px rgba(0,0,0,0.03)',
-                  border: '1px solid #f1f1f1',
-                  gridColumn: '1 / -1' // span across all columns
+                  boxShadow: '0 3px 10px rgba(66, 133, 244, 0.05)',
+                  border: '1px solid #e3f2fd',
+                  bgcolor: '#f8fafd',
+                  gridColumn: '1 / -1'
                 }}
               >
-                <BusinessIcon sx={{ fontSize: 54, color: '#e0e0e0', mb: 3 }} />
+                <CorporateFareIcon sx={{ fontSize: 54, color: EMPLOYER_THEME.primary, mb: 3, opacity: 0.5 }} />
                 <Typography color="text.secondary" sx={{ mb: 3, fontSize: '1rem' }}>
                   هنوز شرکتی ثبت نکرده‌اید
                 </Typography>
                 <Button
                   variant="contained"
+                  startIcon={<AddIcon sx={{ ml: 0.5, mr: -0.5 }} />}
                   sx={{ 
-                    bgcolor: '#4285F4',
-                    '&:hover': { bgcolor: '#3367D6' },
+                    bgcolor: EMPLOYER_THEME.primary,
+                    '&:hover': { bgcolor: EMPLOYER_THEME.dark },
                     px: 4,
                     py: 1.5,
-                    borderRadius: 6,
+                    borderRadius: 2,
                     fontSize: '0.95rem',
                     fontWeight: 'medium',
-                    boxShadow: '0 3px 8px rgba(66, 133, 244, 0.3)'
+                    boxShadow: '0 3px 8px rgba(66, 133, 244, 0.2)'
                   }}
                   component={Link}
                   href="/employer/companies/create"

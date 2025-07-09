@@ -1,0 +1,10 @@
+---
+description: از nextjs 15.3.0 و MUI 7 داریم استفاده میکنیم به نسخه ها دقت کن و از اینترنت اطلاعاتش رو در بیار
+globs: 
+alwaysApply: true
+---
+
+# Your rule content
+
+- You can @ files here
+- You can use markdown but dont have to
