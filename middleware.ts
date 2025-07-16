@@ -5,7 +5,8 @@ import type { NextRequest } from 'next/server';
 const COOKIE_NAMES = {
   ACCESS_TOKEN: 'access_token',
   REFRESH_TOKEN: 'refresh_token',
-  USER_DATA: 'user_data'
+  USER_DATA: 'user_data',
+  REDIRECT_PATH: 'redirect_path' // کوکی جدید برای ذخیره مسیر
 };
 
 // مسیرهایی که نیاز به احراز هویت دارند
@@ -29,17 +30,39 @@ export function middleware(request: NextRequest) {
   const isAuthenticated = !!accessToken;
   const path = request.nextUrl.pathname;
   
+  // بررسی محیط تولید
+  const isProduction = process.env.NODE_ENV === 'production';
+  
   // اگر مسیر محافظت شده است و کاربر احراز هویت نشده است
   if (protectedPaths.some(p => path.startsWith(p)) && !isAuthenticated) {
     const loginUrl = new URL('/login', request.url);
-    // اضافه کردن مسیر فعلی به عنوان پارامتر برای بازگشت پس از ورود
-    loginUrl.searchParams.set('redirect', encodeURIComponent(path));
-    return NextResponse.redirect(loginUrl);
+    
+    // ایجاد پاسخ redirect
+    const response = NextResponse.redirect(loginUrl);
+    
+    // ذخیره مسیر فعلی در کوکی با مدت زمان انقضای 5 دقیقه
+    response.cookies.set({
+      name: COOKIE_NAMES.REDIRECT_PATH,
+      value: path,
+      maxAge: 5 * 60, // 5 دقیقه
+      path: '/',
+      sameSite: 'lax',
+      secure: isProduction // فقط در محیط تولید فعال می‌شود
+    });
+    
+    return response;
   }
   
   // اگر کاربر احراز هویت شده است و سعی دارد به صفحات ورود/ثبت‌نام برود
   if (authPaths.some(p => path === p) && isAuthenticated) {
-    return NextResponse.redirect(new URL('/', request.url));
+    // بررسی آیا مسیر redirect قبلاً ذخیره شده است
+    const redirectPath = request.cookies.get(COOKIE_NAMES.REDIRECT_PATH)?.value || '/';
+    const response = NextResponse.redirect(new URL(redirectPath, request.url));
+    
+    // پاک کردن کوکی redirect path
+    response.cookies.delete(COOKIE_NAMES.REDIRECT_PATH);
+    
+    return response;
   }
   
   return NextResponse.next();

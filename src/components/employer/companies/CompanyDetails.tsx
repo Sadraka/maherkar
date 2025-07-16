@@ -1,16 +1,19 @@
 'use client';
 
-import React from 'react';
+import React, { useState, useRef } from 'react';
 import { 
   Box, 
   Paper, 
   Typography, 
   Chip, 
-  Grid, 
   Divider, 
   Avatar, 
   Skeleton,
-  Link as MuiLink
+  Link as MuiLink,
+  IconButton,
+  styled,
+  Grid,
+  Container
 } from '@mui/material';
 import Link from 'next/link';
 import Image from 'next/image';
@@ -26,7 +29,44 @@ import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
 import LinkedInIcon from '@mui/icons-material/LinkedIn';
 import TwitterIcon from '@mui/icons-material/Twitter';
 import InstagramIcon from '@mui/icons-material/Instagram';
+import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 import { EMPLOYER_THEME } from '@/constants/colors';
+import { dir } from 'console';
+
+// استایل‌های سفارشی
+const StyledPaper = styled(Paper)({
+  borderRadius: 12,
+  overflow: 'hidden',
+  boxShadow: '0 3px 10px rgba(0,0,0,0.05)',
+  border: '1px solid #f0f0f0',
+  marginBottom: 16
+});
+
+const SectionTitle = styled(Typography)({
+  fontSize: '1.1rem',
+  fontWeight: 700,
+  marginBottom: 16,
+  position: 'relative',
+  display: 'inline-block'
+});
+
+const InfoItem = styled(Box)({
+  display: 'flex',
+  alignItems: 'center',
+  marginBottom: 12
+});
+
+const InfoIcon = styled(Box)({
+  marginLeft: 12,
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  color: EMPLOYER_THEME.primary
+});
+
+const InfoText = styled(Typography)({
+  fontSize: '0.9rem'
+});
 
 // تعریف interface برای شرکت بر اساس سریالایزر بک‌اند
 interface Company {
@@ -77,6 +117,9 @@ interface CompanyDetailsProps {
  * کامپوننت نمایش جزئیات شرکت
  */
 const CompanyDetails: React.FC<CompanyDetailsProps> = ({ company, loading = false }) => {
+  const [videoLoaded, setVideoLoaded] = useState(false);
+  const videoRef = useRef<HTMLVideoElement>(null);
+  
   // تابع کمکی برای تبدیل آدرس نسبی به آدرس کامل
   const getImageUrl = (path?: string) => {
     if (!path) return null;
@@ -105,25 +148,28 @@ const CompanyDetails: React.FC<CompanyDetailsProps> = ({ company, loading = fals
     return `${count.toLocaleString('fa-IR')} نفر`;
   };
 
+  // تابع برای بارگذاری و پخش ویدیو
+  const handlePlayVideo = () => {
+    setVideoLoaded(true);
+    
+    // کمی تاخیر برای اطمینان از بارگذاری ویدیو
+    setTimeout(() => {
+      if (videoRef.current) {
+        videoRef.current.play().catch(error => {
+          console.error('خطا در پخش ویدیو:', error);
+        });
+      }
+    }, 100);
+  };
+
   if (loading) {
     return (
-      <Box sx={{width: '100%' }}>
-        <Paper 
-          elevation={0}
-          sx={{ 
-            direction: 'rtl',
-            p: 0, 
-            borderRadius: 3,
-            overflow: 'hidden',
-            boxShadow: '0 3px 10px rgba(0,0,0,0.05)',
-            border: '1px solid #f0f0f0',
-            mb: 4
-          }}
-        >
+      <Box sx={{ width: '100%' }}>
+        <StyledPaper>
           <Skeleton variant="rectangular" width="100%" height={200} />
           <Box sx={{ p: 3 }}>
             <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-              <Skeleton variant="circular" width={80} height={80} sx={{ mr: 2 }} />
+              <Skeleton variant="circular" width={80} height={80} sx={{ ml: 2 }} />
               <Box>
                 <Skeleton variant="text" width={200} height={40} />
                 <Skeleton variant="text" width={150} height={24} />
@@ -133,24 +179,14 @@ const CompanyDetails: React.FC<CompanyDetailsProps> = ({ company, loading = fals
             <Skeleton variant="text" width="80%" height={24} />
             <Skeleton variant="text" width="60%" height={24} />
           </Box>
-        </Paper>
+        </StyledPaper>
       </Box>
     );
   }
 
   return (
-    <Box sx={{ width: '100%', textAlign: 'right' }} dir="rtl">
-      <Paper 
-        elevation={0}
-        sx={{ 
-          p: 0, 
-          borderRadius: 3,
-          overflow: 'hidden',
-          boxShadow: '0 3px 10px rgba(0,0,0,0.05)',
-          border: '1px solid #f0f0f0',
-          mb: 4
-        }}
-      >
+    <Box sx={{ width: '100%' }}>
+      <StyledPaper>
         {/* بنر شرکت */}
         <Box 
           sx={{ 
@@ -187,7 +223,7 @@ const CompanyDetails: React.FC<CompanyDetailsProps> = ({ company, loading = fals
         </Box>
 
         {/* محتوای اصلی */}
-        <Box sx={{ p: { xs: 2, sm: 4 } }} dir="rtl">
+        <Box sx={{ p: 3 }}>
           {/* هدر با لوگو و نام شرکت */}
           <Box sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, alignItems: { xs: 'center', sm: 'flex-start' }, mb: 4 }}>
             <Avatar 
@@ -206,8 +242,8 @@ const CompanyDetails: React.FC<CompanyDetailsProps> = ({ company, loading = fals
             >
               {!company.logo && <BusinessIcon sx={{ fontSize: 40, color: EMPLOYER_THEME.primary }} />}
             </Avatar>
-            <Box sx={{ textAlign: { xs: 'center', sm: 'right' } }}>
-              <Typography variant="h5" component="h1" fontWeight="bold" sx={{ mb: 1 }}>
+            <Box sx={{ textAlign: { xs: 'center', sm: 'right' }, width: '100%' } }dir="rtl">
+              <Typography variant="h5" component="h1" fontWeight="bold" sx={{ mb: 1 }} textAlign="start">
                 {company.name}
               </Typography>
               {company.industry && (
@@ -237,9 +273,9 @@ const CompanyDetails: React.FC<CompanyDetailsProps> = ({ company, loading = fals
           {/* توضیحات شرکت */}
           {company.description && (
             <Box sx={{ mb: 4 }}>
-              <Typography variant="h6" fontWeight="bold" sx={{ mb: 2 }}>
+              <SectionTitle variant="h6">
                 درباره شرکت
-              </Typography>
+              </SectionTitle>
               <Typography variant="body1" sx={{ textAlign: 'justify', lineHeight: 1.8 }}>
                 {company.description}
               </Typography>
@@ -249,57 +285,65 @@ const CompanyDetails: React.FC<CompanyDetailsProps> = ({ company, loading = fals
           <Divider sx={{ my: 4 }} />
 
           {/* اطلاعات تماس و جزئیات */}
-          <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '1fr 1fr' }, gap: 3 }}>
+          <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '1fr 1fr' }, gap: 4 }}>
             <Box>
-              <Typography variant="h6" fontWeight="bold" sx={{ mb: 2 }}>
+              <SectionTitle variant="h6">
                 اطلاعات تماس
-              </Typography>
+              </SectionTitle>
               
-              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+              <Box>
                 {company.website && (
-                  <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                    <LanguageIcon sx={{ fontSize: 20, color: EMPLOYER_THEME.primary, ml: 2 }} />
+                  <InfoItem>
+                    <InfoIcon>
+                      <LanguageIcon fontSize="small" />
+                    </InfoIcon>
                     <MuiLink href={company.website.startsWith('http') ? company.website : `https://${company.website}`} target="_blank" rel="noopener noreferrer" sx={{ textDecoration: 'none', color: EMPLOYER_THEME.primary }}>
                       {company.website}
                     </MuiLink>
-                  </Box>
+                  </InfoItem>
                 )}
                 
                 {company.email && (
-                  <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                    <EmailIcon sx={{ fontSize: 20, color: EMPLOYER_THEME.primary, ml: 2 }} />
+                  <InfoItem>
+                    <InfoIcon>
+                      <EmailIcon fontSize="small" />
+                    </InfoIcon>
                     <MuiLink href={`mailto:${company.email}`} sx={{ textDecoration: 'none', color: EMPLOYER_THEME.primary }}>
                       {company.email}
                     </MuiLink>
-                  </Box>
+                  </InfoItem>
                 )}
                 
                 {company.phone_number && (
-                  <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                    <PhoneIcon sx={{ fontSize: 20, color: EMPLOYER_THEME.primary, ml: 2 }} />
+                  <InfoItem>
+                    <InfoIcon>
+                      <PhoneIcon fontSize="small" />
+                    </InfoIcon>
                     <MuiLink href={`tel:${company.phone_number}`} sx={{ textDecoration: 'none', color: EMPLOYER_THEME.primary }}>
                       {company.phone_number}
                     </MuiLink>
-                  </Box>
+                  </InfoItem>
                 )}
                 
                 {company.address && (
-                  <Box sx={{ display: 'flex', alignItems: 'flex-start' }}>
-                    <LocationOnIcon sx={{ fontSize: 20, color: EMPLOYER_THEME.primary, ml: 2, mt: 0.3 }} />
-                    <Typography variant="body2">
+                  <InfoItem>
+                    <InfoIcon sx={{ alignSelf: 'flex-start', mt: 0.5 }}>
+                      <LocationOnIcon fontSize="small" />
+                    </InfoIcon>
+                    <InfoText>
                       {company.address}
                       {company.postal_code && ` - کد پستی: ${company.postal_code}`}
-                    </Typography>
-                  </Box>
+                    </InfoText>
+                  </InfoItem>
                 )}
               </Box>
 
               {/* شبکه‌های اجتماعی */}
               {(company.linkedin || company.twitter || company.instagram) && (
-                <Box sx={{ mt: 3 }}>
-                  <Typography variant="subtitle1" fontWeight="bold" sx={{ mb: 1.5 }}>
+                <Box sx={{ mt: 4 }}>
+                  <SectionTitle variant="h6">
                     شبکه‌های اجتماعی
-                  </Typography>
+                  </SectionTitle>
                   <Box sx={{ display: 'flex', gap: 2 }}>
                     {company.linkedin && (
                       <MuiLink href={company.linkedin} target="_blank" rel="noopener noreferrer">
@@ -328,40 +372,134 @@ const CompanyDetails: React.FC<CompanyDetailsProps> = ({ company, loading = fals
             </Box>
             
             <Box>
-              <Typography variant="h6" fontWeight="bold" sx={{ mb: 2 }}>
+              <SectionTitle variant="h6">
                 اطلاعات شرکت
-              </Typography>
+              </SectionTitle>
               
-              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+              <Box>
                 {company.founded_date && (
-                  <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                    <CalendarTodayIcon sx={{ fontSize: 20, color: EMPLOYER_THEME.primary, ml: 2 }} />
-                    <Typography variant="body2">
+                  <InfoItem>
+                    <InfoIcon>
+                      <CalendarTodayIcon fontSize="small" />
+                    </InfoIcon>
+                    <InfoText>
                       <Box component="span" fontWeight="medium">تاریخ تأسیس:</Box> {formatDate(company.founded_date)}
-                    </Typography>
-                  </Box>
+                    </InfoText>
+                  </InfoItem>
                 )}
                 
                 {company.number_of_employees && company.number_of_employees > 0 && (
-                  <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                    <PeopleAltIcon sx={{ fontSize: 20, color: EMPLOYER_THEME.primary, ml: 2 }} />
-                    <Typography variant="body2">
+                  <InfoItem>
+                    <InfoIcon>
+                      <PeopleAltIcon fontSize="small" />
+                    </InfoIcon>
+                    <InfoText>
                       <Box component="span" fontWeight="medium">تعداد کارکنان:</Box> {formatEmployeeCount(company.number_of_employees)}
-                    </Typography>
-                  </Box>
+                    </InfoText>
+                  </InfoItem>
                 )}
                 
-                <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                  <CalendarTodayIcon sx={{ fontSize: 20, color: EMPLOYER_THEME.primary, ml: 2 }} />
-                  <Typography variant="body2">
+                <InfoItem>
+                  <InfoIcon>
+                    <CalendarTodayIcon fontSize="small" />
+                  </InfoIcon>
+                  <InfoText>
                     <Box component="span" fontWeight="medium">تاریخ ثبت در سامانه:</Box> {formatDate(company.created_at)}
-                  </Typography>
-                </Box>
+                  </InfoText>
+                </InfoItem>
               </Box>
             </Box>
           </Box>
+          
+          {/* ویدیوی معرفی شرکت */}
+          {company.intro_video && (
+            <Box sx={{ mt: 4 }}>
+              <SectionTitle variant="h6">
+                ویدیوی معرفی
+              </SectionTitle>
+              
+              <Box 
+                sx={{ 
+                  width: '100%',
+                  borderRadius: 2,
+                  overflow: 'hidden',
+                  backgroundColor: '#f5f5f5',
+                  position: 'relative',
+                  height: '350px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center'
+                }}
+              >
+                {!videoLoaded ? (
+                  <Box
+                    sx={{
+                      position: 'absolute',
+                      top: 0,
+                      left: 0,
+                      width: '100%',
+                      height: '100%',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      flexDirection: 'column',
+                      backgroundColor: 'rgba(0, 0, 0, 0.1)',
+                      cursor: 'pointer',
+                      borderRadius: 2,
+                      transition: 'all 0.3s ease',
+                      '&:hover': {
+                        backgroundColor: 'rgba(0, 0, 0, 0.2)',
+                      }
+                    }}
+                    onClick={handlePlayVideo}
+                  >
+                    <IconButton
+                      sx={{
+                        backgroundColor: EMPLOYER_THEME.primary,
+                        width: 80,
+                        height: 80,
+                        '&:hover': {
+                          backgroundColor: EMPLOYER_THEME.primary,
+                          opacity: 0.9,
+                        }
+                      }}
+                    >
+                      <PlayArrowIcon sx={{ fontSize: 40, color: 'white' }} />
+                    </IconButton>
+                    <Typography
+                      variant="body1"
+                      sx={{
+                        mt: 2,
+                        color: 'text.primary',
+                        fontWeight: 'medium',
+                      }}
+                    >
+                      پخش ویدیو
+                    </Typography>
+                  </Box>
+                ) : null}
+                
+                {videoLoaded && (
+                  <video
+                    ref={videoRef}
+                    src={getImageUrl(company.intro_video) || ''}
+                    controls
+                    preload="metadata"
+                    style={{ 
+                      width: '100%',
+                      height: '100%',
+                      objectFit: 'contain',
+                      borderRadius: '8px'
+                    }}
+                    controlsList="nodownload"
+                    onContextMenu={(e) => e.preventDefault()}
+                  />
+                )}
+              </Box>
+            </Box>
+          )}
         </Box>
-      </Paper>
+      </StyledPaper>
     </Box>
   );
 };

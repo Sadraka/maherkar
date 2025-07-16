@@ -28,8 +28,12 @@ const cookieService = {
         date.setTime(date.getTime() + days * 24 * 60 * 60 * 1000);
         const expires = `expires=${date.toUTCString()}`;
 
+        // بررسی محیط تولید برای تنظیم secure
+        const isProduction = process.env.NODE_ENV === 'production';
+        const secureFlag = isProduction ? '; Secure' : '';
+
         // ایجاد کوکی با امنیت بیشتر
-        document.cookie = `${name}=${value}; ${expires}; path=/; SameSite=Strict`;
+        document.cookie = `${name}=${value}; ${expires}; path=/; SameSite=Lax${secureFlag}`;
     },
 
     /**
@@ -58,8 +62,12 @@ const cookieService = {
         // بررسی اجرای در مرورگر
         if (typeof document === 'undefined') return;
 
+        // بررسی محیط تولید برای تنظیم secure
+        const isProduction = process.env.NODE_ENV === 'production';
+        const secureFlag = isProduction ? '; Secure' : '';
+
         // تنظیم تاریخ انقضا در گذشته برای حذف کوکی
-        document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; SameSite=Strict`;
+        document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; SameSite=Lax${secureFlag}`;
     },
 
     /**
@@ -92,7 +100,7 @@ const cookieService = {
             return JSON.parse(cookieValue) as T;
         } catch (error) {
             if (process.env.NODE_ENV !== 'production') {
-                // خطای تبدیل از JSON در محیط توسعه ثبت می‌شود
+                // خطای تبدیل به JSON در محیط توسعه ثبت می‌شود
             }
             return null;
         }

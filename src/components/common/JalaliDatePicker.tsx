@@ -246,9 +246,22 @@ export default function JalaliDatePicker({
   const handleDaySelect = (year: number, month: number, day: number) => {
     setSelectedDate([year, month, day]);
     const gDate = jalaliToGregorian(year, month, day);
+    
     // فرمت تاریخ به صورت YYYY-MM-DD برای ذخیره در دیتابیس
+    // تصحیح مشکل یک روز اختلاف در تاریخ
     const formattedDate = `${gDate[0]}-${gDate[1].toString().padStart(2, '0')}-${gDate[2].toString().padStart(2, '0')}`;
-    onChange(formattedDate);
+    
+    // بررسی اگر تاریخ انتخابی با تاریخ نمایش داده شده یک روز اختلاف دارد
+    const jalaliDate = gregorianToJalali(gDate[0], gDate[1], gDate[2]);
+    if (jalaliDate[2] !== day) {
+      // اگر اختلاف وجود دارد، تاریخ میلادی را یک روز جلوتر می‌بریم
+      const date = new Date(gDate[0], gDate[1] - 1, gDate[2] + 1);
+      const correctedDate = `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, '0')}-${date.getDate().toString().padStart(2, '0')}`;
+      onChange(correctedDate);
+    } else {
+      onChange(formattedDate);
+    }
+    
     handleClose();
   };
 

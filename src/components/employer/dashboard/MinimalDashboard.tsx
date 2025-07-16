@@ -80,13 +80,13 @@ export default function MinimalDashboard() {
       try {
         const [profileResponse, jobsResponse, applicationsResponse, companiesResponse] = await Promise.all([
           apiGet('/profiles/employers/'),
-          apiGet('/ads/job/'),
+          apiGet('/ads/job/my-jobs/'),
           apiGet('/ads/applications/'),
           apiGet('/companies/')
         ]);
 
         setProfileData(profileResponse.data);
-        setJobsData(jobsResponse.data);
+        setJobsData((jobsResponse.data as { count: number; results: any[] }).results);
         setApplicationsData(applicationsResponse.data);
         setCompaniesData(companiesResponse.data as Company[]);
       } catch (err) {

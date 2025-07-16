@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { Container, Box, Typography, Button, Breadcrumbs, Link as MuiLink } from '@mui/material';
+import { Container, Box, Typography, Button } from '@mui/material';
 import Link from 'next/link';
 import { apiGet } from '@/lib/axios';
 import { EMPLOYER_THEME } from '@/constants/colors';
@@ -10,8 +10,6 @@ import { useParams } from 'next/navigation';
 // آیکون‌ها
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import EditIcon from '@mui/icons-material/Edit';
-import HomeIcon from '@mui/icons-material/Home';
-import BusinessIcon from '@mui/icons-material/Business';
 
 // کامپوننت‌ها
 import CompanyDetails from '@/components/employer/companies/CompanyDetails';
@@ -64,12 +62,11 @@ export default function CompanyDetailsPage() {
       return <ErrorState message="اطلاعات شرکت یافت نشد" />;
     }
 
-    return <CompanyDetails company={company} />;
+    return <CompanyDetails company={company}/>;
   };
 
   return (
-    <Container maxWidth="lg" sx={{ py: 6, textAlign: 'right' }} dir="rtl">
-     
+    <Container maxWidth="lg" sx={{ py: 4, direction: 'ltr' }}>
       {/* هدر صفحه */}
       <Box 
         sx={{ 
@@ -78,18 +75,20 @@ export default function CompanyDetailsPage() {
           justifyContent: 'space-between', 
           alignItems: { xs: 'flex-start', sm: 'center' }, 
           mb: { xs: 3, sm: 4 },
-          gap: { xs: 2, sm: 0 }
+          gap: { xs: 2, sm: 0 },
         }}
       >
         <Box sx={{ display: 'flex', alignItems: 'center' }}>
+          <Typography variant="h5" component="h1" fontWeight="bold" sx={{ ml: 2 }}>
+           
+          </Typography>
           <Button
             variant="outlined"
-            startIcon={<ArrowBackIcon />}
+            endIcon={<ArrowBackIcon />}
             sx={{
               borderColor: EMPLOYER_THEME.light,
               color: EMPLOYER_THEME.primary,
               '&:hover': { borderColor: EMPLOYER_THEME.primary },
-              ml: 2,
               borderRadius: 2
             }}
             component={Link}
@@ -97,17 +96,13 @@ export default function CompanyDetailsPage() {
           >
             بازگشت
           </Button>
-          <Typography variant="h5" component="h1" fontWeight="bold">
-           
-          </Typography>
         </Box>
 
         {!loading && company && (
           <Button
             variant="contained"
             startIcon={<EditIcon />}
-            sx={{ 
-            
+            sx={{
               bgcolor: EMPLOYER_THEME.primary,
               '&:hover': { bgcolor: EMPLOYER_THEME.dark },
               borderRadius: 2

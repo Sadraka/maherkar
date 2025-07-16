@@ -42,8 +42,8 @@ const employerMenuItems = [
       icon: faClipboardList,
   },
   { 
-      title: 'پروفایل شرکت', 
-      path: '/employer/company', 
+      title: 'شرکت‌های من', 
+      path: '/employer/companies', 
       icon: faBuilding,
   },
   { 
@@ -68,6 +68,7 @@ export default function EmployerLayout({ children }: { children: React.ReactNode
   const isActiveMenuItem = (path: string) => {
     if (path === pathname) return true;
     if (path === '/employer/jobs' && pathname?.startsWith('/employer/jobs/')) return true;
+    if (path === '/employer/companies' && pathname?.startsWith('/employer/companies/')) return true;
     if (path === '/employer/applications' && pathname?.startsWith('/employer/applications/')) return true;
     return false;
   };

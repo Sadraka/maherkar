@@ -87,6 +87,52 @@ type City = {
 };
 
 /**
+ * تعریف ساختار داده شرکت
+ */
+export interface Company {
+  id: string;
+  name: string;
+  description?: string;
+  website?: string;
+  email?: string;
+  phone_number?: string;
+  address?: string;
+  location?: {
+    id: number;
+    name: string;
+  };
+  logo?: string;
+  banner?: string;
+  intro_video?: string;
+  postal_code?: string;
+  founded_date?: string;
+  industry?: number;
+  number_of_employees?: number;
+  linkedin?: string;
+  twitter?: string;
+  instagram?: string;
+  created_at?: string;
+  updated_at?: string;
+}
+
+/**
+ * Props برای کامپوننت CreateCompanyForm
+ */
+interface CreateCompanyFormProps {
+  initialData?: Company | null;
+  isEditMode?: boolean;
+  onSubmit?: (data: any, formData: FormData) => Promise<{ 
+    success: boolean; 
+    message: string; 
+    redirectUrl: string;
+  }>;
+  pageTitle?: string;
+  pageIcon?: React.ReactElement;
+  submitButtonText?: string;
+  successMessage?: string;
+}
+
+/**
  * ورودی‌های فرم ثبت شرکت
  */
 interface CompanyFormInputs {
@@ -119,6 +165,9 @@ interface ImagePreviewProps {
 }
 
 const ImagePreview: React.FC<ImagePreviewProps> = ({ src, alt, onDelete, objectFit = 'contain', aspectRatio = '1/1' }) => {
+  // کنترل کننده خطای بارگذاری تصویر
+  const [error, setError] = useState<boolean>(false);
+
   return (
     <Box sx={{ position: 'relative', width: '100%', aspectRatio: aspectRatio }}>
       <Box
@@ -129,15 +178,27 @@ const ImagePreview: React.FC<ImagePreviewProps> = ({ src, alt, onDelete, objectF
           left: 0,
           bottom: 0,
           borderRadius: 1,
-          overflow: 'hidden'
+          overflow: 'hidden',
+          bgcolor: error ? 'rgba(0,0,0,0.05)' : 'transparent',
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center'
         }}
       >
-        <Image
-          src={src}
-          alt={alt}
-          fill
-          style={{ objectFit }}
-        />
+        {error ? (
+          <Typography variant="body2" color="error" align="center">
+            خطا در بارگذاری تصویر<br />
+            فرمت یا آدرس تصویر نامعتبر است
+          </Typography>
+        ) : (
+          <Image
+            src={src}
+            alt={alt}
+            fill
+            style={{ objectFit }}
+            onError={() => setError(true)}
+          />
+        )}
         <Tooltip title="حذف" arrow>
           <IconButton
             onClick={(e) => {
@@ -172,6 +233,9 @@ interface VideoPreviewProps {
 }
 
 const VideoPreview: React.FC<VideoPreviewProps> = ({ src, onDelete }) => {
+  // کنترل کننده خطای بارگذاری ویدیو
+  const [error, setError] = useState<boolean>(false);
+
   return (
     <Box sx={{ position: 'relative', width: '100%', aspectRatio: '16/9' }}>
       <Box
@@ -182,14 +246,26 @@ const VideoPreview: React.FC<VideoPreviewProps> = ({ src, onDelete }) => {
           left: 0,
           bottom: 0,
           borderRadius: 1,
-          overflow: 'hidden'
+          overflow: 'hidden',
+          bgcolor: error ? 'rgba(0,0,0,0.05)' : 'transparent',
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center'
         }}
       >
-        <video
-          src={src}
-          style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-          controls
-        />
+        {error ? (
+          <Typography variant="body2" color="error" align="center">
+            خطا در بارگذاری ویدیو<br />
+            فرمت یا آدرس ویدیو نامعتبر است
+          </Typography>
+        ) : (
+          <video
+            src={src}
+            style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+            controls
+            onError={() => setError(true)}
+          />
+        )}
         <Tooltip title="حذف" arrow>
           <IconButton
             onClick={(e) => {
@@ -220,7 +296,15 @@ const VideoPreview: React.FC<VideoPreviewProps> = ({ src, onDelete }) => {
 /**
  * کامپوننت فرم ثبت شرکت جدید
  */
-export default function CreateCompanyForm() {
+export default function CreateCompanyForm({
+  initialData = null,
+  isEditMode = false,
+  onSubmit: customSubmit,
+  pageTitle = "ثبت شرکت جدید",
+  pageIcon = <DomainAddIcon />,
+  submitButtonText = "ثبت شرکت",
+  successMessage = "شرکت با موفقیت ثبت شد. در حال انتقال به صفحه شرکت‌ها..."
+}: CreateCompanyFormProps) {
   const router = useRouter();
   const [industries, setIndustries] = useState<Industry[]>([]);
   const [cities, setCities] = useState<City[]>([]);
@@ -243,7 +327,8 @@ export default function CreateCompanyForm() {
     control, 
     formState: { errors: formErrors },
     watch,
-    setValue
+    setValue,
+    reset
   } = useForm<CompanyFormInputs>({
     defaultValues: {
       name: '',
@@ -386,6 +471,65 @@ export default function CreateCompanyForm() {
     fetchData();
    
   }, []);
+
+  // تابع کمکی برای تبدیل مسیر نسبی به URL کامل
+  const getFullUrl = (path: string | undefined): string | null => {
+    if (!path) return null;
+    if (path.startsWith('http')) return path;
+    return `${process.env.NEXT_PUBLIC_API_URL}${path}`;
+  };
+
+  // اگر داده اولیه وجود داشته باشد، فرم را پر کن
+  useEffect(() => {
+    if (initialData && isEditMode) {
+      // تنظیم داده‌های فرم
+      reset({
+        name: initialData.name || '',
+        city_id: initialData.location?.id || 0,
+        industry: initialData.industry || 0,
+        description: initialData.description || '',
+        website: initialData.website || '',
+        email: initialData.email || '',
+        phone_number: initialData.phone_number || '',
+        address: initialData.address || '',
+        postal_code: initialData.postal_code || '',
+        founded_date: initialData.founded_date || '',
+        number_of_employees: initialData.number_of_employees ? String(initialData.number_of_employees) : '',
+        linkedin: initialData.linkedin || '',
+        twitter: initialData.twitter || '',
+        instagram: initialData.instagram || '',
+      });
+
+      // باز کردن آکاردئون اطلاعات اختیاری اگر داده‌های اختیاری وجود داشته باشد
+      if (
+        initialData.description || 
+        initialData.website || 
+        initialData.email || 
+        initialData.phone_number || 
+        initialData.address || 
+        initialData.postal_code || 
+        initialData.founded_date || 
+        initialData.industry || 
+        initialData.number_of_employees || 
+        initialData.linkedin || 
+        initialData.twitter || 
+        initialData.instagram
+      ) {
+        setExpandedOptional(true);
+      }
+
+      // نمایش تصاویر و ویدیو اگر وجود داشته باشند
+      if (initialData.logo) {
+        setLogoPreview(getFullUrl(initialData.logo));
+      }
+      if (initialData.banner) {
+        setBannerPreview(getFullUrl(initialData.banner));
+      }
+      if (initialData.intro_video) {
+        setVideoPreview(getFullUrl(initialData.intro_video));
+      }
+    }
+  }, [initialData, isEditMode, reset]);
 
   // گروه‌بندی شهرها بر اساس استان
   const groupedCities = React.useMemo(() => {
@@ -775,30 +919,59 @@ export default function CreateCompanyForm() {
         console.log(pair[0] + ': ' + (pair[1] instanceof File ? pair[1].name : pair[1]));
       }
 
-      const response = await apiPost('/companies/', formDataToSend, {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
-      });
-
-      setSuccess(true);
-      
-      // اسکرول به بالای فرم بعد از ثبت موفقیت‌آمیز
-      setTimeout(() => {
-        if (formRef.current) {
-          formRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
-          // تمرکز بر روی پیام موفقیت
-          const successAlert = document.querySelector('.MuiAlert-standardSuccess');
-          if (successAlert) {
-            successAlert.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      // اگر در حالت ویرایش هستیم و تابع onSubmit سفارشی ارسال شده، از آن استفاده کنیم
+      if (isEditMode && customSubmit) {
+        const result = await customSubmit(data, formDataToSend);
+        if (result && result.success) {
+          setSuccess(true);
+          
+          // اسکرول به بالای فرم بعد از ثبت موفقیت‌آمیز
+          setTimeout(() => {
+            if (formRef.current) {
+              formRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
+              // تمرکز بر روی پیام موفقیت
+              const successAlert = document.querySelector('.MuiAlert-standardSuccess');
+              if (successAlert) {
+                successAlert.scrollIntoView({ behavior: 'smooth', block: 'center' });
+              }
+            }
+          }, 100);
+          
+          // هدایت کاربر به صفحه مشخص شده پس از ثبت موفق
+          if (result.redirectUrl) {
+            setTimeout(() => {
+              router.push(result.redirectUrl);
+            }, 2000);
           }
         }
-      }, 100);
-      
-      // هدایت کاربر به صفحه لیست شرکت‌ها پس از ثبت موفق
-      setTimeout(() => {
-        router.push('/employer/companies');
-      }, 2000);
+      } 
+      // در غیر این صورت، از روش معمولی ثبت استفاده کنیم
+      else {
+        await apiPost('/companies/', formDataToSend, {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+        });
+
+        setSuccess(true);
+        
+        // اسکرول به بالای فرم بعد از ثبت موفقیت‌آمیز
+        setTimeout(() => {
+          if (formRef.current) {
+            formRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            // تمرکز بر روی پیام موفقیت
+            const successAlert = document.querySelector('.MuiAlert-standardSuccess');
+            if (successAlert) {
+              successAlert.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+          }
+        }, 100);
+        
+        // هدایت کاربر به صفحه لیست شرکت‌ها پس از ثبت موفق
+        setTimeout(() => {
+          router.push('/employer/companies');
+        }, 2000);
+      }
     } catch (err: any) {
       console.error('خطا در ثبت شرکت:', err);
       
@@ -1006,19 +1179,25 @@ export default function CreateCompanyForm() {
         flexDirection: 'column',
         gap: 2
       }}>
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-          <DomainAddIcon sx={{ 
-            fontSize: { xs: 32, md: 42 }, 
-            color: EMPLOYER_THEME.primary,
-            transform: 'translateY(-2px)'
-          }} />
-          <Typography variant="h5" component="h1" fontWeight="bold" sx={{ 
-            fontSize: { xs: '1.25rem', md: '1.5rem' },
-            color: EMPLOYER_THEME.primary
-          }}>
-            ثبت شرکت جدید
-          </Typography>
-        </Box>
+        {pageTitle && (
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+            {React.isValidElement(pageIcon) && 
+              React.cloneElement(pageIcon, { 
+                sx: { 
+                  fontSize: { xs: 32, md: 42 }, 
+                  color: EMPLOYER_THEME.primary,
+                  transform: 'translateY(-2px)'
+                } 
+              } as any)
+            }
+            <Typography variant="h5" component="h1" fontWeight="bold" sx={{ 
+              fontSize: { xs: '1.25rem', md: '1.5rem' },
+              color: EMPLOYER_THEME.primary
+            }}>
+              {pageTitle}
+            </Typography>
+          </Box>
+        )}
         <Alert 
           severity="info" 
           icon={<InfoIcon />}
@@ -1050,7 +1229,7 @@ export default function CreateCompanyForm() {
               </IconButton>
             }
           >
-            <AlertTitle>خطا در ثبت شرکت</AlertTitle>
+            <AlertTitle>{isEditMode ? 'خطا در ویرایش شرکت' : 'خطا در ثبت شرکت'}</AlertTitle>
             {errors.length === 1 ? errors[0] : 'لطفاً موارد زیر را بررسی کنید:'}
           </Alert>
           
@@ -1089,7 +1268,7 @@ export default function CreateCompanyForm() {
           severity="success" 
           sx={{ mb: 3 }}
         >
-          شرکت با موفقیت ثبت شد. در حال انتقال به صفحه شرکت‌ها...
+          {successMessage}
         </Alert>
       )}
 
@@ -1519,6 +1698,17 @@ export default function CreateCompanyForm() {
                             error={Boolean(formErrors.postal_code)}
                             helperText={formErrors.postal_code?.message}
                             variant="outlined"
+                            inputProps={{
+                              maxLength: 10,
+                              pattern: '[0-9]*',
+                              inputMode: 'numeric'
+                            }}
+                            onChange={(e) => {
+                              // فقط اعداد را قبول کن
+                              const value = e.target.value.replace(/[^0-9]/g, '');
+                              // محدود کردن به 10 کاراکتر
+                              field.onChange(value.slice(0, 10));
+                            }}
                             sx={{ 
                               '& .MuiOutlinedInput-root': { borderRadius: 2 },
                               '& .MuiInputBase-input': { textAlign: 'left', direction: 'ltr' }
@@ -1999,9 +2189,9 @@ export default function CreateCompanyForm() {
             {loading ? (
               <>
                 <CircularProgress size={20} color="inherit" sx={{ ml: 1 }} />
-                در حال ثبت...
+                {isEditMode ? 'در حال ذخیره...' : 'در حال ثبت...'}
               </>
-            ) : 'ثبت شرکت'}
+            ) : submitButtonText}
           </Button>
         </Box>
       </form>
