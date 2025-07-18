@@ -24,7 +24,7 @@ export default function PaymentCallbackPage() {
   const [hasRedirected, setHasRedirected] = useState(false);
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
-
+  
   // دریافت پارامترهای ارسالی از زرین‌پال
   const authority = searchParams.get('Authority');
   const statusParam = searchParams.get('Status');
@@ -87,8 +87,8 @@ export default function PaymentCallbackPage() {
             sessionStorage.setItem(key, 'true');
             startCountdown();
           } else {
-            setStatus('failed');
-            setMessage('خطا در تایید پرداخت. لطفاً با پشتیبانی تماس بگیرید.');
+          setStatus('failed');
+          setMessage('خطا در تایید پرداخت. لطفاً با پشتیبانی تماس بگیرید.');
             setLoading(false);
           }
         }

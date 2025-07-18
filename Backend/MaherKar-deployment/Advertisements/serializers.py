@@ -10,16 +10,12 @@ from Resumes.models import JobSeekerResume
 from .models import Advertisement, JobAdvertisement, ResumeAdvertisement, Application
 
 
-
-
 class AdvertisementSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Advertisement
         fields = '__all__'
         read_only_fields = ['subscription']
-
-
 
 
 class JobAdvertisementSerializer(serializers.ModelSerializer):
@@ -32,7 +28,8 @@ class JobAdvertisementSerializer(serializers.ModelSerializer):
         fields = '__all__'
         # These fields are automatically set by the create() method,
         # so they cannot be modified via the serializer.
-        read_only_fields = ['employer', 'location', 'company', 'advertisement', 'industry']
+        read_only_fields = ['employer', 'location',
+                            'company', 'advertisement', 'industry']
 
     def create(self, validated_data):
         # Retrieve the current request and logged-in user.
@@ -46,10 +43,12 @@ class JobAdvertisementSerializer(serializers.ModelSerializer):
                 # Use the default manager ('objects') to get the Company instance.
                 company = Company.objects.get(id=company_id)
             except Company.DoesNotExist:
-                raise serializers.ValidationError({'company': 'The company does not exist.'})
+                raise serializers.ValidationError(
+                    {'company': 'The company does not exist.'})
         else:
-            raise serializers.ValidationError({'company_id': 'This field is required.'})
-        
+            raise serializers.ValidationError(
+                {'company_id': 'This field is required.'})
+
         # Extract and remove the industry_id from validated_data.
         industry_id = validated_data.pop('industry_id', None)
         if industry_id:
@@ -57,18 +56,21 @@ class JobAdvertisementSerializer(serializers.ModelSerializer):
                 # Retrieve the Industry instance.
                 industry = Industry.objects.get(id=industry_id)
             except Industry.DoesNotExist:
-                raise serializers.ValidationError({'industry': 'The industry does not exist.'})
+                raise serializers.ValidationError(
+                    {'industry': 'The industry does not exist.'})
         else:
-            raise serializers.ValidationError({'industry_id': 'This field is required.'})
+            raise serializers.ValidationError(
+                {'industry_id': 'This field is required.'})
 
         # Verify that the user is the employer of the company or a staff member.
         if company.employer != user and not user.is_staff:
-            raise serializers.ValidationError({'error': 'You are not the employer of this company.'})
-        
+            raise serializers.ValidationError(
+                {'error': 'You are not the employer of this company.'})
+
         # Generate a unique identifier for the advertisement.
         ad_generated_id = uuid.uuid4()
         job_generated_id = uuid.uuid4()
-        
+
         # Create a new subscription for this advertisement.
         subscription = AdvertisementSubscription.objects.create()
 
@@ -77,16 +79,18 @@ class JobAdvertisementSerializer(serializers.ModelSerializer):
             id=ad_generated_id,
             ad_type="J",
         )
-        
+
         # Create the JobAdvertisement with all relationships and remaining data.
         advertisement = JobAdvertisement.objects.create(
             id=job_generated_id,
             advertisement=advertisement,
             industry=industry,
             company=company,
-            location=company.location,  # Location is inferred from the company.
+            # Location is inferred from the company.
+            location=company.location,
             employer=user,
-            **validated_data  # Include other validated fields (e.g., title, description).
+            # Include other validated fields (e.g., title, description).
+            **validated_data
         )
         return advertisement
 
@@ -97,11 +101,13 @@ class JobAdvertisementSerializer(serializers.ModelSerializer):
 
         # Update simple fields.
         instance.title = validated_data.get('title', instance.title)
-        instance.description = validated_data.get('description', instance.description)
+        instance.description = validated_data.get(
+            'description', instance.description)
         instance.gender = validated_data.get('gender', instance.gender)
-        
+
         # Correct field naming for soldier_status.
-        instance.soldier_status = validated_data.get('soldier_status', instance.soldier_status)
+        instance.soldier_status = validated_data.get(
+            'soldier_status', instance.soldier_status)
         instance.degree = validated_data.get('degree', instance.degree)
         instance.salary = validated_data.get('salary', instance.salary)
         instance.job_type = validated_data.get('job_type', instance.job_type)
@@ -113,8 +119,9 @@ class JobAdvertisementSerializer(serializers.ModelSerializer):
                 industry = Industry.objects.get(id=industry_id)
                 instance.industry = industry
             except Industry.DoesNotExist:
-                raise serializers.ValidationError({'industry': 'The industry does not exist.'})
-        
+                raise serializers.ValidationError(
+                    {'industry': 'The industry does not exist.'})
+
         # Optionally update the Location based on city_id if provided.
         city_id = validated_data.get('city_id', None)
         if city_id:
@@ -122,12 +129,13 @@ class JobAdvertisementSerializer(serializers.ModelSerializer):
                 location = City.objects.get(id=city_id)
                 instance.location = location
             except City.DoesNotExist:
-                raise serializers.ValidationError({'location': 'The location does not exist.'})
-        
+                raise serializers.ValidationError(
+                    {'location': 'The location does not exist.'})
+
         # Allow staff users to update the advertisement's status.
         if user.is_staff:
             instance.status = validated_data.get('status', instance.status)
-        
+
         # Persist the changes.
         instance.save()
         return instance
@@ -143,33 +151,38 @@ class ResumeAdvertisementSerializer(serializers.ModelSerializer):
         model = ResumeAdvertisement
         fields = '__all__'
         # job_seeker, location, and resume are controlled by the system.
-        read_only_fields = ['job_seeker', 'location', 'resume', 'advertisement', 'industry']
+        read_only_fields = ['job_seeker', 'location',
+                            'resume', 'advertisement', 'industry']
 
     def create(self, validated_data):
         # Get the request context to access the user.
         request = self.context.get('request')
         user = request.user
-        
+
         # Extract and validate industry_id.
         industry_id = validated_data.pop('industry_id', None)
         if industry_id:
             try:
                 industry = Industry.objects.get(id=industry_id)
             except Industry.DoesNotExist:
-                raise serializers.ValidationError({'industry': 'The industry does not exist.'})
+                raise serializers.ValidationError(
+                    {'industry': 'The industry does not exist.'})
         else:
-            raise serializers.ValidationError({'industry_id': 'This field is required.'})
-        
+            raise serializers.ValidationError(
+                {'industry_id': 'This field is required.'})
+
         # Extract and validate city_id.
         city_id = validated_data.pop('city_id', None)
         if city_id:
             try:
                 location = City.objects.get(id=city_id)
             except City.DoesNotExist:
-                raise serializers.ValidationError({'location': 'The location does not exist.'})
+                raise serializers.ValidationError(
+                    {'location': 'The location does not exist.'})
         else:
-            raise serializers.ValidationError({'city_id': 'This field is required.'})
-        
+            raise serializers.ValidationError(
+                {'city_id': 'This field is required.'})
+
         # Generate a new unique identifier.
         resume_generated_id = uuid.uuid4()
         ad_generated_id = uuid.uuid4()
@@ -178,8 +191,9 @@ class ResumeAdvertisementSerializer(serializers.ModelSerializer):
         try:
             resume = JobSeekerResume.objects.get(job_seeker=user)
         except JobSeekerResume.DoesNotExist:
-            raise serializers.ValidationError({'resume': 'No resume found for the job seeker.'})
-        
+            raise serializers.ValidationError(
+                {'resume': 'No resume found for the job seeker.'})
+
         # Create a subscription for this resume advertisement.
         subscription = AdvertisementSubscription.objects.create()
 
@@ -208,11 +222,13 @@ class ResumeAdvertisementSerializer(serializers.ModelSerializer):
 
         # Update display fields.
         instance.title = validated_data.get('title', instance.title)
-        instance.description = validated_data.get('description', instance.description)
+        instance.description = validated_data.get(
+            'description', instance.description)
         instance.gender = validated_data.get('gender', instance.gender)
-        
+
         # Correct field naming: soldier_status (not solider_status).
-        instance.soldier_status = validated_data.get('soldier_status', instance.soldier_status)
+        instance.soldier_status = validated_data.get(
+            'soldier_status', instance.soldier_status)
         instance.degree = validated_data.get('degree', instance.degree)
         instance.salary = validated_data.get('salary', instance.salary)
         instance.job_type = validated_data.get('job_type', instance.job_type)
@@ -224,8 +240,9 @@ class ResumeAdvertisementSerializer(serializers.ModelSerializer):
                 industry = Industry.objects.get(id=industry_id)
                 instance.industry = industry
             except Industry.DoesNotExist:
-                raise serializers.ValidationError({'industry': 'The industry does not exist.'})
-        
+                raise serializers.ValidationError(
+                    {'industry': 'The industry does not exist.'})
+
         # Update location if a new city_id is provided.
         city_id = validated_data.get('city_id', None)
         if city_id:
@@ -233,8 +250,9 @@ class ResumeAdvertisementSerializer(serializers.ModelSerializer):
                 location = City.objects.get(id=city_id)
                 instance.location = location
             except City.DoesNotExist:
-                raise serializers.ValidationError({'location': 'The location does not exist.'})
-        
+                raise serializers.ValidationError(
+                    {'location': 'The location does not exist.'})
+
         # Permit staff users to modify the advertisement's status.
         if user.is_staff:
             instance.status = validated_data.get('status', instance.status)
@@ -251,30 +269,35 @@ class ApplicationSerializer(serializers.ModelSerializer):
         model = Application
         fields = '__all__'
         # These fields are automatically set during creation, not updated via input.
-        read_only_fields = ['job_seeker', 'advertisement', 'resume', 'industry', 'location']
+        read_only_fields = ['job_seeker', 'advertisement',
+                            'resume', 'industry', 'location']
 
     def create(self, validated_data):
         request = self.context.get('request')
         user = request.user
-        
+
         # Extract and validate advertisement_id.
         advertisement_id = validated_data.pop('advertisement_id', None)
         if advertisement_id:
             try:
-                advertisement = JobAdvertisement.objects.get(id=advertisement_id)
+                advertisement = JobAdvertisement.objects.get(
+                    id=advertisement_id)
             except JobAdvertisement.DoesNotExist:
-                raise serializers.ValidationError({'advertisement': 'The advertisement does not exist.'})
+                raise serializers.ValidationError(
+                    {'advertisement': 'The advertisement does not exist.'})
         else:
-            raise serializers.ValidationError({'advertisement_id': 'This field is required.'})
-        
+            raise serializers.ValidationError(
+                {'advertisement_id': 'This field is required.'})
+
         generated_id = uuid.uuid4()
-        
+
         # Retrieve the job seeker's resume.
         try:
             resume = JobSeekerResume.objects.get(job_seeker=user)
         except JobSeekerResume.DoesNotExist:
-            raise serializers.ValidationError({'resume': 'No resume found for the job seeker.'})
-        
+            raise serializers.ValidationError(
+                {'resume': 'No resume found for the job seeker.'})
+
         # Create the Application instance. Use get() with a default value on cover_letter to avoid KeyError.
         application_instance = Application.objects.create(
             id=generated_id,
@@ -293,14 +316,17 @@ class ApplicationSerializer(serializers.ModelSerializer):
         # Staff or the advertisement's employer may update status, notes, and cover letter.
         if user.is_staff or user == instance.advertisement.employer:
             instance.status = validated_data.get('status', instance.status)
-            instance.employer_notes = validated_data.get('employer_notes', instance.employer_notes)
-            instance.viewed_by_employer = validated_data.get('viewed_by_employer', instance.viewed_by_employer)
-            instance.cover_letter = validated_data.get('cover_letter', instance.cover_letter)
-
+            instance.employer_notes = validated_data.get(
+                'employer_notes', instance.employer_notes)
+            instance.viewed_by_employer = validated_data.get(
+                'viewed_by_employer', instance.viewed_by_employer)
+            instance.cover_letter = validated_data.get(
+                'cover_letter', instance.cover_letter)
 
         # The job seeker can update only the cover letter.
         if user == instance.job_seeker or user.is_staff:
-            instance.cover_letter = validated_data.get('cover_letter', instance.cover_letter)
+            instance.cover_letter = validated_data.get(
+                'cover_letter', instance.cover_letter)
 
         instance.save()
         return instance

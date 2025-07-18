@@ -464,7 +464,7 @@ export default function SubscriptionPlanSelector({
                                 mt: { xs: 0.3, sm: 0.5 }
                               }}>
                                 + ۱۰٪ مالیات بر ارزش افزوده
-                              </Typography>
+                                </Typography>
                             )}
                           </Box>
                         )}
@@ -495,7 +495,7 @@ export default function SubscriptionPlanSelector({
             خلاصه سفارش
           </Typography>
           
-          <Typography variant="body2" color="text.secondary" sx={{
+          <Typography variant="body2" color="text.secondary" sx={{ 
             fontSize: { xs: '0.8rem', sm: '0.875rem' },
             mb: { xs: 1, sm: 1.5 }
           }}>
@@ -513,25 +513,25 @@ export default function SubscriptionPlanSelector({
           ) : (
             <Box>
               {/* قیمت پایه */}
-              <Box sx={{ 
-                display: 'flex', 
-                justifyContent: 'space-between',
+          <Box sx={{ 
+            display: 'flex', 
+            justifyContent: 'space-between',
                 mb: { xs: 0.5, sm: 0.7 }
-              }}>
-                <Typography variant="body2" sx={{
-                  fontSize: { xs: '0.8rem', sm: '0.875rem' }
-                }}>
+          }}>
+            <Typography variant="body2" sx={{
+              fontSize: { xs: '0.8rem', sm: '0.875rem' }
+            }}>
                   قیمت پایه:
-                </Typography>
+            </Typography>
                 <Typography variant="body2" sx={{
                   fontSize: { xs: '0.8rem', sm: '0.875rem' }
-                }}>
+            }}>
                   {formatPrice(calculateBasePrice(selectedPlan, activeDuration))} تومان
-                </Typography>
-              </Box>
-
+            </Typography>
+          </Box>
+          
               {/* مالیات */}
-              <Box sx={{ 
+            <Box sx={{ 
                 display: 'flex', 
                 justifyContent: 'space-between',
                 mb: { xs: 1, sm: 1.2 }
@@ -557,10 +557,10 @@ export default function SubscriptionPlanSelector({
                   display: 'flex', 
                   justifyContent: 'space-between',
                   alignItems: 'center'
-                }}>
+            }}>
                   <Typography variant="body1" fontWeight="bold" sx={{
                     fontSize: { xs: '0.9rem', sm: '1rem' }
-                  }}>
+              }}>
                     مجموع:
                   </Typography>
                   <Typography variant="h6" fontWeight="bold" sx={{
@@ -568,7 +568,7 @@ export default function SubscriptionPlanSelector({
                     color: EMPLOYER_THEME.primary
                   }}>
                     {formatPrice(calculatePrice(selectedPlan, activeDuration))} تومان
-                  </Typography>
+              </Typography>
                 </Box>
               </Box>
             </Box>
