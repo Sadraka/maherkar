@@ -523,7 +523,7 @@ export default function EmployerVerificationModal({
             bgcolor: alpha(EMPLOYER_THEME.primary, 0.06),
             border: `1px solid ${alpha(EMPLOYER_THEME.primary, 0.2)}`,
             color: EMPLOYER_THEME.primary,
-            textAlign: { xs: 'center', sm: 'left' }
+            textAlign: 'center'
           }}>
             <Typography variant="body2" sx={{ fontSize: { xs: '0.82rem', sm: '0.86rem' }, color: 'inherit' }}>
               مدارک شما رد شده است. لطفاً مجدداً مدارک صحیح را ارسال کنید.
@@ -540,7 +540,7 @@ export default function EmployerVerificationModal({
             bgcolor: alpha(EMPLOYER_THEME.primary, 0.06),
             border: `1px solid ${alpha(EMPLOYER_THEME.primary, 0.2)}`,
             color: EMPLOYER_THEME.primary,
-            textAlign: { xs: 'center', sm: 'left' }
+            textAlign: 'center'
           }}>
             <Typography variant="body2" sx={{ fontSize: { xs: '0.82rem', sm: '0.86rem' }, color: 'inherit' }}>
               مدارک شما قبلاً ارسال شده و در حال بررسی است.
@@ -552,7 +552,7 @@ export default function EmployerVerificationModal({
             bgcolor: alpha(EMPLOYER_THEME.primary, 0.06),
             border: `1px solid ${alpha(EMPLOYER_THEME.primary, 0.2)}`,
             color: EMPLOYER_THEME.primary,
-            textAlign: { xs: 'center', sm: 'left' }
+            textAlign: 'center'
           }}>
             <Typography variant="body2" sx={{ fontSize: { xs: '0.82rem', sm: '0.86rem' }, color: 'inherit' }}>
               برای استفاده از امکانات پنل کارفرما، احراز هویت لازم است؛ این کار برای افزایش اعتماد کارجوها انجام می‌شود و اطلاعات شما فقط جهت بررسی استفاده می‌شود.
@@ -716,7 +716,7 @@ export default function EmployerVerificationModal({
             bgcolor: alpha(EMPLOYER_THEME.primary, 0.06),
             border: `1px solid ${alpha(EMPLOYER_THEME.primary, 0.2)}`,
             color: EMPLOYER_THEME.primary,
-            textAlign: { xs: 'center', sm: 'left' }
+            textAlign: 'center'
           }}>
             <Typography variant="body2" sx={{ fontSize: { xs: '0.8rem', sm: '0.86rem' }, color: 'inherit' }}>
               {serverStatus === 'pending' && 'مدارک شما قبلاً ارسال شده و در حال بررسی است.'}
