@@ -126,13 +126,7 @@ const StyledModal = styled(Modal)(({ theme }) => ({
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'center',
-  padding: theme.spacing(1),
-  [theme.breakpoints.down('sm')]: {
-    padding: theme.spacing(1),
-  },
-  [theme.breakpoints.up('md')]: {
-    padding: theme.spacing(2),
-  },
+  padding: 0,
   // زیر هدر ثابت قرار بگیرد
   zIndex: 1100,
   pointerEvents: 'none', // خود Modal container کلیک را عبور دهد
@@ -146,18 +140,21 @@ const ModalContent = styled(Box)(({ theme }) => ({
   width: '100%',
   maxWidth: '600px',
   height: 'auto',
-  maxHeight: '90vh',
+  maxHeight: '95vh',
   overflowY: 'auto',
   WebkitOverflowScrolling: 'touch',
   position: 'relative',
   outline: 'none',
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
   [theme.breakpoints.up('md')]: {
     maxWidth: '720px',
-    maxHeight: '85vh',
+    maxHeight: '90vh',
   },
   [theme.breakpoints.down('sm')]: {
     maxWidth: '95vw',
-    maxHeight: '90vh',
+    maxHeight: '95vh',
   },
 }));
 
@@ -226,6 +223,10 @@ export default function EmployerVerificationModal({
     bgcolor: alpha(color, 0.06),
     border: `1px solid ${alpha(color, 0.2)}`,
     color,
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    justifyContent: 'center',
     textAlign: 'center' as const,
   });
   const INFO_COLOR = EMPLOYER_THEME.primary;
@@ -949,16 +950,13 @@ export default function EmployerVerificationModal({
         hideBackdrop
       >
         <ModalContent sx={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          px: { xs: 1, sm: 0 }
+          padding: '10px'
         }}>
           <Paper 
             elevation={isMobile ? 0 : 3}
             sx={{ 
               p: { xs: 2, sm: 2.5 },
-              borderRadius: { xs: 2, sm: 2 },
+              borderRadius: { xs: 3, sm: 3 },
               display: 'flex',
               flexDirection: 'column',
               justifyContent: 'center',
@@ -990,10 +988,7 @@ export default function EmployerVerificationModal({
       hideBackdrop // اجازه تعامل با هدر و پروموبار
     >
       <ModalContent sx={{
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        px: { xs: 1, sm: 0 }
+        padding: '10px'
       }}>
 
         {/* فرم ثبت‌نام مشابه RegisterForm */}
@@ -1003,7 +998,7 @@ export default function EmployerVerificationModal({
             p: { xs: 1.25, sm: 2.5 },
             pt: { xs: 1.25, sm: 2.5 },
             pb: { xs: 1.25, sm: 2.5 },
-            borderRadius: { xs: 2, sm: 2 },
+            borderRadius: { xs: 3, sm: 3 },
             display: 'flex',
             flexDirection: 'column',
             justifyContent: 'flex-start',
@@ -1013,7 +1008,7 @@ export default function EmployerVerificationModal({
             overflowY: { xs: 'visible', sm: 'auto' },
             overflowX: 'visible',
             WebkitOverflowScrolling: 'touch',
-            transform: { xs: 'translateY(-10px)', md: 'translateY(-12px)' },
+            transform: 'none',
           }}
         >
           {/* هدر انیمیشنی با اطلاعات مرحله */}
