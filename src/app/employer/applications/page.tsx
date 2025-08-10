@@ -14,7 +14,7 @@ import {
 } from '@/components/employer/applications';
 
 /**
- * صفحه نمایش درخواست‌های کاریابی کارفرما
+ *  نمایش درخواست‌های کاریابی کارفرما
  */
 export default function ApplicationsPage() {
   const [loading, setLoading] = useState(true);
