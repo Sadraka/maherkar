@@ -119,20 +119,28 @@ export default function EmployerAuthRequired({ children, redirectTo = '/login' }
       if (typeof window === 'undefined') return;
       const headerEl = document.querySelector('[data-testid="main-header"]') as HTMLElement | null;
       const promoEl = document.querySelector('[data-testid="promo-bar"]') as HTMLElement | null;
+      const spacerEl = promoEl?.previousElementSibling as HTMLElement | null; // باکس فاصله بالای promo bar
 
-      if (showVerificationModal && !isDesktop) {
-        if (headerEl) headerEl.style.display = 'none';
+      if (showVerificationModal) {
+        // در هر دو حالت: هدر نمایش داده شود، فقط پروموبار بسته شود و فاصله‌اش صفر گردد
+        if (headerEl) headerEl.style.display = '';
         if (promoEl) promoEl.style.display = 'none';
+        if (spacerEl) spacerEl.style.height = '0px';
+        try { window.dispatchEvent(new CustomEvent('promoBarClosed')); } catch { /* ignore */ }
       } else {
+        // بازگردانی حالت عادی
         if (headerEl) headerEl.style.display = '';
         if (promoEl) promoEl.style.display = '';
+        if (spacerEl) spacerEl.style.height = '';
+        try { window.dispatchEvent(new CustomEvent('promoBarLoaded')); } catch { /* ignore */ }
       }
 
       return () => {
         if (headerEl) headerEl.style.display = '';
         if (promoEl) promoEl.style.display = '';
+        if (spacerEl) spacerEl.style.height = '';
       };
-    }, [showVerificationModal, isDesktop]);
+    }, [showVerificationModal]);
 
     useEffect(() => {
         // فقط زمانی که بررسی اولیه احراز هویت تمام شده باشد، تصمیم‌گیری می‌کنیم

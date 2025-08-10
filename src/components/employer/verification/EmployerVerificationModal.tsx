@@ -181,6 +181,7 @@ export default function EmployerVerificationModal({
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   const { user } = useAuth();
+  const employerName = (user?.full_name && user.full_name.trim()) || 'کارفرما';
   const [loading, setLoading] = useState(false);
   const [statusLoading, setStatusLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -196,7 +197,7 @@ export default function EmployerVerificationModal({
   const [selectedImageFile, setSelectedImageFile] = useState<File | null>(null);
   const ALLOWED_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/webp'];
   // فاصله داینامیک از بالای صفحه برای موبایل (بر اساس ارتفاع هدر و پروموبار)
-  const [topOffsetPx, setTopOffsetPx] = useState<number>(156);
+  const [topOffsetPx, setTopOffsetPx] = useState<number>(128);
   
   const frontInputRef = useRef<HTMLInputElement>(null);
   const backInputRef = useRef<HTMLInputElement>(null);
@@ -220,6 +221,28 @@ export default function EmployerVerificationModal({
   });
 
   const watchedFields = watch();
+  // استایل یکنواخت برای نوارهای وضعیت بر اساس رنگ ورودی
+  const statusSx = (color: string) => ({
+    mb: { xs: 1.5, sm: 2 },
+    py: 0.8,
+    px: 1.25,
+    bgcolor: alpha(color, 0.06),
+    border: `1px solid ${alpha(color, 0.2)}`,
+    color,
+    textAlign: 'center' as const,
+    '& .MuiAlert-message': {
+      width: '100%',
+      textAlign: 'inherit',
+      display: 'flex',
+      flexDirection: 'column',
+      alignItems: 'center',
+      p: 0,
+      m: 0,
+    },
+  });
+  const INFO_COLOR = EMPLOYER_THEME.primary;
+  const SUCCESS_COLOR = '#2e7d32';
+  const ERROR_COLOR = '#d32f2f';
   // دریافت وضعیت فعلی احراز هویت از سرور
   useEffect(() => {
     const fetchStatus = async () => {
@@ -301,7 +324,7 @@ export default function EmployerVerificationModal({
         // اگر هدر/پرومو بار پنهان شده باشند، فاصله کمتری لازم است
         const headerH = headerEl && headerEl.style.display !== 'none' ? headerEl.offsetHeight : 0;
         const promoH = promoEl && promoEl.style.display !== 'none' ? promoEl.offsetHeight : 0;
-        const gap = 12; // فاصله دلخواه
+        const gap = 16; // فاصله دلخواه مطمئن
         setTopOffsetPx(headerH + promoH + gap);
       } catch {
         setTopOffsetPx(144);
@@ -518,42 +541,56 @@ export default function EmployerVerificationModal({
       <Box component="form" onSubmit={handleSubmit(onSubmit)}>
         {/* پیام وضعیت: نمایش رد/درحال‌بررسی در مرحله ۱ */}
         {serverStatus === 'rejected' ? (
-          <Alert icon={false} severity="info" sx={{
-            mb: { xs: 1.5, sm: 2 }, py: 0.8, px: 1.25,
-            bgcolor: alpha(EMPLOYER_THEME.primary, 0.06),
-            border: `1px solid ${alpha(EMPLOYER_THEME.primary, 0.2)}`,
-            color: EMPLOYER_THEME.primary,
-            textAlign: 'center'
-          }}>
-            <Typography variant="body2" sx={{ fontSize: { xs: '0.82rem', sm: '0.86rem' }, color: 'inherit' }}>
+          <Alert icon={false} severity="info" sx={statusSx(ERROR_COLOR)}>
+            <Typography
+              variant="body2"
+              sx={{ fontSize: { xs: '0.82rem', sm: '0.86rem' }, color: 'inherit' }}
+            >
               مدارک شما رد شده است. لطفاً مجدداً مدارک صحیح را ارسال کنید.
             </Typography>
             {adminNotes && (
-              <Typography variant="caption" sx={{ color: 'inherit' }}>
-                دلیل رد: {adminNotes}
+              <Typography
+                variant="caption"
+                sx={{
+                  color: 'inherit',
+                  mt: 0.75,
+                  display: 'flex',
+                  justifyContent: 'center',
+                  alignItems: 'baseline',
+                  gap: 0.5,
+                  textAlign: 'center',
+                  whiteSpace: 'pre-wrap',
+                  wordBreak: 'break-word',
+                  width: '100%'
+                }}
+              >
+                <Box component="span" sx={{ fontWeight: 700 }}>دلیل رد:</Box>
+                <bdi dir="auto">{adminNotes}</bdi>
               </Typography>
             )}
           </Alert>
         ) : serverStatus === 'pending' ? (
-          <Alert icon={false} severity="info" sx={{
-            mb: { xs: 1.5, sm: 2 }, py: 0.8, px: 1.25,
-            bgcolor: alpha(EMPLOYER_THEME.primary, 0.06),
-            border: `1px solid ${alpha(EMPLOYER_THEME.primary, 0.2)}`,
-            color: EMPLOYER_THEME.primary,
-            textAlign: 'center'
-          }}>
-            <Typography variant="body2" sx={{ fontSize: { xs: '0.82rem', sm: '0.86rem' }, color: 'inherit' }}>
-              مدارک شما قبلاً ارسال شده و در حال بررسی است.
-            </Typography>
+          <Alert icon={false} severity="info" sx={statusSx(INFO_COLOR)}>
+            {isMobile ? (
+              <Box sx={{ textAlign: 'center' }}>
+                <Typography variant="body2" sx={{ fontSize: { xs: '0.82rem', sm: '0.86rem' }, color: 'inherit', m: 0 }}>
+                  {`${employerName} عزیز، مدارک شما قبلاً ارسال شده است.`}
+                </Typography>
+                <Typography variant="body2" sx={{ fontSize: { xs: '0.82rem', sm: '0.86rem' }, color: 'inherit', m: 0 }}>
+                  همکاران ما در سریع‌ترین زمان ممکن آن‌ها را بررسی می‌کنند.
+                </Typography>
+                <Typography variant="body2" sx={{ fontSize: { xs: '0.82rem', sm: '0.86rem' }, color: 'inherit', m: 0 }}>
+                  پس از تأیید، دسترسی شما فعال خواهد شد.
+                </Typography>
+              </Box>
+            ) : (
+              <Typography variant="body2" sx={{ fontSize: { xs: '0.82rem', sm: '0.86rem' }, color: 'inherit', m: 0 }}>
+                {`${employerName} عزیز، مدارک شما قبلاً ارسال شده است. همکاران ما در سریع‌ترین زمان ممکن آن‌ها را بررسی می‌کنند. پس از تأیید، دسترسی شما فعال خواهد شد.`}
+              </Typography>
+            )}
           </Alert>
         ) : (
-          <Alert icon={false} severity="info" sx={{
-            mb: { xs: 1.5, sm: 2 }, py: 0.8, px: 1.25,
-            bgcolor: alpha(EMPLOYER_THEME.primary, 0.06),
-            border: `1px solid ${alpha(EMPLOYER_THEME.primary, 0.2)}`,
-            color: EMPLOYER_THEME.primary,
-            textAlign: 'center'
-          }}>
+          <Alert icon={false} severity="info" sx={statusSx(INFO_COLOR)}>
             <Typography variant="body2" sx={{ fontSize: { xs: '0.82rem', sm: '0.86rem' }, color: 'inherit' }}>
               برای استفاده از امکانات پنل کارفرما، احراز هویت لازم است؛ این کار برای افزایش اعتماد کارجوها انجام می‌شود و اطلاعات شما فقط جهت بررسی استفاده می‌شود.
             </Typography>
@@ -711,17 +748,28 @@ export default function EmployerVerificationModal({
       <Box>
         {/* نوار وضعیت در مرحله ۲ - فقط برای pending و approved */}
         {(serverStatus === 'pending' || serverStatus === 'approved') && (
-          <Alert icon={false} severity="info" sx={{
-            mb: 1.5, py: 1, px: 1.25,
-            bgcolor: alpha(EMPLOYER_THEME.primary, 0.06),
-            border: `1px solid ${alpha(EMPLOYER_THEME.primary, 0.2)}`,
-            color: EMPLOYER_THEME.primary,
-            textAlign: 'center'
-          }}>
-            <Typography variant="body2" sx={{ fontSize: { xs: '0.8rem', sm: '0.86rem' }, color: 'inherit' }}>
-              {serverStatus === 'pending' && 'مدارک شما قبلاً ارسال شده و در حال بررسی است.'}
-              {serverStatus === 'approved' && 'مدارک شما تایید شده است. در صورت نیاز می‌توانید مدارک را به‌روزرسانی کنید.'}
-            </Typography>
+          <Alert
+            icon={false}
+            severity="info"
+            sx={statusSx(serverStatus === 'approved' ? SUCCESS_COLOR : INFO_COLOR)}
+          >
+            {serverStatus === 'pending' ? (
+              <Box sx={{ textAlign: 'center' }}>
+                <Typography variant="body2" sx={{ fontSize: { xs: '0.8rem', sm: '0.86rem' }, color: 'inherit', m: 0 }}>
+                  {`${employerName} عزیز، مدارک شما قبلاً ارسال شده است.`}
+                </Typography>
+                <Typography variant="body2" sx={{ fontSize: { xs: '0.8rem', sm: '0.86rem' }, color: 'inherit', m: 0 }}>
+                  همکاران ما در سریع‌ترین زمان ممکن آن‌ها را بررسی می‌کنند.
+                </Typography>
+                <Typography variant="body2" sx={{ fontSize: { xs: '0.8rem', sm: '0.86rem' }, color: 'inherit', m: 0 }}>
+                  پس از تأیید، دسترسی شما فعال خواهد شد.
+                </Typography>
+              </Box>
+            ) : (
+              <Typography variant="body2" sx={{ fontSize: { xs: '0.8rem', sm: '0.86rem' }, color: 'inherit' }}>
+                مدارک شما تایید شده است. در صورت نیاز می‌توانید مدارک را به‌روزرسانی کنید.
+              </Typography>
+            )}
           </Alert>
         )}
         <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '1fr 1fr' }, gap: { xs: 1.5, md: 2 }, mb: { xs: 1, md: 1 }, alignItems: 'start' }}>
@@ -981,17 +1029,26 @@ export default function EmployerVerificationModal({
         hideBackdrop
         sx={{ pt: 0, mt: { xs: `${topOffsetPx}px` } }}
       >
-        <ModalContent sx={{ mt: { xs: `${topOffsetPx}px` }, maxHeight: { xs: `calc(100dvh - ${topOffsetPx}px)` } }}>
+        <ModalContent sx={{
+          mt: `${topOffsetPx}px`,
+          maxHeight: `calc(100dvh - ${topOffsetPx}px)`,
+          minHeight: `calc(100dvh - ${topOffsetPx}px)`,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          px: { xs: 1, sm: 0 }
+        }}>
           <Paper 
             elevation={isMobile ? 0 : 3}
             sx={{ 
               p: { xs: 2, sm: 2.5 },
-              borderRadius: { xs: 0, sm: 2 },
+              borderRadius: { xs: 2, sm: 2 },
               display: 'flex',
               flexDirection: 'column',
               justifyContent: 'center',
               width: '100%',
-              boxShadow: isMobile ? 'none' : '0px 3px 15px rgba(0, 0, 0, 0.1)',
+              boxShadow: isMobile ? '0px 2px 10px rgba(0,0,0,0.08)' : '0px 3px 15px rgba(0, 0, 0, 0.1)',
+              overflow: 'hidden'
             }}
           >
             <Box sx={{ textAlign: 'center', py: 3 }}>
@@ -1017,7 +1074,15 @@ export default function EmployerVerificationModal({
       hideBackdrop // اجازه تعامل با هدر و پروموبار
       sx={{ pt: 0, mt: { xs: `${topOffsetPx}px` } }}
     >
-      <ModalContent sx={{ mt: { xs: `${topOffsetPx}px` }, maxHeight: { xs: `calc(100dvh - ${topOffsetPx}px)` } }}>
+      <ModalContent sx={{
+        mt: `${topOffsetPx}px`,
+        maxHeight: `calc(100dvh - ${topOffsetPx}px)`,
+        minHeight: `calc(100dvh - ${topOffsetPx}px)`,
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        px: { xs: 1, sm: 0 }
+      }}>
 
         {/* فرم ثبت‌نام مشابه RegisterForm */}
           <Paper 
@@ -1036,6 +1101,7 @@ export default function EmployerVerificationModal({
             overflowY: { xs: 'visible', sm: 'auto' },
             overflowX: 'visible',
             WebkitOverflowScrolling: 'touch',
+            transform: { xs: 'translateY(-10px)', md: 'translateY(-12px)' },
           }}
         >
           {/* هدر انیمیشنی با اطلاعات مرحله */}
@@ -1067,7 +1133,7 @@ export default function EmployerVerificationModal({
             </Typography>
             
             {/* کارت اطلاعات مرحله ثابت - فقط برای never_submitted و rejected نمایش داده شود */}
-            {(serverStatus === 'never_submitted' || serverStatus === 'rejected') && (
+            {(serverStatus === 'never_submitted' || serverStatus === 'rejected' || serverStatus === 'pending') && (
               <Box
                 sx={{
                   background: `linear-gradient(135deg, ${alpha(EMPLOYER_THEME.primary, 0.08)}, ${alpha(EMPLOYER_THEME.light, 0.05)})`,
@@ -1102,7 +1168,9 @@ export default function EmployerVerificationModal({
                     }
                   }}
                 >
-                  مرحله {toPersianNumbers(activeStep + 1)} از {toPersianNumbers(2)}
+                  {serverStatus === 'pending' ? 'وضعیت' : (
+                    <>مرحله {toPersianNumbers(activeStep + 1)} از {toPersianNumbers(2)}</>
+                  )}
                 </Typography>
                 
                 <Typography 
@@ -1116,11 +1184,15 @@ export default function EmployerVerificationModal({
                     animation: 'fadeChange 0.6s ease-in-out 0.1s both',
                   }}
                 >
-                  {activeStep === 0 && 'اطلاعات شخصی'}
-                  {activeStep === 1 && 'آپلود مدارک'}
+                  {serverStatus === 'pending' ? 'در حال بررسی' : (
+                    <>
+                      {activeStep === 0 && 'اطلاعات شخصی'}
+                      {activeStep === 1 && 'آپلود مدارک'}
+                    </>
+                  )}
                 </Typography>
 
-                <Box
+                  <Box
                   sx={{
                     width: '100%',
                     height: 3,
@@ -1136,7 +1208,7 @@ export default function EmployerVerificationModal({
                       background: `linear-gradient(90deg, ${EMPLOYER_THEME.primary}, ${EMPLOYER_THEME.light})`,
                       borderRadius: 1.5,
                       transition: 'width 0.8s cubic-bezier(0.4, 0, 0.2, 1)',
-                      width: `${((activeStep + 1) / 2) * 100}%`,
+                      width: `${serverStatus === 'pending' ? 100 : ((activeStep + 1) / 2) * 100}%`,
                       position: 'relative',
                       '&::after': {
                         content: '""',
@@ -1177,8 +1249,18 @@ export default function EmployerVerificationModal({
               <CircularProgress size={28} sx={{ color: EMPLOYER_THEME.primary }} />
             </Box>
           ) : serverStatus === 'pending' ? (
-            <Alert severity="info" sx={{ mt: 1 }}>
-              مدارک شما قبلاً ارسال شده و در حال بررسی است.
+            <Alert icon={false} severity="info" sx={{ ...statusSx(INFO_COLOR), mt: 1 }}>
+              <Box sx={{ textAlign: 'center' }}>
+                <Typography variant="body2" sx={{ fontSize: { xs: '0.82rem', sm: '0.86rem' }, color: 'inherit', m: 0 }}>
+                  {`${employerName} عزیز، مدارک شما قبلاً ارسال شده است.`}
+                </Typography>
+                <Typography variant="body2" sx={{ fontSize: { xs: '0.82rem', sm: '0.86rem' }, color: 'inherit', m: 0 }}>
+                  همکاران ما در سریع‌ترین زمان ممکن آن‌ها را بررسی می‌کنند.
+                </Typography>
+                <Typography variant="body2" sx={{ fontSize: { xs: '0.82rem', sm: '0.86rem' }, color: 'inherit', m: 0 }}>
+                  پس از تأیید، دسترسی شما فعال خواهد شد.
+                </Typography>
+              </Box>
             </Alert>
           ) : (
             <>
