@@ -206,8 +206,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
       window.dispatchEvent(new HashChangeEvent('hashchange'));
     }
-    // در موبایل پس از کلیک، Drawer را ببند
-    setMobileOpen(false);
+    // سایدبار موبایل حذف شده است؛ نیازی به بستن Drawer نیست
   };
 
   // Drawer موبایل حذف شد
