@@ -1,7 +1,0 @@
--- database: s:\ponisha\Maherkar\maherkar\Backend\db.sqlite3
-SELECT
-    *
-FROM
-    Subscriptions_advertisementsubscription;
-
-PRAGMA foreign_keys = OFF
