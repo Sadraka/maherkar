@@ -1,23 +1,23 @@
 'use client';
 
 import React from 'react';
-import { Box, Container, Typography } from '@mui/material';
 import EmployerVerificationForm from '@/components/employer/verification/EmployerVerificationForm';
 
-/**
- * صفحه تکمیل اطلاعات تایید هویت کارفرما
- */
 export default function VerificationCompletePage() {
-  console.log('VerificationCompletePage rendering...');
-  
   return (
-    <Box sx={{ 
-      minHeight: '100vh',
-      // حداقل padding در موبایل برای قرارگیری خیلی بالاتر
-      px: { xs: 0, sm: 2, md: 3 },
-      py: { xs: 0, sm: 2, md: 3 }
+    <div style={{
+      position: 'absolute',
+      top: '70px',
+      left: '0',
+      right: '0',
+      minHeight: 'calc(100vh - 70px)',
+      backgroundColor: '#f8fafd',
+      padding: '20px',
+      display: 'flex',
+      justifyContent: 'center',
+      alignItems: 'flex-start'
     }}>
       <EmployerVerificationForm />
-    </Box>
+    </div>
   );
 }

@@ -11,34 +11,14 @@ interface ContentWrapperProps {
 export default function ContentWrapper({ children }: ContentWrapperProps) {
   const pathname = usePathname();
   const isAuthPage = pathname?.startsWith('/login') || pathname?.startsWith('/register');
-  const [promoBarClosed, setPromoBarClosed] = useState(false);
-  const [promoBarLoaded, setPromoBarLoaded] = useState(false);
-
-  // گوش دادن به رویداد بسته شدن پرومو بار
-  useEffect(() => {
-    const handlePromoBarClosed = () => {
-      setPromoBarClosed(true);
-    };
-
-    const handlePromoBarLoaded = () => {
-      setPromoBarLoaded(true);
-    };
-
-    window.addEventListener('promoBarClosed', handlePromoBarClosed);
-    window.addEventListener('promoBarLoaded', handlePromoBarLoaded);
-    
-    return () => {
-      window.removeEventListener('promoBarClosed', handlePromoBarClosed);
-      window.removeEventListener('promoBarLoaded', handlePromoBarLoaded);
-    };
-  }, []);
+  const isVerificationPage = pathname?.includes('/verification/complete');
 
   return (
     <Box sx={{ 
-      pt: isAuthPage ? 0 : '60px',
-      transition: 'padding-top 0.3s ease'
+      pt: (isAuthPage || isVerificationPage) ? 0 : '60px',
+      position: 'relative'
     }}>
       {children}
     </Box>
   );
-} 
+}

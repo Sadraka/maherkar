@@ -229,12 +229,10 @@ export default function EmployerVerificationForm() {
   }
 
   return (
-    <Box sx={{ 
-      px: { xs: 0.5, sm: 3, md: 4 },
-      py: { xs: 0.5, sm: 3, md: 4 },
-      '& > *': {
-        mb: { xs: 1, sm: 3, md: 4 }
-      }
+    <div style={{
+      width: '100%',
+      maxWidth: '700px',
+      padding: '20px'
     }}>
       {/* هدر صفحه */}
       <Paper
@@ -623,6 +621,6 @@ export default function EmployerVerificationForm() {
           </Box>
         </form>
       </Paper>
-    </Box>
+    </div>
   );
 }

@@ -242,7 +242,7 @@ export default function EmployerDashboard() {
               <Box sx={{ fontSize: { xs: '1.2rem', sm: '1.5rem' }, color: EMPLOYER_THEME.primary, mb: 0.5, display: 'flex', justifyContent: 'center' }}>
                 <FontAwesomeIcon icon={faListAlt} />
               </Box>
-              <Typography variant="h5" component="div" fontWeight="bold" sx={{ mb: 0.25, fontSize: { xs: '1.2rem', sm: '1.5rem' } }}>
+              <Typography variant="h5" component="div" fontWeight="bold" sx={{ mb: 0.25, fontSize: { xs: '1.2rem', sm: '1.5rem' }, color: EMPLOYER_THEME.primary }}>
                 {loading.jobs ? '...' : toPersianDigits(activeJobs)}
               </Typography>
               <Typography color="text.secondary" sx={{ fontSize: { xs: '0.75rem', sm: '0.9rem' } }}>
@@ -275,7 +275,7 @@ export default function EmployerDashboard() {
               <Box sx={{ fontSize: { xs: '1.2rem', sm: '1.5rem' }, color: EMPLOYER_THEME.primary, mb: 0.5, display: 'flex', justifyContent: 'center' }}>
                 <FontAwesomeIcon icon={faClipboardList} />
               </Box>
-              <Typography variant="h5" component="div" fontWeight="bold" sx={{ mb: 0.25, fontSize: { xs: '1.2rem', sm: '1.5rem' } }}>
+              <Typography variant="h5" component="div" fontWeight="bold" sx={{ mb: 0.25, fontSize: { xs: '1.2rem', sm: '1.5rem' }, color: EMPLOYER_THEME.primary }}>
                 {loading.applications ? '...' : toPersianDigits(totalApplications)}
               </Typography>
               <Typography color="text.secondary" sx={{ fontSize: { xs: '0.75rem', sm: '0.9rem' } }}>
@@ -308,7 +308,7 @@ export default function EmployerDashboard() {
               <Box sx={{ fontSize: { xs: '1.2rem', sm: '1.5rem' }, color: EMPLOYER_THEME.primary, mb: 0.5, display: 'flex', justifyContent: 'center' }}>
                 <FontAwesomeIcon icon={faBuilding} />
               </Box>
-              <Typography variant="h5" component="div" fontWeight="bold" sx={{ mb: 0.25, fontSize: { xs: '1.2rem', sm: '1.5rem' } }}>
+              <Typography variant="h5" component="div" fontWeight="bold" sx={{ mb: 0.25, fontSize: { xs: '1.2rem', sm: '1.5rem' }, color: EMPLOYER_THEME.primary }}>
                 {loading.companies ? '...' : toPersianDigits(totalCompanies)}
               </Typography>
               <Typography color="text.secondary" sx={{ fontSize: { xs: '0.75rem', sm: '0.9rem' } }}>

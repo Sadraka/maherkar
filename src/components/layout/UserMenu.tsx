@@ -1385,7 +1385,7 @@ export default function UserMenu({ user: propUser, isLoggedIn: propIsLoggedIn }:
                                             textAlign: 'center',
                                             borderRadius: 3,
                                             boxShadow: '0 4px 15px rgba(66,133,244,0.05)',
-                                            height: '100%',
+                                            height: 80,
                                             display: 'flex',
                                             flexDirection: 'column',
                                             alignItems: 'center',
@@ -1400,12 +1400,11 @@ export default function UserMenu({ user: propUser, isLoggedIn: propIsLoggedIn }:
                                         }}
                                     >
                                         <Typography 
-                                            variant="h6" 
+                                            variant="subtitle2" 
                                             sx={{ 
-                                                fontSize: '1.2rem',
+                                                fontSize: '1rem',
                                                 color: EMPLOYER_THEME.primary,
-                                                fontWeight: 700,
-                                                lineHeight: 1.2
+                                                fontWeight: 700
                                             }}
                                         >
                                             داشبورد
@@ -1420,7 +1419,7 @@ export default function UserMenu({ user: propUser, isLoggedIn: propIsLoggedIn }:
                                             p: 0,
                                             borderRadius: 3,
                                             overflow: 'hidden',
-                                            height: '100%',
+                                            height: 80,
                                             transition: 'all 0.25s ease',
                                             boxShadow: '0 4px 18px rgba(66,133,244,0.25)',
                                             display: 'flex',
