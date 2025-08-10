@@ -198,6 +198,9 @@ export default function EmployerVerificationModal({
   const ALLOWED_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/webp'];
   // فاصله داینامیک از بالای صفحه برای موبایل (بر اساس ارتفاع هدر و پروموبار)
   const [topOffsetPx, setTopOffsetPx] = useState<number>(128);
+  // بالاتر بردن کلی کارت نسبت به هدر (پیش‌فرض 12px)
+  const offsetLiftPx = 12;
+  const effectiveTopOffset = Math.max(0, topOffsetPx - offsetLiftPx);
   
   const frontInputRef = useRef<HTMLInputElement>(null);
   const backInputRef = useRef<HTMLInputElement>(null);
@@ -1036,9 +1039,9 @@ export default function EmployerVerificationModal({
         sx={{ pt: 0, mt: { xs: `${topOffsetPx}px` } }}
       >
         <ModalContent sx={{
-          mt: `${topOffsetPx}px`,
-          maxHeight: `calc(100dvh - ${topOffsetPx}px)`,
-          minHeight: `calc(100dvh - ${topOffsetPx}px)`,
+          mt: `${effectiveTopOffset}px`,
+          maxHeight: `calc(100dvh - ${effectiveTopOffset}px)`,
+          minHeight: `calc(100dvh - ${effectiveTopOffset}px)`,
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
@@ -1082,9 +1085,9 @@ export default function EmployerVerificationModal({
       sx={{ pt: 0, mt: { xs: `${topOffsetPx}px` } }}
     >
       <ModalContent sx={{
-        mt: `${topOffsetPx}px`,
-        maxHeight: `calc(100dvh - ${topOffsetPx}px)`,
-        minHeight: `calc(100dvh - ${topOffsetPx}px)`,
+        mt: `${effectiveTopOffset}px`,
+        maxHeight: `calc(100dvh - ${effectiveTopOffset}px)`,
+        minHeight: `calc(100dvh - ${effectiveTopOffset}px)`,
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
@@ -1257,17 +1260,23 @@ export default function EmployerVerificationModal({
             </Box>
           ) : serverStatus === 'pending' ? (
             <Alert icon={false} severity="info" sx={{ ...statusSx(INFO_COLOR), mt: 1 }}>
-              <Box sx={{ textAlign: 'center' }}>
+              {isMobile ? (
+                <Box sx={{ textAlign: 'center' }}>
+                  <Typography variant="body2" sx={{ fontSize: { xs: '0.82rem', sm: '0.86rem' }, color: 'inherit', m: 0 }}>
+                    {`${employerName} عزیز، مدارک شما قبلاً ارسال شده است.`}
+                  </Typography>
+                  <Typography variant="body2" sx={{ fontSize: { xs: '0.82rem', sm: '0.86rem' }, color: 'inherit', m: 0 }}>
+                    همکاران ما در سریع‌ترین زمان ممکن آن‌ها را بررسی می‌کنند.
+                  </Typography>
+                  <Typography variant="body2" sx={{ fontSize: { xs: '0.82rem', sm: '0.86rem' }, color: 'inherit', m: 0 }}>
+                    پس از تأیید، دسترسی شما فعال خواهد شد.
+                  </Typography>
+                </Box>
+              ) : (
                 <Typography variant="body2" sx={{ fontSize: { xs: '0.82rem', sm: '0.86rem' }, color: 'inherit', m: 0 }}>
-                  {`${employerName} عزیز، مدارک شما قبلاً ارسال شده است.`}
+                  {`${employerName} عزیز، مدارک شما قبلاً ارسال شده است. همکاران ما در سریع‌ترین زمان ممکن آن‌ها را بررسی می‌کنند. پس از تأیید، دسترسی شما فعال خواهد شد.`}
                 </Typography>
-                <Typography variant="body2" sx={{ fontSize: { xs: '0.82rem', sm: '0.86rem' }, color: 'inherit', m: 0 }}>
-                  همکاران ما در سریع‌ترین زمان ممکن آن‌ها را بررسی می‌کنند.
-                </Typography>
-                <Typography variant="body2" sx={{ fontSize: { xs: '0.82rem', sm: '0.86rem' }, color: 'inherit', m: 0 }}>
-                  پس از تأیید، دسترسی شما فعال خواهد شد.
-                </Typography>
-              </Box>
+              )}
             </Alert>
           ) : (
             <>
