@@ -1,11 +1,20 @@
 # See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
 
 # dependencies
-.env*
+
+/.kiro
+.env
+/Backend/PUSH
+/Backend/MaherKar-deployment
+/Backend/dp.sqlite3
+Job_Application_System_Overview.md
+jobSeeker_Panel_Structure.md
+/Backend
+/.vscode
 /.cursor
 next.mdc
 .cursor
-.gitignore
+.gitignoreی
 venv
 /node_modules
 /.pnp
@@ -19,6 +28,7 @@ venv
 # testing
 /coverage
 backend_api_documentation.md
+API_Documentation.md
 # next.js
 /.next/
 /out/
@@ -51,3 +61,6 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+Backend/db.sqlite3
+Backend/db.sqlite3
+Backend/MaherKar-deployment/Users/migrations/0001_initial.py
