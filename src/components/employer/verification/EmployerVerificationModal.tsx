@@ -754,17 +754,23 @@ export default function EmployerVerificationModal({
             sx={statusSx(serverStatus === 'approved' ? SUCCESS_COLOR : INFO_COLOR)}
           >
             {serverStatus === 'pending' ? (
-              <Box sx={{ textAlign: 'center' }}>
-                <Typography variant="body2" sx={{ fontSize: { xs: '0.8rem', sm: '0.86rem' }, color: 'inherit', m: 0 }}>
-                  {`${employerName} عزیز، مدارک شما قبلاً ارسال شده است.`}
+              isMobile ? (
+                <Box sx={{ textAlign: 'center' }}>
+                  <Typography variant="body2" sx={{ fontSize: { xs: '0.8rem', sm: '0.86rem' }, color: 'inherit', m: 0 }}>
+                    {`${employerName} عزیز، مدارک شما قبلاً ارسال شده است.`}
+                  </Typography>
+                  <Typography variant="body2" sx={{ fontSize: { xs: '0.8rem', sm: '0.86rem' }, color: 'inherit', m: 0 }}>
+                    همکاران ما در سریع‌ترین زمان ممکن آن‌ها را بررسی می‌کنند.
+                  </Typography>
+                  <Typography variant="body2" sx={{ fontSize: { xs: '0.8rem', sm: '0.86rem' }, color: 'inherit', m: 0 }}>
+                    پس از تأیید، دسترسی شما فعال خواهد شد.
+                  </Typography>
+                </Box>
+              ) : (
+                <Typography variant="body2" sx={{ fontSize: { xs: '0.8rem', sm: '0.86rem' }, color: 'inherit' }}>
+                  {`${employerName} عزیز، مدارک شما قبلاً ارسال شده است. همکاران ما در سریع‌ترین زمان ممکن آن‌ها را بررسی می‌کنند. پس از تأیید، دسترسی شما فعال خواهد شد.`}
                 </Typography>
-                <Typography variant="body2" sx={{ fontSize: { xs: '0.8rem', sm: '0.86rem' }, color: 'inherit', m: 0 }}>
-                  همکاران ما در سریع‌ترین زمان ممکن آن‌ها را بررسی می‌کنند.
-                </Typography>
-                <Typography variant="body2" sx={{ fontSize: { xs: '0.8rem', sm: '0.86rem' }, color: 'inherit', m: 0 }}>
-                  پس از تأیید، دسترسی شما فعال خواهد شد.
-                </Typography>
-              </Box>
+              )
             ) : (
               <Typography variant="body2" sx={{ fontSize: { xs: '0.8rem', sm: '0.86rem' }, color: 'inherit' }}>
                 مدارک شما تایید شده است. در صورت نیاز می‌توانید مدارک را به‌روزرسانی کنید.
@@ -1048,7 +1054,8 @@ export default function EmployerVerificationModal({
               justifyContent: 'center',
               width: '100%',
               boxShadow: isMobile ? '0px 2px 10px rgba(0,0,0,0.08)' : '0px 3px 15px rgba(0, 0, 0, 0.1)',
-              overflow: 'hidden'
+              overflow: 'hidden',
+              transform: { xs: 'translateY(-12px)', md: 'translateY(-14px)' }
             }}
           >
             <Box sx={{ textAlign: 'center', py: 3 }}>
@@ -1101,7 +1108,7 @@ export default function EmployerVerificationModal({
             overflowY: { xs: 'visible', sm: 'auto' },
             overflowX: 'visible',
             WebkitOverflowScrolling: 'touch',
-            transform: { xs: 'translateY(-10px)', md: 'translateY(-12px)' },
+            transform: { xs: 'translateY(-16px)', md: 'translateY(-18px)' },
           }}
         >
           {/* هدر انیمیشنی با اطلاعات مرحله */}
