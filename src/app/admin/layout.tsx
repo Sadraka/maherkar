@@ -138,6 +138,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const { jobStats, jobStatsLoading } = useJobStatsStore();
   const [currentHash, setCurrentHash] = useState('');
   const [openManagement, setOpenManagement] = useState(true); // کنترل باز/بسته بودن آکاردئون
+  // سایدبار موبایل حذف شد
   const theme = useTheme();
 
   useEffect(() => {
@@ -205,7 +206,11 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
       window.dispatchEvent(new HashChangeEvent('hashchange'));
     }
+    // در موبایل پس از کلیک، Drawer را ببند
+    setMobileOpen(false);
   };
+
+  // Drawer موبایل حذف شد
 
   const SidebarContent = () => {
     const managementItems = adminMenuItems.filter(item => item.group === 'user-management');
@@ -775,6 +780,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               pb: 3
             }}
           >
+
+            {/* سایدبار موبایل حذف شد بنا به درخواست */}
 
             <Box
               sx={{

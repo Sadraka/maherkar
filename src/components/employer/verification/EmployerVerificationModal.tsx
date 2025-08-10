@@ -127,11 +127,16 @@ const StyledModal = styled(Modal)(({ theme }) => ({
   alignItems: 'flex-start',
   justifyContent: 'center',
   padding: theme.spacing(2),
-  paddingTop: theme.spacing(16),
-  [theme.breakpoints.up('md')]: {
-    paddingTop: theme.spacing(18),
+  paddingTop: theme.spacing(2),
+  [theme.breakpoints.down('sm')]: {
+    paddingTop: theme.spacing(2),
+    padding: theme.spacing(1.5),
   },
-  zIndex: 1200, // کمی بالاتر از AppBar اما اجازه به هدر/پروموبار برای کلیک با hideBackdrop
+  [theme.breakpoints.up('md')]: {
+    paddingTop: theme.spacing(2),
+  },
+  // زیر هدر ثابت قرار بگیرد
+  zIndex: 1100,
   pointerEvents: 'none', // خود Modal container کلیک را عبور دهد
   '& > *': { pointerEvents: 'auto' }, // محتوای داخل Modal قابل تعامل بماند
   '& .MuiBackdrop-root': {
@@ -142,16 +147,19 @@ const StyledModal = styled(Modal)(({ theme }) => ({
 const ModalContent = styled(Box)(({ theme }) => ({
   width: '100%',
   maxWidth: '600px',
-  maxHeight: 'calc(100vh - 128px)',
-  overflow: 'auto',
+  height: 'auto',
+  maxHeight: 'calc(100dvh - 128px)',
+  overflowY: 'auto',
+  WebkitOverflowScrolling: 'touch',
   position: 'relative',
   outline: 'none',
   [theme.breakpoints.up('md')]: {
     maxWidth: '720px', // عرض بیشتر در دسکتاپ
-    maxHeight: 'calc(100vh - 144px)',
+    maxHeight: 'calc(100dvh - 144px)',
   },
   [theme.breakpoints.down('sm')]: {
     maxWidth: '95vw',
+    maxHeight: 'calc(100dvh - 112px)',
   },
 }));
 
@@ -187,6 +195,8 @@ export default function EmployerVerificationModal({
   const [showBackCropper, setShowBackCropper] = useState(false);
   const [selectedImageFile, setSelectedImageFile] = useState<File | null>(null);
   const ALLOWED_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/webp'];
+  // فاصله داینامیک از بالای صفحه برای موبایل (بر اساس ارتفاع هدر و پروموبار)
+  const [topOffsetPx, setTopOffsetPx] = useState<number>(156);
   
   const frontInputRef = useRef<HTMLInputElement>(null);
   const backInputRef = useRef<HTMLInputElement>(null);
@@ -278,6 +288,29 @@ export default function EmployerVerificationModal({
         document.body.style.overflow = previous;
       };
     }
+  }, [open, isMobile]);
+
+  // محاسبه داینامیک فاصله از بالا در موبایل بر اساس ارتفاع هدر و پروموبار
+  useEffect(() => {
+    if (!open || typeof window === 'undefined') return;
+
+    const computeTopOffset = () => {
+      try {
+        const headerEl = document.querySelector('[data-testid="main-header"]') as HTMLElement | null;
+        const promoEl = document.querySelector('[data-testid="promo-bar"]') as HTMLElement | null;
+        // اگر هدر/پرومو بار پنهان شده باشند، فاصله کمتری لازم است
+        const headerH = headerEl && headerEl.style.display !== 'none' ? headerEl.offsetHeight : 0;
+        const promoH = promoEl && promoEl.style.display !== 'none' ? promoEl.offsetHeight : 0;
+        const gap = 12; // فاصله دلخواه
+        setTopOffsetPx(headerH + promoH + gap);
+      } catch {
+        setTopOffsetPx(144);
+      }
+    };
+
+    computeTopOffset();
+    window.addEventListener('resize', computeTopOffset);
+    return () => window.removeEventListener('resize', computeTopOffset);
   }, [open, isMobile]);
 
   // در موبایل: پس از باز شدن مودال، پس‌زمینه کمی به پایین اسکرول شود تا کارت در فضای مناسب‌تری دیده شود
@@ -485,25 +518,43 @@ export default function EmployerVerificationModal({
       <Box component="form" onSubmit={handleSubmit(onSubmit)}>
         {/* پیام وضعیت: نمایش رد/درحال‌بررسی در مرحله ۱ */}
         {serverStatus === 'rejected' ? (
-          <Alert severity="warning" sx={{ mb: { xs: 1.5, sm: 2 }, py: 0.8, px: 1.25 }}>
-            <Typography variant="body2" sx={{ fontSize: { xs: '0.82rem', sm: '0.86rem' } }}>
-              مدارک شما  رد شده است. لطفاً مجدداً مدارک صحیح را ارسال کنید.
+          <Alert icon={false} severity="info" sx={{
+            mb: { xs: 1.5, sm: 2 }, py: 0.8, px: 1.25,
+            bgcolor: alpha(EMPLOYER_THEME.primary, 0.06),
+            border: `1px solid ${alpha(EMPLOYER_THEME.primary, 0.2)}`,
+            color: EMPLOYER_THEME.primary,
+            textAlign: { xs: 'center', sm: 'left' }
+          }}>
+            <Typography variant="body2" sx={{ fontSize: { xs: '0.82rem', sm: '0.86rem' }, color: 'inherit' }}>
+              مدارک شما رد شده است. لطفاً مجدداً مدارک صحیح را ارسال کنید.
             </Typography>
             {adminNotes && (
-              <Typography variant="caption" color="text.secondary">
+              <Typography variant="caption" sx={{ color: 'inherit' }}>
                 دلیل رد: {adminNotes}
               </Typography>
             )}
           </Alert>
         ) : serverStatus === 'pending' ? (
-          <Alert severity="info" sx={{ mb: { xs: 1.5, sm: 2 }, py: 0.8, px: 1.25 }}>
-            <Typography variant="body2" sx={{ fontSize: { xs: '0.82rem', sm: '0.86rem' } }}>
+          <Alert icon={false} severity="info" sx={{
+            mb: { xs: 1.5, sm: 2 }, py: 0.8, px: 1.25,
+            bgcolor: alpha(EMPLOYER_THEME.primary, 0.06),
+            border: `1px solid ${alpha(EMPLOYER_THEME.primary, 0.2)}`,
+            color: EMPLOYER_THEME.primary,
+            textAlign: { xs: 'center', sm: 'left' }
+          }}>
+            <Typography variant="body2" sx={{ fontSize: { xs: '0.82rem', sm: '0.86rem' }, color: 'inherit' }}>
               مدارک شما قبلاً ارسال شده و در حال بررسی است.
             </Typography>
           </Alert>
         ) : (
-          <Alert severity="info" sx={{ mb: { xs: 1.5, sm: 2 }, py: 0.8, px: 1.25 }} icon={<InfoIcon fontSize="small" />}>
-            <Typography variant="body2" sx={{ fontSize: { xs: '0.82rem', sm: '0.86rem' } }}>
+          <Alert icon={false} severity="info" sx={{
+            mb: { xs: 1.5, sm: 2 }, py: 0.8, px: 1.25,
+            bgcolor: alpha(EMPLOYER_THEME.primary, 0.06),
+            border: `1px solid ${alpha(EMPLOYER_THEME.primary, 0.2)}`,
+            color: EMPLOYER_THEME.primary,
+            textAlign: { xs: 'center', sm: 'left' }
+          }}>
+            <Typography variant="body2" sx={{ fontSize: { xs: '0.82rem', sm: '0.86rem' }, color: 'inherit' }}>
               برای استفاده از امکانات پنل کارفرما، احراز هویت لازم است؛ این کار برای افزایش اعتماد کارجوها انجام می‌شود و اطلاعات شما فقط جهت بررسی استفاده می‌شود.
             </Typography>
           </Alert>
@@ -660,8 +711,14 @@ export default function EmployerVerificationModal({
       <Box>
         {/* نوار وضعیت در مرحله ۲ - فقط برای pending و approved */}
         {(serverStatus === 'pending' || serverStatus === 'approved') && (
-          <Alert severity={serverStatus === 'approved' ? 'success' : serverStatus === 'pending' ? 'info' : 'warning'} sx={{ mb: 1.5, py: 1, px: 1.25 }}>
-            <Typography variant="body2" sx={{ fontSize: { xs: '0.8rem', sm: '0.86rem' } }}>
+          <Alert icon={false} severity="info" sx={{
+            mb: 1.5, py: 1, px: 1.25,
+            bgcolor: alpha(EMPLOYER_THEME.primary, 0.06),
+            border: `1px solid ${alpha(EMPLOYER_THEME.primary, 0.2)}`,
+            color: EMPLOYER_THEME.primary,
+            textAlign: { xs: 'center', sm: 'left' }
+          }}>
+            <Typography variant="body2" sx={{ fontSize: { xs: '0.8rem', sm: '0.86rem' }, color: 'inherit' }}>
               {serverStatus === 'pending' && 'مدارک شما قبلاً ارسال شده و در حال بررسی است.'}
               {serverStatus === 'approved' && 'مدارک شما تایید شده است. در صورت نیاز می‌توانید مدارک را به‌روزرسانی کنید.'}
             </Typography>
@@ -682,12 +739,12 @@ export default function EmployerVerificationModal({
               cursor: 'pointer',
               position: 'relative',
               width: '100%',
-              aspectRatio: '1.6',
+              aspectRatio: { xs: '1.9', sm: '1.7', md: '1.6' },
               overflow: 'visible',
               '&:hover': { bgcolor: alpha(EMPLOYER_THEME.primary, 0.03) }
             }}
           >
-            {/* لیبل خارج از کادر */}
+          {/* لیبل خارج از کادر */}
             <Box sx={{
               position: 'absolute',
               top: -12,
@@ -704,7 +761,7 @@ export default function EmployerVerificationModal({
             }}>
               کارت ملی
             </Box>
-            <Box sx={{ position: 'absolute', inset: { xs: 6, sm: 10, md: 12 }, borderRadius: 2, overflow: 'hidden', bgcolor: 'transparent' }}>
+          <Box sx={{ position: 'absolute', inset: { xs: 6, sm: 10, md: 12 }, borderRadius: 2, overflow: 'hidden', bgcolor: 'transparent' }}>
               <Box sx={{ position: 'absolute', inset: 0 }}>
                 {frontImagePreview ? (
                   <>
@@ -766,7 +823,7 @@ export default function EmployerVerificationModal({
               cursor: 'pointer',
               position: 'relative',
               width: '100%',
-              aspectRatio: '1.6',
+              aspectRatio: { xs: '1.9', sm: '1.7', md: '1.6' },
               overflow: 'visible',
               '&:hover': { bgcolor: alpha(EMPLOYER_THEME.primary, 0.03) }
             }}
@@ -922,8 +979,9 @@ export default function EmployerVerificationModal({
         onClose={() => {}}
         disableEscapeKeyDown
         hideBackdrop
+        sx={{ pt: 0, mt: { xs: `${topOffsetPx}px` } }}
       >
-        <ModalContent>
+        <ModalContent sx={{ mt: { xs: `${topOffsetPx}px` }, maxHeight: { xs: `calc(100dvh - ${topOffsetPx}px)` } }}>
           <Paper 
             elevation={isMobile ? 0 : 3}
             sx={{ 
@@ -957,28 +1015,31 @@ export default function EmployerVerificationModal({
       onClose={() => {}} // غیرفعال کردن بستن با کلیک روی backdrop
       disableEscapeKeyDown // غیرفعال کردن بستن با ESC
       hideBackdrop // اجازه تعامل با هدر و پروموبار
+      sx={{ pt: 0, mt: { xs: `${topOffsetPx}px` } }}
     >
-      <ModalContent>
+      <ModalContent sx={{ mt: { xs: `${topOffsetPx}px` }, maxHeight: { xs: `calc(100dvh - ${topOffsetPx}px)` } }}>
 
         {/* فرم ثبت‌نام مشابه RegisterForm */}
           <Paper 
           elevation={isMobile ? 0 : 3}
           sx={{ 
-            p: { xs: 1.5, sm: 2.5 },
-            pt: { xs: 1.5, sm: 2.5 },
-            pb: { xs: 1.5, sm: 2.5 },
+            p: { xs: 1.25, sm: 2.5 },
+            pt: { xs: 1.25, sm: 2.5 },
+            pb: { xs: 1.25, sm: 2.5 },
             borderRadius: { xs: 2, sm: 2 },
             display: 'flex',
             flexDirection: 'column',
             justifyContent: 'flex-start',
-            width: '100%',
+            width: { xs: '100%', sm: '100%' },
             boxShadow: isMobile ? 'none' : '0px 3px 15px rgba(0, 0, 0, 0.1)',
-            maxHeight: '100%',
-            overflow: 'auto',
+            maxHeight: { xs: 'none', sm: '100%' },
+            overflowY: { xs: 'visible', sm: 'auto' },
+            overflowX: 'visible',
+            WebkitOverflowScrolling: 'touch',
           }}
         >
           {/* هدر انیمیشنی با اطلاعات مرحله */}
-          <Box 
+          <Box
             sx={{ 
               mb: { xs: 1.5, sm: 3 }, 
               textAlign: 'center',
@@ -987,13 +1048,13 @@ export default function EmployerVerificationModal({
             }}
           >
             {/* عنوان اصلی */}
-            <Typography 
+          <Typography 
               variant="h6" 
               component="h1" 
               sx={{ 
-                fontWeight: 'bold', 
-                mb: { xs: 1, sm: 1.5 },
-                fontSize: { xs: '1.2rem', sm: '1.5rem' },
+              fontWeight: 700, 
+              mb: { xs: 1, sm: 1.5 },
+              fontSize: { xs: '1.51rem', sm: '1.80rem' },
                 letterSpacing: '0.01em',
                 background: `linear-gradient(135deg, ${EMPLOYER_THEME.primary}, ${EMPLOYER_THEME.light})`,
                 backgroundClip: 'text',
@@ -1002,7 +1063,7 @@ export default function EmployerVerificationModal({
                 textAlign: 'center'
               }}
             >
-              تایید هویت کارفرما
+            احراز هویت کارفرما
             </Typography>
             
             {/* کارت اطلاعات مرحله ثابت - فقط برای never_submitted و rejected نمایش داده شود */}
@@ -1015,7 +1076,7 @@ export default function EmployerVerificationModal({
                   py: { xs: 1.2, sm: 1.5 },
                   border: `1px solid ${alpha(EMPLOYER_THEME.primary, 0.12)}`,
                   backdropFilter: 'blur(10px)',
-                  maxWidth: { xs: '260px', sm: '280px' },
+                  maxWidth: { xs: '300px', sm: '340px' },
                   mx: 'auto',
                   position: 'relative',
                   minHeight: '70px'
@@ -1049,8 +1110,8 @@ export default function EmployerVerificationModal({
                   variant="subtitle1" 
                   sx={{ 
                     color: EMPLOYER_THEME.primary,
-                    fontWeight: 700,
-                    fontSize: { xs: '0.95rem', sm: '1.1rem' },
+                    fontWeight: 800,
+                    fontSize: { xs: '1.15rem', sm: '1.35rem' },
                     lineHeight: 1.3,
                     animation: 'fadeChange 0.6s ease-in-out 0.1s both',
                   }}

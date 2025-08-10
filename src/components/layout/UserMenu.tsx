@@ -26,6 +26,7 @@ import Link from 'next/link';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
     faUser,
+    faUsers,
     faBuilding,
     faUserTie,
     faSignInAlt,
@@ -58,7 +59,8 @@ import {
     faEye,
     faEdit,
     faGraduationCap,
-    faTools
+    faTools,
+    faUserCheck
 } from '@fortawesome/free-solid-svg-icons';
 import { useAuthStore, useAuthActions } from '@/store/authStore';
 import { useJobStatsStore } from '@/store/jobStatsStore';
@@ -186,7 +188,7 @@ const adminMenuItems = [
     {
         title: 'کاربران',
         path: '/admin#users',
-        icon: faUser,
+        icon: faUsers,
         group: 'user-management'
     },
     {
@@ -211,6 +213,12 @@ const adminMenuItems = [
         title: 'اشتراک‌ها',
         path: '/admin#subscriptions',
         icon: null,
+        group: 'user-management'
+    },
+    {
+        title: 'تایید کارفرمایان',
+        path: '/admin#employer-verification',
+        icon: faUserCheck,
         group: 'user-management'
     },
     {
@@ -245,6 +253,8 @@ export default function UserMenu({ user: propUser, isLoggedIn: propIsLoggedIn }:
     const [menuLoading, setMenuLoading] = useState(false);
     const [avatarLoading, setAvatarLoading] = useState(true);
     const [openSubmenus, setOpenSubmenus] = useState<{ [key: string]: boolean }>({});
+    // آکاردئون مدیریت کاربران برای منوی ادمین در موبایل
+    const [openAdminManagement, setOpenAdminManagement] = useState(true);
     const open = Boolean(anchorEl);
     const menuOpenedRef = useRef(false);
     const prevOpenStateRef = useRef(open);
@@ -1153,161 +1163,145 @@ export default function UserMenu({ user: propUser, isLoggedIn: propIsLoggedIn }:
                             </>
                         )}
 
-                        {/* منوی کامل - فقط در حالت موبایل */}
+                        {/* منوی کامل - فقط در حالت موبایل (با آکاردئون مشابه دسکتاپ) */}
                         {isMobile && (
                             <Box sx={{ 
                                 flexGrow: 1,
                                 overflowY: 'auto',
                                 overflowX: 'hidden',
-                                '&::-webkit-scrollbar': {
-                                    width: 4,
-                                },
-                                '&::-webkit-scrollbar-track': {
-                                    background: 'transparent',
-                                },
-                                '&::-webkit-scrollbar-thumb': {
-                                    background: '#ddd',
-                                    borderRadius: 2,
-                                },
+                                '&::-webkit-scrollbar': { width: 4 },
+                                '&::-webkit-scrollbar-track': { background: 'transparent' },
+                                '&::-webkit-scrollbar-thumb': { background: '#ddd', borderRadius: 2 },
                             }}>
                                 <Typography variant="caption" color="text.secondary" sx={{ px: 2, display: 'block', mb: 0.5, fontWeight: 500 }}>
                                     منوی کامل مدیریت
                                 </Typography>
 
-                                <List sx={{ py: 0 }}>
-                                    {adminMenuItems.map((item, index) => (
-                                        <ListItem key={index} disablePadding>
-                                            <ListItemButton
-                                                component={Link}
-                                                href={item.path}
-                                                onClick={(e) => {
-                                                    console.log('Clicked on admin menu item:', item.path);
-                                                    handleClose();
-                                                    if (item.path.includes('#')) {
-                                                        const hash = item.path.split('#')[1];
-                                                        if (typeof window !== 'undefined') {
-                                                            window.location.hash = hash;
-                                                        }
-                                                    } else if (item.path === '/admin') {
-                                                        // برای پنل مدیریت، هش را پاک کرده و رویداد ارسال کنیم
-                                                        if (typeof window !== 'undefined') {
-                                                            window.location.hash = '';
-                                                            window.dispatchEvent(new HashChangeEvent('hashchange'));
-                                                        }
-                                                    }
-                                                }}
-                                                selected={isActiveMenuItem(item.path)}
-                                                sx={{
-                                                    borderRadius: 2,
-                                                    mx: 1,
-                                                    mb: 0.5,
-                                                    cursor: 'pointer',
-                                                    '&.Mui-selected': {
-                                                        bgcolor: ADMIN_THEME.bgLight,
-                                                        '&:hover': {
-                                                            bgcolor: ADMIN_THEME.bgVeryLight,
-                                                        },
-                                                        '& .MuiListItemIcon-root': {
-                                                            color: ADMIN_THEME.primary,
-                                                        },
-                                                        '& .MuiListItemText-primary': {
-                                                            color: ADMIN_THEME.primary,
-                                                            fontWeight: 'bold'
-                                                        }
-                                                    },
-                                                    '&:hover': {
-                                                        bgcolor: ADMIN_THEME.bgVeryLight,
-                                                        transform: 'translateX(-2px)',
-                                                        transition: 'all 0.2s ease',
-                                                    },
-                                                    transition: 'all 0.2s ease',
-                                                }}
-                                            >
-                                                <ListItemIcon sx={{ 
-                                                    minWidth: 40,
-                                                    color: isActiveMenuItem(item.path) ? ADMIN_THEME.primary : 'text.secondary',
-                                                    transition: 'color 0.2s ease',
-                                                }}>
-                                                    {item.icon ? (
-                                                        <FontAwesomeIcon
-                                                            icon={item.icon}
-                                                            style={{
-                                                                fontSize: '1.1rem',
-                                                                color: isActiveMenuItem(item.path) ? ADMIN_THEME.primary : 'text.secondary',
-                                                                transition: 'color 0.2s ease',
-                                                            }}
-                                                        />
-                                                    ) : item.title === 'اشتراک‌ها' ? (
-                                                        <Box
-                                                            sx={{
-                                                                width: 32,
-                                                                height: 20,
-                                                                display: 'flex',
-                                                                alignItems: 'center',
-                                                                justifyContent: 'center',
-                                                                bgcolor: isActiveMenuItem(item.path) ? ADMIN_THEME.primary : 'text.secondary',
-                                                                borderRadius: 0.5,
-                                                                color: '#fff',
-                                                                fontSize: '0.65rem',
-                                                                fontWeight: 'bold',
-                                                                transition: 'all 0.2s ease',
-                                                            }}
-                                                        >
-                                                            نردبان
-                                                        </Box>
-                                                    ) : null}
-                                                </ListItemIcon>
-                                                <ListItemText
-                                                    primary={item.title}
-                                                    primaryTypographyProps={{
-                                                        fontSize: '0.9rem',
-                                                        fontWeight: isActiveMenuItem(item.path) ? 'bold' : 'normal',
-                                                    }}
-                                                />
-                                                {/* شمارنده فقط برای مدیریت آگهی‌ها */}
-                                                {item.path === '/admin#jobs' && (
-                                                    <Box
-                                                        sx={{
-                                                            display: 'flex',
-                                                            alignItems: 'center',
-                                                            justifyContent: 'center',
-                                                            minWidth: 28,
-                                                            height: 20,
-                                                            px: 1,
-                                                            mr: 0.5,
-                                                            ...(jobStats?.pendingJobs && jobStats.pendingJobs > 0 ? {
-                                                                bgcolor: '#ffe0b2',
-                                                                boxShadow: '0 1px 4px rgba(255, 140, 0, 0.1)',
-                                                                border: '1.5px solid #ff9800',
-                                                                color: '#ff6d00'
-                                                            } : {
-                                                                bgcolor: 'transparent',
-                                                                border: '1px solid #e0e0e0',
-                                                                color: '#757575'
-                                                            }),
-                                                            borderRadius: 6,
-                                                            fontWeight: 'bold',
-                                                            fontSize: '0.75rem',
-                                                            transition: 'all 0.2s',
+                                {(() => {
+                                    const dashboardItem = adminMenuItems.find(i => i.path === '/admin');
+                                    const managementItems = adminMenuItems.filter(i => i.group === 'user-management');
+                                    const otherItems = adminMenuItems.filter(i => i.group !== 'user-management' && i.path !== '/admin');
+
+                                    return (
+                                        <List sx={{ py: 0 }}>
+                                            {/* داشبورد */}
+                                            {dashboardItem && (
+                                                <ListItem disablePadding>
+                                                    <ListItemButton
+                                                        component={Link}
+                                                        href={dashboardItem.path}
+                                                        onClick={() => {
+                                                            handleClose();
+                                                            if (typeof window !== 'undefined') {
+                                                                window.location.hash = '';
+                                                                window.dispatchEvent(new HashChangeEvent('hashchange'));
+                                                            }
                                                         }}
+                                                        selected={isActiveMenuItem(dashboardItem.path)}
+                                                        sx={{ mx: 1, mb: 0.5, borderRadius: 2 }}
                                                     >
-                                                        {jobStatsLoading ? (
-                                                            <Skeleton variant="rectangular" width={20} height={16} sx={{ borderRadius: 1 }} />
-                                                        ) : jobStats?.pendingJobs && jobStats.pendingJobs > 0 ? (
-                                                            jobStats.pendingJobs > 99 ? '+99' : jobStats.pendingJobs.toLocaleString('fa-IR')
-                                                        ) : (
-                                                            '۰'
-                                                        )}
-                                                    </Box>
-                                                )}
-                                            </ListItemButton>
-                                        </ListItem>
-                                    ))}
-                                </List>
+                                                        <ListItemIcon sx={{ minWidth: 40, color: isActiveMenuItem(dashboardItem.path) ? ADMIN_THEME.primary : 'text.secondary' }}>
+                                                            <FontAwesomeIcon icon={dashboardItem.icon as any} style={{ fontSize: '1.1rem' }} />
+                                                        </ListItemIcon>
+                                                        <ListItemText primary={dashboardItem.title} primaryTypographyProps={{ fontSize: '0.9rem', fontWeight: isActiveMenuItem(dashboardItem.path) ? 'bold' : 'normal' }} />
+                                                    </ListItemButton>
+                                                </ListItem>
+                                            )}
+
+                                            {/* هدر آکاردئون مدیریت کاربران */}
+                                            <ListItem disablePadding>
+                                                <ListItemButton onClick={() => setOpenAdminManagement(p => !p)} sx={{ mx: 1, mb: 0.5, borderRadius: 2 }}>
+                                                    <ListItemIcon sx={{ minWidth: 40, color: ADMIN_THEME.primary }}>
+                                                        <FontAwesomeIcon icon={faUsers} style={{ fontSize: '1.1rem' }} />
+                                                    </ListItemIcon>
+                                                    <ListItemText primary="مدیریت کاربران" primaryTypographyProps={{ fontSize: '0.9rem', fontWeight: 'bold', color: ADMIN_THEME.primary }} />
+                                                    <FontAwesomeIcon icon={openAdminManagement ? faChevronUp : faChevronDown} style={{ fontSize: '0.9rem', color: ADMIN_THEME.primary }} />
+                                                </ListItemButton>
+                                            </ListItem>
+
+                                            {/* آیتم‌های داخل آکاردئون */}
+                                            <Collapse in={openAdminManagement} timeout="auto" unmountOnExit>
+                                                <List component="div" disablePadding>
+                                                    {managementItems.map((item, idx) => (
+                                                        <ListItem key={idx} disablePadding>
+                                                            <ListItemButton
+                                                                component={Link}
+                                                                href={item.path}
+                                                                onClick={() => {
+                                                                    handleClose();
+                                                                    if (item.path.includes('#') && typeof window !== 'undefined') {
+                                                                        window.location.hash = item.path.split('#')[1];
+                                                                    }
+                                                                }}
+                                                                selected={isActiveMenuItem(item.path)}
+                                                                sx={{ mx: 2.5, mb: 0.5, borderRadius: 2 }}
+                                                            >
+                                                                <ListItemIcon sx={{ minWidth: 36, color: isActiveMenuItem(item.path) ? ADMIN_THEME.primary : 'text.secondary' }}>
+                                                                    {item.icon ? (
+                                                                        <FontAwesomeIcon icon={item.icon as any} style={{ fontSize: '1rem' }} />
+                                                                    ) : (
+                                                                        <Box sx={{ width: 32, height: 20, borderRadius: 0.5, bgcolor: isActiveMenuItem(item.path) ? ADMIN_THEME.primary : 'text.secondary', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.65rem', fontWeight: 'bold' }}>
+                                                                            نردبان
+                                                                        </Box>
+                                                                    )}
+                                                                </ListItemIcon>
+                                                                {/* شمارنده در آگهی‌ها */}
+                                                                {item.path === '/admin#jobs' && (
+                                                                    <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minWidth: 24, height: 18, px: 0.8, mr: 2, borderRadius: 5, fontWeight: 'bold', fontSize: '0.7rem', ...(jobStats?.pendingJobs && jobStats.pendingJobs > 0 ? { bgcolor: '#ffe0b2', border: '1.2px solid #ff9800', color: '#ff6d00' } : { bgcolor: 'transparent', border: '1px solid #e0e0e0', color: '#757575' }) }}>
+                                                                        {jobStatsLoading ? <Skeleton variant="rectangular" width={16} height={12} sx={{ borderRadius: 1 }} /> : (jobStats?.pendingJobs && jobStats.pendingJobs > 0 ? (jobStats.pendingJobs > 99 ? '+99' : jobStats.pendingJobs.toLocaleString('fa-IR')) : '۰')}
+                                                                    </Box>
+                                                                )}
+                                                                <ListItemText primary={item.title} primaryTypographyProps={{ fontSize: '0.85rem', fontWeight: isActiveMenuItem(item.path) ? 'bold' : 'normal' }} />
+                                                            </ListItemButton>
+                                                        </ListItem>
+                                                    ))}
+                                                </List>
+                                            </Collapse>
+
+                                            {/* سایر آیتم‌ها */}
+                                            {otherItems.map((item, idx) => (
+                                                <ListItem key={idx} disablePadding>
+                                                    <ListItemButton
+                                                        component={Link}
+                                                        href={item.path}
+                                                        onClick={() => {
+                                                            handleClose();
+                                                            if (item.path.includes('#') && typeof window !== 'undefined') {
+                                                                window.location.hash = item.path.split('#')[1];
+                                                            }
+                                                        }}
+                                                        selected={isActiveMenuItem(item.path)}
+                                                        sx={{ mx: 1, mb: 0.5, borderRadius: 2 }}
+                                                    >
+                                                        <ListItemIcon sx={{ minWidth: 40, color: isActiveMenuItem(item.path) ? ADMIN_THEME.primary : 'text.secondary' }}>
+                                                            <FontAwesomeIcon icon={item.icon as any} style={{ fontSize: '1.1rem' }} />
+                                                        </ListItemIcon>
+                                                        <ListItemText primary={item.title} primaryTypographyProps={{ fontSize: '0.9rem', fontWeight: isActiveMenuItem(item.path) ? 'bold' : 'normal' }} />
+                                                    </ListItemButton>
+                                                </ListItem>
+                                            ))}
+
+                                            {/* خروج از حساب داخل همین بخش */}
+                                            <Divider sx={{ my: 1.5 }} />
+                                            <ListItem disablePadding>
+                                                <ListItemButton
+                                                    onClick={() => { authLogout(); handleClose(); }}
+                                                    sx={{ mx: 1, mb: 1, borderRadius: 2, color: 'error.main', '&:hover': { bgcolor: 'error.light', color: 'error.contrastText' } }}
+                                                >
+                                                    <ListItemIcon sx={{ minWidth: 40, color: 'inherit' }}>
+                                                        <FontAwesomeIcon icon={faSignOutAlt} style={{ fontSize: '1.1rem' }} />
+                                                    </ListItemIcon>
+                                                    <ListItemText primary="خروج از حساب" />
+                                                </ListItemButton>
+                                            </ListItem>
+                                        </List>
+                                    );
+                                })()}
                             </Box>
                         )}
 
-                        {/* دکمه خروج از حساب کاربری - در هر دو حالت موبایل و دسکتاپ */}
+                        {/* دکمه خروج از حساب کاربری - در هر دو حالت موبایل و دسکتاپ (پنهان در ادمین موبایل، چون بالاتر اضافه شده) */}
+                        {!(isAdmin && isMobile) && (
                         <Box sx={{ 
                             px: 1, 
                             pt: 2, 
@@ -1367,6 +1361,7 @@ export default function UserMenu({ user: propUser, isLoggedIn: propIsLoggedIn }:
                                 />
                             </ListItemButton>
                         </Box>
+                        )}
                     </Box>
                 )}
 

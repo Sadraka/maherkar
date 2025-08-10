@@ -3,7 +3,8 @@
 import React, { useEffect, useState, ReactNode } from 'react';
 import { useAuth, useAuthStore, useAuthActions } from '@/store/authStore';
 import { useRouter, usePathname } from 'next/navigation';
-import { Box, CircularProgress, Typography, Backdrop } from '@mui/material';
+import { Box, CircularProgress, Typography, Backdrop, useMediaQuery } from '@mui/material';
+import { useTheme } from '@mui/material/styles';
 import authService from '@/lib/authService';
 import cookieService, { COOKIE_NAMES } from '@/lib/cookieService';
 import { apiGet } from '@/lib/axios';
@@ -110,6 +111,28 @@ export default function EmployerAuthRequired({ children, redirectTo = '/login' }
         // بروزرسانی وضعیت تایید
         checkEmployerVerification();
     };
+
+    // هنگام نمایش مودال احراز هویت در پنل کارفرما، هدر و پروموبار را فقط در موبایل مخفی کن
+    const theme = useTheme();
+    const isDesktop = useMediaQuery(theme.breakpoints.up('md'));
+    useEffect(() => {
+      if (typeof window === 'undefined') return;
+      const headerEl = document.querySelector('[data-testid="main-header"]') as HTMLElement | null;
+      const promoEl = document.querySelector('[data-testid="promo-bar"]') as HTMLElement | null;
+
+      if (showVerificationModal && !isDesktop) {
+        if (headerEl) headerEl.style.display = 'none';
+        if (promoEl) promoEl.style.display = 'none';
+      } else {
+        if (headerEl) headerEl.style.display = '';
+        if (promoEl) promoEl.style.display = '';
+      }
+
+      return () => {
+        if (headerEl) headerEl.style.display = '';
+        if (promoEl) promoEl.style.display = '';
+      };
+    }, [showVerificationModal, isDesktop]);
 
     useEffect(() => {
         // فقط زمانی که بررسی اولیه احراز هویت تمام شده باشد، تصمیم‌گیری می‌کنیم
