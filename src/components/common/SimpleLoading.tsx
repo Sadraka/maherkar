@@ -11,7 +11,7 @@ interface SimpleLoadingProps {
 }
 
 export default function SimpleLoading({ 
-    message = 'در حال بارگذاری...', 
+    message, 
     size = 'medium',
     fullScreen = false 
 }: SimpleLoadingProps) {

@@ -11,7 +11,7 @@ interface LoadingSpinnerProps {
 }
 
 export default function LoadingSpinner({ 
-    message = 'در حال بارگذاری...', 
+    message, 
     size = 'medium',
     fullScreen = false 
 }: LoadingSpinnerProps) {

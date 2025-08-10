@@ -75,7 +75,6 @@ export default function EditCompanyForm() {
         dir="rtl"
       >
         <CircularProgress size={40} sx={{ color: EMPLOYER_THEME.primary }} />
-        <Typography sx={{ mt: 2, color: 'text.secondary' }}>در حال بارگذاری اطلاعات شرکت...</Typography>
       </Paper>
     );
   }

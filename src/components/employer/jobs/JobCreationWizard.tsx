@@ -70,20 +70,9 @@ export default function JobCreationWizard({ onComplete }: JobCreationWizardProps
         <CircularProgress 
           size={60} 
           sx={{ 
-            color: EMPLOYER_THEME.primary, 
-            mb: 3 
+            color: EMPLOYER_THEME.primary
           }} 
         />
-        <Typography variant="h6" sx={{ 
-          color: EMPLOYER_THEME.primary, 
-          fontWeight: 600,
-          mb: 1
-        }}>
-          در حال بررسی اطلاعات...
-        </Typography>
-        <Typography variant="body2" color="text.secondary">
-          لطفاً کمی صبر کنید
-        </Typography>
       </Box>
     );
   }

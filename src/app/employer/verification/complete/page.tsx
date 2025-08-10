@@ -11,10 +11,13 @@ export default function EmployerVerificationCompletePage() {
   console.log('EmployerVerificationCompletePage rendering...');
   
   return (
-    <div style={{ padding: '20px', minHeight: '100vh', backgroundColor: '#f5f5f5' }}>
-      <h1>تست صفحه تکمیل اطلاعات</h1>
-      <p>این متن باید نمایش داده شود</p>
+    <Box sx={{ 
+      minHeight: '100vh',
+      // حداقل padding در موبایل برای قرارگیری خیلی بالاتر
+      px: { xs: 0, sm: 2, md: 3 },
+      py: { xs: 0, sm: 2, md: 3 }
+    }}>
       <EmployerVerificationForm />
-    </div>
+    </Box>
   );
 }

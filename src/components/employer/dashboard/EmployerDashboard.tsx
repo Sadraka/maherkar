@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { apiGet } from '@/lib/axios';
 import { useAuth } from '@/store/authStore';
 import { EMPLOYER_THEME } from '@/constants/colors';
-import { Box, Container, Typography, Button, Paper, Divider, Avatar, Chip } from '@mui/material';
+import { Box, Container, Typography, Button, Paper, Divider, Avatar, Chip, CircularProgress } from '@mui/material';
 
 // آیکون‌های مورد نیاز
 import WorkIcon from '@mui/icons-material/Work';
@@ -126,6 +126,26 @@ export default function EmployerDashboard() {
   // Helper: convert English digits to Persian digits
   const toPersianDigits = (value: number | string): string =>
     value.toString().replace(/\d/g, (d) => '۰۱۲۳۴۵۶۷۸۹'[Number(d)]);
+
+  // نمایش loading state کلی - فقط دایره لودینگ بدون متن
+  if (loading.profile || loading.jobs || loading.applications || loading.companies) {
+    return (
+      <Box sx={{ 
+        display: 'flex', 
+        justifyContent: 'center', 
+        alignItems: 'center', 
+        minHeight: '70vh',
+        bgcolor: '#fafafa'
+      }}>
+        <CircularProgress 
+          size={60} 
+          sx={{ 
+            color: EMPLOYER_THEME.primary 
+          }} 
+        />
+      </Box>
+    );
+  }
 
   return (
     <Box sx={{ bgcolor: '#fafafa', minHeight: '100vh', py: 6 }}>

@@ -191,9 +191,6 @@ export default function EmployerAuthRequired({ children, redirectTo = '/login' }
                 }}
             >
                 <CircularProgress size={40} />
-                <Typography>
-                    {loading || isCheckingAuth ? 'در حال بررسی وضعیت دسترسی...' : 'در حال بررسی وضعیت تایید...'}
-                </Typography>
             </Box>
         );
     }

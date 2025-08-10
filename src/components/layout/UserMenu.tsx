@@ -810,8 +810,8 @@ export default function UserMenu({ user: propUser, isLoggedIn: propIsLoggedIn }:
             >
                 {/* هدر منو - اطلاعات کاربر */}
                 <Box sx={{
-                    p: { xs: 2, md: 2 },
-                    pt: { xs: 4, md: 2 }, // اضافه کردن padding top بیشتر در موبایل
+                    p: { xs: 1.5, md: 1.5 },
+                    pt: { xs: 2, md: 1.5 }, // کاهش padding top
                     borderBottom: 'none',
                     background: isAdmin 
                         ? `linear-gradient(135deg, ${userTheme.primary}15, ${userTheme.primary}08)`
@@ -903,14 +903,14 @@ export default function UserMenu({ user: propUser, isLoggedIn: propIsLoggedIn }:
                             {/* آواتار کاربر با افکت‌های مدرن */}
                             <Box sx={{
                                 position: 'relative',
-                                mb: { xs: 1, md: 1.5 },
+                                mb: { xs: 0.5, md: 1 },
                                 '&::before': {
                                     content: '""',
                                     position: 'absolute',
-                                    top: -8,
-                                    left: -8,
-                                    right: -8,
-                                    bottom: -8,
+                                    top: -6,
+                                    left: -6,
+                                    right: -6,
+                                    bottom: -6,
                                     background: isAdmin 
                                         ? `linear-gradient(45deg, ${userTheme.primary}30, ${userTheme.primary}10)`
                                         : isEmployer
@@ -925,8 +925,8 @@ export default function UserMenu({ user: propUser, isLoggedIn: propIsLoggedIn }:
                                     src={currentUser.avatar}
                                     alt={currentUser.name}
                                     sx={{
-                                        width: { xs: 60, md: 64 },
-                                        height: { xs: 60, md: 64 },
+                                        width: { xs: 48, md: 52 },
+                                        height: { xs: 48, md: 52 },
                                         bgcolor: isAdmin 
                                             ? userTheme.primary 
                                             : isEmployer 
@@ -934,13 +934,13 @@ export default function UserMenu({ user: propUser, isLoggedIn: propIsLoggedIn }:
                                             : '#2e7d32',
                                         color: '#fff',
                                         fontWeight: 'bold',
-                                        fontSize: { xs: '1.5rem', md: '1.75rem' },
+                                        fontSize: { xs: '1.2rem', md: '1.4rem' },
                                         boxShadow: isAdmin 
-                                            ? `0 8px 32px ${userTheme.primary}40`
+                                            ? `0 6px 24px ${userTheme.primary}40`
                                             : isEmployer
-                                            ? '0 8px 32px #1976d240'
-                                            : '0 8px 32px #2e7d3240',
-                                        border: `4px solid rgba(255,255,255,0.9)`,
+                                            ? '0 6px 24px #1976d240'
+                                            : '0 6px 24px #2e7d3240',
+                                        border: `3px solid rgba(255,255,255,0.9)`,
                                         backdropFilter: 'blur(10px)',
                                         position: 'relative',
                                         zIndex: 1
@@ -960,9 +960,9 @@ export default function UserMenu({ user: propUser, isLoggedIn: propIsLoggedIn }:
                                         : isEmployer 
                                         ? '#1976d2' 
                                         : '#2e7d32',
-                                    mb: { xs: 0.5, md: 1 },
+                                    mb: { xs: 0.25, md: 0.5 },
                                     textAlign: 'center',
-                                    fontSize: { xs: '1rem', md: '1.25rem' },
+                                    fontSize: { xs: '0.9rem', md: '1.1rem' },
                                     textShadow: '0 1px 2px rgba(0,0,0,0.1)'
                                 }}
                             >
@@ -974,13 +974,13 @@ export default function UserMenu({ user: propUser, isLoggedIn: propIsLoggedIn }:
                                 display: 'flex',
                                 alignItems: 'center',
                                 gap: 1,
-                                mb: { xs: 1, md: 2 },
-                                p: { xs: 1, md: 1.5 },
+                                mb: { xs: 0.5, md: 1 },
+                                p: { xs: 0.75, md: 1 },
                                 bgcolor: 'rgba(255,255,255,0.7)',
                                 borderRadius: 3,
                                 backdropFilter: 'blur(10px)',
                                 border: '1px solid rgba(255,255,255,0.3)',
-                                minWidth: { xs: 180, md: 200 },
+                                minWidth: { xs: 160, md: 180 },
                                 justifyContent: 'center'
                             }}>
                                 <FontAwesomeIcon
@@ -1016,9 +1016,9 @@ export default function UserMenu({ user: propUser, isLoggedIn: propIsLoggedIn }:
                                     ? 'linear-gradient(90deg, #1976d2, #42a5f5)'
                                     : 'linear-gradient(90deg, #2e7d32, #4caf50)',
                                 borderRadius: '4px',
-                                px: { xs: 2, md: 2.5 },
-                                py: { xs: 0.8, md: 1 },
-                                minWidth: { xs: '70px', md: '80px' },
+                                px: { xs: 1.5, md: 2 },
+                                py: { xs: 0.6, md: 0.8 },
+                                minWidth: { xs: '60px', md: '70px' },
                                 textAlign: 'center',
                                 boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
                             }}>
@@ -1411,8 +1411,8 @@ export default function UserMenu({ user: propUser, isLoggedIn: propIsLoggedIn }:
                                             variant="subtitle2" 
                                             sx={{ 
                                                 fontSize: '0.85rem',
-                                                color: 'text.primary',
-                                                fontWeight: 400
+                                                color: EMPLOYER_THEME.primary,
+                                                fontWeight: 700
                                             }}
                                         >
                                             داشبورد
@@ -1535,105 +1535,152 @@ export default function UserMenu({ user: propUser, isLoggedIn: propIsLoggedIn }:
                                     }
                                 }} />
                                 
-                                <Typography variant="caption" color="text.secondary" sx={{ px: 2, display: 'block', mb: 0.5, fontWeight: 500 }}>
+                                <Typography variant="caption" color="text.secondary" sx={{ px: 2, display: 'block', mb: 1, fontWeight: 500, fontSize: '0.75rem' }}>
                                     مدیریت
                                 </Typography>
 
-                                <MenuItem component={Link} href="/employer/jobs" onClick={handleClose} sx={{
-                                    py: 1.2,
-                                    mx: 0.5,
-                                    borderRadius: '8px',
-                                    cursor: 'pointer',
-                                    transition: 'all 0.2s ease',
-                                    '&:hover': {
-                                        backgroundColor: `${EMPLOYER_THEME.primary}10`,
-                                        transform: 'translateX(-2px)',
-                                        '& .MuiListItemIcon-root': {
-                                            color: EMPLOYER_THEME.primary,
-                                            transform: 'scale(1.1)',
-                                        }
-                                    }
-                                }}>
-                                    <ListItemIcon sx={{
-                                        transition: 'all 0.2s ease',
-                                        minWidth: '50px'
-                                    }}>
-                                        <FontAwesomeIcon icon={faListAlt} style={{
-                                            fontSize: '1rem',
-                                            color: EMPLOYER_THEME.primary
-                                        }} />
-                                    </ListItemIcon>
-                                    مدیریت آگهی‌ها
-                                </MenuItem>
+                                <List sx={{ px: 1, width: '100%', pb: 1.5 }}>
+                                    <ListItem sx={{ p: 0.25 }}>
+                                        <ListItemButton 
+                                            component={Link}
+                                            href="/employer/jobs"
+                                            onClick={handleClose}
+                                            selected={isActiveMenuItem('/employer/jobs')}
+                                            sx={{
+                                                borderRadius: 1,
+                                                py: 0.75,
+                                                width: '100%',
+                                                '&.Mui-selected': {
+                                                    bgcolor: 'rgba(0, 168, 107, 0.08)',
+                                                    '&:hover': {
+                                                        bgcolor: 'rgba(0, 168, 107, 0.12)',
+                                                    },
+                                                    '& .MuiListItemIcon-root': {
+                                                        color: EMPLOYER_THEME.primary,
+                                                    },
+                                                    '& .MuiListItemText-primary': {
+                                                        color: EMPLOYER_THEME.primary,
+                                                        fontWeight: 'bold'
+                                                    }
+                                                },
+                                                '&:hover': {
+                                                    bgcolor: 'rgba(0, 168, 107, 0.06)',
+                                                },
+                                            }}
+                                        >
+                                            <ListItemIcon sx={{ 
+                                                minWidth: 56,
+                                                color: isActiveMenuItem('/employer/jobs') ? EMPLOYER_THEME.primary : 'text.secondary',
+                                            }}>
+                                                <FontAwesomeIcon 
+                                                    icon={faListAlt} 
+                                                    style={{ fontSize: '1.1rem' }} 
+                                                />
+                                            </ListItemIcon>
+                                            <ListItemText 
+                                                primary="آگهی‌های من"
+                                                primaryTypographyProps={{
+                                                    fontSize: '0.875rem',
+                                                    fontWeight: isActiveMenuItem('/employer/jobs') ? 'bold' : 'normal'
+                                                }}
+                                            />
+                                        </ListItemButton>
+                                    </ListItem>
 
-                                <MenuItem component={Link} href="/employer/applications" onClick={handleClose} sx={{
-                                    py: 1.2,
-                                    mx: 0.5,
-                                    borderRadius: '8px',
-                                    cursor: 'pointer',
-                                    transition: 'all 0.2s ease',
-                                    '&:hover': {
-                                        backgroundColor: `${EMPLOYER_THEME.primary}10`,
-                                        transform: 'translateX(-2px)',
-                                        '& .MuiListItemIcon-root': {
-                                            color: EMPLOYER_THEME.primary,
-                                            transform: 'scale(1.1)',
-                                        }
-                                    }
-                                }}>
-                                    <ListItemIcon sx={{
-                                        transition: 'all 0.2s ease',
-                                        minWidth: '50px'
-                                    }}>
-                                        <FontAwesomeIcon icon={faClipboardList} style={{
-                                            fontSize: '1rem',
-                                            color: EMPLOYER_THEME.primary
-                                        }} />
-                                    </ListItemIcon>
-                                    درخواست‌های استخدام
-                                </MenuItem>
+                                    <ListItem sx={{ p: 0.25 }}>
+                                        <ListItemButton 
+                                            component={Link}
+                                            href="/employer/applications"
+                                            onClick={handleClose}
+                                            selected={isActiveMenuItem('/employer/applications')}
+                                            sx={{
+                                                borderRadius: 1,
+                                                py: 0.75,
+                                                width: '100%',
+                                                '&.Mui-selected': {
+                                                    bgcolor: 'rgba(0, 168, 107, 0.08)',
+                                                    '&:hover': {
+                                                        bgcolor: 'rgba(0, 168, 107, 0.12)',
+                                                    },
+                                                    '& .MuiListItemIcon-root': {
+                                                        color: EMPLOYER_THEME.primary,
+                                                    },
+                                                    '& .MuiListItemText-primary': {
+                                                        color: EMPLOYER_THEME.primary,
+                                                        fontWeight: 'bold'
+                                                    }
+                                                },
+                                                '&:hover': {
+                                                    bgcolor: 'rgba(0, 168, 107, 0.06)',
+                                                },
+                                            }}
+                                        >
+                                            <ListItemIcon sx={{ 
+                                                minWidth: 56,
+                                                color: isActiveMenuItem('/employer/applications') ? EMPLOYER_THEME.primary : 'text.secondary',
+                                            }}>
+                                                <FontAwesomeIcon 
+                                                    icon={faClipboardList} 
+                                                    style={{ fontSize: '1.1rem' }} 
+                                                />
+                                            </ListItemIcon>
+                                            <ListItemText 
+                                                primary="درخواست‌های کاریابی"
+                                                primaryTypographyProps={{
+                                                    fontSize: '0.875rem',
+                                                    fontWeight: isActiveMenuItem('/employer/applications') ? 'bold' : 'normal'
+                                                }}
+                                            />
+                                        </ListItemButton>
+                                    </ListItem>
 
-                                <Box sx={{
-                                    position: 'relative',
-                                    my: 1,
-                                    '&::before': {
-                                        content: '""',
-                                        position: 'absolute',
-                                        left: '50%',
-                                        top: 0,
-                                        transform: 'translateX(-50%)',
-                                        width: '40%',
-                                        height: '1px',
-                                        background: `linear-gradient(90deg, transparent, ${EMPLOYER_THEME.primary}20, transparent)`
-                                    }
-                                }} />
-
-                                <MenuItem component={Link} href="/employer/profile" onClick={handleClose} sx={{
-                                    py: 1.2,
-                                    mx: 0.5,
-                                    borderRadius: '8px',
-                                    cursor: 'pointer',
-                                    transition: 'all 0.2s ease',
-                                    '&:hover': {
-                                        backgroundColor: `${EMPLOYER_THEME.primary}10`,
-                                        transform: 'translateX(-2px)',
-                                        '& .MuiListItemIcon-root': {
-                                            color: EMPLOYER_THEME.primary,
-                                            transform: 'scale(1.1)',
-                                        }
-                                    }
-                                }}>
-                                    <ListItemIcon sx={{
-                                        transition: 'all 0.2s ease',
-                                        minWidth: '50px'
-                                    }}>
-                                        <FontAwesomeIcon icon={faUser} style={{
-                                            fontSize: '1rem',
-                                            color: EMPLOYER_THEME.primary
-                                        }} />
-                                    </ListItemIcon>
-                                    پروفایل
-                                </MenuItem>
+                                    <ListItem sx={{ p: 0.25 }}>
+                                        <ListItemButton 
+                                            component={Link}
+                                            href="/employer/profile"
+                                            onClick={handleClose}
+                                            selected={isActiveMenuItem('/employer/profile')}
+                                            sx={{
+                                                borderRadius: 1,
+                                                py: 0.75,
+                                                width: '100%',
+                                                '&.Mui-selected': {
+                                                    bgcolor: 'rgba(0, 168, 107, 0.08)',
+                                                    '&:hover': {
+                                                        bgcolor: 'rgba(0, 168, 107, 0.12)',
+                                                    },
+                                                    '& .MuiListItemIcon-root': {
+                                                        color: EMPLOYER_THEME.primary,
+                                                    },
+                                                    '& .MuiListItemText-primary': {
+                                                        color: EMPLOYER_THEME.primary,
+                                                        fontWeight: 'bold'
+                                                    }
+                                                },
+                                                '&:hover': {
+                                                    bgcolor: 'rgba(0, 168, 107, 0.06)',
+                                                },
+                                            }}
+                                        >
+                                            <ListItemIcon sx={{ 
+                                                minWidth: 56,
+                                                color: isActiveMenuItem('/employer/profile') ? EMPLOYER_THEME.primary : 'text.secondary',
+                                            }}>
+                                                <FontAwesomeIcon 
+                                                    icon={faUser} 
+                                                    style={{ fontSize: '1.1rem' }} 
+                                                />
+                                            </ListItemIcon>
+                                            <ListItemText 
+                                                primary="پروفایل"
+                                                primaryTypographyProps={{
+                                                    fontSize: '0.875rem',
+                                                    fontWeight: isActiveMenuItem('/employer/profile') ? 'bold' : 'normal'
+                                                }}
+                                            />
+                                        </ListItemButton>
+                                    </ListItem>
+                                </List>
                             </>
                         )}
 

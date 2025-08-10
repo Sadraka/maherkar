@@ -229,30 +229,42 @@ export default function EmployerVerificationForm() {
   }
 
   return (
-    <Box>
+    <Box sx={{ 
+      px: { xs: 0.5, sm: 3, md: 4 },
+      py: { xs: 0.5, sm: 3, md: 4 },
+      '& > *': {
+        mb: { xs: 1, sm: 3, md: 4 }
+      }
+    }}>
       {/* هدر صفحه */}
       <Paper
         elevation={0}
         sx={{
-          p: 4,
-          mb: 4,
+          p: { xs: 1.5, sm: 4 },
           borderRadius: 3,
           background: `linear-gradient(135deg, ${EMPLOYER_THEME.primary} 0%, ${EMPLOYER_THEME.light} 100%)`,
           color: 'white',
           textAlign: 'center'
         }}
       >
-        <SecurityIcon sx={{ fontSize: 48, mb: 2 }} />
-        <Typography variant="h4" fontWeight="bold" gutterBottom>
+        <SecurityIcon sx={{ fontSize: { xs: 28, sm: 48 }, mb: { xs: 0.5, sm: 2 } }} />
+        <Typography variant="h4" fontWeight="bold" gutterBottom sx={{ 
+          fontSize: { xs: '1.1rem', sm: '2.125rem' },
+          mb: { xs: 0.5, sm: 2 }
+        }}>
           تایید هویت کارفرما
         </Typography>
-        <Typography variant="body1" sx={{ opacity: 0.9 }}>
+        <Typography variant="body1" sx={{ 
+          opacity: 0.9, 
+          fontSize: { xs: '0.75rem', sm: '1rem' },
+          mb: { xs: 0, sm: 1 }
+        }}>
           برای استفاده از خدمات ماهرکار، لطفاً اطلاعات هویتی خود را تکمیل کنید
         </Typography>
       </Paper>
 
       {/* Stepper */}
-      <Paper elevation={0} sx={{ p: 3, mb: 4, borderRadius: 2 }}>
+      <Paper elevation={0} sx={{ p: { xs: 1, sm: 3 }, borderRadius: 2 }}>
         <Stepper activeStep={activeStep} alternativeLabel>
           {steps.map((label) => (
             <Step key={label}>
@@ -264,23 +276,23 @@ export default function EmployerVerificationForm() {
 
       {/* نمایش خطا */}
       {error && (
-        <Alert severity="error" sx={{ mb: 3 }}>
+        <Alert severity="error" sx={{ mb: { xs: 1, sm: 3 } }}>
           <AlertTitle>خطا</AlertTitle>
           {error}
         </Alert>
       )}
 
       {/* فرم */}
-      <Paper elevation={0} sx={{ p: 4, borderRadius: 3 }}>
+      <Paper elevation={0} sx={{ p: { xs: 1.5, sm: 4 }, borderRadius: 3 }}>
         <form onSubmit={handleSubmit(onSubmit)}>
           {/* مرحله 1: اطلاعات شخصی */}
           {activeStep === 0 && (
             <Box>
-              <Typography variant="h6" fontWeight="bold" gutterBottom sx={{ mb: 3 }}>
+              <Typography variant="h6" fontWeight="bold" gutterBottom sx={{ mb: { xs: 1, sm: 3 } }}>
                 اطلاعات شخصی
               </Typography>
               
-              <Box sx={{ display: 'grid', gap: 3 }}>
+              <Box sx={{ display: 'grid', gap: { xs: 1, sm: 3 } }}>
                 <Controller
                   name="full_name"
                   control={control}
@@ -335,14 +347,14 @@ export default function EmployerVerificationForm() {
           {/* مرحله 2: آپلود مدارک */}
           {activeStep === 1 && (
             <Box>
-              <Typography variant="h6" fontWeight="bold" gutterBottom sx={{ mb: 1 }}>
+              <Typography variant="h6" fontWeight="bold" gutterBottom sx={{ mb: 0.5 }}>
                 آپلود تصاویر کارت ملی
               </Typography>
-              <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
+              <Typography variant="body2" color="text.secondary" sx={{ mb: { xs: 1, sm: 3 } }}>
                 لطفاً تصاویر واضح و خوانا از روی و پشت کارت ملی خود آپلود کنید
               </Typography>
 
-              <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '1fr 1fr' }, gap: 3 }}>
+              <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '1fr 1fr' }, gap: { xs: 1, sm: 3 } }}>
                 {/* آپلود روی کارت ملی */}
                 <Card variant="outlined" sx={{ p: 2 }}>
                   <CardContent sx={{ textAlign: 'center' }}>
@@ -466,7 +478,7 @@ export default function EmployerVerificationForm() {
                 </Card>
               </Box>
 
-              <Alert severity="info" sx={{ mt: 3 }}>
+              <Alert severity="info" sx={{ mt: { xs: 1, sm: 3 } }}>
                 <AlertTitle>راهنمایی</AlertTitle>
                 • تصاویر باید واضح و خوانا باشند
                 <br />
@@ -480,11 +492,11 @@ export default function EmployerVerificationForm() {
           {/* مرحله 3: تایید و ارسال */}
           {activeStep === 2 && (
             <Box>
-              <Typography variant="h6" fontWeight="bold" gutterBottom sx={{ mb: 3 }}>
+              <Typography variant="h6" fontWeight="bold" gutterBottom sx={{ mb: { xs: 1, sm: 3 } }}>
                 بررسی و تایید اطلاعات
               </Typography>
 
-              <Card variant="outlined" sx={{ mb: 3 }}>
+              <Card variant="outlined" sx={{ mb: { xs: 1, sm: 3 } }}>
                 <CardContent>
                   <Typography variant="subtitle1" fontWeight="bold" gutterBottom>
                     اطلاعات شخصی
@@ -500,7 +512,7 @@ export default function EmployerVerificationForm() {
                 </CardContent>
               </Card>
 
-              <Card variant="outlined" sx={{ mb: 3 }}>
+              <Card variant="outlined" sx={{ mb: { xs: 1, sm: 3 } }}>
                 <CardContent>
                   <Typography variant="subtitle1" fontWeight="bold" gutterBottom>
                     مدارک آپلود شده
@@ -540,7 +552,7 @@ export default function EmployerVerificationForm() {
                 </CardContent>
               </Card>
 
-              <Alert severity="warning" sx={{ mb: 3 }}>
+              <Alert severity="warning" sx={{ mb: { xs: 1, sm: 3 } }}>
                 <AlertTitle>توجه</AlertTitle>
                 با ارسال این اطلاعات، تایید می‌کنم که تمام اطلاعات ارائه شده صحیح و معتبر است.
                 اطلاعات ارسالی توسط تیم ماهرکار بررسی و در کمترین زمان ممکن نتیجه اطلاع‌رسانی خواهد شد.
@@ -548,14 +560,24 @@ export default function EmployerVerificationForm() {
             </Box>
           )}
 
-          <Divider sx={{ my: 3 }} />
+          <Divider sx={{ my: { xs: 1, sm: 3 } }} />
 
           {/* دکمه‌های ناوبری */}
-          <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+          <Box sx={{ 
+            display: 'flex', 
+            justifyContent: 'space-between',
+            flexDirection: { xs: 'column', sm: 'row' },
+            gap: { xs: 1, sm: 0 }
+          }}>
             <Button
               disabled={activeStep === 0}
               onClick={handleBack}
               variant="outlined"
+              fullWidth={false}
+              sx={{ 
+                width: { xs: '100%', sm: 'auto' },
+                order: { xs: 2, sm: 1 }
+              }}
             >
               مرحله قبل
             </Button>
@@ -565,9 +587,12 @@ export default function EmployerVerificationForm() {
                 type="submit"
                 variant="contained"
                 disabled={loading || !isStepValid(activeStep)}
+                fullWidth={false}
                 sx={{
                   bgcolor: EMPLOYER_THEME.primary,
-                  '&:hover': { bgcolor: EMPLOYER_THEME.dark }
+                  '&:hover': { bgcolor: EMPLOYER_THEME.dark },
+                  width: { xs: '100%', sm: 'auto' },
+                  order: { xs: 1, sm: 2 }
                 }}
               >
                 {loading ? (
@@ -584,9 +609,12 @@ export default function EmployerVerificationForm() {
                 onClick={handleNext}
                 variant="contained"
                 disabled={!isStepValid(activeStep)}
+                fullWidth={false}
                 sx={{
                   bgcolor: EMPLOYER_THEME.primary,
-                  '&:hover': { bgcolor: EMPLOYER_THEME.dark }
+                  '&:hover': { bgcolor: EMPLOYER_THEME.dark },
+                  width: { xs: '100%', sm: 'auto' },
+                  order: { xs: 1, sm: 2 }
                 }}
               >
                 مرحله بعد
