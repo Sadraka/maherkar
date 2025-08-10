@@ -1399,20 +1399,13 @@ export default function UserMenu({ user: propUser, isLoggedIn: propIsLoggedIn }:
                                             }
                                         }}
                                     >
-                                        <FontAwesomeIcon
-                                            icon={faTachometerAlt}
-                                            style={{
-                                                fontSize: '1.5rem', 
-                                                color: EMPLOYER_THEME.primary,
-                                                marginBottom: '8px' 
-                                            }}
-                                        />
                                         <Typography 
-                                            variant="subtitle2" 
+                                            variant="h6" 
                                             sx={{ 
-                                                fontSize: '0.85rem',
+                                                fontSize: '1.2rem',
                                                 color: EMPLOYER_THEME.primary,
-                                                fontWeight: 700
+                                                fontWeight: 700,
+                                                lineHeight: 1.2
                                             }}
                                         >
                                             داشبورد
