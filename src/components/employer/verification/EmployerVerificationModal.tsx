@@ -124,16 +124,14 @@ const IdCardPlaceholder: React.FC<{ primaryColor: string; align?: 'left' | 'righ
 // Styled Components مشابه RegisterForm
 const StyledModal = styled(Modal)(({ theme }) => ({
   display: 'flex',
-  alignItems: 'flex-start',
+  alignItems: 'center',
   justifyContent: 'center',
-  padding: theme.spacing(2),
-  paddingTop: theme.spacing(2),
+  padding: theme.spacing(1),
   [theme.breakpoints.down('sm')]: {
-    paddingTop: theme.spacing(2),
-    padding: theme.spacing(1.5),
+    padding: theme.spacing(1),
   },
   [theme.breakpoints.up('md')]: {
-    paddingTop: theme.spacing(2),
+    padding: theme.spacing(2),
   },
   // زیر هدر ثابت قرار بگیرد
   zIndex: 1100,
@@ -148,18 +146,18 @@ const ModalContent = styled(Box)(({ theme }) => ({
   width: '100%',
   maxWidth: '600px',
   height: 'auto',
-  maxHeight: 'calc(100dvh - 128px)',
+  maxHeight: '90vh',
   overflowY: 'auto',
   WebkitOverflowScrolling: 'touch',
   position: 'relative',
   outline: 'none',
   [theme.breakpoints.up('md')]: {
-    maxWidth: '720px', // عرض بیشتر در دسکتاپ
-    maxHeight: 'calc(100dvh - 144px)',
+    maxWidth: '720px',
+    maxHeight: '85vh',
   },
   [theme.breakpoints.down('sm')]: {
     maxWidth: '95vw',
-    maxHeight: 'calc(100dvh - 112px)',
+    maxHeight: '90vh',
   },
 }));
 
@@ -196,8 +194,7 @@ export default function EmployerVerificationModal({
   const [showBackCropper, setShowBackCropper] = useState(false);
   const [selectedImageFile, setSelectedImageFile] = useState<File | null>(null);
   const ALLOWED_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/webp'];
-  // فاصله داینامیک از بالای صفحه برای موبایل (بر اساس ارتفاع هدر و پروموبار)
-  const [topOffsetPx, setTopOffsetPx] = useState<number>(128);
+  // حذف شد - Modal کاملاً وسط قرار میگیره
   
   const frontInputRef = useRef<HTMLInputElement>(null);
   const backInputRef = useRef<HTMLInputElement>(null);
@@ -304,45 +301,9 @@ export default function EmployerVerificationModal({
     }
   }, [open, isMobile]);
 
-  // محاسبه داینامیک فاصله از بالا در موبایل بر اساس ارتفاع هدر و پروموبار
-  useEffect(() => {
-    if (!open || typeof window === 'undefined') return;
+  // حذف شد - Modal کاملاً وسط قرار میگیره
 
-    const computeTopOffset = () => {
-      try {
-        const headerEl = document.querySelector('[data-testid="main-header"]') as HTMLElement | null;
-        const promoEl = document.querySelector('[data-testid="promo-bar"]') as HTMLElement | null;
-        // اگر هدر/پرومو بار پنهان شده باشند، فاصله کمتری لازم است
-        const headerH = headerEl && headerEl.style.display !== 'none' ? headerEl.offsetHeight : 0;
-        const promoH = promoEl && promoEl.style.display !== 'none' ? promoEl.offsetHeight : 0;
-        const gap = 16; // فاصله دلخواه مطمئن
-        setTopOffsetPx(headerH + promoH + gap);
-      } catch {
-        setTopOffsetPx(144);
-      }
-    };
-
-    computeTopOffset();
-    window.addEventListener('resize', computeTopOffset);
-    return () => window.removeEventListener('resize', computeTopOffset);
-  }, [open, isMobile]);
-
-  // در موبایل: پس از باز شدن مودال، پس‌زمینه کمی به پایین اسکرول شود تا کارت در فضای مناسب‌تری دیده شود
-  useEffect(() => {
-    if (open && isMobile && typeof window !== 'undefined') {
-      const scrollOffset = 140; // مقدار اسکرول به پایین در موبایل
-      // کمی تاخیر برای اطمینان از رندر شدن
-      const id = setTimeout(() => {
-        try {
-          window.scrollBy({ top: scrollOffset, behavior: 'smooth' });
-        } catch {
-          // در برخی مرورگرها ممکن است smooth پشتیبانی نشود
-          window.scrollBy(0, scrollOffset);
-        }
-      }, 50);
-      return () => clearTimeout(id);
-    }
-  }, [open, isMobile]);
+  // حذف شد - Modal خودش وسط قرار میگیره
 
   // تابع validation کد ملی
   const validateNationalId = (value: string): boolean | string => {
@@ -986,12 +947,8 @@ export default function EmployerVerificationModal({
         onClose={() => {}}
         disableEscapeKeyDown
         hideBackdrop
-        sx={{ pt: 0, mt: { xs: `${topOffsetPx}px` } }}
       >
         <ModalContent sx={{
-          mt: `${topOffsetPx}px`,
-          maxHeight: `calc(100dvh - ${topOffsetPx}px)`,
-          minHeight: `calc(100dvh - ${topOffsetPx}px)`,
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
@@ -1031,12 +988,8 @@ export default function EmployerVerificationModal({
       onClose={() => {}} // غیرفعال کردن بستن با کلیک روی backdrop
       disableEscapeKeyDown // غیرفعال کردن بستن با ESC
       hideBackdrop // اجازه تعامل با هدر و پروموبار
-      sx={{ pt: 0, mt: { xs: `${topOffsetPx}px` } }}
     >
       <ModalContent sx={{
-        mt: `${topOffsetPx}px`,
-        maxHeight: `calc(100dvh - ${topOffsetPx}px)`,
-        minHeight: `calc(100dvh - ${topOffsetPx}px)`,
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
