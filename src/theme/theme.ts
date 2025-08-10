@@ -5,17 +5,28 @@ import {
     EMPLOYER_DARK_BLUE,
     JOB_SEEKER_GREEN,
     JOB_SEEKER_LIGHT_GREEN,
-    JOB_SEEKER_DARK_GREEN
+    JOB_SEEKER_DARK_GREEN,
+    ADMIN_RED,
+    ADMIN_LIGHT_RED,
+    ADMIN_DARK_RED
 } from '../constants/colors';
 
 declare module '@mui/material/styles' {
     interface Palette {
         employer: Palette['primary'];
         candidate: Palette['primary'];
+        admin: Palette['primary'];
     }
     interface PaletteOptions {
         employer?: PaletteOptions['primary'];
         candidate?: PaletteOptions['primary'];
+        admin?: PaletteOptions['primary'];
+    }
+}
+
+declare module '@mui/material/Button' {
+    interface ButtonPropsColorOverrides {
+        admin: true;
     }
 }
 
@@ -104,6 +115,12 @@ const theme = createTheme({
             main: JOB_SEEKER_GREEN,
             light: JOB_SEEKER_LIGHT_GREEN,
             dark: JOB_SEEKER_DARK_GREEN,
+            contrastText: '#fff',
+        },
+        admin: {
+            main: ADMIN_RED,
+            light: ADMIN_LIGHT_RED,
+            dark: ADMIN_DARK_RED,
             contrastText: '#fff',
         },
         background: {
@@ -216,6 +233,17 @@ const themeWithContainerOverrides = createTheme({
     ...theme,
     components: {
         ...theme.components,
+        MuiPopover: {
+            defaultProps: {
+                disableScrollLock: true,
+            },
+        },
+        MuiMenu: {
+            defaultProps: {
+                disableScrollLock: true,
+            },
+        },
+
         MuiContainer: {
             styleOverrides: {
                 maxWidthSm: {

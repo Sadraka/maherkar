@@ -36,7 +36,7 @@ export default function AuthInitializer() {
         const tokenRefreshInterval = setInterval(() => {
             console.log('[AuthInitializer] بررسی دوره‌ای وضعیت توکن و دریافت اطلاعات کاربر');
             fetchUserData();
-        }, 15 * 60 * 1000); // هر 15 دقیقه
+        }, 15 * 60 * 1000); // هر ۱۵ دقیقه
         
         // تعریف یک event listener برای رویدادهای storage
         // این برای همگام‌سازی بین تب‌های مرورگر مفید است

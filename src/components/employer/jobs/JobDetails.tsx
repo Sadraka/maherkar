@@ -1,8 +1,20 @@
 import React, { useState, useEffect } from 'react';
-import { Typography, Box, Button, Paper, Chip, Divider, Grid } from '@mui/material';
+import { 
+  Typography, 
+  Box, 
+  Button, 
+  Card,
+  CardContent, 
+  Chip, 
+  Divider, 
+  Avatar,
+  useTheme,
+  useMediaQuery,
+  Stack,
+  Paper
+} from '@mui/material';
 import Link from 'next/link';
 import { apiGet } from '@/lib/axios';
-import EditIcon from '@mui/icons-material/Edit';
 import WorkIcon from '@mui/icons-material/Work';
 import LocationOnIcon from '@mui/icons-material/LocationOn';
 import BusinessIcon from '@mui/icons-material/Business';
@@ -12,21 +24,34 @@ import SchoolIcon from '@mui/icons-material/School';
 import PeopleIcon from '@mui/icons-material/People';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
-import StarIcon from '@mui/icons-material/Star';
 import PersonIcon from '@mui/icons-material/Person';
 import MilitaryTechIcon from '@mui/icons-material/MilitaryTech';
 import AccessTimeIcon from '@mui/icons-material/AccessTime';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import AccountCircleIcon from '@mui/icons-material/AccountCircle';
+import PhoneIcon from '@mui/icons-material/Phone';
+import TimerIcon from '@mui/icons-material/Timer';
+import LocationOnOutlinedIcon from '@mui/icons-material/LocationOnOutlined';
+import WorkOutlineIcon from '@mui/icons-material/WorkOutline';
+import AccountBalanceWalletIcon from '@mui/icons-material/AccountBalanceWallet';
 import { EMPLOYER_THEME } from '@/constants/colors';
+import { 
+  getJobTypeText, 
+  getSalaryText, 
+  getDegreeText, 
+  getGenderText, 
+  getSoldierStatusText, 
+  formatDate 
+} from '@/lib/jobUtils';
 
 interface JobDetailsProps {
   job: {
     id: string;
     title: string;
     description?: string;
-    company: string; // Company ID
-    location: number; // Location ID  
-    industry: number; // Industry ID
+    company: string;
+    location: number;
+    industry: number;
     status: string;
     job_type?: string;
     salary?: string;
@@ -38,77 +63,162 @@ interface JobDetailsProps {
     created_at: string;
     updated_at?: string;
     expires_at?: string;
-  };
-}
-
-// تایپ‌های کمکی
-interface Company {
-  id: string;
-  name: string;
-  description?: string;
-  logo?: string;
-  website?: string;
-  email?: string;
-  phone_number?: string;
-  location?: {
-    id: number;
-    name: string;
-    province?: {
+    employer_detail?: {
+      id: string;
+      full_name: string;
+      phone: string;
+      user_type: string;
+    };
+    subscription_detail?: {
+      id: string;
+      subscription_status: 'default' | 'special';
+      plan?: {
+        id: string;
+        name: string;
+        price_per_day: number;
+      };
+      duration: number;
+      start_date?: string;
+      end_date?: string;
+      created_at: string;
+      updated_at: string;
+    };
+    company_detail?: {
+      id: string;
+      name: string;
+      description?: string;
+      logo?: string;
+      banner?: string;
+      industry?: {
+        id: number;
+        name: string;
+      };
+      location?: {
+        id: number;
+        name: string;
+        province?: {
+          id: number;
+          name: string;
+        };
+      };
+      number_of_employees?: number;
+      created_at: string;
+    };
+    location_detail?: {
       id: number;
       name: string;
+      province?: {
+        id: number;
+        name: string;
+      };
+    };
+    industry_detail?: {
+      id: number;
+      name: string;
+      category?: {
+        id: number;
+        name: string;
+      };
     };
   };
-  industry?: {
-    id: number;
-    name: string;
-  };
 }
 
-interface Location {
-  id: number;
-  name: string;
-  province?: {
-    id: number;
-    name: string;
-  };
-}
+// Helper: convert English digits to Persian digits
+const toPersianDigits = (value: number | string): string =>
+  value.toString().replace(/\d/g, (d) => '۰۱۲۳۴۵۶۷۸۹'[Number(d)]);
 
-interface Industry {
-  id: number;
-  name: string;
-}
+// تابع کمکی برای بررسی اشتراک ویژه
+const isSpecialSubscription = (job: any): boolean => {
+  // بررسی بر اساس نام طرح در subscription_detail
+  if (job.subscription_detail?.plan?.name) {
+    const planName = job.subscription_detail.plan.name.toLowerCase();
+    // فقط طرح‌های نردبان، ویژه، vip، یا ladder را به عنوان special در نظر بگیر
+    if (planName.includes('نردبان') || planName.includes('ویژه') || planName.includes('vip') || planName.includes('ladder')) {
+      return true;
+    }
+    // طرح‌های پایه را special در نظر نگیر
+    if (planName.includes('پایه') || planName.includes('base') || planName.includes('basic')) {
+      return false;
+    }
+  }
+  
+  // بررسی بر اساس subscription_status در subscription_detail
+  if (job.subscription_detail?.subscription_status) {
+    if (job.subscription_detail.subscription_status === 'special') {
+      return true;
+    }
+  }
+  
+  // اگر subscription_detail نبود، از advertisement.subscription بررسی کن
+  if (job.advertisement?.subscription?.subscription_status) {
+    if (job.advertisement.subscription.subscription_status === 'special') {
+      return true;
+    }
+  }
+  
+  // بررسی بر اساس نام طرح در advertisement
+  if (job.advertisement?.subscription?.plan?.name) {
+    const planName = job.advertisement.subscription.plan.name.toLowerCase();
+    if (planName.includes('نردبان') || planName.includes('ویژه') || planName.includes('vip') || planName.includes('ladder')) {
+      return true;
+    }
+  }
+  
+  return false;
+};
 
-/**
- * کامپوننت نمایش جزئیات آگهی شغلی
- */
-const JobDetails = ({ job }: JobDetailsProps) => {
-  const [company, setCompany] = useState<Company | null>(null);
-  const [location, setLocation] = useState<Location | null>(null);
-  const [industry, setIndustry] = useState<Industry | null>(null);
-  const [loading, setLoading] = useState(true);
+// تابع کمکی برای دریافت نام شهر
+const getLocationName = (job: any): string => {
+  if (job.location_detail?.name) {
+    return job.location_detail.province?.name ? 
+      `${job.location_detail.province.name}، ${job.location_detail.name}` : 
+      job.location_detail.name;
+  }
+  return 'موقعیت نامشخص';
+};
 
-  // فراخوانی داده‌های مربوطه
-  useEffect(() => {
-    const fetchJobData = async () => {
-      try {
-        const [companyRes, locationRes, industryRes] = await Promise.all([
-          job.company ? apiGet(`/companies/${job.company}/`) : Promise.resolve(null),
-          job.location ? apiGet(`/locations/cities/${job.location}/`) : Promise.resolve(null),
-          job.industry ? apiGet(`/industries/industries/${job.industry}/`) : Promise.resolve(null)
-        ]);
+// تابع کمکی برای محاسبه روزهای باقی‌مانده
+const getRemainingDays = (job: any): number | null => {
+  if (job.status !== 'A') return null;
+  
+  const endDate = job.subscription_detail?.end_date;
+  if (!endDate) return null;
+  
+  const now = new Date();
+  const end = new Date(endDate);
+  const diffTime = end.getTime() - now.getTime();
+  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+  
+  return diffDays > 0 ? diffDays : 0;
+};
 
-        if (companyRes?.data) setCompany(companyRes.data as Company);
-        if (locationRes?.data) setLocation(locationRes.data as Location);
-        if (industryRes?.data) setIndustry(industryRes.data as Industry);
-      } catch (error) {
-        console.error('خطا در دریافت اطلاعات آگهی:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
+// تابع کمکی برای نمایش مدت زمان باقی‌مانده
+const getRemainingDaysText = (job: any): string => {
+  const remainingDays = getRemainingDays(job);
+  if (remainingDays === null) return '';
+  if (remainingDays === 0) return 'امروز پایان می‌یابد';
+  if (remainingDays === 1) return 'فردا پایان می‌یابد';
+  return `${toPersianDigits(remainingDays.toString())} روز باقی‌مانده`;
+};
 
-    fetchJobData();
-  }, [job.company, job.location, job.industry]);
+// تابع کمکی برای محاسبه زمان انتشار
+const getTimePosted = (createdAt: string): string => {
+  const now = new Date();
+  const created = new Date(createdAt);
+  const diffInHours = Math.floor((now.getTime() - created.getTime()) / (1000 * 60 * 60));
+  
+  if (diffInHours < 1) return 'کمتر از ۱ ساعت پیش';
+  if (diffInHours < 24) return `${toPersianDigits(diffInHours.toString())} ساعت پیش`;
+  
+  const diffInDays = Math.floor(diffInHours / 24);
+  if (diffInDays < 7) return `${toPersianDigits(diffInDays.toString())} روز پیش`;
+  
+  const diffInWeeks = Math.floor(diffInDays / 7);
+  if (diffInWeeks < 4) return `${toPersianDigits(diffInWeeks.toString())} هفته پیش`;
+  
+  const diffInMonths = Math.floor(diffInDays / 30);
+  return `${toPersianDigits(diffInMonths.toString())} ماه پیش`;
+};
 
   // تابع تبدیل وضعیت به فارسی
   const getStatusText = (status: string) => {
@@ -120,378 +230,513 @@ const JobDetails = ({ job }: JobDetailsProps) => {
     return statusMap[status] || { text: 'نامشخص', color: '#757575' };
   };
 
-  // تابع تبدیل نوع قرارداد
-  const getJobTypeText = (jobType?: string) => {
-    const typeMap: Record<string, string> = {
-      'FT': 'تمام وقت',
-      'PT': 'پاره وقت', 
-      'RE': 'دورکاری',
-      'IN': 'کارآموزی'
-    };
-    return jobType ? typeMap[jobType] || jobType : '';
-  };
-
-  // تابع تبدیل جنسیت
-  const getGenderText = (gender?: string) => {
-    const genderMap: Record<string, string> = {
-      'M': 'آقا',
-      'F': 'خانم'
-    };
-    return gender ? genderMap[gender] || 'فرقی ندارد' : 'فرقی ندارد';
-  };
-
-  // تابع تبدیل مدرک
-  const getDegreeText = (degree?: string) => {
-    const degreeMap: Record<string, string> = {
-      'DI': 'دیپلم',
-      'AD': 'فوق دیپلم',
-      'BA': 'لیسانس',
-      'MA': 'فوق لیسانس',
-      'PH': 'دکتری'
-    };
-    return degree ? degreeMap[degree] || 'فرقی ندارد' : 'فرقی ندارد';
-  };
-
-  // تابع تبدیل وضعیت سربازی
-  const getSoldierStatusText = (status?: string) => {
-    const statusMap: Record<string, string> = {
-      'EE': 'معافیت',
-      'CO': 'پایان خدمت',
-      'SE': 'در حال خدمت'
-    };
-    return status ? statusMap[status] || 'فرقی ندارد' : 'فرقی ندارد';
-  };
-
-  // تابع تبدیل حقوق به فارسی
-  const getSalaryText = (salary?: string) => {
-    if (!salary) return '';
-    const convertToFarsiNumber = (num: string): string => {
-      const farsiDigits = ['۰', '۱', '۲', '۳', '۴', '۵', '۶', '۷', '۸', '۹'];
-      return num.toString().replace(/\d/g, (x) => farsiDigits[parseInt(x)]);
-    };
-
-    switch (salary) {
-      case '5 to 10': return convertToFarsiNumber('5') + ' تا ' + convertToFarsiNumber('10') + ' میلیون تومان';
-      case '10 to 15': return convertToFarsiNumber('10') + ' تا ' + convertToFarsiNumber('15') + ' میلیون تومان';
-      case '15 to 20': return convertToFarsiNumber('15') + ' تا ' + convertToFarsiNumber('20') + ' میلیون تومان';
-      case '20 to 30': return convertToFarsiNumber('20') + ' تا ' + convertToFarsiNumber('30') + ' میلیون تومان';
-      case '30 to 50': return convertToFarsiNumber('30') + ' تا ' + convertToFarsiNumber('50') + ' میلیون تومان';
-      case 'More than 50': return 'بیش از ' + convertToFarsiNumber('50') + ' میلیون تومان';
-      case 'Negotiable': 
-      default: return 'توافقی';
-    }
-  };
-
-  // تابع فرمت تاریخ
-  const formatDate = (dateString: string) => {
-    try {
-      const date = new Date(dateString);
-      return date.toLocaleDateString('fa-IR');
-    } catch {
-      return 'تاریخ نامعلوم';
-    }
-  };
+/**
+ * کامپوننت نمایش جزئیات آگهی شغلی به سبک مینیمال و کاربرپسند
+ */
+const JobDetails = ({ job }: JobDetailsProps) => {
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
   const statusInfo = getStatusText(job.status);
 
-  if (loading) {
-    return (
-      <Box sx={{ display: 'flex', justifyContent: 'center', py: 8 }}>
-        <Typography>در حال بارگذاری...</Typography>
-      </Box>
-    );
-  }
-
   return (
-    <Box sx={{ maxWidth: 1200, mx: 'auto' }}>
-      {/* هدر صفحه */}
-      <Box sx={{ mb: 4, display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 2 }}>
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-          <Button
-            component={Link}
-            href="/employer/jobs"
-            variant="outlined"
-            startIcon={<ArrowBackIcon />}
-            sx={{
-              borderColor: EMPLOYER_THEME.primary,
-              color: EMPLOYER_THEME.primary,
-              '&:hover': { 
-                borderColor: EMPLOYER_THEME.dark,
-                backgroundColor: `${EMPLOYER_THEME.primary}08`
-              }
-            }}
-          >
-            بازگشت
-          </Button>
-          
-          <Box>
-            <Typography variant="h4" fontWeight="bold" sx={{ color: EMPLOYER_THEME.primary, mb: 0.5 }}>
-              جزئیات آگهی شغلی
-            </Typography>
-            <Typography color="text.secondary">
-              مشاهده و مدیریت اطلاعات آگهی
-            </Typography>
-          </Box>
+    <Box sx={{ py: 3, maxWidth: '800px', mx: 'auto' }}>
+      {/* دکمه بازگشت */}
+      <Button
+        component={Link}
+        href="/employer/jobs"
+        variant="text"
+        startIcon={<ArrowBackIcon />}
+        sx={{
+          mb: 3,
+          color: 'text.secondary',
+          '&:hover': { 
+            backgroundColor: 'rgba(0,0,0,0.04)',
+            color: 'text.primary'
+          }
+        }}
+      >
+        بازگشت
+      </Button>
+              
+      {/* کارت اصلی پیوسته */}
+      <Card
+        elevation={0} 
+        sx={{ 
+          border: '1px solid',
+          borderColor: 'divider',
+          borderRadius: 3,
+          overflow: 'hidden'
+        }}
+      >
+        {/* هدر */}
+        <Box sx={{ p: { xs: 2.5, sm: 3 } }}>
+          <Stack direction="row" alignItems="flex-start" justifyContent="space-between" spacing={2}>
+            <Box sx={{ flex: 1, minWidth: 0 }}>
+              <Typography
+                variant="h4"
+                component="h1"
+                sx={{
+                  fontWeight: 600,
+                  fontSize: { xs: '1.4rem', sm: '1.6rem' },
+                  color: EMPLOYER_THEME.primary,
+                  mb: 1.5,
+                  lineHeight: 1.3
+                }}
+              >
+                {job.title}
+              </Typography>
+                  
+              {/* اطلاعات اساسی */}
+              <Stack 
+                direction={{ xs: 'column', sm: 'row' }} 
+                spacing={{ xs: 1, sm: 3 }}
+                sx={{ color: 'text.secondary', fontSize: '0.9rem' }}
+              >
+                {/* اطلاعات شرکت با لوگو بزرگ و مشخص */}
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                  {job.company_detail?.logo ? (
+                    <Avatar
+                      src={job.company_detail.logo}
+                      alt={job.company_detail.name}
+                      sx={{ 
+                        width: 48, 
+                        height: 48,
+                        border: `3px solid ${EMPLOYER_THEME.primary}40`,
+                        boxShadow: `0 4px 12px ${EMPLOYER_THEME.primary}25`
+                      }}
+                    />
+                  ) : (
+                    <Avatar
+                      sx={{ 
+                        width: 48, 
+                        height: 48,
+                        bgcolor: `${EMPLOYER_THEME.primary}15`,
+                        border: `3px solid ${EMPLOYER_THEME.primary}40`
+                      }}
+                    >
+                      <BusinessIcon 
+                        sx={{ 
+                          fontSize: 28, 
+                          color: EMPLOYER_THEME.primary
+                        }} 
+                      />
+                    </Avatar>
+                  )}
+                  <Typography
+                    component="span"
+                    sx={{
+                      color: EMPLOYER_THEME.primary,
+                      fontWeight: 800,
+                      fontSize: '1.3rem'
+                    }}
+                  >
+                    {job.company_detail?.name}
+                  </Typography>
+                </Box>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                  <LocationOnIcon sx={{ fontSize: 16 }} />
+                  {getLocationName(job)}
+                </Box>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                  <CalendarTodayIcon sx={{ fontSize: 16 }} />
+                  {getTimePosted(job.created_at)}
+                </Box>
+              </Stack>
+            </Box>
+
+            {/* برچسب‌ها */}
+            <Stack direction="row" spacing={1}>
+              {isSpecialSubscription(job) && (
+                <Chip
+                  label="نردبان"
+                  size="small"
+                  sx={{
+                    bgcolor: '#e53935',
+                    color: 'white',
+                    fontWeight: 600,
+                    fontSize: '0.75rem'
+                  }}
+                />
+              )}
+              {job.status !== 'A' && (
+                <Chip
+                  label={statusInfo.text}
+                  size="small"
+                  sx={{
+                    bgcolor: statusInfo.color,
+                    color: 'white',
+                    fontWeight: 500,
+                    fontSize: '0.75rem'
+                  }}
+                />
+              )}
+            </Stack>
+          </Stack>
         </Box>
 
-        <Button
-          component={Link}
-          href={`/employer/jobs/edit/${job.id}`}
-          variant="contained"
-          startIcon={<EditIcon />}
-          sx={{
-            bgcolor: EMPLOYER_THEME.primary,
-            '&:hover': { bgcolor: EMPLOYER_THEME.dark },
-            px: 3,
-            py: 1.2
-          }}
-        >
-          ویرایش آگهی
-        </Button>
-      </Box>
+        <Divider />
 
-             <Box sx={{ display: 'flex', flexDirection: { xs: 'column', md: 'row' }, gap: 4 }}>
-         {/* اطلاعات اصلی آگهی */}
-         <Box sx={{ flex: 1 }}>
-           <Paper elevation={0} sx={{ p: 4, border: '1px solid #f0f0f0', borderRadius: 3 }}>
-             {/* عنوان و وضعیت */}
-             <Box sx={{ mb: 4 }}>
-               <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2, flexWrap: 'wrap' }}>
-                 <Typography variant="h5" fontWeight="bold" sx={{ color: EMPLOYER_THEME.dark, flex: 1 }}>
-                   {job.title}
-                 </Typography>
-                 
-                 <Chip
-                   label={statusInfo.text}
-                   sx={{
-                     backgroundColor: statusInfo.color,
-                     color: 'white',
-                     fontWeight: 500
-                   }}
-                 />
-               </Box>
-               
-               {job.description && (
-                 <Typography color="text.secondary" sx={{ lineHeight: 1.7, fontSize: '1rem' }}>
-                   {job.description}
-                 </Typography>
-               )}
-             </Box>
-
-             <Divider sx={{ my: 4 }} />
-
-             {/* جزئیات آگهی */}
-             <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr' }, gap: 3 }}>
-               {/* نوع قرارداد */}
-               {job.job_type && (
-                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                   <WorkIcon sx={{ color: EMPLOYER_THEME.primary, fontSize: 24 }} />
-                   <Box>
-                     <Typography variant="body2" color="text.secondary" sx={{ fontSize: '0.85rem' }}>
-                       نوع قرارداد
-                     </Typography>
-                     <Typography fontWeight="500">
-                       {getJobTypeText(job.job_type)}
-                     </Typography>
-                   </Box>
-                 </Box>
-               )}
-
-               {/* حقوق */}
-               {job.salary && (
-                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                   <AttachMoneyIcon sx={{ color: EMPLOYER_THEME.primary, fontSize: 24 }} />
-                   <Box>
-                     <Typography variant="body2" color="text.secondary" sx={{ fontSize: '0.85rem' }}>
-                       حقوق
-                     </Typography>
-                     <Typography fontWeight="500" sx={{ color: EMPLOYER_THEME.primary }}>
-                       {getSalaryText(job.salary)}
-                     </Typography>
-                   </Box>
-                 </Box>
-               )}
-
-               {/* جنسیت */}
-               {job.gender && (
-                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                   <PersonIcon sx={{ color: EMPLOYER_THEME.primary, fontSize: 24 }} />
-                   <Box>
-                     <Typography variant="body2" color="text.secondary" sx={{ fontSize: '0.85rem' }}>
-                       جنسیت
-                     </Typography>
-                     <Typography fontWeight="500">
-                       {getGenderText(job.gender)}
-                     </Typography>
-                   </Box>
-                 </Box>
-               )}
-
-               {/* مدرک تحصیلی */}
-               {job.degree && (
-                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                   <SchoolIcon sx={{ color: EMPLOYER_THEME.primary, fontSize: 24 }} />
-                   <Box>
-                     <Typography variant="body2" color="text.secondary" sx={{ fontSize: '0.85rem' }}>
-                       حداقل مدرک
-                     </Typography>
-                     <Typography fontWeight="500">
-                       {getDegreeText(job.degree)}
-                     </Typography>
-                   </Box>
-                 </Box>
-               )}
-
-               {/* وضعیت سربازی */}
-               {job.soldier_status && (
-                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                   <MilitaryTechIcon sx={{ color: EMPLOYER_THEME.primary, fontSize: 24 }} />
-                   <Box>
-                     <Typography variant="body2" color="text.secondary" sx={{ fontSize: '0.85rem' }}>
-                       وضعیت سربازی
-                     </Typography>
-                     <Typography fontWeight="500">
-                       {getSoldierStatusText(job.soldier_status)}
-                     </Typography>
-                   </Box>
-                 </Box>
-               )}
-
-               {/* تاریخ انتشار */}
-               <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                 <CalendarTodayIcon sx={{ color: EMPLOYER_THEME.primary, fontSize: 24 }} />
-                 <Box>
-                   <Typography variant="body2" color="text.secondary" sx={{ fontSize: '0.85rem' }}>
-                     تاریخ انتشار
-                   </Typography>
-                   <Typography fontWeight="500">
-                     {formatDate(job.created_at)}
-                   </Typography>
-                 </Box>
-               </Box>
-
-               {/* آخرین بروزرسانی */}
-               {job.updated_at && (
-                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                   <AccessTimeIcon sx={{ color: EMPLOYER_THEME.primary, fontSize: 24 }} />
-                   <Box>
-                     <Typography variant="body2" color="text.secondary" sx={{ fontSize: '0.85rem' }}>
-                       آخرین بروزرسانی
-                     </Typography>
-                     <Typography fontWeight="500">
-                       {formatDate(job.updated_at)}
-                     </Typography>
-                   </Box>
-                 </Box>
-               )}
-             </Box>
-           </Paper>
-         </Box>
-
-         {/* اطلاعات جانبی */}
-         <Box sx={{ width: { xs: '100%', md: '350px' } }}>
-          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
-            {/* اطلاعات شرکت */}
-            {company && (
-              <Paper elevation={0} sx={{ p: 3, border: '1px solid #f0f0f0', borderRadius: 3 }}>
-                <Typography variant="h6" fontWeight="bold" sx={{ mb: 2, color: EMPLOYER_THEME.primary }}>
-                  اطلاعات شرکت
-                </Typography>
-                
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}>
-                  <BusinessIcon sx={{ color: EMPLOYER_THEME.primary, fontSize: 20 }} />
-                  <Typography fontWeight="500">{company.name}</Typography>
-                </Box>
-
-                {company.description && (
-                  <Typography variant="body2" color="text.secondary" sx={{ mb: 2, lineHeight: 1.6 }}>
-                    {company.description}
-                  </Typography>
-                )}
-
-                {company.location && (
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 1 }}>
-                    <LocationOnIcon sx={{ color: EMPLOYER_THEME.primary, fontSize: 18 }} />
-                    <Typography variant="body2" color="text.secondary">
-                      {company.location.province?.name ? 
-                        `${company.location.province.name}، ${company.location.name}` : 
-                        company.location.name
-                      }
-                    </Typography>
-                  </Box>
-                )}
-
-                {company.industry && (
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                    <CategoryIcon sx={{ color: EMPLOYER_THEME.primary, fontSize: 18 }} />
-                    <Typography variant="body2" color="text.secondary">
-                      {company.industry.name}
-                    </Typography>
-                  </Box>
-                )}
-              </Paper>
-            )}
-
-            {/* موقعیت مکانی */}
-            {location && (
-              <Paper elevation={0} sx={{ p: 3, border: '1px solid #f0f0f0', borderRadius: 3 }}>
-                <Typography variant="h6" fontWeight="bold" sx={{ mb: 2, color: EMPLOYER_THEME.primary }}>
-                  موقعیت شغل
-                </Typography>
-                
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                  <LocationOnIcon sx={{ color: EMPLOYER_THEME.primary, fontSize: 20 }} />
-                  <Typography fontWeight="500">
-                    {location.province?.name ? 
-                      `${location.province.name}، ${location.name}` : 
-                      location.name
-                    }
-                  </Typography>
-                </Box>
-              </Paper>
-            )}
-
-            {/* صنعت */}
-            {industry && (
-              <Paper elevation={0} sx={{ p: 3, border: '1px solid #f0f0f0', borderRadius: 3 }}>
-                <Typography variant="h6" fontWeight="bold" sx={{ mb: 2, color: EMPLOYER_THEME.primary }}>
-                  صنعت
-                </Typography>
-                
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                  <CategoryIcon sx={{ color: EMPLOYER_THEME.primary, fontSize: 20 }} />
-                  <Typography fontWeight="500">{industry.name}</Typography>
-                </Box>
-              </Paper>
-            )}
-
-            {/* آمار آگهی */}
-            <Paper elevation={0} sx={{ p: 3, border: '1px solid #f0f0f0', borderRadius: 3 }}>
-              <Typography variant="h6" fontWeight="bold" sx={{ mb: 2, color: EMPLOYER_THEME.primary }}>
-                آمار آگهی
+        {/* محتوای اصلی */}
+        <Box sx={{ p: { xs: 2.5, sm: 3 } }}>
+                    {/* توضیحات شغل */}
+          {job.description && (
+            <Box sx={{ mb: 4 }}>
+              <Typography
+                variant="h6"
+                sx={{ 
+                  fontWeight: 600, 
+                  mb: 2, 
+                  fontSize: '1.1rem',
+                  color: EMPLOYER_THEME.primary 
+                }}
+              >
+                توضیحات شغل
               </Typography>
-              
-              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, justifyContent: 'space-between' }}>
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                    <VisibilityIcon sx={{ color: EMPLOYER_THEME.primary, fontSize: 18 }} />
-                    <Typography variant="body2" color="text.secondary">بازدید</Typography>
+              <Typography
+                sx={{
+                  color: 'text.secondary',
+                  lineHeight: 1.7,
+                  fontSize: '0.95rem',
+                  whiteSpace: 'pre-wrap'
+                }}
+              >
+                {job.description}
+              </Typography>
+            </Box>
+          )}
+
+          {/* شرایط و مزایا */}
+          <Box sx={{ mb: 4 }}>
+            <Typography
+              variant="h6"
+              sx={{ 
+                fontWeight: 600, 
+                mb: 2.5, 
+                fontSize: '1.1rem',
+                color: EMPLOYER_THEME.primary
+              }}
+            >
+              شرایط و مزایا
+            </Typography>
+            
+            <Box sx={{ 
+              display: 'grid', 
+              gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr', md: '1fr 1fr 1fr' }, 
+              gap: 2.5 
+            }}>
+              {/* حقوق */}
+              {job.salary && (
+                <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                  <Box
+                    sx={{
+                      backgroundColor: 'rgba(25, 118, 210, 0.08)',
+                      color: EMPLOYER_THEME.primary,
+                      width: 36,
+                      height: 36,
+                      borderRadius: '50%',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      mr: 1.5,
+                    }}
+                  >
+                    <AccountBalanceWalletIcon sx={{ fontSize: '1.1rem' }} />
                   </Box>
-                  <Typography fontWeight="500">{job.views_count || 0}</Typography>
-                </Box>
-                
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, justifyContent: 'space-between' }}>
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                    <PeopleIcon sx={{ color: EMPLOYER_THEME.primary, fontSize: 18 }} />
-                    <Typography variant="body2" color="text.secondary">متقاضی</Typography>
+                  <Box>
+                    <Typography
+                      variant="body2"
+                      sx={{
+                        color: 'text.secondary',
+                        fontSize: '0.8rem',
+                        mb: 0.25
+                      }}
+                    >
+                      حقوق
+                    </Typography>
+                    <Typography
+                      variant="body1"
+                      sx={{
+                        color: EMPLOYER_THEME.primary,
+                        fontSize: '0.95rem',
+                        fontWeight: 600
+                      }}
+                    >
+                      {getSalaryText(job.salary)}
+                    </Typography>
                   </Box>
-                  <Typography fontWeight="500">{job.applications_count || 0}</Typography>
                 </Box>
+              )}
+
+              {/* نوع کار */}
+              {job.job_type && (
+                <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                  <Box
+                    sx={{
+                      backgroundColor: 'rgba(25, 118, 210, 0.08)',
+                      color: EMPLOYER_THEME.primary,
+                      width: 36,
+                      height: 36,
+                      borderRadius: '50%',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      mr: 1.5,
+                    }}
+                  >
+                    <WorkOutlineIcon sx={{ fontSize: '1.1rem' }} />
+                  </Box>
+                  <Box>
+                    <Typography
+                      variant="body2"
+                      sx={{
+                        color: 'text.secondary',
+                        fontSize: '0.8rem',
+                        mb: 0.25
+                      }}
+                    >
+                      نوع کار
+                    </Typography>
+                    <Typography
+                      variant="body1"
+                      sx={{
+                        color: 'text.primary',
+                        fontSize: '0.95rem',
+                        fontWeight: 500
+                      }}
+                    >
+                      {getJobTypeText(job.job_type)}
+                    </Typography>
+                  </Box>
+                </Box>
+              )}
+
+              {/* مدرک تحصیلی */}
+              {job.degree && (
+                <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                  <Box
+                    sx={{
+                      backgroundColor: 'rgba(25, 118, 210, 0.08)',
+                      color: EMPLOYER_THEME.primary,
+                      width: 36,
+                      height: 36,
+                      borderRadius: '50%',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      mr: 1.5,
+                    }}
+                  >
+                    <SchoolIcon sx={{ fontSize: '1.1rem' }} />
+                  </Box>
+                  <Box>
+                    <Typography
+                      variant="body2"
+                      sx={{
+                        color: 'text.secondary',
+                        fontSize: '0.8rem',
+                        mb: 0.25
+                      }}
+                    >
+                      مدرک تحصیلی
+                    </Typography>
+                    <Typography
+                      variant="body1"
+                      sx={{
+                        color: 'text.primary',
+                        fontSize: '0.95rem',
+                        fontWeight: 500
+                      }}
+                    >
+                      {getDegreeText(job.degree)}
+                    </Typography>
+                  </Box>
+                </Box>
+              )}
+
+              {/* جنسیت */}
+              {job.gender && (
+                <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                  <Box
+                    sx={{
+                      backgroundColor: 'rgba(25, 118, 210, 0.08)',
+                      color: EMPLOYER_THEME.primary,
+                      width: 36,
+                      height: 36,
+                      borderRadius: '50%',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      mr: 1.5,
+                    }}
+                  >
+                    <PersonIcon sx={{ fontSize: '1.1rem' }} />
+                  </Box>
+                  <Box>
+                    <Typography
+                      variant="body2"
+                      sx={{
+                        color: 'text.secondary',
+                        fontSize: '0.8rem',
+                        mb: 0.25
+                      }}
+                    >
+                      جنسیت
+                    </Typography>
+                    <Typography
+                      variant="body1"
+                      sx={{
+                        color: 'text.primary',
+                        fontSize: '0.95rem',
+                        fontWeight: 500
+                      }}
+                    >
+                      {getGenderText(job.gender)}
+                    </Typography>
+                  </Box>
+                </Box>
+              )}
+
+              {/* وضعیت سربازی - فقط برای مردان */}
+              {job.soldier_status && job.gender !== 'F' && (
+                <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                  <Box
+                    sx={{
+                      backgroundColor: 'rgba(25, 118, 210, 0.08)',
+                      color: EMPLOYER_THEME.primary,
+                      width: 36,
+                      height: 36,
+                      borderRadius: '50%',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      mr: 1.5,
+                    }}
+                  >
+                    <MilitaryTechIcon sx={{ fontSize: '1.1rem' }} />
+                  </Box>
+                  <Box>
+                    <Typography
+                      variant="body2"
+                      sx={{
+                        color: 'text.secondary',
+                        fontSize: '0.8rem',
+                        mb: 0.25
+                      }}
+                    >
+                      وضعیت سربازی
+                    </Typography>
+                    <Typography
+                      variant="body1"
+                      sx={{
+                        color: 'text.primary',
+                        fontSize: '0.95rem',
+                        fontWeight: 500
+                      }}
+                    >
+                      {getSoldierStatusText(job.soldier_status)}
+                    </Typography>
+                  </Box>
+                </Box>
+              )}
+
+              {/* گروه کاری */}
+              {job.industry_detail && (
+                <Box sx={{ gridColumn: { xs: '1', sm: '1 / -1', md: '1 / -1' } }}>
+                  <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                    <Box
+                      sx={{
+                        backgroundColor: 'rgba(25, 118, 210, 0.08)',
+                        color: EMPLOYER_THEME.primary,
+                        width: 36,
+                        height: 36,
+                        borderRadius: '50%',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        mr: 1.5,
+                      }}
+                    >
+                      <CategoryIcon sx={{ fontSize: '1.1rem' }} />
+                    </Box>
+                    <Box>
+                      <Typography
+                        variant="body2"
+                        sx={{
+                          color: 'text.secondary',
+                          fontSize: '0.8rem',
+                          mb: 0.25
+                        }}
+                      >
+                        گروه کاری
+                      </Typography>
+                      <Typography
+                        variant="body1"
+                        sx={{
+                          color: 'text.primary',
+                          fontSize: '0.95rem',
+                          fontWeight: 500
+                        }}
+                      >
+                        {job.industry_detail.name}
+                      </Typography>
+                    </Box>
+                  </Box>
+                </Box>
+              )}
+            </Box>
+          </Box>
+
+          {/* زمان باقی‌مانده */}
+          {job.status === 'A' && getRemainingDaysText(job) && (
+            <Box sx={{ 
+              p: 3,
+              bgcolor: getRemainingDays(job) === 0 ? 'rgba(244, 67, 54, 0.03)' : 'rgba(76, 175, 80, 0.03)',
+              borderRadius: 2,
+              border: '1px solid',
+              borderColor: getRemainingDays(job) === 0 ? 'rgba(244, 67, 54, 0.1)' : 'rgba(76, 175, 80, 0.1)',
+              textAlign: 'center'
+            }}>
+              <Box
+                sx={{
+                  backgroundColor: getRemainingDays(job) === 0 ? 'rgba(244, 67, 54, 0.08)' : 'rgba(76, 175, 80, 0.08)',
+                  color: getRemainingDays(job) === 0 ? '#F44336' : '#4CAF50',
+                  width: 56,
+                  height: 56,
+                  borderRadius: '50%',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  mx: 'auto',
+                  mb: 2
+                }}
+              >
+                <TimerIcon sx={{ fontSize: '1.8rem' }} />
               </Box>
-            </Paper>
-                     </Box>
-         </Box>
-       </Box>
+              <Typography
+                variant="h6"
+                sx={{
+                  color: getRemainingDays(job) === 0 ? '#F44336' : '#4CAF50',
+                  fontSize: '1.1rem',
+                  fontWeight: 600,
+                  mb: 0.5
+                }}
+              >
+                {getRemainingDaysText(job)}
+              </Typography>
+              <Typography
+                variant="body2"
+                sx={{
+                  color: 'text.secondary',
+                  fontSize: '0.85rem'
+                }}
+              >
+                زمان باقی‌مانده برای درخواست
+              </Typography>
+            </Box>
+          )}
+        </Box>
+      </Card>
     </Box>
   );
 };

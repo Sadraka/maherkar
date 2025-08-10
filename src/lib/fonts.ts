@@ -13,6 +13,8 @@ export const iranSansFont = localFont({
       style: 'normal',
     },
   ],
-  display: 'swap',
-  variable: '--font-iransans'
+  display: 'block', // تغییر از swap به block برای جلوگیری از FOIT
+  variable: '--font-iransans',
+  preload: true,
+  fallback: ['system-ui', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'Arial', 'sans-serif'],
 }); 

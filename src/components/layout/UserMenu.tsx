@@ -17,7 +17,8 @@ import {
     List,
     ListItem,
     ListItemButton,
-    ListItemText
+    ListItemText,
+    Collapse
 } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
 import { useRouter, usePathname } from 'next/navigation';
@@ -25,18 +26,74 @@ import Link from 'next/link';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
     faUser,
-    faSignOutAlt,
+    faBuilding,
+    faUserTie,
+    faSignInAlt,
+    faUserPlus,
+    faRightToBracket,
+    faUserCircle,
+    faBell,
+    faHeadset,
+    faBars,
     faTachometerAlt,
     faListAlt,
-    faFileAlt,
-    faPhone,
-    faBuilding,
     faClipboardList,
+    faCreditCard,
+    faChartBar,
+    faProjectDiagram,
+    faTags,
+    faBriefcase,
+    faFileAlt,
+    faIndustry,
+    faSubscript,
+    faCog,
     faPlus,
-    faCog
+    faSignOutAlt,
+    faBullhorn,
+    faPhone,
+    faTimes,
+    faXmark,
+    faChevronDown,
+    faChevronUp,
+    faEye,
+    faEdit,
+    faGraduationCap,
+    faTools
 } from '@fortawesome/free-solid-svg-icons';
 import { useAuthStore, useAuthActions } from '@/store/authStore';
-import { EMPLOYER_THEME, JOB_SEEKER_THEME } from '@/constants/colors';
+import { useJobStatsStore } from '@/store/jobStatsStore';
+import { EMPLOYER_THEME, JOB_SEEKER_THEME, ADMIN_THEME } from '@/constants/colors';
+
+// اضافه کردن انیمیشن pulse
+const pulseKeyframes = `
+  @keyframes pulse {
+    0% {
+      transform: scale(1);
+      opacity: 0.8;
+    }
+    50% {
+      transform: scale(1.05);
+      opacity: 0.4;
+    }
+    100% {
+      transform: scale(1);
+      opacity: 0.8;
+    }
+  }
+`;
+
+// تزریق استایل انیمیشن
+if (typeof document !== 'undefined') {
+  const style = document.createElement('style');
+  style.textContent = pulseKeyframes;
+  document.head.appendChild(style);
+}
+
+// تابع تبدیل اعداد انگلیسی به فارسی
+const convertToPersianNumbers = (text: string): string => {
+  const persianNumbers = ['۰', '۱', '۲', '۳', '۴', '۵', '۶', '۷', '۸', '۹'];
+  return text.replace(/[0-9]/g, (match) => persianNumbers[parseInt(match)]);
+};
 
 // تایپ‌های مورد نیاز
 interface UserMenuProps {
@@ -49,43 +106,134 @@ interface UserMenuProps {
     isLoggedIn: boolean;
 }
 
-// آیتم‌های منوی کارفرما - مشابه با EmployerSidebar
+// آیتم‌های منوی کارفرما
 const employerMenuItems = [
-    { 
-        title: 'پنل کارفرما', 
-        path: '/employer/dashboard', 
+    {
+        title: 'پنل کارفرما',
+        path: '/employer/dashboard',
         icon: faTachometerAlt,
     },
-    { 
-        title: 'ثبت آگهی جدید', 
-        path: '/employer/jobs/create', 
+    {
+        title: 'ثبت آگهی جدید',
+        path: '/employer/jobs/create',
         icon: faPlus,
     },
-    { 
-        title: 'آگهی‌های من', 
-        path: '/employer/jobs', 
+    {
+        title: 'آگهی‌های من',
+        path: '/employer/jobs',
         icon: faListAlt,
     },
-    { 
-        title: 'درخواست‌های کاریابی', 
-        path: '/employer/applications', 
+    {
+        title: 'درخواست‌های کاریابی',
+        path: '/employer/applications',
         icon: faClipboardList,
     },
-    { 
-        title: 'پروفایل شرکت', 
-        path: '/employer/company', 
+    {
+        title: 'شرکت‌های من',
+        path: '/employer/companies',
         icon: faBuilding,
     },
-    { 
-        title: 'تنظیمات', 
-        path: '/employer/settings', 
-        icon: faCog,
+    {
+        title: 'پروفایل',
+        path: '/employer/profile',
+        icon: faUser,
+    }
+];
+
+// آیتم‌های منوی کارجو
+const jobSeekerMenuItems = [
+    {
+        title: 'داشبورد',
+        path: '/jobseeker/dashboard',
+        icon: faTachometerAlt,
+    },
+    {
+        title: 'پروفایل',
+        path: '/jobseeker/profile',
+        icon: faUser,
+        hasSubmenu: true,
+        submenu: [
+            { title: 'اطلاعات شخصی', path: '/jobseeker/resume', icon: faUser },
+            { title: 'تجربیات کاری', path: '/jobseeker/resume/experiences', icon: faBriefcase },
+            { title: 'تحصیلات', path: '/jobseeker/resume/educations', icon: faGraduationCap },
+            { title: 'مهارت‌ها', path: '/jobseeker/resume/skills', icon: faTools },
+        ]
+    },
+    {
+        title: 'آگهی‌های رزومه',
+        path: '/jobseeker/resume-ads',
+        icon: faBullhorn,
+    },
+    {
+        title: 'درخواست‌های ارسالی',
+        path: '/jobseeker/applications',
+        icon: faClipboardList,
+    },
+    {
+        title: 'آگهی‌های شغلی',
+        path: '/jobseeker/job-ads',
+        icon: faBriefcase,
+    }
+];
+
+// آیتم‌های منوی ادمین
+const adminMenuItems = [
+    {
+        title: 'داشبورد',
+        path: '/admin',
+        icon: faTachometerAlt,
+    },
+    {
+        title: 'کاربران',
+        path: '/admin#users',
+        icon: faUser,
+        group: 'user-management'
+    },
+    {
+        title: 'شرکت‌ها',
+        path: '/admin#companies',
+        icon: faBuilding,
+        group: 'user-management'
+    },
+    {
+        title: 'آگهی‌ها',
+        path: '/admin#jobs',
+        icon: faBriefcase,
+        group: 'user-management'
+    },
+    {
+        title: 'پرداخت‌ها',
+        path: '/admin#payments',
+        icon: faCreditCard,
+        group: 'user-management'
+    },
+    {
+        title: 'اشتراک‌ها',
+        path: '/admin#subscriptions',
+        icon: null,
+        group: 'user-management'
+    },
+    {
+        title: 'گروه‌های کاری',
+        path: '/admin#industries',
+        icon: faIndustry,
+    },
+    {
+        title: 'درخواست‌ها',
+        path: '/admin#applications',
+        icon: faFileAlt,
+    },
+    {
+        title: 'طرح‌های اشتراک',
+        path: '/admin#subscription-plans',
+        icon: faTags,
     }
 ];
 
 export default function UserMenu({ user: propUser, isLoggedIn: propIsLoggedIn }: UserMenuProps) {
     const theme = useTheme();
     const muiTheme = useMuiTheme();
+    const { jobStats, jobStatsLoading } = useJobStatsStore();
     const isMobile = useMediaQuery(muiTheme.breakpoints.down('md'));
     const router = useRouter();
     const pathname = usePathname(); // اضافه کردن pathname برای تشخیص منوی فعال
@@ -95,44 +243,73 @@ export default function UserMenu({ user: propUser, isLoggedIn: propIsLoggedIn }:
     const { logout: authLogout, refreshUserData } = useAuthActions();
     const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
     const [menuLoading, setMenuLoading] = useState(false);
+    const [avatarLoading, setAvatarLoading] = useState(true);
+    const [openSubmenus, setOpenSubmenus] = useState<{ [key: string]: boolean }>({});
     const open = Boolean(anchorEl);
     const menuOpenedRef = useRef(false);
     const prevOpenStateRef = useRef(open);
     const hasInitialLoadedRef = useRef(false);
     // اضافه کردن state برای نگهداری ارتفاع دقیق هدر
     const [headerHeight, setHeaderHeight] = useState(60);
+    const [promoBarClosed, setPromoBarClosed] = useState(false);
+
+    // گوش دادن به رویداد بسته شدن پرومو بار
+    useEffect(() => {
+        const handlePromoBarClosed = () => {
+            setPromoBarClosed(true);
+        };
+
+        window.addEventListener('promoBarClosed', handlePromoBarClosed);
+        return () => {
+            window.removeEventListener('promoBarClosed', handlePromoBarClosed);
+        };
+    }, []);
+
+    // مدیریت loading state برای آواتار
+    useEffect(() => {
+        if (authUser && authUser.full_name) {
+            // اگر اطلاعات کاربر موجود است، loading را متوقف کن
+            setAvatarLoading(false);
+        } else if (propUser && propUser.name) {
+            // اگر اطلاعات از props موجود است، loading را متوقف کن
+            setAvatarLoading(false);
+        } else {
+            // در غیر این صورت، loading را فعال کن
+            setAvatarLoading(true);
+        }
+    }, [authUser, propUser]);
 
     // محاسبه دقیق ارتفاع هدر (شامل PromoBar)
     useEffect(() => {
         // تابع محاسبه ارتفاع دقیق هدر و PromoBar
         const calculateHeaderHeight = () => {
             // سعی در یافتن هدر با انتخابگرهای مختلف
-            const header = document.querySelector('header') || 
-                           document.querySelector('.MuiAppBar-root') || 
-                           document.querySelector('[role="banner"]');
+            const header = document.querySelector('header') ||
+                document.querySelector('.MuiAppBar-root') ||
+                document.querySelector('[role="banner"]');
             
+            const promoBar = document.querySelector('[data-testid="promo-bar"]');
+
             // چاپ اطلاعات برای دیباگ
             //('Header element found:', header);
+
+            let totalHeight = 60; // ارتفاع پیش‌فرض
             
             if (header) {
                 const headerRect = header.getBoundingClientRect();
-                // استفاده از bottom برای محاسبه کل ارتفاع هدر + PromoBar
-                const totalHeight = headerRect.bottom;
-                //('Header total height calculated:', totalHeight);
-                setHeaderHeight(totalHeight);
-            } else {
-                console.warn('Header element not found, using default height:', 60);
-                setHeaderHeight(60); // ارتفاع پیش‌فرض اگر هدر پیدا نشد
+                totalHeight = headerRect.height;
+                //('Header height calculated:', totalHeight);
             }
             
-            // بررسی وجود PromoBar به صورت جداگانه
-            const promoBar = document.querySelector('[data-testid="promo-bar"]') || 
-                            document.querySelector('.promo-bar');
-            if (promoBar) {
-                //('PromoBar found:', promoBar);
-            } else {
-                //('PromoBar not found separately');
+            // اگر پرومو بار بسته نشده و وجود دارد، ارتفاع آن را اضافه کن
+            if (promoBar && !promoBarClosed) {
+                const promoRect = promoBar.getBoundingClientRect();
+                totalHeight += promoRect.height;
+                //('PromoBar height added:', promoRect.height);
             }
+            
+            setHeaderHeight(totalHeight);
+            //('Total header height:', totalHeight);
         };
 
         // محاسبه اولیه ارتفاع
@@ -142,20 +319,22 @@ export default function UserMenu({ user: propUser, isLoggedIn: propIsLoggedIn }:
         const handleResize = () => calculateHeaderHeight();
         const handleScroll = () => calculateHeaderHeight();
 
-        window.addEventListener('resize', handleResize, { passive: true });
-        window.addEventListener('scroll', handleScroll, { passive: true });
+        if (typeof window !== 'undefined') {
+            window.addEventListener('resize', handleResize, { passive: true });
+            window.addEventListener('scroll', handleScroll, { passive: true });
 
-        // هنگام باز شدن منو نیز مجدداً ارتفاع محاسبه شود
-        if (open) {
-            setTimeout(calculateHeaderHeight, 50); // محاسبه با کمی تاخیر برای اطمینان
+            // هنگام باز شدن منو نیز مجدداً ارتفاع محاسبه شود
+            if (open) {
+                setTimeout(calculateHeaderHeight, 50); // محاسبه با کمی تاخیر برای اطمینان
+            }
+
+            // پاکسازی event listeners هنگام unmount کردن کامپوننت
+            return () => {
+                window.removeEventListener('resize', handleResize);
+                window.removeEventListener('scroll', handleScroll);
+            };
         }
-
-        // پاکسازی event listeners هنگام unmount کردن کامپوننت
-        return () => {
-            window.removeEventListener('resize', handleResize);
-            window.removeEventListener('scroll', handleScroll);
-        };
-    }, [open]);
+    }, [open, promoBarClosed]);
 
     // لود اولیه اطلاعات کاربر در زمان مانت کامپوننت
     useEffect(() => {
@@ -165,10 +344,10 @@ export default function UserMenu({ user: propUser, isLoggedIn: propIsLoggedIn }:
                 try {
                     // ثبت زمان آخرین درخواست
                     (window as any)._userMenuLastFetch = Date.now();
-                    
+
                     // بارگیری اطلاعات از سرور
                     await refreshUserData();
-                    
+
                     // یادداشت می‌کنیم که بارگیری اولیه انجام شده
                     hasInitialLoadedRef.current = true;
                 } catch (error) {
@@ -176,7 +355,7 @@ export default function UserMenu({ user: propUser, isLoggedIn: propIsLoggedIn }:
                 }
             }
         };
-        
+
         preloadUserData();
     }, [isAuthenticated]); // وابستگی به وضعیت احراز هویت
 
@@ -186,29 +365,29 @@ export default function UserMenu({ user: propUser, isLoggedIn: propIsLoggedIn }:
         if (open && !prevOpenStateRef.current && isAuthenticated) {
             // ثبت اینکه منو باز شده است، برای جلوگیری از بروزرسانی‌های مکرر
             menuOpenedRef.current = true;
-            
+
             // اگر از قبل داده‌ها بارگیری شده‌اند، نیازی به نمایش اسکلتون نیست
             const now = Date.now();
             const lastFetch = (window as any)._userMenuLastFetch || 0;
             const shouldShowLoading = now - lastFetch > 30000; // اگر بیش از 30 ثانیه گذشته، حالت لودینگ نشان بده
-            
+
             if (shouldShowLoading) {
                 setMenuLoading(true);
             }
-            
+
             // برای جلوگیری از حلقه بی‌نهایت، فقط یک بار داده‌ها را بروز می‌کنیم
             const fetchData = async () => {
                 // برای محدود کردن فراخوانی‌های متوالی، فاصله زمانی را بررسی می‌کنیم
                 const now = Date.now();
                 const lastFetch = (window as any)._userMenuLastFetch || 0;
-                
+
                 // حداقل 15 ثانیه بین درخواست‌ها فاصله باشد (کاهش از 5 ثانیه به 15 ثانیه)
                 if (now - lastFetch < 15000) {
                     //('[UserMenu] فراخوانی throttled - درخواست قبلی اخیراً انجام شده است');
                     setMenuLoading(false);
                     return;
                 }
-                
+
                 try {
                     (window as any)._userMenuLastFetch = now;
                     await refreshUserData();
@@ -222,7 +401,7 @@ export default function UserMenu({ user: propUser, isLoggedIn: propIsLoggedIn }:
                     }, 200);
                 }
             };
-            
+
             // فقط اگر کاربر احراز هویت شده، داده‌ها را به‌روز کن
             if (isAuthenticated) {
                 fetchData();
@@ -230,7 +409,7 @@ export default function UserMenu({ user: propUser, isLoggedIn: propIsLoggedIn }:
                 setMenuLoading(false);
             }
         }
-        
+
         // ذخیره وضعیت فعلی منو برای مقایسه در رندر بعدی
         prevOpenStateRef.current = open;
     }, [open, isAuthenticated]); // حذف refreshUserData از وابستگی‌ها
@@ -242,29 +421,33 @@ export default function UserMenu({ user: propUser, isLoggedIn: propIsLoggedIn }:
     const currentUser = {
         name: authUser?.full_name || propUser?.name || '',
         phone: authUser?.phone || '',
-        avatar: propUser?.avatar || '',
+        avatar: authUser?.profile_picture || propUser?.avatar || '',
         role: authUser?.user_type || propUser?.role || '',
     };
 
-    // بررسی اینکه کاربر کارفرما است یا خیر - اطمینان از بررسی هر دو حالت ممکن
+    // بررسی نوع کاربر
     const isEmployer = currentUser.role === 'EM' || currentUser.role === 'employer';
+    const isJobSeeker = currentUser.role === 'JS' || currentUser.role === 'jobseeker' || authUser?.user_type === 'JS';
+    const isAdmin = currentUser.role === 'AD' || currentUser.role === 'SU' ||
+        (authUser as any)?.is_staff === true || (authUser as any)?.is_admin === true ||
+        (authUser as any)?.is_superuser === true;
+
+
+
+    // تعیین تم رنگی بر اساس نوع کاربر
+    const getUserTheme = () => {
+        if (isAdmin) return ADMIN_THEME;
+        if (isEmployer) return EMPLOYER_THEME;
+        return JOB_SEEKER_THEME;
+    };
+
+    const userTheme = getUserTheme();
 
     // تبدیل نوع کاربر به فارسی
-    const getUserRoleText = (role: string) => {
-        switch (role) {
-            case 'JS': 
-            case 'candidate': 
-                return 'جوینده کار';
-            case 'EM': 
-            case 'employer': 
-                return 'کارفرما';
-            case 'AD': 
-                return 'مدیر';
-            case 'SU': 
-                return 'پشتیبان';
-            default:
-                return 'کاربر';
-        }
+    const getUserRoleText = () => {
+        if (isAdmin) return 'مدیریت';
+        if (isEmployer) return 'کارفرما';
+        return 'کارجو';
     };
 
     // حرف اول نام برای نمایش در آواتار
@@ -278,33 +461,33 @@ export default function UserMenu({ user: propUser, isLoggedIn: propIsLoggedIn }:
     // کوتاه کردن نام طولانی برای نمایش بهتر
     const getShortName = () => {
         if (!currentUser.name) return 'کاربر ماهرکار';
-        
+
         // جدا کردن بخش اول نام (اسم) از فامیل
         const nameParts = currentUser.name.split(' ');
-        
+
         // اگر فقط یک بخش داشت (فقط اسم)
         if (nameParts.length === 1) {
             // اگر طول اسم بیشتر از 12 کاراکتر بود، آن را کوتاه کن
-            return nameParts[0].length > 12 
-                ? nameParts[0].substring(0, 10) + '...' 
+            return nameParts[0].length > 12
+                ? nameParts[0].substring(0, 10) + '...'
                 : nameParts[0];
         }
-        
+
         // اگر چند بخش داشت (اسم و فامیل)
         // فقط اسم را برگردان، مگر اینکه خیلی کوتاه باشد
         const firstName = nameParts[0];
-        
+
         // اگر اسم کوتاه بود (کمتر از 4 کاراکتر)، اسم و فامیل را با هم نمایش بده
         if (firstName.length < 4 && nameParts.length > 1) {
             const fullNameShort = `${firstName} ${nameParts[1]}`;
-            return fullNameShort.length > 15 
-                ? fullNameShort.substring(0, 13) + '...' 
+            return fullNameShort.length > 15
+                ? fullNameShort.substring(0, 13) + '...'
                 : fullNameShort;
         }
-        
+
         // در غیر این صورت فقط اسم را برگردان
-        return firstName.length > 12 
-            ? firstName.substring(0, 10) + '...' 
+        return firstName.length > 12
+            ? firstName.substring(0, 10) + '...'
             : firstName;
     };
 
@@ -325,22 +508,55 @@ export default function UserMenu({ user: propUser, isLoggedIn: propIsLoggedIn }:
     };
 
     // کامپوننت آواتار پیش‌فرض به جای حرف اول نام
-    const UserDefaultAvatar = () => (
-        <FontAwesomeIcon
-            icon={faUser}
-            style={{
-                fontSize: '1rem',
-                color: '#fff',
-            }}
-        />
-    );
+    const UserDefaultAvatar = ({ size = 'normal' }: { size?: 'small' | 'normal' | 'large' }) => {
+        const iconSize = size === 'small' ? '0.9rem' : size === 'large' ? '2rem' : '1.2rem';
+        return (
+            <FontAwesomeIcon
+                icon={faUser}
+                style={{
+                    fontSize: iconSize,
+                    color: '#fff',
+                }}
+            />
+        );
+    };
 
     // بررسی اینکه آیا در صفحه‌ای هستیم که آیتم منو با آن تطبیق دارد
     const isActiveMenuItem = (path: string) => {
         if (path === pathname) return true;
-        if (path === '/employer/jobs' && pathname?.startsWith('/employer/jobs/')) return true;
+        
+        // برای صفحه آگهی‌ها - فقط اگر در صفحه لیست آگهی‌ها باشیم
+        if (path === '/employer/jobs') {
+            // اگر در صفحه ایجاد آگهی باشیم، آگهی‌های من فعال نشود
+            if (pathname === '/employer/jobs/create') return false;
+            // فقط برای صفحات جزئیات و ویرایش آگهی فعال شود
+            if (pathname?.startsWith('/employer/jobs/') && !pathname.includes('/create')) return true;
+        }
+        
         if (path === '/employer/applications' && pathname?.startsWith('/employer/applications/')) return true;
+        
+        // اضافه کردن حالت هش برای پنل ادمین
+        if (path.includes('#') && pathname === '/admin') {
+            const pathHash = path.split('#')[1];
+            const currentHash = typeof window !== 'undefined' ? window.location.hash.replace('#', '') : '';
+            return pathHash === currentHash;
+        }
+        
         return false;
+    };
+
+    // بررسی اینکه آیا یک زیرمنو باید باز باشد
+    const shouldSubmenuBeOpen = (item: any) => {
+        if (!item.hasSubmenu || !item.submenu) return false;
+        return item.submenu.some((subItem: any) => isActiveMenuItem(subItem.path));
+    };
+
+    // تغییر وضعیت زیرمنو
+    const toggleSubmenu = (itemTitle: string) => {
+        setOpenSubmenus(prev => ({
+            ...prev,
+            [itemTitle]: !prev[itemTitle]
+        }));
     };
 
     // اگر کاربر لاگین نکرده باشد، آیکون ورود نمایش داده می‌شود
@@ -435,490 +651,1505 @@ export default function UserMenu({ user: propUser, isLoggedIn: propIsLoggedIn }:
                     aria-haspopup="true"
                     aria-expanded={open ? 'true' : undefined}
                 >
-                        <Avatar
-                            src={currentUser.avatar}
-                        alt={currentUser.name}
-                            sx={{
-                            width: { xs: 36, md: 40 },
-                            height: { xs: 36, md: 40 },
-                            bgcolor: isEmployer ? EMPLOYER_THEME.primary : JOB_SEEKER_THEME.primary,
-                                color: '#fff',
-                            fontWeight: 'bold',
-                            fontSize: { xs: '0.85rem', md: '0.95rem' },
-                            boxShadow: `0 2px 6px ${isEmployer ? EMPLOYER_THEME.primary : JOB_SEEKER_THEME.primary}40`,
-                            border: `2px solid ${isEmployer ? EMPLOYER_THEME.light : JOB_SEEKER_THEME.light}80`,
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                            flexShrink: 0,
-                            mr: 0,
-                            transition: 'all 0.3s ease',
-                            order: -1,
-                            '&:hover': {
-                                boxShadow: `0 3px 8px ${isEmployer ? EMPLOYER_THEME.primary : JOB_SEEKER_THEME.primary}60`,
-                                border: `2px solid ${isEmployer ? EMPLOYER_THEME.light : JOB_SEEKER_THEME.light}`,
-                            }
-                        }}
-                    >
-                        {currentUser.avatar ? getAvatarText() : <UserDefaultAvatar />}
-                    </Avatar>
-
-                    <Box sx={{ 
-                        display: 'flex',
-                        flexDirection: 'column',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        lineHeight: 1.1,
-                        minWidth: { xs: '70px', md: '80px' },
-                        ml: -1,
-                    }}>
-                        <Typography 
-                            variant="body2" 
-                            sx={{ 
-                                fontWeight: 600,
-                                color: isEmployer ? EMPLOYER_THEME.dark : JOB_SEEKER_THEME.dark,
-                                fontSize: { xs: '0.75rem', md: '0.85rem' },
-                                maxWidth: { xs: '90px', md: '120px' },
-                                whiteSpace: 'nowrap',
-                                overflow: 'hidden',
-                                textOverflow: 'ellipsis',
-                                textAlign: 'center',
-                            }}
-                        >
-                            {getShortName()}
-                        </Typography>
-                        
-                        <Box sx={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            background: isEmployer 
-                                ? `linear-gradient(90deg, ${EMPLOYER_THEME.primary}, ${EMPLOYER_THEME.light})`
-                                : `linear-gradient(90deg, ${JOB_SEEKER_THEME.primary}, ${JOB_SEEKER_THEME.light})`,
-                            borderRadius: '4px',
-                            px: 0.75,
-                            py: 0.1,
-                            mt: 0.2,
-                            minWidth: '44px',
-                            textAlign: 'center',
-                        }}>
-                            <Typography 
-                                variant="caption" 
-                                sx={{ 
-                                    fontSize: { xs: '0.6rem', md: '0.65rem' },
-                                    lineHeight: 1.2,
+                    {avatarLoading ? (
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                            <Skeleton 
+                                variant="circular" 
+                                width={40} 
+                                height={40} 
+                                animation="wave"
+                                sx={{
+                                    bgcolor: 'rgba(0,0,0,0.1)',
+                                    '&::after': {
+                                        background: 'linear-gradient(90deg, transparent, rgba(0,0,0,0.1), transparent)'
+                                    }
+                                }}
+                            />
+                            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }}>
+                                <Skeleton 
+                                    variant="text" 
+                                    width={60} 
+                                    height={16} 
+                                    animation="wave"
+                                    sx={{ bgcolor: 'rgba(0,0,0,0.1)' }}
+                                />
+                                <Skeleton 
+                                    variant="rounded" 
+                                    width={40} 
+                                    height={16} 
+                                    animation="wave"
+                                    sx={{ bgcolor: 'rgba(0,0,0,0.1)' }}
+                                />
+                            </Box>
+                        </Box>
+                    ) : (
+                        <>
+                            <Avatar
+                                src={currentUser.avatar}
+                                alt={currentUser.name}
+                                sx={{
+                                    width: { xs: 36, md: 40 },
+                                    height: { xs: 36, md: 40 },
+                                    bgcolor: userTheme.primary,
                                     color: '#fff',
-                                    fontWeight: 500
+                                    fontWeight: 'bold',
+                                    fontSize: { xs: '0.85rem', md: '0.95rem' },
+                                    boxShadow: `0 2px 6px ${userTheme.primary}40`,
+                                    border: `2px solid ${userTheme.light}80`,
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    flexShrink: 0,
+                                    mr: 0,
+                                    transition: 'all 0.3s ease',
+                                    order: -1,
+                                    '&:hover': {
+                                        boxShadow: `0 3px 8px ${userTheme.primary}60`,
+                                        border: `2px solid ${userTheme.light}`,
+                                    }
                                 }}
                             >
-                                {isEmployer ? 'کارفرما' : 'کارجو'}
-                            </Typography>
-                        </Box>
-                    </Box>
+                                <UserDefaultAvatar size="small" />
+                            </Avatar>
+
+                            <Box sx={{
+                                display: 'flex',
+                                flexDirection: 'column',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                lineHeight: 1.1,
+                                minWidth: { xs: '70px', md: '80px' },
+                                ml: -1,
+                            }}>
+                                <Typography
+                                    variant="body2"
+                                    sx={{
+                                        fontWeight: 400,
+                                        color: userTheme.dark,
+                                        fontSize: { xs: '0.75rem', md: '0.85rem' },
+                                        maxWidth: { xs: '90px', md: '120px' },
+                                        whiteSpace: 'nowrap',
+                                        overflow: 'hidden',
+                                        textOverflow: 'ellipsis',
+                                        textAlign: 'center',
+                                    }}
+                                >
+                                    {getShortName()}
+                                </Typography>
+
+                                <Box sx={{
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    background: `linear-gradient(90deg, ${userTheme.primary}, ${userTheme.light})`,
+                                    borderRadius: '4px',
+                                    px: 0.75,
+                                    py: 0.1,
+                                    mt: 0.2,
+                                    minWidth: '44px',
+                                    textAlign: 'center',
+                                }}>
+                                    <Typography
+                                        variant="caption"
+                                        sx={{
+                                            fontSize: { xs: '0.6rem', md: '0.65rem' },
+                                            lineHeight: 1.2,
+                                            color: '#fff',
+                                            fontWeight: 500
+                                        }}
+                                    >
+                                        {getUserRoleText()}
+                                    </Typography>
+                                </Box>
+                            </Box>
+                        </>
+                    )}
                 </Box>
             </Tooltip>
 
             {/* منوی کاربر یکپارچه برای همه حالت‌ها */}
             <Drawer
+                disableScrollLock
                 anchor="right"
                 open={open}
                 onClose={handleClose}
                 variant="temporary"
                 elevation={16}
                 PaperProps={{
-                    sx: { 
+                    sx: {
                         width: { xs: 280, sm: 320, md: 350 },
-                        height: '100vh',
-                        top: `${headerHeight}px`,
-                        zIndex: 9999,
+                        height: { xs: '100vh', md: `calc(100vh - ${headerHeight - 8}px)` }, // استفاده از 100vh در موبایل
+                        top: { xs: 0, md: `${headerHeight - 8}px` }, // شروع از بالای صفحه در موبایل
+                        zIndex: 1200,
                         boxShadow: '-4px 0px 15px rgba(0,0,0,0.1)',
-                        borderLeft: '1px solid',
-                        borderColor: 'divider',
+                        borderLeft: 'none',
                         borderRadius: 0,
                         padding: 0,
                         margin: 0,
-                        position: 'fixed'
+                        position: 'fixed',
+                        display: 'flex',
+                        flexDirection: 'column' // اضافه کردن flexbox
                     }
                 }}
                 sx={{
                     '& .MuiBackdrop-root': {
-                        top: `${headerHeight}px`,
+                        top: { xs: 0, md: `${headerHeight - 8}px` }, // align backdrop too
                         backgroundColor: 'rgba(0,0,0,0.3)'
-                    },
-                    display: 'flex',
-                    flexDirection: 'column'
+                    }
                 }}
             >
                 {/* هدر منو - اطلاعات کاربر */}
-                <Box sx={{ 
-                    p: 2.5, 
-                    borderBottom: '1px solid',
-                    borderColor: 'divider',
-                    background: isEmployer 
-                        ? `linear-gradient(135deg, ${EMPLOYER_THEME.bgVeryLight}, ${EMPLOYER_THEME.bgLight})` 
-                        : `linear-gradient(135deg, ${JOB_SEEKER_THEME.bgLight}, ${JOB_SEEKER_THEME.bgLight})`,
+                <Box sx={{
+                    p: { xs: 2, md: 2 },
+                    pt: { xs: 4, md: 2 }, // اضافه کردن padding top بیشتر در موبایل
+                    borderBottom: 'none',
+                    background: isAdmin 
+                        ? `linear-gradient(135deg, ${userTheme.primary}15, ${userTheme.primary}08)`
+                        : isEmployer
+                        ? `linear-gradient(135deg, #1976d215, #1976d208)`
+                        : `linear-gradient(135deg, #2e7d3215, #2e7d3208)`,
                     display: 'flex',
                     flexDirection: 'column',
                     alignItems: 'center',
                     position: 'relative',
                     overflow: 'hidden',
+                    flexShrink: 0,
+                    '&::before': {
+                        content: '""',
+                        position: 'absolute',
+                        top: 0,
+                        left: 0,
+                        right: 0,
+                        bottom: 0,
+                        background: isAdmin 
+                            ? `radial-gradient(circle at 30% 20%, ${userTheme.primary}10 0%, transparent 50%),
+                               radial-gradient(circle at 70% 80%, ${userTheme.primary}08 0%, transparent 50%)`
+                            : isEmployer
+                            ? `radial-gradient(circle at 30% 20%, #1976d210 0%, transparent 50%),
+                               radial-gradient(circle at 70% 80%, #1976d208 0%, transparent 50%)`
+                            : `radial-gradient(circle at 30% 20%, #2e7d3210 0%, transparent 50%),
+                               radial-gradient(circle at 70% 80%, #2e7d3208 0%, transparent 50%)`,
+                        pointerEvents: 'none'
+                    },
                     '&::after': {
                         content: '""',
                         position: 'absolute',
                         bottom: 0,
-                        left: 0,
-                        width: '100%',
-                        height: '30%',
-                        background: 'linear-gradient(to top, rgba(255,255,255,0.7), transparent)',
+                        left: '50%',
+                        transform: 'translateX(-50%)',
+                        width: '80%',
+                        height: '1px',
+                        background: isAdmin 
+                            ? `linear-gradient(90deg, transparent, ${userTheme.primary}20, transparent)`
+                            : isEmployer
+                            ? `linear-gradient(90deg, transparent, #1976d220, transparent)`
+                            : `linear-gradient(90deg, transparent, #2e7d3220, transparent)`,
                         pointerEvents: 'none'
                     }
                 }}>
                     {/* دکمه بستن منو در گوشه بالا سمت چپ */}
-                    <IconButton 
+                    <IconButton
                         onClick={handleClose}
-                        aria-label="بستن منو" 
-                        sx={{ 
+                        aria-label="بستن منو"
+                        sx={{
                             position: 'absolute',
-                            top: 8,
-                            left: 8,
-                            bgcolor: 'rgba(0,0,0,0.05)',
+                            top: { xs: 8, md: 12 },
+                            left: { xs: 8, md: 12 },
+                            bgcolor: 'rgba(255,255,255,0.9)',
+                            backdropFilter: 'blur(10px)',
+                            border: '1px solid rgba(255,255,255,0.2)',
+                            width: { xs: 32, md: 36 },
+                            height: { xs: 32, md: 36 },
                             '&:hover': {
-                                bgcolor: 'rgba(0,0,0,0.1)'
-                            }
+                                bgcolor: 'rgba(255,255,255,1)',
+                                transform: 'scale(1.05)',
+                                boxShadow: '0 4px 12px rgba(0,0,0,0.15)'
+                            },
+                            transition: 'all 0.2s ease'
                         }}
                     >
-                        <FontAwesomeIcon 
-                            icon={faSignOutAlt} 
-                            style={{ fontSize: '0.9rem', color: theme.palette.text.secondary }} 
+                        <FontAwesomeIcon
+                            icon={faTimes}
+                            style={{ 
+                                fontSize: '0.8rem', 
+                                color: isAdmin 
+                                    ? userTheme.primary 
+                                    : isEmployer 
+                                    ? '#1976d2' 
+                                    : '#2e7d32' 
+                            }}
                         />
                     </IconButton>
-                {menuLoading ? (
-                    <>
+
+                    {menuLoading ? (
+                        <>
                             <Skeleton variant="circular" width={60} height={60} animation="wave" />
-                            <Skeleton variant="text" width={150} height={30} animation="wave" sx={{ mt: 1 }} />
-                            <Skeleton variant="text" width={120} height={25} animation="wave" sx={{ mt: 0.5 }} />
-                            <Skeleton variant="rounded" width={80} height={22} animation="wave" sx={{ mt: 0.5 }} />
-                    </>
-                ) : (
-                    <>
-                            <Avatar
-                                src={currentUser.avatar}
-                                alt={currentUser.name}
-                                sx={{ 
-                                    width: 60, 
-                                    height: 60, 
-                                    bgcolor: isEmployer ? EMPLOYER_THEME.primary : JOB_SEEKER_THEME.primary,
-                                    color: '#fff',
+                            <Skeleton variant="text" width={150} height={24} animation="wave" sx={{ mt: 1 }} />
+                            <Skeleton variant="text" width={120} height={20} animation="wave" sx={{ mt: 0.5 }} />
+                            <Skeleton variant="rounded" width={100} height={24} animation="wave" sx={{ mt: 1 }} />
+                        </>
+                    ) : (
+                        <>
+                            {/* آواتار کاربر با افکت‌های مدرن */}
+                            <Box sx={{
+                                position: 'relative',
+                                mb: { xs: 1, md: 1.5 },
+                                '&::before': {
+                                    content: '""',
+                                    position: 'absolute',
+                                    top: -8,
+                                    left: -8,
+                                    right: -8,
+                                    bottom: -8,
+                                    background: isAdmin 
+                                        ? `linear-gradient(45deg, ${userTheme.primary}30, ${userTheme.primary}10)`
+                                        : isEmployer
+                                        ? `linear-gradient(45deg, #1976d230, #1976d210)`
+                                        : `linear-gradient(45deg, #2e7d3230, #2e7d3210)`,
+                                    borderRadius: '50%',
+                                    zIndex: -1,
+                                    animation: 'pulse 2s infinite'
+                                }
+                            }}>
+                                <Avatar
+                                    src={currentUser.avatar}
+                                    alt={currentUser.name}
+                                    sx={{
+                                        width: { xs: 60, md: 64 },
+                                        height: { xs: 60, md: 64 },
+                                        bgcolor: isAdmin 
+                                            ? userTheme.primary 
+                                            : isEmployer 
+                                            ? '#1976d2' 
+                                            : '#2e7d32',
+                                        color: '#fff',
+                                        fontWeight: 'bold',
+                                        fontSize: { xs: '1.5rem', md: '1.75rem' },
+                                        boxShadow: isAdmin 
+                                            ? `0 8px 32px ${userTheme.primary}40`
+                                            : isEmployer
+                                            ? '0 8px 32px #1976d240'
+                                            : '0 8px 32px #2e7d3240',
+                                        border: `4px solid rgba(255,255,255,0.9)`,
+                                        backdropFilter: 'blur(10px)',
+                                        position: 'relative',
+                                        zIndex: 1
+                                    }}
+                                >
+                                    <UserDefaultAvatar size="large" />
+                                </Avatar>
+                            </Box>
+
+                            {/* نام کاربر */}
+                            <Typography
+                                variant="h6"
+                                sx={{
                                     fontWeight: 'bold',
-                                    fontSize: '1.5rem',
-                                    boxShadow: `0 3px 10px ${isEmployer ? EMPLOYER_THEME.primary : JOB_SEEKER_THEME.primary}40`,
-                                    border: `3px solid ${isEmployer ? EMPLOYER_THEME.light : JOB_SEEKER_THEME.light}80`,
-                                    mb: 1
+                                    color: isAdmin 
+                                        ? userTheme.primary 
+                                        : isEmployer 
+                                        ? '#1976d2' 
+                                        : '#2e7d32',
+                                    mb: { xs: 0.5, md: 1 },
+                                    textAlign: 'center',
+                                    fontSize: { xs: '1rem', md: '1.25rem' },
+                                    textShadow: '0 1px 2px rgba(0,0,0,0.1)'
                                 }}
                             >
-                                {currentUser.avatar ? getAvatarText() : <UserDefaultAvatar />}
-                            </Avatar>
-                            
-                        <Typography variant="subtitle1" fontWeight={700} sx={{ 
-                                color: isEmployer ? EMPLOYER_THEME.dark : JOB_SEEKER_THEME.dark,
-                                textAlign: 'center',
-                                maxWidth: '220px',
-                                mx: 'auto',
-                                whiteSpace: 'nowrap',
-                                overflow: 'hidden',
-                                textOverflow: 'ellipsis'
-                        }}>
-                            {currentUser.name || 'کاربر ماهرکار'}
-                        </Typography>
-                        
-                        <Box sx={{ display: 'flex', alignItems: 'center', mt: 0.5, justifyContent: 'center' }}>
-                        <FontAwesomeIcon icon={faPhone} style={{ 
-                            fontSize: '0.75rem', 
-                            color: theme.palette.text.secondary,
-                            marginLeft: '5px' 
-                        }} />
-                        <Typography variant="body2" color="text.secondary" sx={{ 
-                            direction: 'ltr',
-                            fontSize: '0.85rem'
-                        }}>
-                            {currentUser.phone || 'شماره تلفن نامشخص'}
-                        </Typography>
-                    </Box>
-                    
-                    <Typography 
-                        variant="caption" 
-                        sx={{ 
-                                mt: 1, 
-                            display: 'inline-block', 
-                            fontSize: '0.75rem',
-                                backgroundColor: isEmployer ? `${EMPLOYER_THEME.primary}15` : `${JOB_SEEKER_THEME.primary}15`,
-                                color: isEmployer ? EMPLOYER_THEME.primary : JOB_SEEKER_THEME.primary,
-                                px: 1.5,
-                            py: 0.3,
-                                borderRadius: '50px',
-                            fontWeight: 500
-                        }}
-                    >
-                        {getUserRoleText(currentUser.role)}
-                    </Typography>
-                </>
-            )}
-        </Box>
+                                {currentUser.name || 'کاربر'}
+                            </Typography>
 
-                {/* آیتم‌های منو برای کارفرما */}
-                {isEmployer && !menuLoading && (
-                    <Box sx={{ py: 1.5, px: 1 }}>
-                        {/* فقط در حالت دسکتاپ نمایش می‌دهیم */}
+                            {/* شماره تلفن با آیکون */}
+                            <Box sx={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: 1,
+                                mb: { xs: 1, md: 2 },
+                                p: { xs: 1, md: 1.5 },
+                                bgcolor: 'rgba(255,255,255,0.7)',
+                                borderRadius: 3,
+                                backdropFilter: 'blur(10px)',
+                                border: '1px solid rgba(255,255,255,0.3)',
+                                minWidth: { xs: 180, md: 200 },
+                                justifyContent: 'center'
+                            }}>
+                                <FontAwesomeIcon
+                                    icon={faPhone}
+                                    style={{
+                                        fontSize: '0.8rem',
+                                        color: isAdmin 
+                                            ? userTheme.primary 
+                                            : isEmployer 
+                                            ? '#1976d2' 
+                                            : '#2e7d32',
+                                        opacity: 0.8
+                                    }}
+                                    className="fa-phone-icon"
+                                />
+                                <Typography variant="body2" color="text.secondary" sx={{
+                                    direction: 'rtl',
+                                    fontSize: '0.8rem',
+                                    fontWeight: 500
+                                }}>
+                                    {currentUser.phone ? convertToPersianNumbers(currentUser.phone) : 'شماره تلفن نامشخص'}
+                                </Typography>
+                            </Box>
+
+                            {/* برچسب نقش کاربر */}
+                            <Box sx={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                background: isAdmin 
+                                    ? `linear-gradient(90deg, ${userTheme.primary}, ${userTheme.light})`
+                                    : isEmployer
+                                    ? 'linear-gradient(90deg, #1976d2, #42a5f5)'
+                                    : 'linear-gradient(90deg, #2e7d32, #4caf50)',
+                                borderRadius: '4px',
+                                px: { xs: 2, md: 2.5 },
+                                py: { xs: 0.8, md: 1 },
+                                minWidth: { xs: '70px', md: '80px' },
+                                textAlign: 'center',
+                                boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
+                            }}>
+                                <Typography
+                                    variant="caption"
+                                    sx={{
+                                        fontSize: '0.7rem',
+                                        lineHeight: 1.2,
+                                        color: '#fff',
+                                        fontWeight: 400
+                                    }}
+                                >
+                                    {getUserRoleText()}
+                                </Typography>
+                            </Box>
+                        </>
+                    )}
+                </Box>
+
+                {/* CSS برای responsive icon */}
+                <style jsx>{`
+                    .fa-phone-icon {
+                        font-size: 0.8rem;
+                    }
+                    @media (min-width: 768px) {
+                        .fa-phone-icon {
+                            font-size: 0.9rem;
+                        }
+                    }
+                `}</style>
+
+                {/* آیتم‌های منو برای ادمین */}
+                {isAdmin && !menuLoading && (
+                    <Box sx={{ 
+                        py: 1.5, 
+                        px: 1, 
+                        flexGrow: 1,
+                        display: 'flex',
+                        flexDirection: 'column',
+                        overflow: 'hidden' // برای کنترل اسکرول
+                    }}>
+                        {/* دسترسی سریع - فقط در حالت دسکتاپ */}
                         {!isMobile && (
                             <>
-                                <Typography variant="caption" color="text.secondary" sx={{ px: 2, display: 'block', mb: 0.5, fontWeight: 500 }}>
-                                    دسترسی سریع
-                                </Typography>
-                                
-                                <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 1, px: 1, mb: 2 }}>
-                                    <MenuItem 
-                                        component={Link} 
-                                        href="/employer/dashboard" 
-                                        onClick={handleClose}
-                                        sx={{
-                                            flexDirection: 'column',
-                                            borderRadius: 2,
-                                            py: 1.5,
-                                            width: '100%',
-                                            textAlign: 'center',
-                                            bgcolor: `${EMPLOYER_THEME.bgVeryLight}`,
-                                            '&:hover': {
-                                                bgcolor: `${EMPLOYER_THEME.bgLight}`,
-                                            }
-                                        }}
-                                    >
-                                        <FontAwesomeIcon 
-                                            icon={faTachometerAlt} 
-                                            style={{ 
-                                                fontSize: '1.2rem',
-                                                color: EMPLOYER_THEME.primary,
-                                                marginBottom: '5px'
-                                            }} 
-                                        />
-                                        <Typography variant="caption" fontWeight={500}>
-                                            داشبورد
-                                        </Typography>
-                                    </MenuItem>
-                                    
-                                    <MenuItem 
-                                        component={Link} 
-                                        href="/employer/jobs/create" 
-                                        onClick={handleClose}
-                                        sx={{
-                                            flexDirection: 'column',
-                                            borderRadius: 2,
-                                            py: 1.5,
-                                            width: '100%',
-                                            textAlign: 'center',
-                                            bgcolor: `${EMPLOYER_THEME.bgVeryLight}`,
-                                            '&:hover': {
-                                                bgcolor: `${EMPLOYER_THEME.bgLight}`,
-                                            }
-                                        }}
-                                    >
-                                        <FontAwesomeIcon 
-                                            icon={faFileAlt} 
-                                            style={{ 
-                                                fontSize: '1.2rem',
-                                                color: EMPLOYER_THEME.primary,
-                                                marginBottom: '5px'
-                                            }} 
-                                        />
-                                        <Typography variant="caption" fontWeight={500}>
-                                            ثبت آگهی
-                                        </Typography>
-                                    </MenuItem>
-                                </Box>
-                                
-                                <Divider sx={{ my: 1 }} />
-                                
-                                <Typography variant="caption" color="text.secondary" sx={{ px: 2, display: 'block', mb: 0.5, mt: 1, fontWeight: 500 }}>
-                                    مدیریت
+                                <Typography variant="caption" color="text.secondary" sx={{ px: 2, display: 'block', mb: 1, fontWeight: 400, fontSize: '0.75rem' }}>
+                                    دسترسی سریع مدیریت
                                 </Typography>
 
-                                <MenuItem component={Link} href="/employer/jobs" onClick={handleClose} sx={{ 
-                                    py: 1.2,
-                                    mx: 0.5,
-                                    borderRadius: '8px', 
-                                    transition: 'all 0.2s ease',
-                                    '&:hover': {
-                                        backgroundColor: `${EMPLOYER_THEME.primary}10`,
-                                        '& .MuiListItemIcon-root': {
-                                            color: EMPLOYER_THEME.primary,
-                                            transform: 'scale(1.1)',
-                                        }
-                                    }
-                                }}>
-                                    <ListItemIcon sx={{ 
-                                        transition: 'all 0.2s ease',
-                                        minWidth: '35px'
-                                    }}>
-                                        <FontAwesomeIcon icon={faListAlt} style={{ 
-                                            fontSize: '1rem', 
-                                            color: EMPLOYER_THEME.primary 
-                                        }} />
-                                    </ListItemIcon>
-                                    مدیریت آگهی‌ها
-                                </MenuItem>
-                                    
-                                <MenuItem component={Link} href="/employer/applications" onClick={handleClose} sx={{ 
-                                    py: 1.2,
-                                    mx: 0.5,
-                                    borderRadius: '8px', 
-                                    transition: 'all 0.2s ease',
-                                    '&:hover': {
-                                        backgroundColor: `${EMPLOYER_THEME.primary}10`,
-                                        '& .MuiListItemIcon-root': {
-                                            color: EMPLOYER_THEME.primary,
-                                            transform: 'scale(1.1)',
-                                        }
-                                    }
-                                }}>
-                                    <ListItemIcon sx={{ 
-                                        transition: 'all 0.2s ease',
-                                        minWidth: '35px'
-                                    }}>
-                                        <FontAwesomeIcon icon={faClipboardList} style={{ 
-                                            fontSize: '1rem', 
-                                            color: EMPLOYER_THEME.primary 
-                                        }} />
-                                    </ListItemIcon>
-                                    درخواست‌های استخدام
-                                </MenuItem>
-                                    
-                                <Divider sx={{ my: 1 }} />
-                                
-                                <Typography variant="caption" color="text.secondary" sx={{ px: 2, display: 'block', mb: 0.5, mt: 1, fontWeight: 500 }}>
-                                    تنظیمات
-                                </Typography>
-                                
-                                <MenuItem component={Link} href="/employer/company" onClick={handleClose} sx={{ 
-                                    py: 1.2,
-                                    mx: 0.5,
-                                    borderRadius: '8px', 
-                                    transition: 'all 0.2s ease',
-                                    '&:hover': {
-                                        backgroundColor: `${EMPLOYER_THEME.primary}10`,
-                                        '& .MuiListItemIcon-root': {
-                                            color: EMPLOYER_THEME.primary,
-                                            transform: 'scale(1.1)',
-                                        }
-                                    }
-                                }}>
-                                    <ListItemIcon sx={{ 
-                                        transition: 'all 0.2s ease',
-                                        minWidth: '35px'
-                                    }}>
-                                        <FontAwesomeIcon icon={faBuilding} style={{ 
-                                            fontSize: '1rem', 
-                                            color: EMPLOYER_THEME.primary 
-                                        }} />
-                                    </ListItemIcon>
-                                    پروفایل شرکت
-                                </MenuItem>
+                                <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 2, px: 1.5, mb: 2.5 }}>
+                                    {adminMenuItems.slice(0, 4).map((item, index) => {
+                                        const colorConfigs = [
+                                            { bg: '#e3f2fd', text: '#1976d2' }, // primary
+                                            { bg: '#f3e5f5', text: '#7b1fa2' }, // secondary
+                                            { bg: '#e8f5e8', text: '#2e7d32' }, // success
+                                            { bg: '#fff3e0', text: '#f57c00' }, // warning
+                                        ];
+                                        const colorConfig = colorConfigs[index % 4];
+                                        
+                                        return (
+                                        <MenuItem
+                                            key={index}
+                                            component={Link}
+                                            href={item.path}
+                                            onClick={(e) => {
+                                                console.log('Clicked on quick access:', item.path);
+                                                handleClose();
+                                                if (item.path.includes('#')) {
+                                                    const hash = item.path.split('#')[1];
+                                                    if (typeof window !== 'undefined') {
+                                                        window.location.hash = hash;
+                                                    }
+                                                } else if (item.path === '/admin') {
+                                                    // برای پنل مدیریت، هش را پاک کرده و رویداد ارسال کنیم
+                                                    if (typeof window !== 'undefined') {
+                                                        window.location.hash = '';
+                                                        window.dispatchEvent(new HashChangeEvent('hashchange'));
+                                                    }
+                                                }
+                                            }}
+                                            sx={{
+                                                    borderRadius: 2,
+                                                    p: 2,
+                                                width: '100%',
+                                                    display: 'flex',
+                                                    alignItems: 'center',
+                                                    justifyContent: 'space-between',
+                                                    bgcolor: 'background.paper',
+                                                    border: `1px solid ${colorConfig.bg}`,
+                                                    boxShadow: '0 1px 3px rgba(0,0,0,0.08)',
+                                                cursor: 'pointer',
+                                                    transition: 'all 0.3s ease',
+                                                '&:hover': {
+                                                    transform: 'translateY(-2px)',
+                                                        boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+                                                        borderColor: colorConfig.text,
+                                                    },
+                                                }}
+                                            >
+                                                <Box sx={{ flex: 1, textAlign: 'left' }}>
+                                                    <Typography 
+                                                        variant="subtitle2" 
+                                                        sx={{ 
+                                                            fontSize: '0.85rem',
+                                                            color: 'text.primary',
+                                                            fontWeight: 400
+                                                        }}
+                                                    >
+                                                        {item.title}
+                                                    </Typography>
+                                                </Box>
+                                                <Box
+                                                    sx={{
+                                                        p: 1.5,
+                                                        borderRadius: 2,
+                                                        bgcolor: colorConfig.bg,
+                                                        color: colorConfig.text,
+                                                        display: 'flex',
+                                                        alignItems: 'center',
+                                                        justifyContent: 'center',
+                                            }}
+                                        >
+                                            {item.icon ? (
+                                                <FontAwesomeIcon
+                                                    icon={item.icon}
+                                                            style={{ fontSize: '1.2rem' }}
+                                                />
+                                            ) : item.title === 'اشتراک‌ها' ? (
+                                                <Box
+                                                    sx={{
+                                                        fontSize: '0.65rem',
+                                                                fontWeight: 'normal'
+                                                    }}
+                                                >
+                                                    نردبان
+                                                </Box>
+                                            ) : null}
+                                                </Box>
+                                        </MenuItem>
+                                        );
+                                    })}
+                                </Box>
                             </>
                         )}
-                        
-                        {/* در موبایل، منوی کامل سایدبار کارفرما را نشان می‌دهیم */}
+
+                        {/* منوی کامل - فقط در حالت موبایل */}
                         {isMobile && (
-                            <>
+                            <Box sx={{ 
+                                flexGrow: 1,
+                                overflowY: 'auto',
+                                overflowX: 'hidden',
+                                '&::-webkit-scrollbar': {
+                                    width: 4,
+                                },
+                                '&::-webkit-scrollbar-track': {
+                                    background: 'transparent',
+                                },
+                                '&::-webkit-scrollbar-thumb': {
+                                    background: '#ddd',
+                                    borderRadius: 2,
+                                },
+                            }}>
                                 <Typography variant="caption" color="text.secondary" sx={{ px: 2, display: 'block', mb: 0.5, fontWeight: 500 }}>
-                                    منوی کارفرما
+                                    منوی کامل مدیریت
                                 </Typography>
-                                
-                                <List sx={{ px: 0, width: '100%' }}>
-                                    {employerMenuItems.map((item) => (
-                                        <ListItem key={item.path} sx={{ p: 0 }}>
-                                            <ListItemButton 
+
+                                <List sx={{ py: 0 }}>
+                                    {adminMenuItems.map((item, index) => (
+                                        <ListItem key={index} disablePadding>
+                                            <ListItemButton
                                                 component={Link}
                                                 href={item.path}
-                                                onClick={handleClose}
+                                                onClick={(e) => {
+                                                    console.log('Clicked on admin menu item:', item.path);
+                                                    handleClose();
+                                                    if (item.path.includes('#')) {
+                                                        const hash = item.path.split('#')[1];
+                                                        if (typeof window !== 'undefined') {
+                                                            window.location.hash = hash;
+                                                        }
+                                                    } else if (item.path === '/admin') {
+                                                        // برای پنل مدیریت، هش را پاک کرده و رویداد ارسال کنیم
+                                                        if (typeof window !== 'undefined') {
+                                                            window.location.hash = '';
+                                                            window.dispatchEvent(new HashChangeEvent('hashchange'));
+                                                        }
+                                                    }
+                                                }}
                                                 selected={isActiveMenuItem(item.path)}
                                                 sx={{
-                                                    borderRadius: 1,
-                                                    py: 1,
-                                                    width: '100%',
+                                                    borderRadius: 2,
+                                                    mx: 1,
+                                                    mb: 0.5,
+                                                    cursor: 'pointer',
                                                     '&.Mui-selected': {
-                                                        bgcolor: 'rgba(0, 168, 107, 0.08)',
+                                                        bgcolor: ADMIN_THEME.bgLight,
                                                         '&:hover': {
-                                                            bgcolor: 'rgba(0, 168, 107, 0.12)',
+                                                            bgcolor: ADMIN_THEME.bgVeryLight,
                                                         },
                                                         '& .MuiListItemIcon-root': {
-                                                            color: EMPLOYER_THEME.primary,
+                                                            color: ADMIN_THEME.primary,
                                                         },
                                                         '& .MuiListItemText-primary': {
-                                                            color: EMPLOYER_THEME.primary,
+                                                            color: ADMIN_THEME.primary,
                                                             fontWeight: 'bold'
                                                         }
                                                     },
                                                     '&:hover': {
-                                                        bgcolor: 'rgba(0, 168, 107, 0.06)',
+                                                        bgcolor: ADMIN_THEME.bgVeryLight,
+                                                        transform: 'translateX(-2px)',
+                                                        transition: 'all 0.2s ease',
                                                     },
+                                                    transition: 'all 0.2s ease',
                                                 }}
                                             >
                                                 <ListItemIcon sx={{ 
                                                     minWidth: 40,
-                                                    color: isActiveMenuItem(item.path) ? EMPLOYER_THEME.primary : 'text.secondary',
+                                                    color: isActiveMenuItem(item.path) ? ADMIN_THEME.primary : 'text.secondary',
+                                                    transition: 'color 0.2s ease',
                                                 }}>
-                                                    <FontAwesomeIcon 
-                                                        icon={item.icon} 
-                                                        style={{ fontSize: '1.1rem' }} 
-                                                    />
+                                                    {item.icon ? (
+                                                        <FontAwesomeIcon
+                                                            icon={item.icon}
+                                                            style={{
+                                                                fontSize: '1.1rem',
+                                                                color: isActiveMenuItem(item.path) ? ADMIN_THEME.primary : 'text.secondary',
+                                                                transition: 'color 0.2s ease',
+                                                            }}
+                                                        />
+                                                    ) : item.title === 'اشتراک‌ها' ? (
+                                                        <Box
+                                                            sx={{
+                                                                width: 32,
+                                                                height: 20,
+                                                                display: 'flex',
+                                                                alignItems: 'center',
+                                                                justifyContent: 'center',
+                                                                bgcolor: isActiveMenuItem(item.path) ? ADMIN_THEME.primary : 'text.secondary',
+                                                                borderRadius: 0.5,
+                                                                color: '#fff',
+                                                                fontSize: '0.65rem',
+                                                                fontWeight: 'bold',
+                                                                transition: 'all 0.2s ease',
+                                                            }}
+                                                        >
+                                                            نردبان
+                                                        </Box>
+                                                    ) : null}
                                                 </ListItemIcon>
-                                                <ListItemText 
+                                                <ListItemText
                                                     primary={item.title}
                                                     primaryTypographyProps={{
-                                                        fontSize: '0.875rem',
-                                                        fontWeight: isActiveMenuItem(item.path) ? 'bold' : 'normal'
+                                                        fontSize: '0.9rem',
+                                                        fontWeight: isActiveMenuItem(item.path) ? 'bold' : 'normal',
                                                     }}
                                                 />
+                                                {/* شمارنده فقط برای مدیریت آگهی‌ها */}
+                                                {item.path === '/admin#jobs' && (
+                                                    <Box
+                                                        sx={{
+                                                            display: 'flex',
+                                                            alignItems: 'center',
+                                                            justifyContent: 'center',
+                                                            minWidth: 28,
+                                                            height: 20,
+                                                            px: 1,
+                                                            mr: 0.5,
+                                                            ...(jobStats?.pendingJobs && jobStats.pendingJobs > 0 ? {
+                                                                bgcolor: '#ffe0b2',
+                                                                boxShadow: '0 1px 4px rgba(255, 140, 0, 0.1)',
+                                                                border: '1.5px solid #ff9800',
+                                                                color: '#ff6d00'
+                                                            } : {
+                                                                bgcolor: 'transparent',
+                                                                border: '1px solid #e0e0e0',
+                                                                color: '#757575'
+                                                            }),
+                                                            borderRadius: 6,
+                                                            fontWeight: 'bold',
+                                                            fontSize: '0.75rem',
+                                                            transition: 'all 0.2s',
+                                                        }}
+                                                    >
+                                                        {jobStatsLoading ? (
+                                                            <Skeleton variant="rectangular" width={20} height={16} sx={{ borderRadius: 1 }} />
+                                                        ) : jobStats?.pendingJobs && jobStats.pendingJobs > 0 ? (
+                                                            jobStats.pendingJobs > 99 ? '+99' : jobStats.pendingJobs.toLocaleString('fa-IR')
+                                                        ) : (
+                                                            '۰'
+                                                        )}
+                                                    </Box>
+                                                )}
                                             </ListItemButton>
                                         </ListItem>
                                     ))}
                                 </List>
-                            </>
+                            </Box>
                         )}
-                        
-                        <Divider sx={{ my: 1 }} />
-                        
-                        <MenuItem onClick={handleLogout} sx={{ 
-                            py: 1.2,
-                            mx: 0.5,
-                            borderRadius: '8px',
-                            color: '#d32f2f',
-                            transition: 'all 0.2s ease',
-                            '&:hover': {
-                                backgroundColor: 'rgba(211, 47, 47, 0.08)',
-                                '& .MuiListItemIcon-root': {
-                                    transform: 'scale(1.1) rotate(10deg)',
-                                }
+
+                        {/* دکمه خروج از حساب کاربری - در هر دو حالت موبایل و دسکتاپ */}
+                        <Box sx={{ 
+                            px: 1, 
+                            pt: 2, 
+                            pb: { xs: 2, md: 1 }, // اضافه کردن padding bottom در موبایل
+                            flexShrink: 0,
+                            mt: 'auto', // برای قرار دادن در پایین
+                            position: 'relative',
+                            '&::before': {
+                                content: '""',
+                                position: 'absolute',
+                                top: 0,
+                                left: '50%',
+                                transform: 'translateX(-50%)',
+                                width: '80%',
+                                height: '1px',
+                                background: isAdmin 
+                                    ? `linear-gradient(90deg, transparent, ${userTheme.primary}20, transparent)`
+                                    : isEmployer
+                                    ? 'linear-gradient(90deg, transparent, #1976d220, transparent)'
+                                    : 'linear-gradient(90deg, transparent, #2e7d3220, transparent)'
                             }
                         }}>
-                            <ListItemIcon sx={{ 
-                                color: 'inherit',
-                                transition: 'all 0.2s ease',
-                                minWidth: '35px'
-                            }}>
-                                <FontAwesomeIcon icon={faSignOutAlt} style={{ 
-                                    fontSize: '1rem', 
-                                    color: '#d32f2f' 
-                                }} />
-                            </ListItemIcon>
-                            خروج از حساب
-                        </MenuItem>
+                            <ListItemButton
+                                onClick={() => {
+                                    console.log('Logout clicked');
+                                    authLogout();
+                                    handleClose();
+                                }}
+                                sx={{
+                                    borderRadius: 2,
+                                    color: 'error.main',
+                                    cursor: 'pointer',
+                                    '&:hover': {
+                                        bgcolor: 'error.light',
+                                        color: 'error.contrastText',
+                                        transform: 'scale(1.02)',
+                                        transition: 'all 0.2s ease',
+                                    },
+                                    transition: 'all 0.2s ease',
+                                }}
+                            >
+                                <ListItemIcon sx={{ minWidth: 40 }}>
+                                    <FontAwesomeIcon
+                                        icon={faSignOutAlt}
+                                        style={{
+                                            fontSize: '1.1rem',
+                                            color: 'inherit'
+                                        }}
+                                    />
+                                </ListItemIcon>
+                                <ListItemText
+                                    primary="خروج از حساب"
+                                    primaryTypographyProps={{
+                                        fontSize: '0.9rem',
+                                        fontWeight: 500
+                                    }}
+                                />
+                            </ListItemButton>
+                        </Box>
                     </Box>
                 )}
-                
-                {/* منوی غیر کارفرما */}
-                {!isEmployer && !menuLoading && (
-                    <Box sx={{ py: 1 }}>
+
+                {/* آیتم‌های منو برای کارفرما */}
+                {isEmployer && !isAdmin && !menuLoading && (
+                    <Box sx={{ py: 1.5, px: 1, flexGrow: 1 }}>
+                        {/* دسترسی سریع - در حالت دسکتاپ */}
+                        {!isMobile && (
+                            <>
+                                <Typography variant="caption" color="text.secondary" sx={{ px: 2, display: 'block', mb: 1, fontWeight: 400, fontSize: '0.75rem' }}>
+                                    دسترسی سریع
+                                </Typography>
+
+                                <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 2, px: 1.5, mb: 2.5 }}>
+                                    <MenuItem
+                                        component={Link}
+                                        href="/employer/dashboard"
+                                        onClick={handleClose}
+                                        sx={{
+                                            p: 2,
+                                            textAlign: 'center',
+                                            borderRadius: 3,
+                                            boxShadow: '0 4px 15px rgba(66,133,244,0.05)',
+                                            height: '100%',
+                                            display: 'flex',
+                                            flexDirection: 'column',
+                                            alignItems: 'center',
+                                            justifyContent: 'center',
+                                            border: `2px solid ${EMPLOYER_THEME.primary}`,
+                                            transition: 'all 0.25s ease',
+                                            bgcolor: 'background.paper',
+                                            '&:hover': {
+                                                boxShadow: '0 6px 18px rgba(66,133,244,0.12)',
+                                                transform: 'translateY(-2px)'
+                                            }
+                                        }}
+                                    >
+                                        <FontAwesomeIcon
+                                            icon={faTachometerAlt}
+                                            style={{
+                                                fontSize: '1.5rem', 
+                                                color: EMPLOYER_THEME.primary,
+                                                marginBottom: '8px' 
+                                            }}
+                                        />
+                                        <Typography 
+                                            variant="subtitle2" 
+                                            sx={{ 
+                                                fontSize: '0.85rem',
+                                                color: 'text.primary',
+                                                fontWeight: 400
+                                            }}
+                                        >
+                                            داشبورد
+                                        </Typography>
+                                    </MenuItem>
+
+                                    <MenuItem
+                                        component={Link}
+                                        href="/employer/jobs/create"
+                                        onClick={handleClose}
+                                        sx={{
+                                            p: 0,
+                                            borderRadius: 3,
+                                            overflow: 'hidden',
+                                            height: '100%',
+                                            transition: 'all 0.25s ease',
+                                            boxShadow: '0 4px 18px rgba(66,133,244,0.25)',
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            justifyContent: 'center',
+                                            background: `linear-gradient(135deg, ${EMPLOYER_THEME.primary} 0%, ${EMPLOYER_THEME.light} 100%)`,
+                                            '&:hover': {
+                                                boxShadow: '0 6px 24px rgba(66,133,244,0.35)',
+                                                transform: 'translateY(-2px)'
+                                            }
+                                        }}
+                                    >
+                                        <Typography 
+                                            fontWeight="normal" 
+                                            sx={{ 
+                                                fontSize: '0.9rem',
+                                                color: '#ffffff', 
+                                                textAlign: 'center', 
+                                                lineHeight: 1.8,
+                                                fontWeight: 800
+                                            }}
+                                        >
+                                            ثبت آگهی استخدامی
+                                        </Typography>
+                                    </MenuItem>
+                                </Box>
+                            </>
+                        )}
+
+                        {/* گزینه‌های سایدبار پنل کارفرما - فقط در حالت موبایل */}
+                        {isMobile && (
+                            <>
+                                <Typography variant="caption" color="text.secondary" sx={{ px: 2, display: 'block', mb: 1, fontWeight: 400, fontSize: '0.75rem' }}>
+                                    پنل کارفرما
+                                </Typography>
+
+                                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5, px: 1.5, mb: 2 }}>
+                                    {employerMenuItems.map((item, index) => {
+                                        const active = isActiveMenuItem(item.path);
+                                        return (
+                                            <MenuItem
+                                                key={index}
+                                                component={Link}
+                                                href={item.path}
+                                                onClick={handleClose}
+                                                sx={{
+                                                    borderRadius: 1,
+                                                    py: 1,
+                                                    px: 2,
+                                                    width: '100%',
+                                                    display: 'flex',
+                                                    alignItems: 'center',
+                                                    gap: 2,
+                                                    bgcolor: active ? 'rgba(0,168,107,0.08)' : 'transparent',
+                                                    transition: 'all 0.15s ease',
+                                                    '&:hover': {
+                                                        bgcolor: 'rgba(0,168,107,0.06)',
+                                                    }
+                                                }}
+                                            >
+                                                <FontAwesomeIcon
+                                                    icon={item.icon}
+                                                    style={{
+                                                        fontSize: '1.1rem',
+                                                        width: '20px',
+                                                        textAlign: 'center',
+                                                        color: active ? EMPLOYER_THEME.primary : theme.palette.text.secondary,
+                                                        transition: 'color 0.2s ease'
+                                                    }}
+                                                />
+                                                <Typography 
+                                                    variant="body2" 
+                                                    fontWeight={active ? 'bold' : 500} 
+                                                    sx={{ 
+                                                        fontSize: '0.9rem', 
+                                                        color: active ? EMPLOYER_THEME.primary : 'text.secondary' 
+                                                    }}
+                                                >
+                                                    {item.title}
+                                                </Typography>
+                                            </MenuItem>
+                                        );
+                                    })}
+                                </Box>
+                            </>
+                                        )}
+
+
+
+                {/* منوی کامل - فقط در حالت دسکتاپ */}
+                        {!isMobile && (
+                            <>
+                                <Box sx={{
+                                    position: 'relative',
+                                    my: 2,
+                                    '&::before': {
+                                        content: '""',
+                                        position: 'absolute',
+                                        left: '50%',
+                                        top: 0,
+                                        transform: 'translateX(-50%)',
+                                        width: '60%',
+                                        height: '1px',
+                                        background: `linear-gradient(90deg, transparent, ${EMPLOYER_THEME.primary}30, transparent)`
+                                    }
+                                }} />
+                                
+                                <Typography variant="caption" color="text.secondary" sx={{ px: 2, display: 'block', mb: 0.5, fontWeight: 500 }}>
+                                    مدیریت
+                                </Typography>
+
+                                <MenuItem component={Link} href="/employer/jobs" onClick={handleClose} sx={{
+                                    py: 1.2,
+                                    mx: 0.5,
+                                    borderRadius: '8px',
+                                    cursor: 'pointer',
+                                    transition: 'all 0.2s ease',
+                                    '&:hover': {
+                                        backgroundColor: `${EMPLOYER_THEME.primary}10`,
+                                        transform: 'translateX(-2px)',
+                                        '& .MuiListItemIcon-root': {
+                                            color: EMPLOYER_THEME.primary,
+                                            transform: 'scale(1.1)',
+                                        }
+                                    }
+                                }}>
+                                    <ListItemIcon sx={{
+                                        transition: 'all 0.2s ease',
+                                        minWidth: '50px'
+                                    }}>
+                                        <FontAwesomeIcon icon={faListAlt} style={{
+                                            fontSize: '1rem',
+                                            color: EMPLOYER_THEME.primary
+                                        }} />
+                                    </ListItemIcon>
+                                    مدیریت آگهی‌ها
+                                </MenuItem>
+
+                                <MenuItem component={Link} href="/employer/applications" onClick={handleClose} sx={{
+                                    py: 1.2,
+                                    mx: 0.5,
+                                    borderRadius: '8px',
+                                    cursor: 'pointer',
+                                    transition: 'all 0.2s ease',
+                                    '&:hover': {
+                                        backgroundColor: `${EMPLOYER_THEME.primary}10`,
+                                        transform: 'translateX(-2px)',
+                                        '& .MuiListItemIcon-root': {
+                                            color: EMPLOYER_THEME.primary,
+                                            transform: 'scale(1.1)',
+                                        }
+                                    }
+                                }}>
+                                    <ListItemIcon sx={{
+                                        transition: 'all 0.2s ease',
+                                        minWidth: '50px'
+                                    }}>
+                                        <FontAwesomeIcon icon={faClipboardList} style={{
+                                            fontSize: '1rem',
+                                            color: EMPLOYER_THEME.primary
+                                        }} />
+                                    </ListItemIcon>
+                                    درخواست‌های استخدام
+                                </MenuItem>
+
+                                <Box sx={{
+                                    position: 'relative',
+                                    my: 1,
+                                    '&::before': {
+                                        content: '""',
+                                        position: 'absolute',
+                                        left: '50%',
+                                        top: 0,
+                                        transform: 'translateX(-50%)',
+                                        width: '40%',
+                                        height: '1px',
+                                        background: `linear-gradient(90deg, transparent, ${EMPLOYER_THEME.primary}20, transparent)`
+                                    }
+                                }} />
+
+                                <MenuItem component={Link} href="/employer/profile" onClick={handleClose} sx={{
+                                    py: 1.2,
+                                    mx: 0.5,
+                                    borderRadius: '8px',
+                                    cursor: 'pointer',
+                                    transition: 'all 0.2s ease',
+                                    '&:hover': {
+                                        backgroundColor: `${EMPLOYER_THEME.primary}10`,
+                                        transform: 'translateX(-2px)',
+                                        '& .MuiListItemIcon-root': {
+                                            color: EMPLOYER_THEME.primary,
+                                            transform: 'scale(1.1)',
+                                        }
+                                    }
+                                }}>
+                                    <ListItemIcon sx={{
+                                        transition: 'all 0.2s ease',
+                                        minWidth: '50px'
+                                    }}>
+                                        <FontAwesomeIcon icon={faUser} style={{
+                                            fontSize: '1rem',
+                                            color: EMPLOYER_THEME.primary
+                                        }} />
+                                    </ListItemIcon>
+                                    پروفایل
+                                </MenuItem>
+                            </>
+                        )}
+
+                        {/* دکمه خروج از حساب کاربری - در هر دو حالت موبایل و دسکتاپ */}
+                        <Box sx={{ 
+                            px: 1, 
+                            pt: 2, 
+                            pb: { xs: 2, md: 1 }, // اضافه کردن padding bottom در موبایل
+                            borderTop: '1px solid', 
+                            borderColor: 'divider', 
+                            flexShrink: 0 
+                        }}>
+                            <ListItemButton
+                                onClick={() => {
+                                    console.log('Logout clicked'); // برای دیباگ
+                                    authLogout();
+                                    handleClose();
+                                }}
+                                sx={{
+                                    borderRadius: 2,
+                                    color: 'error.main',
+                                    cursor: 'pointer',
+                                    '&:hover': {
+                                        bgcolor: 'error.light',
+                                        color: 'error.contrastText',
+                                        transform: 'scale(1.02)',
+                                        transition: 'all 0.2s ease',
+                                    },
+                                    transition: 'all 0.2s ease',
+                                }}
+                            >
+                                <ListItemIcon sx={{ minWidth: 40 }}>
+                                    <FontAwesomeIcon
+                                        icon={faSignOutAlt}
+                                        style={{
+                                            fontSize: '1.1rem',
+                                            color: 'inherit'
+                                        }}
+                                    />
+                                </ListItemIcon>
+                                <ListItemText
+                                    primary="خروج از حساب"
+                                    primaryTypographyProps={{
+                                        fontSize: '0.9rem',
+                                        fontWeight: 500
+                                    }}
+                                />
+                            </ListItemButton>
+                        </Box>
+                    </Box>
+                )}
+
+                {/* آیتم‌های منو برای کارجو */}
+                {isJobSeeker && !isAdmin && !menuLoading && (
+                    <Box sx={{ py: 1.5, px: 1, flexGrow: 1 }}>
+                        {/* دسترسی سریع - در حالت دسکتاپ */}
+                        {!isMobile && (
+                            <>
+                                <Typography variant="caption" color="text.secondary" sx={{ px: 2, display: 'block', mb: 1, fontWeight: 400, fontSize: '0.75rem' }}>
+                                    دسترسی سریع
+                                </Typography>
+
+                                <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 2, px: 1.5, mb: 2.5 }}>
+                                    <MenuItem
+                                        component={Link}
+                                        href="/jobseeker/dashboard"
+                                        onClick={handleClose}
+                                        sx={{
+                                            p: 2,
+                                            textAlign: 'center',
+                                            borderRadius: 3,
+                                            boxShadow: '0 4px 15px rgba(10,155,84,0.05)',
+                                            height: '100%',
+                                            display: 'flex',
+                                            flexDirection: 'column',
+                                            alignItems: 'center',
+                                            justifyContent: 'center',
+                                            border: `2px solid ${JOB_SEEKER_THEME.primary}`,
+                                            transition: 'all 0.25s ease',
+                                            bgcolor: 'background.paper',
+                                            '&:hover': {
+                                                boxShadow: '0 6px 18px rgba(10,155,84,0.12)',
+                                                transform: 'translateY(-2px)'
+                                            }
+                                        }}
+                                    >
+                                        <FontAwesomeIcon
+                                            icon={faTachometerAlt}
+                                            style={{
+                                                fontSize: '1.5rem', 
+                                                color: JOB_SEEKER_THEME.primary,
+                                                marginBottom: '8px' 
+                                            }}
+                                        />
+                                        <Typography 
+                                            variant="subtitle2" 
+                                            sx={{ 
+                                                fontSize: '0.85rem',
+                                                color: 'text.primary',
+                                                fontWeight: 400
+                                            }}
+                                        >
+                                            داشبورد
+                                        </Typography>
+                                    </MenuItem>
+
+                                    <MenuItem
+                                        component={Link}
+                                        href="/jobseeker/resume-ads/create"
+                                        onClick={handleClose}
+                                        sx={{
+                                            p: 0,
+                                            borderRadius: 3,
+                                            overflow: 'hidden',
+                                            height: '100%',
+                                            transition: 'all 0.25s ease',
+                                            boxShadow: '0 4px 18px rgba(10,155,84,0.25)',
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            justifyContent: 'center',
+                                            background: `linear-gradient(135deg, ${JOB_SEEKER_THEME.primary} 0%, ${JOB_SEEKER_THEME.light} 100%)`,
+                                            '&:hover': {
+                                                boxShadow: '0 6px 24px rgba(10,155,84,0.35)',
+                                                transform: 'translateY(-2px)'
+                                            }
+                                        }}
+                                    >
+                                        <Typography 
+                                            fontWeight="normal" 
+                                            sx={{ 
+                                                fontSize: '0.9rem',
+                                                color: '#ffffff', 
+                                                textAlign: 'center', 
+                                                lineHeight: 1.8,
+                                                fontWeight: 800
+                                            }}
+                                        >
+                                            ایجاد آگهی رزومه
+                                        </Typography>
+                                    </MenuItem>
+                                </Box>
+                            </>
+                        )}
+
+                        {/* گزینه‌های سایدبار پنل کارجو - فقط در حالت موبایل */}
+                        {isMobile && (
+                            <>
+                                <Typography variant="caption" color="text.secondary" sx={{ px: 2, display: 'block', mb: 1, fontWeight: 400, fontSize: '0.75rem' }}>
+                                    پنل کارجو
+                                </Typography>
+
+                                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5, px: 1.5, mb: 2 }}>
+                                    {jobSeekerMenuItems.map((item, index) => {
+                                        const active = isActiveMenuItem(item.path);
+                                        return (
+                                            <Box key={index}>
+                                                {/* آیتم اصلی منو */}
+                                                <MenuItem
+                                                    component={item.hasSubmenu ? 'div' : Link}
+                                                    href={!item.hasSubmenu ? item.path : undefined}
+                                                    onClick={item.hasSubmenu ? () => toggleSubmenu(item.title) : handleClose}
+                                                    sx={{
+                                                        borderRadius: 1,
+                                                        py: 1,
+                                                        px: 2,
+                                                        width: '100%',
+                                                        display: 'flex',
+                                                        alignItems: 'center',
+                                                        gap: 2,
+                                                        bgcolor: active ? 'rgba(10, 155, 84, 0.08)' : 'transparent',
+                                                        transition: 'all 0.15s ease',
+                                                        '&:hover': {
+                                                            bgcolor: 'rgba(10, 155, 84, 0.06)',
+                                                        }
+                                                    }}
+                                                >
+                                                    <FontAwesomeIcon
+                                                        icon={item.icon}
+                                                        style={{
+                                                            fontSize: '1.1rem',
+                                                            width: '20px',
+                                                            textAlign: 'center',
+                                                            color: active ? '#0a9b54' : theme.palette.text.secondary,
+                                                            transition: 'color 0.2s ease'
+                                                        }}
+                                                    />
+                                                    <Typography 
+                                                        variant="body2" 
+                                                        fontWeight={active ? 'bold' : 500} 
+                                                        sx={{ 
+                                                            fontSize: '0.9rem', 
+                                                            color: active ? '#0a9b54' : 'text.secondary',
+                                                            flexGrow: 1
+                                                        }}
+                                                    >
+                                                        {item.title}
+                                                    </Typography>
+                                                    {item.hasSubmenu && (
+                                                        <FontAwesomeIcon 
+                                                            icon={openSubmenus[item.title] || shouldSubmenuBeOpen(item) ? faChevronUp : faChevronDown} 
+                                                            style={{ fontSize: '0.8rem', color: '#0a9b54' }} 
+                                                        />
+                                                    )}
+                                                </MenuItem>
+
+                                                {/* زیرمنو */}
+                                                {item.hasSubmenu && item.submenu && (
+                                                    <Collapse in={openSubmenus[item.title] || shouldSubmenuBeOpen(item)} timeout="auto" unmountOnExit>
+                                                        <Box sx={{ pl: 2 }}>
+                                                            {item.submenu.map((subItem: any, subIndex: number) => {
+                                                                const subActive = isActiveMenuItem(subItem.path);
+                                                                return (
+                                                                    <MenuItem
+                                                                        key={subIndex}
+                                                                        component={Link}
+                                                                        href={subItem.path}
+                                                                        onClick={handleClose}
+                                                                        sx={{
+                                                                            borderRadius: 1,
+                                                                            py: 0.8,
+                                                            px: 2,
+                                                            width: '100%',
+                                                            display: 'flex',
+                                                            alignItems: 'center',
+                                                            gap: 2,
+                                                            bgcolor: subActive ? 'rgba(10, 155, 84, 0.06)' : 'transparent',
+                                                            transition: 'all 0.15s ease',
+                                                            '&:hover': {
+                                                                bgcolor: 'rgba(10, 155, 84, 0.04)',
+                                                            }
+                                                        }}
+                                                    >
+                                                        <FontAwesomeIcon
+                                                            icon={subItem.icon}
+                                                            style={{
+                                                                fontSize: '1rem',
+                                                                width: '18px',
+                                                                textAlign: 'center',
+                                                                color: subActive ? '#0a9b54' : theme.palette.text.secondary,
+                                                                transition: 'color 0.2s ease'
+                                                            }}
+                                                        />
+                                                        <Typography 
+                                                            variant="body2" 
+                                                            fontWeight={subActive ? 'bold' : 400} 
+                                                            sx={{ 
+                                                                fontSize: '0.85rem', 
+                                                                color: subActive ? '#0a9b54' : 'text.secondary' 
+                                                            }}
+                                                        >
+                                                            {subItem.title}
+                                                        </Typography>
+                                                    </MenuItem>
+                                                );
+                                            })}
+                                        </Box>
+                                    </Collapse>
+                                )}
+                            </Box>
+                        );
+                    })}
+                </Box>
+            </>
+                                )}
+
+                        {/* دکمه خروج برای کارجو - فقط در حالت موبایل */}
+                        {isMobile && (
+                            <Box sx={{ 
+                                px: 1, 
+                                pt: 2, 
+                                pb: 2,
+                                borderTop: '1px solid', 
+                                borderColor: 'divider', 
+                                flexShrink: 0 
+                            }}>
+                                <ListItemButton
+                                    onClick={() => {
+                                        console.log('Logout clicked');
+                                        authLogout();
+                                        handleClose();
+                                    }}
+                                    sx={{
+                                        borderRadius: 2,
+                                        color: 'error.main',
+                                        cursor: 'pointer',
+                                        '&:hover': {
+                                            bgcolor: 'error.light',
+                                            color: 'error.contrastText',
+                                        },
+                                    }}
+                                >
+                                    <ListItemIcon sx={{ minWidth: 36, color: 'inherit' }}>
+                                        <FontAwesomeIcon icon={faSignOutAlt} style={{ fontSize: '1rem' }} />
+                                    </ListItemIcon>
+                                    <ListItemText
+                                        primary="خروج از حساب"
+                                        primaryTypographyProps={{
+                                            fontSize: '0.9rem',
+                                            fontWeight: 'medium',
+                                        }}
+                                    />
+                                </ListItemButton>
+                            </Box>
+                        )}
+
+                        {/* منوی کامل کارجو - فقط در حالت دسکتاپ */}
+                        {!isMobile && (
+                            <>
+                                <Box sx={{
+                                    position: 'relative',
+                                    my: 2,
+                                    '&::before': {
+                                        content: '""',
+                                        position: 'absolute',
+                                        left: '50%',
+                                        top: 0,
+                                        transform: 'translateX(-50%)',
+                                        width: '60%',
+                                        height: '1px',
+                                        background: `linear-gradient(90deg, transparent, #0a9b5430, transparent)`
+                                    }
+                                }} />
+                                
+                                <Typography variant="caption" color="text.secondary" sx={{ px: 2, display: 'block', mb: 0.5, fontWeight: 500 }}>
+                                    مدیریت
+                                </Typography>
+
+                                <MenuItem component={Link} href="/jobseeker/resume" onClick={handleClose} sx={{
+                                    py: 1.2,
+                                    mx: 0.5,
+                                    borderRadius: '8px',
+                                    cursor: 'pointer',
+                                    transition: 'all 0.2s ease',
+                                    '&:hover': {
+                                        backgroundColor: '#0a9b5410',
+                                        transform: 'translateX(-2px)',
+                                        '& .MuiListItemIcon-root': {
+                                            color: '#0a9b54',
+                                            transform: 'scale(1.1)',
+                                        }
+                                    }
+                                }}>
+                                    <ListItemIcon sx={{
+                                        transition: 'all 0.2s ease',
+                                        minWidth: '50px'
+                                    }}>
+                                        <FontAwesomeIcon icon={faFileAlt} style={{
+                                            fontSize: '1rem',
+                                            color: '#0a9b54'
+                                        }} />
+                                    </ListItemIcon>
+                                    رزومه من
+                                </MenuItem>
+
+                                <MenuItem component={Link} href="/jobseeker/applications" onClick={handleClose} sx={{
+                                    py: 1.2,
+                                    mx: 0.5,
+                                    borderRadius: '8px',
+                                    cursor: 'pointer',
+                                    transition: 'all 0.2s ease',
+                                    '&:hover': {
+                                        backgroundColor: '#0a9b5410',
+                                        transform: 'translateX(-2px)',
+                                        '& .MuiListItemIcon-root': {
+                                            color: '#0a9b54',
+                                            transform: 'scale(1.1)',
+                                        }
+                                    }
+                                }}>
+                                    <ListItemIcon sx={{
+                                        transition: 'all 0.2s ease',
+                                        minWidth: '50px'
+                                    }}>
+                                        <FontAwesomeIcon icon={faClipboardList} style={{
+                                            fontSize: '1rem',
+                                            color: '#0a9b54'
+                                        }} />
+                                    </ListItemIcon>
+                                    درخواست‌های ارسالی
+                                </MenuItem>
+
+                                <MenuItem component={Link} href="/jobseeker/resume-ads" onClick={handleClose} sx={{
+                                    py: 1.2,
+                                    mx: 0.5,
+                                    borderRadius: '8px',
+                                    cursor: 'pointer',
+                                    transition: 'all 0.2s ease',
+                                    '&:hover': {
+                                        backgroundColor: '#0a9b5410',
+                                        transform: 'translateX(-2px)',
+                                        '& .MuiListItemIcon-root': {
+                                            color: '#0a9b54',
+                                            transform: 'scale(1.1)',
+                                        }
+                                    }
+                                }}>
+                                    <ListItemIcon sx={{
+                                        transition: 'all 0.2s ease',
+                                        minWidth: '50px'
+                                    }}>
+                                        <FontAwesomeIcon icon={faBullhorn} style={{
+                                            fontSize: '1rem',
+                                            color: '#0a9b54'
+                                        }} />
+                                    </ListItemIcon>
+                                    آگهی‌های رزومه
+                                </MenuItem>
+
+                                <Box sx={{
+                                    position: 'relative',
+                                    my: 1,
+                                    '&::before': {
+                                        content: '""',
+                                        position: 'absolute',
+                                        left: '50%',
+                                        top: 0,
+                                        transform: 'translateX(-50%)',
+                                        width: '40%',
+                                        height: '1px',
+                                        background: `linear-gradient(90deg, transparent, #0a9b5420, transparent)`
+                                    }
+                                }} />
+
+                                <MenuItem component={Link} href="/jobseeker/profile" onClick={handleClose} sx={{
+                                    py: 1.2,
+                                    mx: 0.5,
+                                    borderRadius: '8px',
+                                    cursor: 'pointer',
+                                    transition: 'all 0.2s ease',
+                                    '&:hover': {
+                                        backgroundColor: '#0a9b5410',
+                                        transform: 'translateX(-2px)',
+                                        '& .MuiListItemIcon-root': {
+                                            color: '#0a9b54',
+                                            transform: 'scale(1.1)',
+                                        }
+                                    }
+                                }}>
+                                    <ListItemIcon sx={{
+                                        transition: 'all 0.2s ease',
+                                        minWidth: '50px'
+                                    }}>
+                                        <FontAwesomeIcon icon={faUser} style={{
+                                            fontSize: '1rem',
+                                            color: '#0a9b54'
+                                        }} />
+                                    </ListItemIcon>
+                                    پروفایل
+                                </MenuItem>
+
+                                <Box sx={{
+                                    position: 'relative',
+                                    my: 1,
+                                    '&::before': {
+                                        content: '""',
+                                        position: 'absolute',
+                                        left: '50%',
+                                        top: 0,
+                                        transform: 'translateX(-50%)',
+                                        width: '40%',
+                                        height: '1px',
+                                        background: `linear-gradient(90deg, transparent, #0a9b5420, transparent)`
+                                    }
+                                }} />
+
+                                <MenuItem onClick={() => {
+                                    console.log('Logout clicked');
+                                    authLogout();
+                                    handleClose();
+                                }} sx={{
+                                    py: 1.2,
+                                    mx: 0.5,
+                                    borderRadius: '8px',
+                                    color: 'error.main',
+                                    cursor: 'pointer',
+                                    transition: 'all 0.2s ease',
+                                    '&:hover': {
+                                        backgroundColor: 'error.light',
+                                        color: 'error.contrastText',
+                                        transform: 'scale(1.02)',
+                                        transition: 'all 0.2s ease',
+                                    },
+                                }}>
+                                    <ListItemIcon sx={{
+                                        transition: 'all 0.2s ease',
+                                        minWidth: '50px',
+                                        color: 'inherit'
+                                    }}>
+                                        <FontAwesomeIcon
+                                            icon={faSignOutAlt}
+                                            style={{
+                                                fontSize: '1rem',
+                                                color: 'inherit'
+                                            }}
+                                        />
+                                    </ListItemIcon>
+                                    خروج از حساب
+                                </MenuItem>
+                            </>
+                        )}
+                    </Box>
+                )}
+
+                {/* منوی غیر کارفرما و غیر ادمین */}
+                {!isEmployer && !isJobSeeker && !isAdmin && !menuLoading && (
+                    <Box sx={{ 
+                        py: 1,
+                        pb: { xs: 2, md: 1 } // اضافه کردن padding bottom در موبایل
+                    }}>
                         {/* دکمه خروج از حساب کاربری */}
-                        <MenuItem onClick={handleLogout} sx={{ 
+                        <MenuItem onClick={handleLogout} sx={{
                             py: 1.2,
                             mx: 0.5,
                             borderRadius: '8px',
@@ -931,14 +2162,14 @@ export default function UserMenu({ user: propUser, isLoggedIn: propIsLoggedIn }:
                                 }
                             }
                         }}>
-                            <ListItemIcon sx={{ 
+                            <ListItemIcon sx={{
                                 color: 'inherit',
                                 transition: 'all 0.2s ease',
                                 minWidth: '35px'
                             }}>
-                                <FontAwesomeIcon icon={faSignOutAlt} style={{ 
-                                    fontSize: '1rem', 
-                                    color: '#d32f2f' 
+                                <FontAwesomeIcon icon={faSignOutAlt} style={{
+                                    fontSize: '1rem',
+                                    color: '#d32f2f'
                                 }} />
                             </ListItemIcon>
                             خروج از حساب

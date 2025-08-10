@@ -47,9 +47,9 @@ const employerMenuItems = [
       icon: faBuilding,
   },
   { 
-      title: 'تنظیمات', 
-      path: '/employer/settings', 
-      icon: faCog,
+      title: 'پروفایل', 
+      path: '/employer/profile', 
+      icon: faUser,
   }
 ];
 
@@ -67,7 +67,8 @@ export default function EmployerLayout({ children }: { children: React.ReactNode
   // بررسی اینکه آیا در صفحه‌ای هستیم که آیتم منو با آن تطبیق دارد
   const isActiveMenuItem = (path: string) => {
     if (path === pathname) return true;
-    if (path === '/employer/jobs' && pathname?.startsWith('/employer/jobs/')) return true;
+    // برای آگهی‌ها: فقط صفحات جزئیات و ویرایش، نه صفحه درج جدید
+    if (path === '/employer/jobs' && pathname?.startsWith('/employer/jobs/') && !pathname?.includes('/create')) return true;
     if (path === '/employer/companies' && pathname?.startsWith('/employer/companies/')) return true;
     if (path === '/employer/applications' && pathname?.startsWith('/employer/applications/')) return true;
     return false;
@@ -93,8 +94,8 @@ export default function EmployerLayout({ children }: { children: React.ReactNode
   );
 
   return (
-    <EmployerAuthRequired>
-      <ThemeRegistry>
+    <ThemeRegistry>
+      <EmployerAuthRequired>
         <Box
           sx={{
             minHeight: '100vh',
@@ -162,6 +163,7 @@ export default function EmployerLayout({ children }: { children: React.ReactNode
                   mb: 1
                 }}>
                   <Avatar
+                    src={user?.profile_picture}
                     sx={{
                       width: 60,
                       height: 60,
@@ -237,7 +239,7 @@ export default function EmployerLayout({ children }: { children: React.ReactNode
                         }}
                       >
                         <ListItemIcon sx={{ 
-                          minWidth: 40,
+                          minWidth: 56,
                           color: isActiveMenuItem(item.path) ? EMPLOYER_THEME.primary : 'text.secondary',
                         }}>
                           <FontAwesomeIcon 
@@ -286,7 +288,7 @@ export default function EmployerLayout({ children }: { children: React.ReactNode
             </Box>
           </Container>
         </Box>
-      </ThemeRegistry>
-    </EmployerAuthRequired>
+      </EmployerAuthRequired>
+    </ThemeRegistry>
   );
 } 

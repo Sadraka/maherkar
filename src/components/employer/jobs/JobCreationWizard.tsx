@@ -1,9 +1,9 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Box, Typography, Button, Paper, Stepper, Step, StepLabel } from '@mui/material';
+import { Box, Typography, Button, Paper, CircularProgress } from '@mui/material';
 import { useRouter } from 'next/navigation';
-import { apiGet, apiPost } from '@/lib/axios';
+import { apiGet } from '@/lib/axios';
 import { EMPLOYER_THEME } from '@/constants/colors';
 
 // آیکون‌ها
@@ -13,7 +13,6 @@ import AddIcon from '@mui/icons-material/Add';
 
 // کامپوننت‌ها
 import CreateJobForm from './CreateJobForm';
-import LoadingState from '@/components/common/LoadingState';
 import ErrorState from '@/components/common/ErrorState';
 
 interface Company {
@@ -26,22 +25,14 @@ interface JobCreationWizardProps {
   onComplete?: () => void;
 }
 
-enum WizardStep {
-  CHECK_COMPANY = 'check_company',
-  CREATE_COMPANY = 'create_company', 
-  JOB_FORM = 'job_form'
-}
-
 /**
- * کامپوننت ساده‌شده مدیریت فرآیند ثبت آگهی شغلی
- * آگهی با اشتراک رایگان پیش‌فرض ثبت می‌شود
+ * کامپوننت ساده مدیریت فرآیند ثبت آگهی شغلی
  */
 export default function JobCreationWizard({ onComplete }: JobCreationWizardProps) {
   const router = useRouter();
-  const [currentStep, setCurrentStep] = useState<WizardStep>(WizardStep.CHECK_COMPANY);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [companies, setCompanies] = useState<Company[]>([]);
+  const [hasCompany, setHasCompany] = useState(false);
 
   // بررسی وجود شرکت
   useEffect(() => {
@@ -50,13 +41,7 @@ export default function JobCreationWizard({ onComplete }: JobCreationWizardProps
         setLoading(true);
         const response = await apiGet('/companies/');
         const userCompanies = response.data as Company[];
-        setCompanies(userCompanies);
-
-        if (userCompanies.length === 0) {
-          setCurrentStep(WizardStep.CREATE_COMPANY);
-        } else {
-          setCurrentStep(WizardStep.JOB_FORM);
-        }
+        setHasCompany(userCompanies.length > 0);
       } catch (err) {
         console.error('خطا در دریافت شرکت‌ها:', err);
         setError('خطا در بررسی وضعیت شرکت‌ها');
@@ -68,107 +53,105 @@ export default function JobCreationWizard({ onComplete }: JobCreationWizardProps
     checkCompanies();
   }, []);
 
-  // تکمیل ثبت آگهی
-  const handleJobSubmissionComplete = () => {
-    if (onComplete) {
-      onComplete();
-    } else {
-      // در فرآیند جدید، کاربر به درگاه پرداخت هدایت می‌شود
-      // و بعد از پرداخت موفق، به صفحه آگهی‌ها برمی‌گردد
-      // فعلاً نیازی به هدایت خاص نیست
-    }
-  };
-
-  // رندر محتوای مراحل مختلف
-  const renderStepContent = () => {
-    if (loading) {
-      return <LoadingState />;
-    }
-
-    switch (currentStep) {
-      case WizardStep.CHECK_COMPANY:
-        return <LoadingState />;
-
-      case WizardStep.CREATE_COMPANY:
-        return (
-          <Paper elevation={0} sx={{ p: 4, borderRadius: 3, textAlign: 'center', border: '1px solid #f0f0f0' }}>
-            <BusinessIcon sx={{ fontSize: 64, color: EMPLOYER_THEME.primary, mb: 2 }} />
-            <Typography variant="h5" fontWeight="bold" sx={{ mb: 2, color: EMPLOYER_THEME.primary }}>
-              ابتدا شرکت خود را ثبت کنید
-            </Typography>
-            <Typography color="text.secondary" sx={{ mb: 4 }}>
-              برای ثبت آگهی شغلی، ابتدا باید اطلاعات شرکت خود را تکمیل کنید
-            </Typography>
-            <Button
-              variant="contained"
-              size="large"
-              startIcon={<AddIcon />}
-              sx={{
-                bgcolor: EMPLOYER_THEME.primary,
-                '&:hover': { bgcolor: EMPLOYER_THEME.dark },
-                px: 4,
-                py: 1.5,
-                borderRadius: 2,
-                fontSize: '1rem',
-                fontWeight: 'medium'
-              }}
-              onClick={() => router.push('/employer/companies/create')}
-            >
-              ثبت اطلاعات شرکت
-            </Button>
-          </Paper>
-        );
-
-      case WizardStep.JOB_FORM:
-        return (
-          <CreateJobForm 
-            pageTitle="ثبت آگهی شغلی جدید"
-            pageIcon={<WorkIcon />}
-            submitButtonText="ثبت آگهی و پرداخت"
-            successMessage="در حال هدایت به درگاه پرداخت..."
-          />
-        );
-
-      default:
-        return null;
-    }
-  };
-
   if (error) {
     return <ErrorState message={error} />;
   }
 
-  return (
-    <Box sx={{ maxWidth: 1200, mx: 'auto', p: 2 }}>
-      {/* نمایش مراحل فقط در صورت نیاز */}
-      {currentStep !== WizardStep.JOB_FORM && (
-        <Box sx={{ mb: 4 }}>
-          <Stepper activeStep={getStepIndex()} alternativeLabel>
-            <Step>
-              <StepLabel>بررسی شرکت</StepLabel>
-            </Step>
-            <Step>
-              <StepLabel>ثبت آگهی</StepLabel>
-            </Step>
-          </Stepper>
-        </Box>
-      )}
-
-      {/* محتوای مرحله */}
-      {renderStepContent()}
-    </Box>
-  );
-
-  // تابع کمکی برای تعیین شماره مرحله فعلی
-  function getStepIndex(): number {
-    switch (currentStep) {
-      case WizardStep.CHECK_COMPANY:
-      case WizardStep.CREATE_COMPANY:
-        return 0;
-      case WizardStep.JOB_FORM:
-        return 1;
-      default:
-        return 0;
-    }
+  if (loading) {
+    return (
+      <Box sx={{ 
+        display: 'flex', 
+        flexDirection: 'column',
+        alignItems: 'center', 
+        justifyContent: 'center', 
+        minHeight: '400px',
+        textAlign: 'center'
+      }}>
+        <CircularProgress 
+          size={60} 
+          sx={{ 
+            color: EMPLOYER_THEME.primary, 
+            mb: 3 
+          }} 
+        />
+        <Typography variant="h6" sx={{ 
+          color: EMPLOYER_THEME.primary, 
+          fontWeight: 600,
+          mb: 1
+        }}>
+          در حال بررسی اطلاعات...
+        </Typography>
+        <Typography variant="body2" color="text.secondary">
+          لطفاً کمی صبر کنید
+        </Typography>
+      </Box>
+    );
   }
+
+  if (!hasCompany) {
+    return (
+      <Box sx={{ maxWidth: 600, mx: 'auto', p: 2 }}>
+        <Paper 
+          elevation={0} 
+          sx={{ 
+            p: { xs: 3, sm: 4 }, 
+            borderRadius: 3, 
+            textAlign: 'center', 
+            border: `2px solid ${EMPLOYER_THEME.primary}`,
+            boxShadow: '0 4px 15px rgba(66,133,244,0.05)'
+          }}
+        >
+          <BusinessIcon sx={{ 
+            fontSize: { xs: 48, sm: 64 }, 
+            color: EMPLOYER_THEME.primary, 
+            mb: 2 
+          }} />
+          <Typography variant="h5" fontWeight="bold" sx={{ 
+            mb: 2, 
+            color: EMPLOYER_THEME.primary,
+            fontSize: { xs: '1.3rem', sm: '1.5rem' }
+          }}>
+            ابتدا شرکت خود را ثبت کنید
+          </Typography>
+          <Typography color="text.secondary" sx={{ 
+            mb: 4,
+            fontSize: { xs: '0.9rem', sm: '1rem' }
+          }}>
+            برای ثبت آگهی شغلی، ابتدا باید اطلاعات شرکت خود را تکمیل کنید
+          </Typography>
+          <Button
+            variant="contained"
+            size="large"
+            startIcon={<AddIcon />}
+            sx={{
+              bgcolor: EMPLOYER_THEME.primary,
+              '&:hover': { 
+                bgcolor: EMPLOYER_THEME.dark,
+                transform: 'translateY(-1px)'
+              },
+              px: { xs: 3, sm: 4 },
+              py: 1.5,
+              borderRadius: 2,
+              fontSize: { xs: '0.9rem', sm: '1rem' },
+              fontWeight: 'medium',
+              boxShadow: '0 4px 12px rgba(66, 133, 244, 0.3)',
+              transition: 'all 0.3s ease'
+            }}
+            onClick={() => router.push('/employer/companies/create')}
+          >
+            ثبت اطلاعات شرکت
+          </Button>
+        </Paper>
+      </Box>
+    );
+  }
+
+  return (
+    <CreateJobForm 
+      pageTitle="ثبت آگهی شغلی جدید"
+      pageIcon={<WorkIcon />}
+      submitButtonText="ثبت آگهی و پرداخت"
+      successMessage="در حال هدایت به درگاه پرداخت..."
+    />
+  );
 } 

@@ -64,7 +64,7 @@ export default function MenuPopover() {
       description: 'جستجو و انتخاب متخصصان مناسب',
     },
     { 
-      title: 'مشاهده دسته‌بندی‌ها', 
+      title: 'مشاهده گروه‌های کاری', 
       icon: <FontAwesomeIcon icon={faProjectDiagram} size="lg" />, 
       href: '#',
       description: 'جستجو بر اساس مهارت‌ها و تخصص‌ها',
@@ -121,6 +121,7 @@ export default function MenuPopover() {
       
       {/* منوی کارفرما */}
       <Popover
+        disableScrollLock
         id="employer-menu"
         open={isEmployerHovered}
         anchorEl={employerAnchorEl}
@@ -155,7 +156,7 @@ export default function MenuPopover() {
               borderTop: '0px solid transparent',
               marginTop: '0px',
               position: 'fixed',
-              zIndex: 1000,
+              zIndex: 1200,
               '&:before': {
                 display: 'none',
               },
@@ -255,6 +256,7 @@ export default function MenuPopover() {
 
       {/* منوی کارجو */}
       <Popover
+        disableScrollLock
         id="candidate-menu"
         open={isCandidateHovered}
         anchorEl={candidateAnchorEl}
@@ -289,7 +291,7 @@ export default function MenuPopover() {
               borderTop: '0px solid transparent',
               marginTop: '0px',
               position: 'fixed',
-              zIndex: 1000,
+              zIndex: 1200,
               '&:before': {
                 display: 'none',
               },

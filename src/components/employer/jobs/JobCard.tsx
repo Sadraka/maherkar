@@ -7,29 +7,19 @@ import {
   Typography,
   Box,
   Chip,
-  Avatar,
-  CardActions,
   Button,
   IconButton,
   Tooltip,
-  Paper,
-  Divider,
-  Stack
+  useTheme,
+  useMediaQuery
 } from '@mui/material';
-import {
-  Work as WorkIcon,
-  LocationOn as LocationIcon,
-  Business as BusinessIcon,
-  Schedule as ScheduleIcon,
-  AccountBalance as SalaryIcon,
-  Group as GroupIcon,
-  Edit as EditIcon,
-  Visibility as ViewIcon,
-  Delete as DeleteIcon,
-  Person as PersonIcon,
-  School as SchoolIcon,
-  Security as SecurityIcon
-} from '@mui/icons-material';
+import LocationOnOutlinedIcon from '@mui/icons-material/LocationOnOutlined';
+import AccessTimeOutlinedIcon from '@mui/icons-material/AccessTimeOutlined';
+import WorkOutlineIcon from '@mui/icons-material/WorkOutline';
+import VisibilityOutlinedIcon from '@mui/icons-material/VisibilityOutlined';
+import EditIcon from '@mui/icons-material/Edit';
+import DeleteIcon from '@mui/icons-material/Delete';
+import PaidOutlinedIcon from '@mui/icons-material/PaidOutlined';
 import { useRouter } from 'next/navigation';
 import { 
   JobAdvertisement, 
@@ -49,6 +39,49 @@ interface JobCardProps {
   onView?: (jobId: string) => void;
 }
 
+// تابع کمکی برای تبدیل اعداد انگلیسی به فارسی
+const convertToFarsiNumber = (num: string): string => {
+  const farsiDigits = ['۰', '۱', '۲', '۳', '۴', '۵', '۶', '۷', '۸', '۹'];
+  return num.toString().replace(/\d/g, (x) => farsiDigits[parseInt(x)]);
+};
+
+// تابع کمکی برای تبدیل وضعیت‌ها به متن فارسی مناسب
+const getSalaryText = (salary: string): string => {
+  switch (salary) {
+    case '5 to 10': return convertToFarsiNumber('5') + ' تا ' + convertToFarsiNumber('10') + ' میلیون تومان';
+    case '10 to 15': return convertToFarsiNumber('10') + ' تا ' + convertToFarsiNumber('15') + ' میلیون تومان';
+    case '15 to 20': return convertToFarsiNumber('15') + ' تا ' + convertToFarsiNumber('20') + ' میلیون تومان';
+    case '20 to 30': return convertToFarsiNumber('20') + ' تا ' + convertToFarsiNumber('30') + ' میلیون تومان';
+    case '30 to 50': return convertToFarsiNumber('30') + ' تا ' + convertToFarsiNumber('50') + ' میلیون تومان';
+    case 'More than 50': return 'بیش از ' + convertToFarsiNumber('50') + ' میلیون تومان';
+    case 'Negotiable':
+    default: return 'توافقی';
+  }
+};
+
+const getJobTypeText = (jobType: string): string => {
+  switch (jobType) {
+    case 'Full-Time': return 'تمام وقت';
+    case 'Part-Time': return 'پاره وقت';
+    case 'Remote': return 'دورکاری';
+    case 'Internship': return 'کارآموزی';
+    default: return jobType;
+  }
+};
+
+const getStatusText = (status: string) => {
+  return JOB_STATUS_CHOICES[status as keyof typeof JOB_STATUS_CHOICES] || status;
+};
+
+const getStatusColor = (status: string) => {
+  switch (status) {
+    case 'A': return 'success';
+    case 'P': return 'warning';
+    case 'R': return 'error';
+    default: return 'default';
+  }
+};
+
 const JobCard: React.FC<JobCardProps> = ({ 
   job, 
   index,
@@ -56,33 +89,9 @@ const JobCard: React.FC<JobCardProps> = ({
   onDelete,
   onView
 }) => {
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   const router = useRouter();
-
-  const getImageUrl = (path?: string) => {
-    if (!path) return null;
-    return path.startsWith('http') ? path : `${process.env.NEXT_PUBLIC_BACKEND_URL}${path}`;
-  };
-
-  const formatDate = (dateString: string) => {
-    return new Intl.DateTimeFormat('fa-IR', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-    }).format(new Date(dateString));
-  };
-
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'A': return 'success';
-      case 'P': return 'warning';
-      case 'R': return 'error';
-      default: return 'default';
-    }
-  };
-
-  const getStatusText = (status: string) => {
-    return JOB_STATUS_CHOICES[status as keyof typeof JOB_STATUS_CHOICES] || status;
-  };
 
   const handleCardClick = () => {
     if (onView) {
@@ -108,9 +117,12 @@ const JobCard: React.FC<JobCardProps> = ({
     }
   };
 
-  const handleView = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    handleCardClick();
+  const formatDate = (dateString: string) => {
+    return new Intl.DateTimeFormat('fa-IR', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+    }).format(new Date(dateString));
   };
 
   return (
@@ -119,245 +131,244 @@ const JobCard: React.FC<JobCardProps> = ({
         height: '100%',
         display: 'flex',
         flexDirection: 'column',
+        borderRadius: { xs: 2, sm: 2.5, md: 3 },
+        border: `1px solid #E0E0E0`,
+        boxShadow: '0 2px 8px rgba(0,0,0,0.05)',
+        overflow: 'hidden',
+        position: 'relative',
+        backgroundColor: theme.palette.background.paper,
+        transition: 'all 0.25s ease-in-out',
+        p: 0,
+        width: '100%',
+        mx: 'auto',
         cursor: 'pointer',
-        transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-        transform: `translateY(${index * 10}px)`,
-        animation: `slideInUp 0.5s ease-out ${index * 0.1}s both`,
         '&:hover': {
-          transform: 'translateY(-8px)',
-          boxShadow: '0 12px 24px rgba(0,0,0,0.15)',
-          '& .job-actions': {
-            opacity: 1,
-            transform: 'translateY(0)',
-          },
-        },
-        '@keyframes slideInUp': {
-          from: {
-            opacity: 0,
-            transform: 'translateY(30px)',
-          },
-          to: {
-            opacity: 1,
-            transform: 'translateY(0)',
-          },
-        },
+          transform: 'translateY(-4px)',
+          boxShadow: '0 6px 15px rgba(0,0,0,0.1)',
+        }
       }}
       onClick={handleCardClick}
     >
-      {/* Header with company info */}
-      <Box sx={{ p: 2, pb: 1 }}>
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}>
-          <Avatar
-            src={getImageUrl(job.company.logo) || undefined}
-            sx={{ 
-              width: 48, 
-              height: 48, 
-              bgcolor: 'primary.main',
-              '& img': {
-                objectFit: 'contain'
-              }
-            }}
-          >
-            <BusinessIcon />
-          </Avatar>
-          <Box sx={{ flex: 1, minWidth: 0 }}>
-            <Typography 
-              variant="subtitle2" 
-              sx={{ 
-                fontWeight: 600,
-                color: 'text.secondary',
-                fontSize: '0.875rem'
-              }}
-              noWrap
-            >
-              {job.company.name}
-            </Typography>
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mt: 0.5 }}>
-              <LocationIcon sx={{ fontSize: 16, color: 'text.secondary' }} />
-              <Typography variant="caption" color="text.secondary" noWrap>
-                {job.location.name}
-                {job.location.province && `, ${job.location.province.name}`}
-              </Typography>
-            </Box>
-          </Box>
-          <Chip
-            label={getStatusText(job.status)}
-            size="small"
-            color={getStatusColor(job.status) as any}
-            variant="filled"
-          />
-        </Box>
-
-        {/* Job Title */}
+      <CardContent sx={{ p: { xs: 1.2, sm: 1.5 }, pb: "0px !important", flex: 1, display: 'flex', flexDirection: 'column' }}>
+        {/* عنوان شغل در بالای کارت */}
         <Typography
-          variant="h6"
+          variant="subtitle1"
+          component="h3"
           sx={{
             fontWeight: 700,
-            fontSize: '1.125rem',
+            fontSize: { xs: '0.9rem', sm: '0.95rem', md: '1rem' },
+            color: 'text.primary',
             lineHeight: 1.3,
-            mb: 1,
-            display: '-webkit-box',
-            WebkitLineClamp: 2,
-            WebkitBoxOrient: 'vertical',
-            overflow: 'hidden',
+            mb: { xs: 1.2, sm: 1.5 },
+            textAlign: 'right',
           }}
         >
           {job.title}
         </Typography>
 
-        {/* Job Description */}
-        {job.description && (
-          <Typography
-            variant="body2"
-            color="text.secondary"
-            sx={{
-              display: '-webkit-box',
-              WebkitLineClamp: 3,
-              WebkitBoxOrient: 'vertical',
-              overflow: 'hidden',
-              lineHeight: 1.5,
-              mb: 2,
-            }}
-          >
-            {job.description}
-          </Typography>
-        )}
-      </Box>
-
-      <CardContent sx={{ pt: 0, pb: 1, flex: 1 }}>
-        {/* Job Details */}
-        <Stack spacing={1.5}>
-          {/* Industry */}
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-            <WorkIcon sx={{ fontSize: 18, color: 'text.secondary' }} />
-            <Typography variant="body2" color="text.secondary">
-              {job.industry.name}
+        {/* اطلاعات شغلی */}
+        <Box sx={{ flex: 1, display: 'flex', flexDirection: 'column', gap: { xs: 1, sm: 1.2 } }}>
+          {/* محل کار */}
+          <Box sx={{ display: 'flex', alignItems: 'center' }}>
+            <Box
+              sx={{
+                backgroundColor: 'rgba(25, 118, 210, 0.08)',
+                color: '#1976d2',
+                width: { xs: 28, sm: 32 },
+                height: { xs: 28, sm: 32 },
+                borderRadius: '50%',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                ml: 0.5,
+                mr: { xs: 0.8, sm: 1 },
+              }}
+            >
+              <LocationOnOutlinedIcon sx={{ fontSize: { xs: '1rem', sm: '1.1rem' } }} />
+            </Box>
+            <Typography
+              variant="body2"
+              sx={{
+                color: 'text.primary',
+                fontSize: { xs: '0.85rem', sm: '0.9rem' },
+                display: 'flex',
+                alignItems: 'center',
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                whiteSpace: 'nowrap',
+                maxWidth: '100%'
+              }}
+            >
+              {job.location.name}
+              {job.location.province && `, ${job.location.province.name}`}
             </Typography>
           </Box>
 
-          {/* Job Type and Salary */}
-          <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
-            {job.job_type && (
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                <ScheduleIcon sx={{ fontSize: 18, color: 'text.secondary' }} />
-                <Typography variant="body2" color="text.secondary">
-                  {JOB_TYPE_CHOICES[job.job_type as keyof typeof JOB_TYPE_CHOICES]}
-                </Typography>
-              </Box>
-            )}
-            {job.salary && (
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                <SalaryIcon sx={{ fontSize: 18, color: 'text.secondary' }} />
-                <Typography variant="body2" color="text.secondary">
-                  {SALARY_CHOICES[job.salary as keyof typeof SALARY_CHOICES]}
-                </Typography>
-              </Box>
-            )}
+          {/* زمان انتشار */}
+          <Box sx={{ display: 'flex', alignItems: 'center' }}>
+            <Box
+              sx={{
+                backgroundColor: 'rgba(25, 118, 210, 0.08)',
+                color: '#1976d2',
+                width: { xs: 28, sm: 32 },
+                height: { xs: 28, sm: 32 },
+                borderRadius: '50%',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                ml: 0.5,
+                mr: { xs: 0.8, sm: 1 },
+              }}
+            >
+              <AccessTimeOutlinedIcon sx={{ fontSize: { xs: '1rem', sm: '1.1rem' } }} />
+            </Box>
+            <Typography
+              variant="body2"
+              sx={{
+                color: 'text.secondary',
+                fontSize: { xs: '0.85rem', sm: '0.9rem' },
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                whiteSpace: 'nowrap',
+                maxWidth: '100%'
+              }}
+            >
+              {formatDate(job.created_at)}
+            </Typography>
           </Box>
 
-          {/* Requirements */}
-          <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
-            {job.gender && job.gender !== 'N' && (
-              <Chip
-                icon={<PersonIcon sx={{ fontSize: 16 }} />}
-                label={GENDER_CHOICES[job.gender as keyof typeof GENDER_CHOICES]}
-                size="small"
-                variant="outlined"
-                sx={{ fontSize: '0.75rem' }}
-              />
-            )}
-            {job.degree && (
-              <Chip
-                icon={<SchoolIcon sx={{ fontSize: 16 }} />}
-                label={DEGREE_CHOICES[job.degree as keyof typeof DEGREE_CHOICES]}
-                size="small"
-                variant="outlined"
-                sx={{ fontSize: '0.75rem' }}
-              />
-            )}
-            {job.soldier_status && job.soldier_status !== 'NS' && (
-              <Chip
-                icon={<SecurityIcon sx={{ fontSize: 16 }} />}
-                label={SOLDIER_STATUS_CHOICES[job.soldier_status as keyof typeof SOLDIER_STATUS_CHOICES]}
-                size="small"
-                variant="outlined"
-                sx={{ fontSize: '0.75rem' }}
-              />
-            )}
+          {/* نوع کار */}
+          <Box sx={{ display: 'flex', alignItems: 'center' }}>
+            <Box
+              sx={{
+                backgroundColor: 'rgba(25, 118, 210, 0.08)',
+                color: '#1976d2',
+                width: { xs: 28, sm: 32 },
+                height: { xs: 28, sm: 32 },
+                borderRadius: '50%',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                ml: 0.5,
+                mr: { xs: 0.8, sm: 1 },
+              }}
+            >
+              <WorkOutlineIcon sx={{ fontSize: { xs: '1rem', sm: '1.1rem' } }} />
+            </Box>
+            <Typography
+              variant="body2"
+              sx={{
+                color: 'text.secondary',
+                fontSize: { xs: '0.85rem', sm: '0.9rem' },
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                whiteSpace: 'nowrap',
+                maxWidth: '100%'
+              }}
+            >
+              {job.job_type ? getJobTypeText(job.job_type) : 'نامشخص'}
+            </Typography>
           </Box>
-        </Stack>
-      </CardContent>
 
-      <Divider />
+          {/* حقوق */}
+          <Box sx={{ display: 'flex', alignItems: 'center' }}>
+            <Box
+              sx={{
+                backgroundColor: 'rgba(25, 118, 210, 0.08)',
+                color: '#1976d2',
+                width: { xs: 28, sm: 32 },
+                height: { xs: 28, sm: 32 },
+                borderRadius: '50%',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                ml: 0.5,
+                mr: { xs: 0.8, sm: 1 },
+              }}
+            >
+              <PaidOutlinedIcon sx={{ fontSize: { xs: '1rem', sm: '1.1rem' } }} />
+            </Box>
+            <Typography
+              variant="body2"
+              sx={{
+                color: '#1976d2',
+                fontSize: { xs: '0.85rem', sm: '0.9rem' },
+                fontWeight: 600,
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                whiteSpace: 'nowrap',
+                maxWidth: '100%'
+              }}
+            >
+              {job.salary ? getSalaryText(job.salary) : 'توافقی'}
+            </Typography>
+          </Box>
+        </Box>
 
-      {/* Footer */}
-      <Box sx={{ p: 2, pt: 1 }}>
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <Typography variant="caption" color="text.secondary">
-            {formatDate(job.created_at)}
-          </Typography>
-          
-          {/* Action Buttons */}
-          <Box
-            className="job-actions"
-            sx={{
-              display: 'flex',
-              gap: 0.5,
-              opacity: 0,
-              transform: 'translateY(8px)',
-              transition: 'all 0.2s ease-out',
-            }}
-          >
-            <Tooltip title="مشاهده جزئیات">
-              <IconButton
-                size="small"
-                onClick={handleView}
-                sx={{
-                  bgcolor: 'primary.main',
-                  color: 'white',
-                  '&:hover': {
-                    bgcolor: 'primary.dark',
-                  },
-                }}
-              >
-                <ViewIcon sx={{ fontSize: 18 }} />
-              </IconButton>
-            </Tooltip>
+        {/* دکمه‌های عملیات */}
+        <Box sx={{ mt: { xs: 1.2, sm: 1.5 } }}>
+          <Box sx={{ display: 'flex', gap: 1 }}>
+            <Button
+              fullWidth
+              variant="contained"
+              disableElevation
+              startIcon={<VisibilityOutlinedIcon fontSize="small" />}
+              onClick={handleCardClick}
+              sx={{
+                py: { xs: 0.8, sm: 1 },
+                fontWeight: 'bold',
+                borderRadius: 1.5,
+                fontSize: { xs: '0.85rem', sm: '0.9rem' },
+                background: 'linear-gradient(135deg, #4299e1 0%, #1976d2 100%)',
+                color: '#fff',
+                transition: 'all 0.2s ease',
+                '&:hover': {
+                  background: 'linear-gradient(135deg, #1976d2 0%, #1565c0 100%)',
+                  boxShadow: '0 4px 8px rgba(25, 118, 210, 0.3)',
+                }
+              }}
+            >
+              مشاهده آگهی
+            </Button>
+            
             <Tooltip title="ویرایش">
               <IconButton
-                size="small"
                 onClick={handleEdit}
                 sx={{
-                  bgcolor: 'warning.main',
-                  color: 'white',
+                  bgcolor: '#ff9800',
+                  color: '#fff',
                   '&:hover': {
-                    bgcolor: 'warning.dark',
+                    bgcolor: '#f57c00',
                   },
+                  width: { xs: 40, sm: 44 },
+                  height: { xs: 40, sm: 44 },
                 }}
               >
-                <EditIcon sx={{ fontSize: 18 }} />
+                <EditIcon sx={{ fontSize: { xs: '1rem', sm: '1.1rem' } }} />
               </IconButton>
             </Tooltip>
+            
             {onDelete && (
               <Tooltip title="حذف">
                 <IconButton
-                  size="small"
                   onClick={handleDelete}
                   sx={{
-                    bgcolor: 'error.main',
-                    color: 'white',
+                    bgcolor: '#f44336',
+                    color: '#fff',
                     '&:hover': {
-                      bgcolor: 'error.dark',
+                      bgcolor: '#d32f2f',
                     },
+                    width: { xs: 40, sm: 44 },
+                    height: { xs: 40, sm: 44 },
                   }}
                 >
-                  <DeleteIcon sx={{ fontSize: 18 }} />
+                  <DeleteIcon sx={{ fontSize: { xs: '1rem', sm: '1.1rem' } }} />
                 </IconButton>
               </Tooltip>
             )}
           </Box>
         </Box>
-      </Box>
+      </CardContent>
     </Card>
   );
 };

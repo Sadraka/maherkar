@@ -1,8 +1,9 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
-import { Container, Pagination, Box } from '@mui/material';
+import React, { useEffect, useState, Suspense } from 'react';
+import { Container, Box } from '@mui/material';
 import { apiGet } from '@/lib/axios';
+import { EMPLOYER_THEME } from '@/constants/colors';
 
 // کامپوننت‌های اختصاصی
 import CompaniesHeader from '@/components/employer/companies/CompaniesHeader';
@@ -10,6 +11,7 @@ import CompaniesGrid from '@/components/employer/companies/CompaniesGrid';
 import EmptyCompaniesState from '@/components/employer/companies/EmptyCompaniesState';
 import LoadingState from '@/components/common/LoadingState';
 import ErrorState from '@/components/common/ErrorState';
+import CustomPagination from '@/components/common/CustomPagination';
 
 /**
  * صفحه نمایش لیست شرکت‌های کارفرما
@@ -20,7 +22,7 @@ export default function CompaniesPage() {
   const [companiesData, setCompaniesData] = useState<any[]>([]);
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
-  const itemsPerPage = 9;
+  const pageSize = 9; // تعداد ثابت
 
   useEffect(() => {
     const fetchCompanies = async () => {
@@ -29,7 +31,7 @@ export default function CompaniesPage() {
         const response = await apiGet('/companies/');
         const allCompanies = response.data as any[];
         setCompaniesData(allCompanies);
-        setTotalPages(Math.ceil(allCompanies.length / itemsPerPage));
+        setTotalPages(Math.ceil(allCompanies.length / pageSize));
         setError(null);
       } catch (err: any) {
         console.error('خطا در دریافت اطلاعات شرکت‌ها:', err);
@@ -44,14 +46,9 @@ export default function CompaniesPage() {
 
   // گرفتن شرکت‌های مربوط به صفحه جاری
   const getCurrentPageCompanies = () => {
-    const startIndex = (page - 1) * itemsPerPage;
-    const endIndex = startIndex + itemsPerPage;
+    const startIndex = (page - 1) * pageSize;
+    const endIndex = startIndex + pageSize;
     return companiesData.slice(startIndex, endIndex);
-  };
-
-  // تغییر صفحه
-  const handlePageChange = (event: React.ChangeEvent<unknown>, value: number) => {
-    setPage(value);
   };
 
   // رندر محتوای اصلی صفحه
@@ -69,16 +66,15 @@ export default function CompaniesPage() {
         <>
           <CompaniesGrid companies={getCurrentPageCompanies()} />
           {totalPages > 1 && (
-            <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4, dir: 'ltr' }}>
-              <Pagination 
-                count={totalPages} 
+            <CustomPagination
                 page={page} 
-                onChange={handlePageChange} 
-                color="primary" 
-                size="large"
-                shape="rounded"
-              />
-            </Box>
+              totalPages={totalPages}
+              pageSize={pageSize}
+              onPageChange={setPage}
+              onPageSizeChange={() => {}} // تابع خالی چون pageSize ثابت است
+              theme={EMPLOYER_THEME}
+              showPageSizeSelector={false}
+            />
           )}
         </>
       );
@@ -88,9 +84,11 @@ export default function CompaniesPage() {
   };
 
   return (
-    <Container maxWidth="lg" sx={{ py: 6 }} dir="rtl">
-      <CompaniesHeader />
-      {renderContent()}
+    <Container maxWidth="lg" sx={{ py: { xs: 3, sm: 4, md: 6 } }} dir="rtl">
+      <Suspense fallback={<LoadingState />}>
+        <CompaniesHeader />
+        {renderContent()}
+      </Suspense>
     </Container>
   );
 } 

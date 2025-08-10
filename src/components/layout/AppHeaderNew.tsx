@@ -26,7 +26,8 @@ import {
   faUserCircle,
   faBell,
   faHeadset,
-  faBars
+  faBars,
+  faTimes
 } from '@fortawesome/free-solid-svg-icons';
 import { useHeaderContext } from '@/contexts/HeaderContext';
 import { styled } from '@mui/material/styles';
@@ -34,11 +35,13 @@ import { useRouter } from 'next/navigation';
 import { useState, memo, useEffect, useRef } from 'react';
 import UserMenu from './UserMenu';
 import { useAuthStore, useAuthActions } from '@/store/authStore';
+import { useJobStatsStore } from '@/store/jobStatsStore';
 import authService from '@/lib/authService';
 
 // کامپوننت AppBar اصلی
-function AppHeaderNew() {
+function AppHeaderNew({ promoBarClosed = false, promoBarLoaded = false }: { promoBarClosed?: boolean, promoBarLoaded?: boolean }) {
   const theme = useTheme();
+  const { jobStats, jobStatsLoading } = useJobStatsStore();
   
   // استفاده از selectorهای جداگانه برای کاهش رندرهای غیرضروری
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
@@ -46,6 +49,12 @@ function AppHeaderNew() {
   const { refreshUserData } = useAuthActions();
   const dataLoadedRef = useRef(false);
   
+  // بررسی نوع کاربر برای تنظیم موقعیت هدر
+  const shouldShowPromoBar = user?.user_type === 'EM' || !user;
+  const headerTop = shouldShowPromoBar 
+    ? (promoBarClosed ? 0 : (promoBarLoaded ? '48px' : 0))
+    : 0; // برای کارجوها همیشه بالا
+
   const {
     isMobile,
     mobileOpen,
@@ -116,6 +125,31 @@ function AppHeaderNew() {
     }
   ];
 
+  // فیلتر کردن آیتم‌های منو بر اساس نوع کاربر
+  const filteredNavItems = navItems.filter(item => {
+    // اگر کاربر لاگین نکرده باشد، هر دو گزینه نمایش داده شود
+    if (!isAuthenticated) {
+      return true;
+    }
+    
+    // اگر کاربر ادمین (AD) یا پشتیبان (SU) باشد، هیچ‌کدام نمایش داده نشود
+    if (user?.user_type === 'AD' || user?.user_type === 'SU') {
+      return false;
+    }
+    
+    // اگر کاربر کارفرما (EM) باشد، فقط "کارفرما هستم" نمایش داده شود
+    if (user?.user_type === 'EM') {
+      return item.title === 'کارفرما هستم';
+    }
+    
+    // اگر کاربر کارجو (JS) باشد، فقط "کارجو هستم" نمایش داده شود
+    if (user?.user_type === 'JS') {
+      return item.title === 'کارجو هستم';
+    }
+    
+    return true;
+  });
+
   const SubMenuItem = styled(MenuItem)(() => ({
     fontSize: 15,
     position: 'relative',
@@ -153,7 +187,7 @@ function AppHeaderNew() {
 
   return (
     <AppBar
-      position="sticky"
+      position="fixed"
       color="default"
       elevation={0}
       sx={{
@@ -161,11 +195,12 @@ function AppHeaderNew() {
         borderBottom: '1px solid',
         borderColor: 'divider',
         boxShadow: '0px 2px 8px rgba(0,0,0,0.04)',
-        zIndex: 1200,
-        top: 0,
+        zIndex: 1199, // کمتر از پرومو بار
+        top: headerTop, // در ابتدا بالا، بعد از لود پرومو بار پایین
         left: 0,
         right: 0,
         width: '100%',
+        transition: 'top 0.3s ease', // انیمیشن برای حرکت هدر
         '&.MuiPaper-root': {
           backdropFilter: 'blur(15px)' as any,
           backgroundColor: 'rgba(255, 255, 255, 0.98)',
@@ -236,7 +271,7 @@ function AppHeaderNew() {
                 }}
               >
                 <FontAwesomeIcon
-                  icon={faBars}
+                  icon={mobileOpen ? faTimes : faBars}
                   style={{
                     fontSize: '1.2rem',
                     width: '20px',
@@ -245,6 +280,47 @@ function AppHeaderNew() {
                   }}
                 />
               </IconButton>
+
+              {/* آیکون اعلان‌ها (زنگوله) - فقط برای کاربران لاگین شده در موبایل */}
+              {isAuthenticated && (
+                <Tooltip title="اعلان‌ها" arrow>
+                  <Box
+                    component="a"
+                    href="#"
+                    sx={{
+                      width: { xs: '36px', md: '42px' },
+                      height: { xs: '36px', md: '42px' },
+                      display: { xs: 'flex', md: 'none' }, // فقط در موبایل نمایش داده شود
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      cursor: 'pointer',
+                      transition: 'all 0.25s ease',
+                      position: 'relative',
+                      overflow: 'hidden',
+                      borderRadius: '8px',
+                      '&:hover': {
+                        transform: 'translateY(-2px)',
+                        backgroundColor: 'rgba(0,0,0,0.05)',
+                        '& .icon': {
+                          color: theme.palette.primary.dark
+                        }
+                      }
+                    }}
+                  >
+                    <FontAwesomeIcon
+                      icon={faBell}
+                      className="icon"
+                      style={{
+                        fontSize: '1.1rem',
+                        width: '18px',
+                        height: '18px',
+                        color: theme.palette.primary.main,
+                        transition: 'all 0.25s ease'
+                      }}
+                    />
+                  </Box>
+                </Tooltip>
+              )}
 
               {/* لوگوی سایت - فقط در دسکتاپ */}
               <Typography
@@ -273,7 +349,7 @@ function AppHeaderNew() {
                 alignItems: 'center',
                 gap: 2
               }}>
-                {navItems.map((item, index) => (
+                {filteredNavItems.map((item, index) => (
                   <Box key={index}>
                     {item.hasSubmenu ? (
                       <Box>
@@ -396,7 +472,7 @@ function AppHeaderNew() {
               sx={{
                 display: 'flex',
                 alignItems: 'center',
-                gap: { xs: 1.5, md: 2 }, // افزایش فاصله آیکون‌ها در موبایل
+                gap: { xs: 2, md: 2 }, // افزایش فاصله آیکون‌ها در موبایل
                 mr: { xs: 0, md: 0 },
                 zIndex: 2
               }}
@@ -441,24 +517,26 @@ function AppHeaderNew() {
                 </Box>
               </Box>
 
-              {/* آیکون اعلان‌ها (زنگوله) - فقط برای کاربران لاگین شده */}
+              {/* آیکون اعلان‌ها (زنگوله) - فقط برای کاربران لاگین شده در دسکتاپ */}
               {isAuthenticated && (
                 <Tooltip title="اعلان‌ها" arrow>
                   <Box
                     component="a"
                     href="#"
                     sx={{
-                      width: { xs: '34px', md: '42px' },
-                      height: { xs: '34px', md: '42px' },
-                      display: 'flex',
+                      width: { xs: '36px', md: '42px' },
+                      height: { xs: '36px', md: '42px' },
+                      display: { xs: 'none', md: 'flex' }, // فقط در دسکتاپ نمایش داده شود
                       alignItems: 'center',
                       justifyContent: 'center',
                       cursor: 'pointer',
                       transition: 'all 0.25s ease',
                       position: 'relative',
                       overflow: 'hidden',
+                      borderRadius: '8px',
                       '&:hover': {
                         transform: 'translateY(-2px)',
+                        backgroundColor: 'rgba(0,0,0,0.05)',
                         '& .icon': {
                           color: theme.palette.primary.dark
                         }
@@ -469,9 +547,9 @@ function AppHeaderNew() {
                       icon={faBell}
                       className="icon"
                       style={{
-                        fontSize: '1.2rem',
-                        width: '20px',
-                        height: '20px',
+                        fontSize: '1.1rem',
+                        width: '18px',
+                        height: '18px',
                         color: theme.palette.primary.main,
                         transition: 'all 0.25s ease'
                       }}
@@ -485,7 +563,8 @@ function AppHeaderNew() {
                 isLoggedIn={isAuthenticated}
                 user={user ? {
                   name: user.full_name || '',
-                  role: user.user_type
+                  role: user.user_type,
+                  avatar: user.profile_picture || ''
                 } : undefined}
               />
             </Box>

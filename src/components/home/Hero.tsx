@@ -1,6 +1,7 @@
+
 'use client'
 
-import { Box, Container, Typography, TextField, MenuItem, Button, useTheme, useMediaQuery, InputAdornment, MenuProps, FormControl, OutlinedInput, Select, SelectChangeEvent, Radio, RadioGroup, FormControlLabel, Stack } from '@mui/material';
+import { Box, Container, Typography, TextField, MenuItem, Button, useTheme, useMediaQuery, InputAdornment, MenuProps, FormControl, OutlinedInput, Select, SelectChangeEvent, Radio, RadioGroup, FormControlLabel, Stack, Skeleton } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 import LocationOnIcon from '@mui/icons-material/LocationOn';
 import WorkIcon from '@mui/icons-material/Work';
@@ -8,81 +9,33 @@ import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import SchoolIcon from '@mui/icons-material/School';
 import LaptopIcon from '@mui/icons-material/Laptop';
-import { useState, useEffect, useLayoutEffect } from 'react';
+import React, { useState, useEffect, useLayoutEffect } from 'react';
 import { useJobSeekerTheme } from '@/contexts/JobSeekerThemeContext';
 import { EMPLOYER_THEME } from '@/constants/colors';
 import Image from 'next/image';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faLaptopHouse, faGraduationCap } from '@fortawesome/free-solid-svg-icons';
+import { useAuthStore } from '@/store/authStore';
+import { apiGet } from '@/lib/axios';
+import { InitialData, Industry, Province, City } from '@/lib/initialData';
 
-// تعریف داده‌های فارسی برای فیلدهای انتخابی
-const jobCategories = [
-  { value: '', label: 'همه گروه‌های کاری' },
-  { value: 'dev', label: 'برنامه‌نویسی و توسعه' },
-  { value: 'design', label: 'طراحی و خلاقیت' },
-  { value: 'marketing', label: 'بازاریابی و فروش' },
-  { value: 'content', label: 'تولید محتوا و ترجمه' },
-  { value: 'business', label: 'کسب و کار' },
-  { value: 'engineering', label: 'مهندسی و معماری' }
-];
+interface HeroProps {
+  initialData: InitialData;
+}
 
-// زیرگروه‌های کاری
-const jobSubCategories = [
-  { value: '', label: 'همه زیرگروه‌ها', parentCategory: '' },
-  // برنامه‌نویسی و توسعه
-  { value: 'frontend', label: 'فرانت‌اند', parentCategory: 'dev' },
-  { value: 'backend', label: 'بک‌اند', parentCategory: 'dev' },
-  { value: 'mobile', label: 'موبایل', parentCategory: 'dev' },
-  { value: 'fullstack', label: 'فول‌استک', parentCategory: 'dev' },
-  // طراحی و خلاقیت
-  { value: 'ui-ux', label: 'رابط و تجربه کاربری', parentCategory: 'design' },
-  { value: 'graphic', label: 'گرافیک', parentCategory: 'design' },
-  { value: 'motion', label: 'موشن گرافیک', parentCategory: 'design' },
-  // بازاریابی و فروش
-  { value: 'digital-marketing', label: 'دیجیتال مارکتینگ', parentCategory: 'marketing' },
-  { value: 'sales', label: 'فروش', parentCategory: 'marketing' },
-  // تولید محتوا و ترجمه
-  { value: 'content-creation', label: 'تولید محتوا', parentCategory: 'content' },
-  { value: 'translation', label: 'ترجمه', parentCategory: 'content' },
-  // کسب و کار
-  { value: 'management', label: 'مدیریت', parentCategory: 'business' },
-  { value: 'finance', label: 'مالی و حسابداری', parentCategory: 'business' },
-  // مهندسی و معماری
-  { value: 'civil', label: 'عمران', parentCategory: 'engineering' },
-  { value: 'architecture', label: 'معماری', parentCategory: 'engineering' },
-];
-
-const provinces = [
-  { value: '', label: 'همه استان‌ها' },
-  { value: 'east-azerbaijan', label: 'آذربایجان شرقی' },
-  { value: 'tehran', label: 'تهران' },
-  { value: 'isfahan', label: 'اصفهان' },
-  { value: 'khorasan-razavi', label: 'خراسان رضوی' },
-  { value: 'fars', label: 'فارس' },
-
-];
-
-const cities = [
-  { value: '', label: 'همه شهرها', province: '' },
-  { value: 'tehran-city', label: 'تهران', province: 'tehran' },
-  { value: 'tabriz-city', label: 'تبریز', province: 'east-azerbaijan' },
-  { value: 'maragheh', label: 'میانه', province: 'east-azerbaijan' },
-  { value: 'karaj', label: 'کرج', province: 'tehran' },
-  { value: 'isfahan-city', label: 'اصفهان', province: 'isfahan' },
-  { value: 'kashan', label: 'کاشان', province: 'isfahan' },
-  { value: 'mashhad-city', label: 'مشهد', province: 'khorasan-razavi' },
-  { value: 'neyshabur', label: 'نیشابور', province: 'khorasan-razavi' },
-  { value: 'shiraz-city', label: 'شیراز', province: 'fars' },
-  { value: 'marvdasht', label: 'مرودشت', province: 'fars' }
-
-];
-
-export default function Hero() {
+export default function Hero({ initialData }: HeroProps) {
   const theme = useTheme();
   const jobSeekerColors = useJobSeekerTheme();
 
   // رنگ‌های کارفرما برای استفاده در این کامپوننت
   const employerColors = EMPLOYER_THEME;
+
+  // دریافت اطلاعات کاربر
+  const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
+  const user = useAuthStore((state) => state.user);
+
+  // تعیین نوع کاربر
+  const isEmployer = isAuthenticated && user?.user_type === 'EM';
 
   const [jobCategory, setJobCategory] = useState('');
   const [jobSubCategory, setJobSubCategory] = useState('');
@@ -90,11 +43,67 @@ export default function Hero() {
   const [city, setCity] = useState('');
   const [filterOption, setFilterOption] = useState('');
 
+  // State برای داده‌های دریافتی از API
+  const [industries, setIndustries] = useState<Industry[]>(initialData.industries);
+  const [provinces, setProvinces] = useState<Province[]>(initialData.provinces);
+  const [cities, setCities] = useState<City[]>(initialData.cities);
+  const [dataLoading, setDataLoading] = useState(false);
+  const [dataError, setDataError] = useState(false);
+
+  // تبدیل داده‌های API به فرمت مورد نیاز
+  const jobCategories = React.useMemo(() => {
+    if (industries.length > 0) {
+      // استخراج دسته‌بندی‌های یکتا از صنایع
+      const uniqueCategories = new Map();
+      industries.forEach(industry => {
+        if (industry.category) {
+          uniqueCategories.set(industry.category.id, industry.category);
+        }
+      });
+      
+      return [
+        { value: '', label: 'همه گروه‌های کاری' },
+        ...Array.from(uniqueCategories.values()).map(category => ({
+          value: category.id.toString(),
+          label: category.name
+        }))
+      ];
+    }
+    return [];
+  }, [industries]);
+
+  const provincesList = React.useMemo(() => {
+    if (provinces.length > 0) {
+      return [
+        { value: '', label: 'همه استان‌ها' },
+        ...provinces.map(province => ({
+          value: province.id.toString(),
+          label: province.name
+        }))
+      ];
+    }
+    return [];
+  }, [provinces]);
+
+  const citiesList = React.useMemo(() => {
+    if (cities.length > 0) {
+      return [
+        { value: '', label: 'همه شهرها', province: '' },
+        ...cities.map(city => ({
+          value: city.id.toString(),
+          label: city.name,
+          province: city.province?.id.toString() || ''
+        }))
+      ];
+    }
+    return [];
+  }, [cities]);
+
   // Filtered cities based on selected province
-  const [filteredCities, setFilteredCities] = useState(cities);
+  const [filteredCities, setFilteredCities] = useState(citiesList);
 
   // زیرگروه‌های فیلتر شده بر اساس گروه کاری انتخاب شده
-  const [filteredSubCategories, setFilteredSubCategories] = useState(jobSubCategories);
+  const [filteredSubCategories, setFilteredSubCategories] = useState<Industry[]>([]);
 
   // تابع برای تغییر وضعیت فیلترها (فعال/غیرفعال)
   const handleFilterChange = (value: string) => {
@@ -110,46 +119,61 @@ export default function Hero() {
   useEffect(() => {
     if (location) {
       // Filter cities for the selected province, always include "همه شهرها"
-      setFilteredCities(cities.filter(c => c.province === location || c.province === ''));
+      setFilteredCities(citiesList.filter(c => c.province === location || c.province === ''));
     } else {
       // If no province is selected, show all cities
-      setFilteredCities(cities);
+      setFilteredCities(citiesList);
     }
     // Reset city selection when province changes
     setCity('');
-  }, [location]); // Rerun effect when location (province) changes
+  }, [location, citiesList]); // Rerun effect when location (province) changes
 
   // به‌روزرسانی زیرگروه‌های کاری بر اساس گروه کاری انتخاب شده
   useEffect(() => {
-    if (jobCategory) {
-      // زیرگروه‌های مرتبط با گروه کاری انتخاب شده به علاوه گزینه "همه زیرگروه‌ها"
-      setFilteredSubCategories(jobSubCategories.filter(sc => sc.parentCategory === jobCategory || sc.parentCategory === ''));
+    if (jobCategory && industries.length > 0) {
+      // فیلتر کردن صنایع بر اساس دسته‌بندی انتخاب شده
+      const filtered = industries.filter(industry => 
+        industry.category?.id.toString() === jobCategory
+      );
+      setFilteredSubCategories(filtered);
     } else {
-      // اگر گروه کاری انتخاب نشده باشد، همه زیرگروه‌ها نمایش داده شوند
-      setFilteredSubCategories(jobSubCategories);
+      setFilteredSubCategories([]);
     }
     // ریست کردن انتخاب زیرگروه کاری هنگام تغییر گروه کاری
     setJobSubCategory('');
-  }, [jobCategory]);
+  }, [jobCategory, industries]);
 
   // یافتن برچسب فارسی مناسب برای مقدار انتخاب شده
   const getJobCategoryLabel = () => {
+    if (dataLoading) return 'در حال بارگذاری...';
+    if (industries.length === 0) return 'گروه کاری';
     const category = jobCategories.find(cat => cat.value === jobCategory);
     return category ? category.label : 'گروه کاری';
   };
 
   const getJobSubCategoryLabel = () => {
-    const subCategory = jobSubCategories.find(sc => sc.value === jobSubCategory);
-    return subCategory ? subCategory.label : 'زیرگروه کاری';
+    if (dataLoading) return 'در حال بارگذاری...';
+    if (jobSubCategory === '') {
+      return 'همه زیرگروه‌ها';
+    }
+    if (jobSubCategory && filteredSubCategories.length > 0) {
+      const subCategory = filteredSubCategories.find(sc => sc.id.toString() === jobSubCategory);
+      return subCategory ? subCategory.name : 'زیرگروه کاری';
+    }
+    return 'زیرگروه کاری';
   };
 
   const getLocationLabel = () => {
-    const province = provinces.find(prov => prov.value === location);
+    if (dataLoading) return 'در حال بارگذاری...';
+    if (provinces.length === 0) return 'در حال بارگذاری استان‌ها...';
+    const province = provincesList.find(prov => prov.value === location);
     return province ? province.label : 'استان';
   };
 
   const getCityLabel = () => {
-    const selectedCity = cities.find(c => c.value === city);
+    if (dataLoading) return 'در حال بارگذاری...';
+    if (cities.length === 0) return 'در حال بارگذاری شهرها...';
+    const selectedCity = citiesList.find(c => c.value === city);
     return selectedCity ? selectedCity.label : 'شهر';
   };
 
@@ -287,6 +311,8 @@ export default function Hero() {
     },
   };
 
+
+
   return (
     <Box
       sx={{
@@ -348,28 +374,57 @@ export default function Hero() {
                 display: { xs: 'none', sm: 'block', md: 'block' }
               }}
             >
-              هوشمند انتخاب کن، <Box
-                component="span"
-                sx={{
-                  color: '#FFDA3E',
-                  position: 'relative',
-                  display: 'inline-block',
-                  '&::after': {
-                    content: '""',
-                    position: 'absolute',
-                    bottom: { xs: '-6px', sm: '-8px' },
-                    left: 0,
-                    width: '100%',
-                    height: { xs: '6px', sm: '8px' },
-                    backgroundImage: 'url(/images/underline-yellow.svg)',
-                    backgroundRepeat: 'no-repeat',
-                    backgroundSize: '100% 100%',
-                    backgroundPosition: 'center bottom',
-                  }
-                }}
-              >
-                سریع
-              </Box> استخدام شو
+              {isEmployer ? (
+                <>
+                  هوشمند انتخاب کن، <Box
+                    component="span"
+                    sx={{
+                      color: '#FFDA3E',
+                      position: 'relative',
+                      display: 'inline-block',
+                      '&::after': {
+                        content: '""',
+                        position: 'absolute',
+                        bottom: { xs: '-6px', sm: '-8px' },
+                        left: 0,
+                        width: '100%',
+                        height: { xs: '6px', sm: '8px' },
+                        backgroundImage: 'url(/images/underline-yellow.svg)',
+                        backgroundRepeat: 'no-repeat',
+                        backgroundSize: '100% 100%',
+                        backgroundPosition: 'center bottom',
+                      }
+                    }}
+                  >
+                    سریع
+                  </Box> استخدام کن
+                </>
+              ) : (
+                <>
+                  هوشمند انتخاب کن، <Box
+                    component="span"
+                    sx={{
+                      color: '#FFDA3E',
+                      position: 'relative',
+                      display: 'inline-block',
+                      '&::after': {
+                        content: '""',
+                        position: 'absolute',
+                        bottom: { xs: '-6px', sm: '-8px' },
+                        left: 0,
+                        width: '100%',
+                        height: { xs: '6px', sm: '8px' },
+                        backgroundImage: 'url(/images/underline-yellow.svg)',
+                        backgroundRepeat: 'no-repeat',
+                        backgroundSize: '100% 100%',
+                        backgroundPosition: 'center bottom',
+                      }
+                    }}
+                  >
+                    سریع
+                  </Box> استخدام شو
+                </>
+              )}
             </Typography>
 
             {/* نمایش عنوان در حالت موبایل به صورت دو سطری */}
@@ -419,7 +474,7 @@ export default function Hero() {
                   }}
                 >
                   سریع
-                </Box> استخدام شو
+                </Box> {isEmployer ? 'استخدام کن' : 'استخدام شو'}
               </Typography>
             </Box>
           </Box>
@@ -455,13 +510,10 @@ export default function Hero() {
                   displayEmpty
                   value={jobCategory}
                   onChange={(e: SelectChangeEvent<string>) => setJobCategory(e.target.value)}
+                  disabled={industries.length === 0}
                   input={<OutlinedInput sx={textFieldStyles} />}
-                  renderValue={() => {
-                    return (
-                      <Box component="div" sx={{ display: 'flex', justifyContent: 'center', width: '100%' }}>
-                        {getJobCategoryLabel()}
-                      </Box>
-                    );
+                  renderValue={(selected) => {
+                    return getJobCategoryLabel();
                   }}
                   MenuProps={menuPropsRTL}
                   startAdornment={
@@ -473,11 +525,15 @@ export default function Hero() {
                     <KeyboardArrowDownIcon {...props} sx={{ color: employerColors.primary }} />
                   )}
                 >
-                  {jobCategories.map((category) => (
+                  {industries.length > 0 ? jobCategories.map((category) => (
                     <MenuItem key={category.value} value={category.value}>
                       {category.label}
                     </MenuItem>
-                  ))}
+                  )) : [
+                    <MenuItem key="no-data" value="" disabled>
+                      گروه‌های کاری در دسترس نیست
+                    </MenuItem>
+                  ]}
                 </Select>
               </FormControl>
             </Box>
@@ -495,14 +551,10 @@ export default function Hero() {
                   displayEmpty
                   value={jobSubCategory}
                   onChange={(e: SelectChangeEvent<string>) => setJobSubCategory(e.target.value)}
-                  disabled={filteredSubCategories.length <= 1}
+                  disabled={filteredSubCategories.length === 0 || industries.length === 0}
                   input={<OutlinedInput sx={textFieldStyles} />}
-                  renderValue={() => {
-                    return (
-                      <Box component="div" sx={{ display: 'flex', justifyContent: 'center', width: '100%' }}>
-                        {getJobSubCategoryLabel()}
-                      </Box>
-                    );
+                  renderValue={(selected) => {
+                    return getJobSubCategoryLabel();
                   }}
                   MenuProps={menuPropsRTL}
                   startAdornment={
@@ -514,11 +566,20 @@ export default function Hero() {
                     <KeyboardArrowDownIcon {...props} sx={{ color: employerColors.primary }} />
                   )}
                 >
-                  {filteredSubCategories.map((subCategory) => (
-                    <MenuItem key={subCategory.value} value={subCategory.value}>
-                      {subCategory.label}
+                  {filteredSubCategories.length > 0 ? [
+                    <MenuItem key="all" value="">
+                      همه زیرگروه‌ها
+                    </MenuItem>,
+                    ...filteredSubCategories.map((subCategory) => (
+                      <MenuItem key={subCategory.id} value={subCategory.id.toString()}>
+                        {subCategory.name}
+                      </MenuItem>
+                    ))
+                  ] : [
+                    <MenuItem key="disabled" value="" disabled>
+                      {industries.length === 0 ? 'گروه‌های کاری در دسترس نیست' : 'ابتدا یک گروه کاری انتخاب کنید'}
                     </MenuItem>
-                  ))}
+                  ]}
                 </Select>
               </FormControl>
             </Box>
@@ -536,13 +597,10 @@ export default function Hero() {
                   displayEmpty
                   value={location}
                   onChange={(e: SelectChangeEvent<string>) => setLocation(e.target.value)}
+                  disabled={provinces.length === 0}
                   input={<OutlinedInput sx={textFieldStyles} />}
-                  renderValue={() => {
-                    return (
-                      <Box component="div" sx={{ display: 'flex', justifyContent: 'center', width: '100%' }}>
-                        {getLocationLabel()}
-                      </Box>
-                    );
+                  renderValue={(selected) => {
+                    return getLocationLabel();
                   }}
                   MenuProps={menuPropsRTL}
                   startAdornment={
@@ -554,11 +612,15 @@ export default function Hero() {
                     <KeyboardArrowDownIcon {...props} sx={{ color: employerColors.primary }} />
                   )}
                 >
-                  {provinces.map((province) => (
+                  {provinces.length > 0 ? provincesList.map((province) => (
                     <MenuItem key={province.value} value={province.value}>
                       {province.label}
                     </MenuItem>
-                  ))}
+                  )) : [
+                    <MenuItem key="loading" value="" disabled>
+                      در حال بارگذاری استان‌ها...
+                    </MenuItem>
+                  ]}
                 </Select>
               </FormControl>
             </Box>
@@ -576,14 +638,10 @@ export default function Hero() {
                   displayEmpty
                   value={city}
                   onChange={(e: SelectChangeEvent<string>) => setCity(e.target.value)}
-                  disabled={filteredCities.length <= 1}
+                  disabled={!location || filteredCities.length <= 1 || cities.length === 0}
                   input={<OutlinedInput sx={textFieldStyles} />}
-                  renderValue={() => {
-                    return (
-                      <Box component="div" sx={{ display: 'flex', justifyContent: 'center', width: '100%' }}>
-                        {getCityLabel()}
-                      </Box>
-                    );
+                  renderValue={(selected) => {
+                    return getCityLabel();
                   }}
                   MenuProps={menuPropsRTL}
                   startAdornment={
@@ -595,11 +653,15 @@ export default function Hero() {
                     <KeyboardArrowDownIcon {...props} sx={{ color: employerColors.primary }} />
                   )}
                 >
-                  {filteredCities.map((cityItem) => (
+                  {cities.length > 0 ? filteredCities.map((cityItem) => (
                     <MenuItem key={cityItem.value} value={cityItem.value}>
                       {cityItem.label}
                     </MenuItem>
-                  ))}
+                  )) : [
+                    <MenuItem key="loading" value="" disabled>
+                      در حال بارگذاری شهرها...
+                    </MenuItem>
+                  ]}
                 </Select>
               </FormControl>
             </Box>
@@ -641,7 +703,7 @@ export default function Hero() {
                   border: 'none'
                 }}
               >
-                جستجو در مشاغل
+                {isEmployer ? 'جستجو در رزومه‌ها' : 'جستجو در مشاغل'}
               </Button>
             </Box>
           </Box>

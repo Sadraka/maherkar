@@ -1,96 +1,87 @@
-import React from 'react';
-import { TextField, TextFieldProps } from '@mui/material';
+'use client';
 
-// تابع تبدیل اعداد فارسی و عربی به انگلیسی
-export const convertPersianToEnglish = (str: string): string => {
+import React, { useState, useEffect } from 'react';
+import { TextField, TextFieldProps } from '@mui/material';
+import { EMPLOYER_THEME } from '@/constants/colors';
+
+// تبدیل اعداد انگلیسی به فارسی برای نمایش
+export const convertEnglishToPersian = (str: string): string => {
   if (!str) return str;
-  
-  // تبدیل اعداد فارسی به انگلیسی (کد یونیکد ۰۶۰۰-۰۶۶۹)
   const persianDigits = ['۰', '۱', '۲', '۳', '۴', '۵', '۶', '۷', '۸', '۹'];
-  // تبدیل اعداد عربی به انگلیسی (کد یونیکد ۰۶۶۰-۰۶۶۹)
-  const arabicDigits = ['٠', '١', '٢', '٣', '٤', '٥', '٦', '٧', '٨', '٩'];
-  
-  let result = str;
-  
-  // تبدیل اعداد فارسی
-  result = result.replace(/[۰-۹]/g, match => String(persianDigits.indexOf(match)));
-  
-  // تبدیل اعداد عربی
-  result = result.replace(/[٠-٩]/g, match => String(arabicDigits.indexOf(match)));
-  
-  return result;
+  return str.replace(/[0-9]/g, match => persianDigits[parseInt(match)]);
 };
 
-// کامپوننت TextField با پشتیبانی از اعداد فارسی و عربی
-const NumberTextField = React.forwardRef<HTMLDivElement, TextFieldProps>((props, ref) => {
-  const { onChange, value, ...rest } = props;
+// تبدیل اعداد فارسی به انگلیسی برای ارسال به سرور
+export const convertPersianToEnglish = (str: string): string => {
+  if (!str) return str;
+  const persianDigits = ['۰', '۱', '۲', '۳', '۴', '۵', '۶', '۷', '۸', '۹'];
+  return str.replace(/[۰-۹]/g, match => persianDigits.indexOf(match).toString());
+};
 
-  // هندلر برای تبدیل اعداد فارسی و عربی به انگلیسی
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const originalValue = e.target.value;
-    const convertedValue = convertPersianToEnglish(originalValue);
+interface NumberTextFieldProps extends Omit<TextFieldProps, 'onChange'> {
+  onChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
+  isMobile?: boolean; // اضافه شد
+}
+
+const NumberTextField: React.FC<NumberTextFieldProps> = ({ value, onChange, sx, isMobile = false, ...props }) => {
+  const [displayValue, setDisplayValue] = useState('');
+
+  // همگام‌سازی با value خارجی
+  useEffect(() => {
+    const newDisplayValue = typeof value === 'string' ? convertEnglishToPersian(value) : String(value || '');
+    setDisplayValue(newDisplayValue);
+  }, [value]);
+
+  // مدیریت تغییرات داخلی
+  const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const inputValue = event.target.value;
+    const englishValue = convertPersianToEnglish(inputValue);
+    const persianValue = convertEnglishToPersian(englishValue);
     
-    // فقط اگر مقدار تغییر کرده باشد، رویداد جدید ایجاد کنیم
-    if (onChange) {
-      // به جای ایجاد رویداد جدید، مستقیماً از رویداد اصلی استفاده می‌کنیم
-      // و فقط مقدار را تغییر می‌دهیم
-      e.target.value = convertedValue;
-      onChange(e);
-    }
-  };
-
-  // هندلر برای تشخیص کلیدهای فارسی و عربی هنگام تایپ
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    // اجازه می‌دهیم کلیدها به صورت عادی کار کنند
-    // و تبدیل را در handleChange انجام می‌دهیم
+    // بروزرسانی نمایش
+    setDisplayValue(persianValue);
+    
+    // ارسال مقدار انگلیسی به والد
+    const syntheticEvent = {
+      ...event,
+      target: {
+        ...event.target,
+        value: englishValue,
+        name: event.target.name // اطمینان از پاس کردن name
+      }
+    };
+    
+    // Debug log برای بررسی مقادیر
+    console.log('NumberTextField:', {
+      inputValue,
+      englishValue,
+      persianValue,
+      name: event.target.name
+    });
+    
+    onChange(syntheticEvent as React.ChangeEvent<HTMLInputElement>);
   };
 
   return (
     <TextField
-      {...rest}
-      value={value}
+      {...props}
+      value={displayValue}
       onChange={handleChange}
-      onKeyDown={handleKeyDown}
-      ref={ref}
-      onPaste={(e) => {
-        // تبدیل اعداد فارسی و عربی در هنگام پیست
-        const clipboardData = e.clipboardData.getData('text');
-        const convertedData = convertPersianToEnglish(clipboardData);
-        
-        // اگر داده تغییر کرده، رفتار پیش‌فرض را متوقف کن و مقدار تبدیل شده را وارد کن
-        if (convertedData !== clipboardData) {
-          e.preventDefault();
-          const target = e.target as HTMLInputElement;
-          const start = target.selectionStart || 0;
-          const end = target.selectionEnd || 0;
-          
-          // ایجاد مقدار جدید با جایگزینی متن انتخاب شده با مقدار پیست شده
-          const currentValue = target.value;
-          const newValue = currentValue.substring(0, start) + convertedData + currentValue.substring(end);
-          
-          // ایجاد یک رویداد تغییر مصنوعی
-          const syntheticEvent = {
-            target: {
-              value: newValue,
-              name: target.name
-            }
-          } as React.ChangeEvent<HTMLInputElement>;
-          
-          if (onChange) {
-            onChange(syntheticEvent);
-          }
-          
-          // تنظیم موقعیت کرسر بعد از متن پیست شده
-          setTimeout(() => {
-            target.selectionStart = start + convertedData.length;
-            target.selectionEnd = start + convertedData.length;
-          }, 0);
-        }
+      onFocus={(e) => props.onFocus && props.onFocus(e)}
+      onBlur={(e) => props.onBlur && props.onBlur(e)}
+      inputProps={{
+        ...(props.inputProps || {}),
+        dir: "ltr", // شماره تلفن همیشه از چپ شروع شود
+        ...(isMobile ? { inputMode: 'numeric', type: 'tel' } : {}),
+      }}
+      sx={{
+        '& .MuiInputBase-input': {
+          color: EMPLOYER_THEME.primary, // رنگ متن آبی کارفرما
+        },
+        ...sx
       }}
     />
   );
-});
-
-NumberTextField.displayName = 'NumberTextField';
+};
 
 export default NumberTextField; 

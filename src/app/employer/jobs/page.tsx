@@ -1,15 +1,19 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
-import { Container, Pagination, Box } from '@mui/material';
+import React, { useEffect, useState, useCallback } from 'react';
+import { Container, Box, Typography } from '@mui/material';
 import { apiGet } from '@/lib/axios';
+import { EMPLOYER_THEME } from '@/constants/colors';
 
 // کامپوننت‌های اختصاصی
 import JobsHeader from '../../../components/employer/jobs/JobsHeader';
 import JobsGrid from '../../../components/employer/jobs/JobsGrid';
+import JobsSearchAndSort from '../../../components/employer/jobs/JobsSearchAndSort';
 import EmptyJobsState from '../../../components/employer/jobs/EmptyJobsState';
+
 import LoadingState from '@/components/common/LoadingState';
 import ErrorState from '@/components/common/ErrorState';
+import CustomPagination from '@/components/common/CustomPagination';
 
 /**
  * صفحه نمایش لیست آگهی‌های شغلی کارفرما
@@ -17,10 +21,15 @@ import ErrorState from '@/components/common/ErrorState';
 export default function JobsPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [jobsData, setJobsData] = useState<any[]>([]);
+  const [allJobsData, setAllJobsData] = useState<any[]>([]);
+  const [filteredJobsData, setFilteredJobsData] = useState<any[]>([]);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [statusFilter, setStatusFilter] = useState('all');
+  const [subscriptionFilter, setSubscriptionFilter] = useState('all');
+  const [hasSearchResults, setHasSearchResults] = useState(true);
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
-  const itemsPerPage = 9;
+  const pageSize = 9; // تعداد ثابت
 
   useEffect(() => {
     const fetchJobs = async () => {
@@ -32,8 +41,9 @@ export default function JobsPage() {
         const responseData = jobsResponse.data as { count: number; results: any[] };
         const allJobs = responseData.results;
         
-        setJobsData(allJobs);
-        setTotalPages(Math.ceil(allJobs.length / itemsPerPage));
+        setAllJobsData(allJobs);
+        setFilteredJobsData(allJobs);
+        setTotalPages(Math.ceil(allJobs.length / pageSize));
         
         setError(null);
       } catch (err: any) {
@@ -49,15 +59,33 @@ export default function JobsPage() {
 
   // گرفتن آگهی‌های مربوط به صفحه جاری
   const getCurrentPageJobs = () => {
-    const startIndex = (page - 1) * itemsPerPage;
-    const endIndex = startIndex + itemsPerPage;
-    return jobsData.slice(startIndex, endIndex);
+    const startIndex = (page - 1) * pageSize;
+    const endIndex = startIndex + pageSize;
+    return filteredJobsData.slice(startIndex, endIndex);
   };
 
-  // تغییر صفحه
-  const handlePageChange = (event: React.ChangeEvent<unknown>, value: number) => {
-    setPage(value);
-  };
+  // تابع callback برای دریافت نتایج فیلتر شده
+  const handleFilteredJobsChange = useCallback((filteredJobs: any[]) => {
+    setFilteredJobsData(filteredJobs);
+    setPage(1); // بازگشت به صفحه اول
+    setTotalPages(Math.ceil(filteredJobs.length / pageSize));
+  }, [pageSize]);
+
+  // تابع callback برای دریافت وضعیت جستجو
+  const handleSearchStateChange = useCallback((query: string, hasResults: boolean) => {
+    setHasSearchResults(hasResults);
+  }, []);
+
+  // تابع callback برای دریافت متن جستجو
+  const handleSearchQueryChange = useCallback((query: string) => {
+    setSearchQuery(query);
+  }, []);
+
+  // تابع callback برای دریافت فیلترهای فعال
+  const handleFiltersChange = useCallback((status: string, subscription: string) => {
+    setStatusFilter(status);
+    setSubscriptionFilter(subscription);
+  }, []);
 
   const renderContent = () => {
     if (loading) {
@@ -68,33 +96,47 @@ export default function JobsPage() {
       return <ErrorState message={error} />;
     }
 
-    if (jobsData.length === 0) {
+    if (allJobsData.length === 0) {
+      // اگر اصلاً آگهی‌ای وجود ندارد
       return <EmptyJobsState />;
     }
 
     return (
       <Box>
-        <JobsGrid jobs={getCurrentPageJobs()} />
+        {/* کامپوننت جستجو و مرتب‌سازی */}
+        <JobsSearchAndSort
+          jobs={allJobsData}
+          onFilteredJobsChange={handleFilteredJobsChange}
+          onSearchStateChange={handleSearchStateChange}
+          onSearchQueryChange={handleSearchQueryChange}
+          onFiltersChange={handleFiltersChange}
+        />
+        
+        {/* نمایش کارت‌ها یا پیام "نتیجه‌ای یافت نشد" */}
+        <JobsGrid 
+          jobs={getCurrentPageJobs()} 
+          searchQuery={searchQuery}
+          statusFilter={statusFilter}
+          subscriptionFilter={subscriptionFilter}
+        />
         
         {totalPages > 1 && (
-          <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
-            <Pagination
-              count={totalPages}
+          <CustomPagination
               page={page}
-              onChange={handlePageChange}
-              color="primary"
-              size="large"
-              showFirstButton
-              showLastButton
-            />
-          </Box>
+            totalPages={totalPages}
+            pageSize={pageSize}
+            onPageChange={setPage}
+            onPageSizeChange={() => {}} // تابع خالی چون pageSize ثابت است
+            theme={EMPLOYER_THEME}
+            showPageSizeSelector={false}
+          />
         )}
       </Box>
     );
   };
 
   return (
-    <Container maxWidth="lg" sx={{ py: 6 }} dir="rtl">
+    <Container maxWidth="lg" sx={{ py: { xs: 3, sm: 4, md: 6 } }} dir="rtl">
       <JobsHeader />
       {renderContent()}
     </Container>

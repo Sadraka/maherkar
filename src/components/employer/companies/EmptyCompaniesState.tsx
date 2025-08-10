@@ -9,11 +9,11 @@ import { EMPLOYER_THEME } from '@/constants/colors';
  */
 const EmptyCompaniesState = () => {
   return (
-    <Box sx={{ textAlign: 'center', my: 8 }}>
+    <Box sx={{ textAlign: 'center', my: { xs: 4, sm: 6, md: 8 } }}>
       <Paper
         elevation={0}
         sx={{
-          p: 6,
+          p: { xs: 4, sm: 5, md: 6 },
           maxWidth: 600,
           mx: 'auto',
           borderRadius: 3,
@@ -21,11 +21,18 @@ const EmptyCompaniesState = () => {
           border: '1px solid #f1f1f1'
         }}
       >
-        <BusinessIcon sx={{ fontSize: 64, color: '#e0e0e0', mb: 3 }} />
-        <Typography variant="h6" fontWeight="medium" sx={{ mb: 2 }}>
+        <BusinessIcon sx={{ fontSize: { xs: 48, sm: 56, md: 64 }, color: '#e0e0e0', mb: { xs: 2, sm: 2.5, md: 3 } }} />
+        <Typography variant="h6" fontWeight="medium" sx={{ 
+          mb: 2,
+          fontSize: { xs: '1.1rem', sm: '1.25rem' }
+        }}>
           هنوز شرکتی ثبت نکرده‌اید
         </Typography>
-        <Typography color="text.secondary" sx={{ mb: 4 }}>
+        <Typography color="text.secondary" sx={{ 
+          mb: { xs: 3, sm: 3.5, md: 4 },
+          fontSize: { xs: '0.9rem', sm: '1rem' },
+          px: { xs: 1, sm: 0 }
+        }}>
           برای ثبت آگهی شغلی و استخدام نیروی کار، ابتدا باید اطلاعات شرکت خود را وارد کنید.
         </Typography>
         <Button
@@ -33,12 +40,13 @@ const EmptyCompaniesState = () => {
           sx={{
             bgcolor: EMPLOYER_THEME.primary,
             '&:hover': { bgcolor: EMPLOYER_THEME.dark },
-            px: 4,
-            py: 1.5,
+            px: { xs: 3, sm: 4 },
+            py: { xs: 1.2, sm: 1.5 },
             borderRadius: 6,
-            fontSize: '0.95rem',
+            fontSize: { xs: '0.85rem', sm: '0.95rem' },
             fontWeight: 'medium',
-            boxShadow: `0 3px 8px rgba(33, 150, 243, 0.3)`
+            boxShadow: `0 3px 8px rgba(33, 150, 243, 0.3)`,
+            width: { xs: '100%', sm: 'auto' }
           }}
           component={Link}
           href="/employer/companies/create"

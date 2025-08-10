@@ -11,11 +11,20 @@ interface CompaniesGridProps {
  */
 const CompaniesGrid = ({ companies }: CompaniesGridProps) => {
   return (
-    <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 3 }}>
+    <Box sx={{ 
+      display: 'grid', 
+      gridTemplateColumns: { 
+        xs: '1fr', 
+        sm: 'repeat(2, 1fr)', 
+        md: 'repeat(3, 1fr)' 
+      }, 
+      gap: { xs: 2, sm: 3, md: 4 },
+      '& > *': {
+        height: 'auto'
+      }
+    }}>
       {companies.map((company, index) => (
-        <Box key={company.id || index} sx={{ width: { xs: '100%', sm: 'calc(50% - 12px)', md: 'calc(33.33% - 16px)' } }}>
-          <CompanyCard company={company} index={index} />
-        </Box>
+        <CompanyCard key={company.id || index} company={company} index={index} />
       ))}
     </Box>
   );

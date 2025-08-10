@@ -50,7 +50,7 @@ export type JobType = {
   degree?: 'Below Diploma' | 'Diploma' | 'Associate' | 'Bachelor' | 'Master' | 'Doctorate'; // حداقل مدرک تحصیلی
   advertiseCode?: string; // کد آگهی
   status?: 'Pending' | 'Approved' | 'Rejected'; // وضعیت آگهی
-  industry?: string; // صنعت مربوطه - مرتبط با مدل Industry
+  industry?: string; // گروه کاری مربوطه - مرتبط با مدل Industry
   description?: string; // توضیحات شغل
   descriptionPosition?: string; // توضیحات موقعیت شغلی
   slug?: string; // اسلاگ آگهی برای استفاده در URL

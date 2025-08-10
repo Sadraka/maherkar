@@ -14,6 +14,12 @@ import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
 import KeyboardArrowLeftIcon from '@mui/icons-material/KeyboardArrowLeft';
 import KeyboardArrowRightIcon from '@mui/icons-material/KeyboardArrowRight';
 
+// تابع تبدیل اعداد انگلیسی به فارسی
+const convertToPersianNumbers = (num: number | string): string => {
+  const persianNumbers = ['۰', '۱', '۲', '۳', '۴', '۵', '۶', '۷', '۸', '۹'];
+  return num.toString().replace(/[0-9]/g, (d) => persianNumbers[parseInt(d)]);
+};
+
 // تعریف نوع داده‌های مورد استفاده
 interface JalaliDatePickerProps {
   value: string;
@@ -200,7 +206,10 @@ export default function JalaliDatePicker({
       const [year, month, day] = value.split('-').map(Number);
       if (!isNaN(year) && !isNaN(month) && !isNaN(day)) {
         const jalali = gregorianToJalali(year, month, day);
-        setDisplayValue(`${jalali[0]}/${jalali[1].toString().padStart(2, '0')}/${jalali[2].toString().padStart(2, '0')}`);
+        const persianYear = convertToPersianNumbers(jalali[0]);
+        const persianMonth = convertToPersianNumbers(jalali[1].toString().padStart(2, '0'));
+        const persianDay = convertToPersianNumbers(jalali[2].toString().padStart(2, '0'));
+        setDisplayValue(`${persianYear}/${persianMonth}/${persianDay}`);
         setSelectedDate(jalali);
         setDisplayYear(jalali[0]);
         setDisplayMonth(jalali[1]);
@@ -374,7 +383,7 @@ export default function JalaliDatePicker({
             }
           }}
         >
-          {day}
+          {convertToPersianNumbers(day)}
         </DayButton>
       );
     }
@@ -468,7 +477,7 @@ export default function JalaliDatePicker({
           }}
           onClick={() => handleYearSelect(year)}
         >
-          {year}
+          {convertToPersianNumbers(year)}
         </Typography>
       );
     }
@@ -510,7 +519,7 @@ export default function JalaliDatePicker({
               sx={{ cursor: 'pointer', fontWeight: 'bold' }}
               onClick={handleYearViewClick}
             >
-              {displayYear}
+              {convertToPersianNumbers(displayYear)}
             </Typography>
           </Box>
           <NavButton size="small" onClick={nextMonth}>
@@ -529,7 +538,7 @@ export default function JalaliDatePicker({
             sx={{ cursor: 'pointer', fontWeight: 'bold' }}
             onClick={handleYearViewClick}
           >
-            {displayYear}
+            {convertToPersianNumbers(displayYear)}
           </Typography>
           <NavButton size="small" onClick={nextYear}>
             <KeyboardArrowLeftIcon fontSize="small" />

@@ -6,10 +6,10 @@
 .env
 /Backend/PUSH
 /Backend/MaherKar-deployment
-/Backend/dp.sqlite3
+
 Job_Application_System_Overview.md
 jobSeeker_Panel_Structure.md
-/Backend
+/Backend/
 /.vscode
 /.cursor
 next.mdc

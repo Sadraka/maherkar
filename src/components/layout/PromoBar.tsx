@@ -6,23 +6,29 @@ import CloseIcon from '@mui/icons-material/Close'
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward'
 import { useTheme } from '@mui/material/styles'
 import cookieService, { COOKIE_NAMES } from '@/lib/cookieService'
+import { useAuth } from '@/store/authStore'
 
 export default function PromoBar() {
   const theme = useTheme()
+  const { user } = useAuth()
   const [isVisible, setIsVisible] = useState(true)
-  const [isScrolled, setIsScrolled] = useState(false)
+  const [isClosing, setIsClosing] = useState(false)
   const [isMounted, setIsMounted] = useState(false)
   const [barHeight, setBarHeight] = useState(0)
   const barRef = useRef<HTMLDivElement>(null)
-  const lastScrollY = useRef(0)
-  const ticking = useRef(false)
   const isInitialMount = useRef(true)
+
+  // بررسی نوع کاربر - فقط کارفرماها پرومو بار را ببینند
+  const shouldShowPromoBar = user?.user_type === 'EM' || !user
 
   // برای بستن دستی نوار تبلیغاتی
   const handleClose = () => {
-    setIsVisible(false)
+    setIsClosing(true)
     // ذخیره وضعیت در کوکی برای جلوگیری از نمایش مجدد در بارگذاری‌های بعدی
     cookieService.setCookie(COOKIE_NAMES.PROMO_BAR_CLOSED, 'true', 30); // 30 روز
+
+    // اطلاع‌رسانی به هدر که پرومو بار بسته شده
+    window.dispatchEvent(new CustomEvent('promoBarClosed'));
   }
 
   // محاسبه ارتفاع نوار یکبار در شروع
@@ -53,82 +59,52 @@ export default function PromoBar() {
     cookieService.deleteCookie(COOKIE_NAMES.PROMO_BAR_CLOSED);
 
     setIsVisible(true)
-
-    // تشخیص اسکرول با throttling برای بهبود عملکرد
-    const handleScroll = () => {
-      lastScrollY.current = window.scrollY;
-
-      if (!ticking.current) {
-        window.requestAnimationFrame(() => {
-          // استفاده از آستانه بزرگتر و پایدارتر
-          if (lastScrollY.current > 100) {
-            setIsScrolled(true);
-          } else if (lastScrollY.current < 50) {
-            // ایجاد هیسترسیس برای جلوگیری از تغییر وضعیت سریع
-            setIsScrolled(false);
-          }
-          ticking.current = false;
-        });
-
-        ticking.current = true;
-      }
-    }
-
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    return () => {
-      window.removeEventListener('scroll', handleScroll);
-    }
+    
+    // اطلاع‌رسانی به هدر که پرومو بار لود شده
+    setTimeout(() => {
+      window.dispatchEvent(new CustomEvent('promoBarLoaded'));
+    }, 10);
   }, []);
 
   // قبل از اینکه کامپوننت در سمت کلاینت مانت شود، چیزی نمایش نده
   // این کار از خطای هیدراسیون جلوگیری می‌کند
   if (!isMounted) return null;
 
-  // اگر نوار به صورت دستی بسته شده، کاملاً آن را حذف کنید
+  // اگر کاربر کارجو است، هیچ‌چیزی نمایش نده (نه پرومو بار و نه فضای خالی)
+  if (!shouldShowPromoBar) return null;
+
+  // اگر نوار کاملاً بسته شده، آن را حذف کن
   if (!isVisible) return null;
 
   return (
     <>
-      {/* همیشه یک فضای خالی با همان ارتفاع داشته باشید تا از پرش جلوگیری شود */}
-      <Box sx={{ height: barHeight, display: isScrolled ? 'block' : 'none' }} />
+      {/* فضای خالی با انیمیشن ارتفاع برای جلوگیری از پرش محتوا */}
+      <Box
+        sx={{
+          height: isClosing ? 0 : barHeight,
+          transition: 'height 0.3s ease'
+        }}
+      />
 
       <Box
         ref={barRef}
         data-testid="promo-bar"
         sx={{
-          bgcolor: theme.palette.primary.main,
+          bgcolor: '#0d47a1', // رنگ آبی تیره‌تر
           color: 'white',
           py: 1,
           width: '100%',
-          position: isScrolled ? 'fixed' : 'static',
+          position: 'fixed',
           top: 0,
           left: 0,
           right: 0,
           zIndex: theme.zIndex.appBar + 1,
-          transform: isScrolled ? 'translateY(-100%)' : 'translateY(0)',
+          transform: isClosing ? 'translateY(-100%)' : 'translateY(0)',
           transition: 'transform 0.3s ease',
-          visibility: isScrolled ? 'hidden' : 'visible',
-          opacity: isScrolled ? 0 : 1,
-          backgroundImage: `
-            linear-gradient(to right, ${theme.palette.primary.main}, ${theme.palette.primary.dark}),
-            url("data:image/svg+xml,%3Csvg width='120' height='60' xmlns='http://www.w3.org/2000/svg'%3E%3Ctext x='10' y='40' font-family='Arial' font-weight='bold' font-size='30' fill='rgba(255,255,255,0.08)'%3Eماهرکار%3C/text%3E%3C/svg%3E")
-          `,
-          backgroundSize: 'cover, 120px 60px',
-          backgroundRepeat: 'no-repeat, repeat',
-          backgroundPosition: 'center, center',
-          overflow: 'hidden',
-          '&::before': {
-            content: '""',
-            position: 'absolute',
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            background: `url("data:image/svg+xml,%3Csvg width='50' height='50' xmlns='http://www.w3.org/2000/svg'%3E%3Ctext x='5' y='30' font-family='Arial' font-weight='bold' font-size='20' fill='rgba(255,255,255,0.05)'%3Eم%3C/text%3E%3C/svg%3E")`,
-            backgroundSize: '50px 50px',
-            backgroundRepeat: 'repeat',
-            mixBlendMode: 'overlay',
-            opacity: 0.7,
+        }}
+        onTransitionEnd={() => {
+          if (isClosing) {
+            setIsVisible(false);
           }
         }}
       >
@@ -157,17 +133,15 @@ export default function PromoBar() {
             <Button
               size="small"
               color="inherit"
-              variant="outlined"
+              variant="text"
               endIcon={<ArrowForwardIcon />}
               sx={{
                 mr: 1,
                 ml: 2,
-                borderColor: 'rgba(255,255,255,0.5)',
                 fontSize: '0.75rem',
                 display: { xs: 'none', sm: 'flex' },
                 whiteSpace: 'nowrap',
                 '&:hover': {
-                  borderColor: 'white',
                   bgcolor: 'rgba(255,255,255,0.1)'
                 }
               }}

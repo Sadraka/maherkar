@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Suspense, useRef } from 'react';
 import {
     Box,
     Typography,
@@ -9,138 +9,43 @@ import {
     Paper,
     InputAdornment,
     CircularProgress,
+    Link as MuiLink,
+    useMediaQuery,
+    useTheme,
+    Card,
+    CardContent,
     Stepper,
     Step,
     StepLabel,
-    StepIconProps,
-    Link as MuiLink,
     MenuItem,
     Select,
     FormControl,
     InputLabel,
-    useMediaQuery,
-    useTheme,
     Checkbox,
     FormControlLabel,
-    FormHelperText
+    FormHelperText,
+    IconButton
 } from '@mui/material';
-import { styled } from '@mui/material/styles';
-import { useAuthStore, useAuthActions, useAuthStatus } from '@/store/authStore';
-import { useRouter } from 'next/navigation';
-import PhoneIcon from '@mui/icons-material/Phone';
+import { styled, alpha } from '@mui/material/styles';
+import { StepIconProps } from '@mui/material/StepIcon';
 import BadgeIcon from '@mui/icons-material/Badge';
+import PhoneIcon from '@mui/icons-material/Phone';
+import WorkIcon from '@mui/icons-material/Work';
+import PersonSearchIcon from '@mui/icons-material/PersonSearch';
+import EditIcon from '@mui/icons-material/Edit';
+import { useAuthStore, useAuthActions, useAuthStatus } from '@/store/authStore';
+import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
-import { EMPLOYER_THEME } from '@/constants/colors';
+import { EMPLOYER_THEME, JOB_SEEKER_THEME } from '@/constants/colors';
+import { ErrorHandler } from '@/components/common/ErrorHandler';
 import { toast } from 'react-hot-toast';
 import OtpInput from '@/components/common/OtpInput';
-import { alpha } from '@mui/material/styles';
 import NumberTextField from '../common/NumberTextField';
 
-// کامپوننت آیکون مراحل با اعداد فارسی
-const PersianStepIcon = (props: StepIconProps) => {
-    const { active, completed, icon } = props;
-
     // تبدیل اعداد انگلیسی به فارسی
-    const getPersianNumber = (num: number): string => {
+const toPersianNumbers = (str: string | number): string => {
         const persianDigits = ['۰', '۱', '۲', '۳', '۴', '۵', '۶', '۷', '۸', '۹'];
-        return num.toString().replace(/[0-9]/g, match => persianDigits[parseInt(match)]);
-    };
-
-    return (
-        <Box sx={{
-            width: 30,
-            height: 30,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            borderRadius: '50%',
-            backgroundColor: completed || active ? EMPLOYER_THEME.primary : '#ccc',
-            color: '#fff',
-            fontWeight: 'bold',
-        }}>
-            {completed ? (
-                '✓'
-            ) : (
-                <Typography variant="body2" component="span" fontWeight="bold">
-                    {getPersianNumber(Number(icon))}
-                </Typography>
-            )}
-        </Box>
-    );
-};
-
-// کامپوننت نقطه‌ای برای نمایش مراحل در موبایل
-const MobileDotStepper = ({ activeStep, steps }: { activeStep: number, steps: string[] }) => {
-    return (
-        <Box sx={{ 
-            display: 'flex', 
-            flexDirection: 'column',
-            alignItems: 'center',
-            my: 2
-        }}>
-            {/* نمایش عنوان مرحله فعلی */}
-            <Typography 
-                variant="subtitle2" 
-                sx={{ 
-                    color: EMPLOYER_THEME.primary,
-                    fontWeight: 600,
-                    mb: 2,
-                    fontSize: '0.9rem'
-                }}
-            >
-                {steps[activeStep]}
-            </Typography>
-
-            {/* نمایش نقطه‌ها */}
-            <Box sx={{ 
-                display: 'flex', 
-                justifyContent: 'center', 
-                alignItems: 'center',
-                gap: 2,
-                position: 'relative'
-            }}>
-                {steps.map((_, index) => {
-                    const isActive = index === activeStep;
-                    const isCompleted = index < activeStep;
-                    
-                    return (
-                        <Box
-                            key={index}
-                            sx={{
-                                width: isActive ? 14 : 10,
-                                height: isActive ? 14 : 10,
-                                borderRadius: '50%',
-                                backgroundColor: isActive 
-                                    ? EMPLOYER_THEME.primary 
-                                    : isCompleted 
-                                        ? alpha(EMPLOYER_THEME.primary, 0.7)
-                                        : alpha(EMPLOYER_THEME.primary, 0.2),
-                                transition: 'all 0.4s cubic-bezier(0.68, -0.55, 0.27, 1.55)',
-                                transform: isActive ? 'scale(1.1)' : 'scale(1)',
-                                boxShadow: isActive 
-                                    ? `0 0 0 2px ${alpha(EMPLOYER_THEME.primary, 0.2)}, 0 2px 4px ${alpha(EMPLOYER_THEME.primary, 0.3)}` 
-                                    : 'none',
-                                position: 'relative',
-                                '&::after': index < steps.length - 1 ? {
-                                    content: '""',
-                                    position: 'absolute',
-                                    top: '50%',
-                                    left: '100%',
-                                    width: 16,
-                                    height: 2,
-                                    backgroundColor: isCompleted && index + 1 <= activeStep
-                                        ? alpha(EMPLOYER_THEME.primary, 0.7)
-                                        : alpha(EMPLOYER_THEME.primary, 0.2),
-                                    transform: 'translateY(-50%)',
-                                    transition: 'background-color 0.4s ease'
-                                } : {}
-                            }}
-                        />
-                    );
-                })}
-            </Box>
-        </Box>
-    );
+    return str.toString().replace(/[0-9]/g, match => persianDigits[parseInt(match)]);
 };
 
 interface RegisterFormProps {
@@ -157,31 +62,63 @@ export default function RegisterForm({ onSuccess }: RegisterFormProps) {
     const employerColors = EMPLOYER_THEME;
     const theme = useTheme();
     const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
-
-    // وضعیت ارسال فرم در مراحل مختلف
-    const [isSubmitting, setIsSubmitting] = useState(false);
-
-    // مرحله فعلی ثبت‌نام
-    const [activeStep, setActiveStep] = useState(0);
-
-    // توکن OTP دریافتی در مرحله اول
-    const [phoneOtpToken, setPhoneOtpToken] = useState('');
-
-    // کد OTP وارد شده توسط کاربر در مرحله دوم
-    const [phoneOtpCode, setPhoneOtpCode] = useState('');
-
-    // خطای کد تایید
-    const [otpError, setOtpError] = useState('');
-
-    // تایمر ارسال مجدد کد OTP (120 ثانیه = 2 دقیقه)
-    const [resendTimer, setResendTimer] = useState(0);
     
-    // فرم ثبت‌نام - فقط شامل نام کامل، شماره تلفن و نوع کاربر
+    // تمام useState ها در ابتدا
+    const [viewportHeight, setViewportHeight] = useState('100vh');
+    const [mounted, setMounted] = useState(false);
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    const [activeStep, setActiveStep] = useState(0);
+    const [isPhoneFocused, setIsPhoneFocused] = useState(false);
+    const [isFullNameFocused, setIsFullNameFocused] = useState(false);
+    const [inlineUserSubmitPressed, setInlineUserSubmitPressed] = useState(false);
+    const [isOtpFocusedStep3, setIsOtpFocusedStep3] = useState(false);
+    const [inlineOtpSubmitPressedStep3, setInlineOtpSubmitPressedStep3] = useState(false);
+
+    // جلوگیری از باقی‌ماندن وضعیت فوکوس بین مراحل و ایجاد دکمه‌های تکراری
+    useEffect(() => {
+        if (activeStep !== 0) setIsPhoneFocused(false);
+        if (activeStep !== 1) setIsFullNameFocused(false);
+        if (activeStep !== 2) setIsOtpFocusedStep3(false);
+    }, [activeStep]);
+    const [inlinePhoneSubmitPressed, setInlinePhoneSubmitPressed] = useState(false);
+    const contentRef = useRef<HTMLDivElement | null>(null);
+    const [phoneOtpToken, setPhoneOtpToken] = useState('');
+    const [phoneOtpCode, setPhoneOtpCode] = useState('');
+    const autoSubmitOtpLockRef = useRef(false);
+    const lastAutoSubmittedOtpRef = useRef<string | null>(null);
+    const [otpError, setOtpError] = useState('');
+    const [resendTimer, setResendTimer] = useState(0);
     const [formData, setFormData] = useState({
         phone: '',
         full_name: '',
         user_type: 'JS', // پیش‌فرض: جوینده کار
     });
+    const [formErrors, setFormErrors] = useState<Record<string, string>>({});
+
+    // حل مشکل hydration mismatch
+    useEffect(() => {
+        setMounted(true);
+    }, []);
+
+    // تنظیم ارتفاع viewport برای موبایل
+    useEffect(() => {
+        if (isMobile && typeof window !== 'undefined') {
+            const setVH = () => {
+                const vh = window.innerHeight * 0.01;
+                document.documentElement.style.setProperty('--vh', `${vh}px`);
+                setViewportHeight(`${vh * 100}px`);
+            };
+
+            setVH();
+            window.addEventListener('resize', setVH);
+            window.addEventListener('orientationchange', setVH);
+
+            return () => {
+                window.removeEventListener('resize', setVH);
+                window.removeEventListener('orientationchange', setVH);
+            };
+        }
+    }, [isMobile]);
 
     // بررسی وجود تایمر در localStorage هنگام لود اولیه
     useEffect(() => {
@@ -267,9 +204,6 @@ export default function RegisterForm({ onSuccess }: RegisterFormProps) {
         return `${formattedMins}:${formattedSecs}`;
     };
 
-    // خطاهای اعتبارسنجی فرم
-    const [formErrors, setFormErrors] = useState<Record<string, string>>({});
-
     // دریافت شماره تلفن از پارامترهای URL در صورت وجود
     useEffect(() => {
         if (typeof window !== 'undefined') {
@@ -329,6 +263,25 @@ export default function RegisterForm({ onSuccess }: RegisterFormProps) {
         }
     };
 
+    // ثبت خودکار وقتی کد OTP کامل شد (مرحله ۳) با قفل و ثبت آخرین کد ارسال‌شده برای جلوگیری از ارسال‌های پیاپی
+    useEffect(() => {
+        if (activeStep !== 2) return;
+        const code = phoneOtpCode.trim();
+        if (code.length === 6 && /^\d{6}$/.test(code)) {
+            if (isSubmitting) return;
+            if (autoSubmitOtpLockRef.current) return;
+            if (lastAutoSubmittedOtpRef.current === code) return;
+            autoSubmitOtpLockRef.current = true;
+            lastAutoSubmittedOtpRef.current = code;
+            const form = document.getElementById('register-otp-form') as HTMLFormElement | null;
+            form?.requestSubmit();
+        } else {
+            // اگر کد کمتر از ۶ رقم شد، قفل آزاد شود تا در تکمیل بعدی دوباره ارسال شود
+            autoSubmitOtpLockRef.current = false;
+            lastAutoSubmittedOtpRef.current = null;
+        }
+    }, [phoneOtpCode, activeStep, isSubmitting]);
+
     // اعتبارسنجی شماره تلفن در مرحله اول
     const validatePhoneStep = (): boolean => {
         const errors: Record<string, string> = {};
@@ -339,7 +292,7 @@ export default function RegisterForm({ onSuccess }: RegisterFormProps) {
             errors.phone = 'شماره تلفن الزامی است';
             isValid = false;
         }
-        // بررسی فرمت شماره تلفن (۱۱ رقم و شروع با ۰۹)
+        // بررسی فرمت شماره تلفن (۱۱ رقم و شروع با ۰۹ - اعداد انگلیسی)
         else if (!/^09\d{9}$/.test(formData.phone.trim())) {
             errors.phone = 'شماره تلفن باید ۱۱ رقم و با ۰۹ شروع شود';
             isValid = false;
@@ -437,12 +390,36 @@ export default function RegisterForm({ onSuccess }: RegisterFormProps) {
         setIsSubmitting(true);
 
         try {
-            // پاک کردن توکن قبلی ثبت شده در localStorage - حتی اگر تایمر هنوز فعال است
             const phoneKey = formData.phone.trim();
-            localStorage.removeItem(`reg_otp_timer_${phoneKey}`);
-            localStorage.removeItem(`reg_otp_token_${phoneKey}`);
-            
-            // همیشه یک OTP جدید درخواست کن با اطلاعات به‌روز
+
+            // اگر تایمر قبلی هنوز معتبر است، بدون ارسال مجدد OTP به مرحله کد برو
+            try {
+                const storedData = localStorage.getItem(`reg_otp_timer_${phoneKey}`);
+                const storedToken = localStorage.getItem(`reg_otp_token_${phoneKey}`);
+                if (storedData && storedToken) {
+                    const { endTime } = JSON.parse(storedData);
+                    const now = new Date().getTime();
+                    const remainingTime = Math.round((endTime - now) / 1000);
+                    if (remainingTime > 0) {
+                        setPhoneOtpToken(storedToken);
+                        setResendTimer(remainingTime);
+                        setActiveStep(2);
+                        // به‌روزرسانی اطلاعات کاربر در storage برای سازگاری
+                        localStorage.setItem(`reg_otp_timer_${phoneKey}`, JSON.stringify({
+                            endTime,
+                            userInfo: { full_name: formData.full_name, user_type: formData.user_type }
+                        }));
+                        toast.success('کد تأیید قبلی هنوز معتبر است. لطفاً صبر کنید یا کد را وارد کنید.');
+                        return;
+                    } else {
+                        // پاک‌سازی در صورت انقضای تایمر
+                        localStorage.removeItem(`reg_otp_timer_${phoneKey}`);
+                        localStorage.removeItem(`reg_otp_token_${phoneKey}`);
+                    }
+                }
+            } catch {}
+
+            // در غیر این صورت، OTP جدید ارسال کن
             const otpToken = await registerOtp({
                 phone: formData.phone,
                 full_name: formData.full_name,
@@ -458,7 +435,7 @@ export default function RegisterForm({ onSuccess }: RegisterFormProps) {
             // تنظیم تایمر و ذخیره در localStorage
             setResendTimer(120);
             const now = new Date().getTime();
-            const endTime = now + (120 * 1000); // 120 ثانیه بعد
+            const endTime = now + (120 * 1000); // ۱۲۰ ثانیه بعد
             localStorage.setItem(`reg_otp_timer_${phoneKey}`, JSON.stringify({ 
                 endTime,
                 userInfo: {
@@ -523,7 +500,9 @@ export default function RegisterForm({ onSuccess }: RegisterFormProps) {
                 } else {
                     setTimeout(() => {
                         // استفاده از window.location.href به جای router.push برای ریلود کامل صفحه
+                        if (typeof window !== 'undefined') {
                         window.location.href = '/change-user-type';
+                        }
                     }, 1500);
                 }
                 return;
@@ -544,7 +523,9 @@ export default function RegisterForm({ onSuccess }: RegisterFormProps) {
                 onSuccess();
             } else {
                 // استفاده از window.location.href به جای router.push برای ریلود کامل صفحه
+                if (typeof window !== 'undefined') {
                 window.location.href = '/';
+                }
             }
         } catch (error: any) {
             console.error('خطا در تایید کد:', error);
@@ -610,7 +591,7 @@ export default function RegisterForm({ onSuccess }: RegisterFormProps) {
             setResendTimer(120);
             const phoneKey = formData.phone.trim();
             const now = new Date().getTime();
-            const endTime = now + (120 * 1000); // 120 ثانیه بعد
+            const endTime = now + (120 * 1000); // ۱۲۰ ثانیه بعد
             localStorage.setItem(`reg_otp_timer_${phoneKey}`, JSON.stringify({ 
                 endTime,
                 userInfo: {
@@ -634,9 +615,9 @@ export default function RegisterForm({ onSuccess }: RegisterFormProps) {
     // رندر فرم مرحله اول (شماره تلفن) - با متن قوانین اما بدون چک‌باکس
     const renderPhoneForm = () => {
         return (
-            <Box component="form" onSubmit={handlePhoneSubmit}>
+            <Box component="form" id="register-phone-form" onSubmit={handlePhoneSubmit}>
                 <Box sx={{ display: 'flex', flexDirection: 'column', gap: { xs: 2.5, sm: 2.5 } }}>
-                    <Box>
+                    <Box id="reg-phone-section" sx={{ scrollMarginTop: '32px' }}>
                         <NumberTextField
                             fullWidth
                             name="phone"
@@ -644,23 +625,117 @@ export default function RegisterForm({ onSuccess }: RegisterFormProps) {
                             variant="outlined"
                             value={formData.phone}
                             onChange={handleChange}
+                            onFocus={() => {
+                                if (isMobile) {
+                                    setIsPhoneFocused(true);
+                                    try {
+                                        const containerEl = contentRef.current;
+                                        const headerEl = document.getElementById('reg-step-header');
+                                        const offset = 0;
+                                        const doScroll = () => {
+                                            if (containerEl && headerEl) {
+                                                const rect = headerEl.getBoundingClientRect();
+                                                const crect = containerEl.getBoundingClientRect();
+                                                const targetScrollTop = containerEl.scrollTop + (rect.top - crect.top) - offset;
+                                                containerEl.scrollTo({ top: Math.max(targetScrollTop, 0), behavior: 'auto' });
+                                            } else if (headerEl) {
+                                                headerEl.scrollIntoView({ behavior: 'auto', block: 'start' });
+                                            }
+                                        };
+                                        doScroll();
+                                        requestAnimationFrame(() => requestAnimationFrame(() => doScroll()));
+                                        setTimeout(doScroll, 180);
+                                        setTimeout(doScroll, 360);
+                                    } catch {}
+                                }
+                            }}
+                            onBlur={() => {
+                                if (!inlinePhoneSubmitPressed) {
+                                    setIsPhoneFocused(false);
+                                }
+                            }}
                             error={!!formErrors.phone}
                             helperText={formErrors.phone}
+                            disabled={isSubmitting}
                             placeholder="۰۹۱۲۳۴۵۶۷۸۹"
                             autoFocus
                             InputProps={{
                                 startAdornment: (
                                     <InputAdornment position="start">
-                                        <PhoneIcon />
+                                        <PhoneIcon sx={{ color: EMPLOYER_THEME.primary }} />
                                     </InputAdornment>
                                 ),
                             }}
-                            inputProps={{ dir: "ltr" }}
-                            size={isMobile ? "medium" : "medium"}
+                            isMobile={isMobile}
+                            sx={{
+                                '& .MuiOutlinedInput-root': {
+                                    borderRadius: 2,
+                                    backgroundColor: '#f8fafd',
+                                    border: '1px solid #e3f2fd',
+                                    transition: 'all 0.3s ease',
+                                    '&:hover': {
+                                        backgroundColor: '#ffffff',
+                                        borderColor: EMPLOYER_THEME.light,
+                                        boxShadow: '0 2px 8px rgba(65, 135, 255, 0.1)',
+                                    },
+                                    '&.Mui-focused': {
+                                        backgroundColor: '#ffffff',
+                                        borderColor: EMPLOYER_THEME.primary,
+                                        boxShadow: `0 0 0 3px ${EMPLOYER_THEME.primary}20`,
+                                        transform: 'translateY(-1px)',
+                                    },
+                                    '&.Mui-error': {
+                                        borderColor: '#d32f2f',
+                                        backgroundColor: '#fff5f5',
+                                        '&:hover': {
+                                            borderColor: '#d32f2f',
+                                            backgroundColor: '#fff0f0',
+                                        },
+                                        '&.Mui-focused': {
+                                            borderColor: '#d32f2f',
+                                            boxShadow: '0 0 0 3px rgba(211, 47, 47, 0.2)',
+                                        }
+                                    },
+                                    '& .MuiOutlinedInput-notchedOutline': {
+                                        border: 'none',
+                                    },
+                                    '&:hover .MuiOutlinedInput-notchedOutline': {
+                                        border: 'none',
+                                    },
+                                    '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                                        border: 'none',
+                                    },
+                                    '&.Mui-error .MuiOutlinedInput-notchedOutline': {
+                                        border: 'none',
+                                    },
+                                },
+                                '& .MuiInputBase-input': {
+                                    color: EMPLOYER_THEME.primary, // رنگ متن آبی کارفرما
+                                },
+                                '& .MuiInputLabel-root': {
+                                    color: '#666',
+                                    backgroundColor: '#ffffff',
+                                    padding: '0 4px',
+                                    '&.Mui-focused': {
+                                        color: EMPLOYER_THEME.primary,
+                                        fontWeight: 600,
+                                        backgroundColor: '#ffffff',
+                                    },
+                                    '&.Mui-shrink': {
+                                        backgroundColor: '#ffffff',
+                                    }
+                                },
+                                '& .MuiFormHelperText-root': {
+                                    marginLeft: 0,
+                                    marginRight: 0,
+                                    fontSize: '0.75rem',
+                                }
+                            }}
                         />
                     </Box>
 
-                    {/* متن شرایط و قوانین بدون چک‌باکس */}
+                    {/* متن شرایط و قوانین فقط در حالت دسکتاپ و فقط مرحله 1 */}
+                    {!isMobile && activeStep === 0 && (
                     <Box sx={{ textAlign: 'center', mt: -0.5 }}>
                         <Typography 
                             variant="caption" 
@@ -674,42 +749,109 @@ export default function RegisterForm({ onSuccess }: RegisterFormProps) {
                             با ثبت‌نام در ماهرکار، <MuiLink component={Link} href="/terms" target="_blank" underline="hover">شرایط و قوانین</MuiLink> و <MuiLink component={Link} href="/privacy" target="_blank" underline="hover">بیانیه حریم خصوصی</MuiLink> را می‌پذیرید
                         </Typography>
                     </Box>
+                    )}
 
+                    {/* دکمه ادامه زیر ورودی هنگام فوکوس (فقط موبایل) */}
+                    {isMobile && isPhoneFocused && (
+                        <Box>
+                            <Button
+                                type="button"
+                                fullWidth
+                                variant="contained"
+                                size="large"
+                                disabled={isSubmitting}
+                                onMouseDown={() => setInlinePhoneSubmitPressed(true)}
+                                onTouchStart={() => setInlinePhoneSubmitPressed(true)}
+                                onClick={() => {
+                                    const form = document.getElementById('register-phone-form') as HTMLFormElement | null;
+                                    form?.requestSubmit();
+                                    setTimeout(() => setInlinePhoneSubmitPressed(false), 0);
+                                }}
+                                sx={{
+                                    mt: 1.5,
+                                    py: 1.2,
+                                    backgroundColor: EMPLOYER_THEME.primary,
+                                    background: `linear-gradient(135deg, ${EMPLOYER_THEME.primary}, ${EMPLOYER_THEME.light})`,
+                                    '&:hover': {
+                                        background: `linear-gradient(135deg, ${EMPLOYER_THEME.dark}, ${EMPLOYER_THEME.primary})`,
+                                        transform: 'translateY(-2px)',
+                                        boxShadow: '0 8px 25px rgba(65, 135, 255, 0.3)',
+                                    },
+                                    '&:active': {
+                                        transform: 'translateY(0)',
+                                        boxShadow: '0 4px 15px rgba(65, 135, 255, 0.2)',
+                                    },
+                                    borderRadius: 2,
+                                    fontSize: '1rem',
+                                    fontWeight: 600,
+                                    textTransform: 'none',
+                                    transition: 'all 0.3s ease',
+                                    boxShadow: '0 4px 15px rgba(65, 135, 255, 0.2)',
+                                }}
+                            >
+                                ادامه
+                            </Button>
+                        </Box>
+                    )}
+
+                    {/* دکمه در حالت موبایل در پایین صفحه قرار می‌گیرد */}
+                    {!isMobile && (
                     <Box>
                         <Button
                             fullWidth
                             type="submit"
                             variant="contained"
-                            size={isMobile ? "large" : "medium"}
                             disabled={isSubmitting}
                             sx={{
                                 mt: 2,
-                                py: { xs: 1.5, sm: 1.2 },
-                                backgroundColor: employerColors.primary,
+                                py: 1.2,
+                                backgroundColor: EMPLOYER_THEME.primary,
+                                background: `linear-gradient(135deg, ${EMPLOYER_THEME.primary}, ${EMPLOYER_THEME.light})`,
                                 '&:hover': {
-                                    backgroundColor: employerColors.dark,
+                                    background: `linear-gradient(135deg, ${EMPLOYER_THEME.dark}, ${EMPLOYER_THEME.primary})`,
+                                    transform: 'translateY(-2px)',
+                                    boxShadow: '0 8px 25px rgba(65, 135, 255, 0.3)',
+                                },
+                                '&:active': {
+                                    transform: 'translateY(0)',
+                                    boxShadow: '0 4px 15px rgba(65, 135, 255, 0.2)',
                                 },
                                 borderRadius: 2,
-                                fontSize: { xs: '1rem', sm: '0.95rem' }
+                                fontSize: '0.95rem',
+                                fontWeight: 600,
+                                textTransform: 'none',
+                                transition: 'all 0.3s ease',
+                                boxShadow: '0 4px 15px rgba(65, 135, 255, 0.2)',
                             }}
                         >
                             {isSubmitting ? <CircularProgress size={24} color="inherit" /> : 'ادامه'}
                         </Button>
                     </Box>
+                    )}
 
+                    {/* لینک ورود در حالت موبایل در پایین صفحه قرار می‌گیرد */}
+                    {!isMobile && (
                     <Box sx={{ mt: 2, textAlign: 'center' }}>
-                        <Typography variant={isMobile ? "body1" : "body1"}>
+                            <Typography variant="body1">
                             قبلاً ثبت‌نام کرده‌اید؟{' '}
                             <MuiLink
                                 component={Link}
                                 href="/login"
                                 underline="hover"
-                                sx={{ fontWeight: 'bold', color: employerColors.primary }}
+                                sx={{ 
+                                    fontWeight: 'bold', 
+                                    color: EMPLOYER_THEME.primary,
+                                    '&:hover': {
+                                        color: EMPLOYER_THEME.dark,
+                                    },
+                                    transition: 'color 0.2s ease',
+                                }}
                             >
                                 ورود به حساب
                             </MuiLink>
                         </Typography>
                     </Box>
+                    )}
                 </Box>
             </Box>
         );
@@ -718,9 +860,9 @@ export default function RegisterForm({ onSuccess }: RegisterFormProps) {
     // رندر فرم مرحله دوم (اطلاعات کاربر)
     const renderUserInfoForm = () => {
         return (
-            <Box component="form" onSubmit={handleUserInfoSubmit}>
+            <Box component="form" id="register-info-form" onSubmit={handleUserInfoSubmit}>
                 <Box sx={{ display: 'flex', flexDirection: 'column', gap: { xs: 2.5, sm: 2.5 } }}>
-                    <Box>
+                    <Box id="reg-fullname-section" sx={{ scrollMarginTop: '56px' }}>
                         <TextField
                             fullWidth
                             name="full_name"
@@ -731,32 +873,367 @@ export default function RegisterForm({ onSuccess }: RegisterFormProps) {
                             error={!!formErrors.full_name}
                             helperText={formErrors.full_name}
                             autoFocus
+                            onFocus={() => {
+                                if (isMobile) {
+                                    setIsFullNameFocused(true);
+                                    setInlineUserSubmitPressed(false);
+                                    try {
+                                        const containerEl = contentRef.current;
+                                        const headerEl = document.getElementById('reg-step-header');
+                                        const offset = 0; // هدر دقیقاً بچسبد به بالای کانتینر
+                                        const doScroll = () => {
+                                            if (containerEl && headerEl) {
+                                                const rect = headerEl.getBoundingClientRect();
+                                                const crect = containerEl.getBoundingClientRect();
+                                                const targetScrollTop = containerEl.scrollTop + (rect.top - crect.top) - offset;
+                                                containerEl.scrollTo({ top: Math.max(targetScrollTop, 0), behavior: 'auto' });
+                                            } else if (headerEl) {
+                                                headerEl.scrollIntoView({ behavior: 'auto', block: 'start' });
+                                            }
+                                        };
+                                        doScroll();
+                                        requestAnimationFrame(() => requestAnimationFrame(() => doScroll()));
+                                        setTimeout(doScroll, 180);
+                                        setTimeout(doScroll, 360);
+                                    } catch {}
+                                }
+                            }}
+                            onBlur={() => {
+                                if (!inlineUserSubmitPressed) {
+                                    setIsFullNameFocused(false);
+                                }
+                            }}
                             InputProps={{
                                 startAdornment: (
                                     <InputAdornment position="start">
-                                        <BadgeIcon />
+                                        <BadgeIcon sx={{ color: EMPLOYER_THEME.primary }} />
                                     </InputAdornment>
                                 ),
                             }}
-                            inputProps={{ dir: "rtl" }}
-                            size={isMobile ? "medium" : "medium"}
+                            sx={{
+                                '& .MuiOutlinedInput-root': {
+                                    borderRadius: 2,
+                                    backgroundColor: '#f8fafd',
+                                    border: '1px solid #e3f2fd',
+                                    transition: 'all 0.3s ease',
+                                    '&:hover': {
+                                        backgroundColor: '#ffffff',
+                                        borderColor: EMPLOYER_THEME.light,
+                                        boxShadow: '0 2px 8px rgba(65, 135, 255, 0.1)',
+                                    },
+                                    '&.Mui-focused': {
+                                        backgroundColor: '#ffffff',
+                                        borderColor: EMPLOYER_THEME.primary,
+                                        boxShadow: `0 0 0 3px ${EMPLOYER_THEME.primary}20`,
+                                        transform: 'translateY(-1px)',
+                                    },
+                                    '&.Mui-error': {
+                                        borderColor: '#d32f2f',
+                                        backgroundColor: '#fff5f5',
+                                        '&:hover': {
+                                            borderColor: '#d32f2f',
+                                            backgroundColor: '#fff0f0',
+                                        },
+                                        '&.Mui-focused': {
+                                            borderColor: '#d32f2f',
+                                            boxShadow: '0 0 0 3px rgba(211, 47, 47, 0.2)',
+                                        }
+                                    },
+                                    '& .MuiOutlinedInput-notchedOutline': {
+                                        border: 'none',
+                                    },
+                                    '&:hover .MuiOutlinedInput-notchedOutline': {
+                                        border: 'none',
+                                    },
+                                    '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                                        border: 'none',
+                                    },
+                                    '&.Mui-error .MuiOutlinedInput-notchedOutline': {
+                                        border: 'none',
+                                    },
+                                },
+                                '& .MuiInputBase-input': {
+                                    color: EMPLOYER_THEME.primary, // رنگ متن آبی کارفرما
+                                },
+                                '& .MuiInputLabel-root': {
+                                    color: '#666',
+                                    backgroundColor: '#ffffff',
+                                    padding: '0 4px',
+                                    '&.Mui-focused': {
+                                        color: EMPLOYER_THEME.primary,
+                                        fontWeight: 600,
+                                        backgroundColor: '#ffffff',
+                                    },
+                                    '&.Mui-shrink': {
+                                        backgroundColor: '#ffffff',
+                                    }
+                                },
+                                '& .MuiFormHelperText-root': {
+                                    marginLeft: 0,
+                                    marginRight: 0,
+                                    fontSize: '0.75rem',
+                                }
+                            }}
                         />
                     </Box>
 
                     <Box>
-                        <FormControl fullWidth variant="outlined" size={isMobile ? "medium" : "medium"}>
-                            <InputLabel id="user-type-label">نوع کاربر</InputLabel>
-                            <Select
-                                labelId="user-type-label"
-                                id="user-type"
-                                value={formData.user_type}
-                                label="نوع کاربر"
-                                onChange={handleSelectChange}
+                        <Typography 
+                            variant="subtitle1" 
+                            sx={{ 
+                                mb: 2.5, 
+                                fontWeight: 600, 
+                                color: EMPLOYER_THEME.primary,
+                                fontSize: { xs: '1rem', sm: '1.1rem' }
+                            }}
+                        >
+                            نوع کاربر
+                        </Typography>
+                        
+                        <Box 
+                            sx={{ 
+                            display: 'flex', 
+                            gap: { xs: 1.5, sm: 2 },
+                            flexDirection: 'row'
+                        }}>
+                            {/* کارت کارجو */}
+                            <Card 
+                                onClick={() => setFormData(prev => ({ ...prev, user_type: 'JS' }))}
+                                sx={{ 
+                                    flex: 1,
+                                    cursor: 'pointer',
+                                    border: `2px solid ${formData.user_type === 'JS' ? JOB_SEEKER_THEME.primary : '#e5e5e5'}`,
+                                    backgroundColor: formData.user_type === 'JS' ? '#f8fff9' : '#ffffff',
+                                    transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                                    borderRadius: 2,
+                                    minHeight: { xs: '90px', sm: '100px' },
+                                    position: 'relative',
+                                    overflow: 'hidden',
+                                    boxShadow: formData.user_type === 'JS' ? `0 4px 20px ${JOB_SEEKER_THEME.primary}20` : '0 2px 8px rgba(0,0,0,0.08)',
+                                    '&:hover': {
+                                        border: `2px solid ${JOB_SEEKER_THEME.primary}`,
+                                        backgroundColor: '#f0fff1',
+                                        transform: 'translateY(-2px)',
+                                        boxShadow: `0 8px 25px ${JOB_SEEKER_THEME.primary}30`,
+                                    },
+                                    '&::before': formData.user_type === 'JS' ? {
+                                        content: '""',
+                                        position: 'absolute',
+                                        top: 0,
+                                        left: 0,
+                                        right: 0,
+                                        height: '3px',
+                                        background: `linear-gradient(90deg, ${JOB_SEEKER_THEME.primary}, ${JOB_SEEKER_THEME.light})`,
+                                    } : {}
+                                }}
                             >
-                                <MenuItem value="JS">کارجو</MenuItem>
-                                <MenuItem value="EM">کارفرما</MenuItem>
-                            </Select>
-                        </FormControl>
+                                <CardContent sx={{ 
+                                    textAlign: 'center', 
+                                    py: { xs: 1.5, sm: 2 },
+                                    px: { xs: 1, sm: 1.5 },
+                                    '&:last-child': { pb: { xs: 1.5, sm: 2 } },
+                                    display: 'flex',
+                                    flexDirection: 'column',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    gap: { xs: 0.5, sm: 1 },
+                                    height: '100%'
+                                }}>
+                                    <PersonSearchIcon sx={{ 
+                                        fontSize: { xs: 24, sm: 28 },
+                                        color: formData.user_type === 'JS' ? JOB_SEEKER_THEME.primary : '#9e9e9e',
+                                        transition: 'all 0.3s ease'
+                                    }} />
+                                    <Box sx={{ textAlign: 'center' }}>
+                                        <Typography 
+                                            variant="subtitle2" 
+                                            sx={{ 
+                                                fontWeight: 700,
+                                                color: formData.user_type === 'JS' ? JOB_SEEKER_THEME.primary : '#616161',
+                                                fontSize: { xs: '0.8rem', sm: '0.9rem' },
+                                                lineHeight: 1.2,
+                                                mb: { xs: 0.2, sm: 0.3 }
+                                            }}
+                                        >
+                                            کارجو
+                                        </Typography>
+                                        <Typography 
+                                            variant="caption" 
+                                            sx={{ 
+                                                color: formData.user_type === 'JS' ? JOB_SEEKER_THEME.primary : '#9e9e9e',
+                                                fontSize: { xs: '0.65rem', sm: '0.7rem' },
+                                                lineHeight: 1.2,
+                                                display: 'block'
+                                            }}
+                                        >
+                                            جستجوی شغل
+                                        </Typography>
+                                    </Box>
+                                </CardContent>
+                            </Card>
+
+                            {/* کارت کارفرما */}
+                            <Card 
+                                onClick={() => setFormData(prev => ({ ...prev, user_type: 'EM' }))}
+                                sx={{ 
+                                    flex: 1,
+                                    cursor: 'pointer',
+                                    border: `2px solid ${formData.user_type === 'EM' ? EMPLOYER_THEME.primary : '#e5e5e5'}`,
+                                    backgroundColor: formData.user_type === 'EM' ? '#f7f9ff' : '#ffffff',
+                                    transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                                    borderRadius: 2,
+                                    minHeight: { xs: '90px', sm: '100px' },
+                                    position: 'relative',
+                                    overflow: 'hidden',
+                                    boxShadow: formData.user_type === 'EM' ? `0 4px 20px ${EMPLOYER_THEME.primary}20` : '0 2px 8px rgba(0,0,0,0.08)',
+                                    '&:hover': {
+                                        border: `2px solid ${EMPLOYER_THEME.primary}`,
+                                        backgroundColor: '#f0f4ff',
+                                        transform: 'translateY(-2px)',
+                                        boxShadow: `0 8px 25px ${EMPLOYER_THEME.primary}30`,
+                                    },
+                                    '&::before': formData.user_type === 'EM' ? {
+                                        content: '""',
+                                        position: 'absolute',
+                                        top: 0,
+                                        left: 0,
+                                        right: 0,
+                                        height: '3px',
+                                        background: `linear-gradient(90deg, ${EMPLOYER_THEME.primary}, ${EMPLOYER_THEME.light})`,
+                                    } : {}
+                                }}
+                            >
+                                <CardContent sx={{ 
+                                    textAlign: 'center', 
+                                    py: { xs: 1.5, sm: 2 },
+                                    px: { xs: 1, sm: 1.5 },
+                                    '&:last-child': { pb: { xs: 1.5, sm: 2 } },
+                                    display: 'flex',
+                                    flexDirection: 'column',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    gap: { xs: 0.5, sm: 1 },
+                                    height: '100%'
+                                }}>
+                                    <WorkIcon sx={{ 
+                                        fontSize: { xs: 24, sm: 28 },
+                                        color: formData.user_type === 'EM' ? EMPLOYER_THEME.primary : '#9e9e9e',
+                                        transition: 'all 0.3s ease'
+                                    }} />
+                                    <Box sx={{ textAlign: 'center' }}>
+                                        <Typography 
+                                            variant="subtitle2" 
+                                            sx={{ 
+                                                fontWeight: 700,
+                                                color: formData.user_type === 'EM' ? EMPLOYER_THEME.primary : '#616161',
+                                                fontSize: { xs: '0.8rem', sm: '0.9rem' },
+                                                lineHeight: 1.2,
+                                                mb: { xs: 0.2, sm: 0.3 }
+                                            }}
+                                        >
+                                            کارفرما
+                                        </Typography>
+                                        <Typography 
+                                            variant="caption" 
+                                            sx={{ 
+                                                color: formData.user_type === 'EM' ? EMPLOYER_THEME.primary : '#9e9e9e',
+                                                fontSize: { xs: '0.65rem', sm: '0.7rem' },
+                                                lineHeight: 1.2,
+                                                display: 'block'
+                                            }}
+                                        >
+                                            استخدام نیرو
+                                        </Typography>
+                                    </Box>
+                                </CardContent>
+                            </Card>
+                        </Box>
+
+                        {/* دکمه دریافت کد تایید زیر نام و نام خانوادگی در حالت فوکوس (فقط موبایل/فقط مرحله 1) */}
+                        {isMobile && activeStep === 1 && isFullNameFocused && (
+                            <Box>
+                                <Button
+                                    type="button"
+                                    fullWidth
+                                    variant="contained"
+                                    size="large"
+                                    disabled={isSubmitting}
+                                    onMouseDown={() => setInlineUserSubmitPressed(true)}
+                                    onTouchStart={() => setInlineUserSubmitPressed(true)}
+                                    onClick={() => {
+                                        const form = document.getElementById('register-info-form') as HTMLFormElement | null;
+                                        form?.requestSubmit();
+                                        setTimeout(() => setInlineUserSubmitPressed(false), 0);
+                                    }}
+                                    sx={{
+                                        mt: 1.5,
+                                        py: 1.2,
+                                        backgroundColor: EMPLOYER_THEME.primary,
+                                        background: `linear-gradient(135deg, ${EMPLOYER_THEME.primary}, ${EMPLOYER_THEME.light})`,
+                                        '&:hover': {
+                                            background: `linear-gradient(135deg, ${EMPLOYER_THEME.dark}, ${EMPLOYER_THEME.primary})`,
+                                            transform: 'translateY(-2px)',
+                                            boxShadow: '0 8px 25px rgba(65, 135, 255, 0.3)',
+                                        },
+                                        '&:active': {
+                                            transform: 'translateY(0)',
+                                            boxShadow: '0 4px 15px rgba(65, 135, 255, 0.2)',
+                                        },
+                                        borderRadius: 2,
+                                        fontSize: '1rem',
+                                        fontWeight: 600,
+                                        textTransform: 'none',
+                                        transition: 'all 0.3s ease',
+                                        boxShadow: '0 4px 15px rgba(65, 135, 255, 0.2)',
+                                    }}
+                                >
+                                    دریافت کد تایید
+                                </Button>
+                            </Box>
+                        )}
+
+                        {/* دکمه دریافت کد تایید زیر کارت‌ها هنگام فوکوس (فقط موبایل/فقط مرحله 0) */}
+                        {isMobile && activeStep === 0 && isPhoneFocused && (
+                        <Box>
+                            <Button
+                                type="button"
+                                fullWidth
+                                variant="contained"
+                                size="large"
+                                disabled={isSubmitting}
+                                onMouseDown={() => setInlinePhoneSubmitPressed(true)}
+                                onTouchStart={() => setInlinePhoneSubmitPressed(true)}
+                                onClick={() => {
+                                    const form = document.querySelector('form');
+                                    if (form) form.dispatchEvent(new Event('submit', { bubbles: true }));
+                                    setTimeout(() => setInlinePhoneSubmitPressed(false), 0);
+                                }}
+                                sx={{
+                                    mt: 1.5,
+                                    py: 1.2,
+                                    backgroundColor: EMPLOYER_THEME.primary,
+                                    background: `linear-gradient(135deg, ${EMPLOYER_THEME.primary}, ${EMPLOYER_THEME.light})`,
+                                    '&:hover': {
+                                        background: `linear-gradient(135deg, ${EMPLOYER_THEME.dark}, ${EMPLOYER_THEME.primary})`,
+                                        transform: 'translateY(-2px)',
+                                        boxShadow: '0 8px 25px rgba(65, 135, 255, 0.3)',
+                                    },
+                                    '&:active': {
+                                        transform: 'translateY(0)',
+                                        boxShadow: '0 4px 15px rgba(65, 135, 255, 0.2)',
+                                    },
+                                    borderRadius: 2,
+                                    fontSize: '1rem',
+                                    fontWeight: 600,
+                                    textTransform: 'none',
+                                    transition: 'all 0.3s ease',
+                                    boxShadow: '0 4px 15px rgba(65, 135, 255, 0.2)',
+                                }}
+                            >
+                                دریافت کد تایید
+                            </Button>
+                        </Box>
+                        )}
                     </Box>
 
                     {formErrors.general && (
@@ -769,53 +1246,47 @@ export default function RegisterForm({ onSuccess }: RegisterFormProps) {
                         </Typography>
                     )}
 
+                        {/* دکمه‌ها در حالت موبایل در پایین صفحه قرار می‌گیرند */}
+                    {!isMobile && (
                     <Box sx={{
                         display: 'flex',
-                        flexDirection: { xs: 'column', sm: 'row' },
-                        justifyContent: 'space-between',
-                        gap: { xs: 2, sm: 2 },
-                        mt: { xs: 1, sm: 2 }
+                        flexDirection: 'row',
+                        justifyContent: 'flex-end',
+                        gap: 2,
+                        mt: 2,
+                        width: '100%'
                     }}>
-                        <Button
-                            variant="outlined"
-                            onClick={() => setActiveStep(0)}
-                            disabled={isSubmitting}
-                            fullWidth={isMobile}
-                            size={isMobile ? "large" : "medium"}
-                            sx={{
-                                order: { xs: 2, sm: 1 }, // در موبایل پایین باشد
-                                py: { xs: 1.5, sm: 1.2 },
-                                borderColor: employerColors.primary,
-                                color: employerColors.primary,
-                                '&:hover': {
-                                    borderColor: employerColors.dark,
-                                    backgroundColor: 'rgba(0, 0, 0, 0.04)',
-                                },
-                                fontSize: { xs: '1rem', sm: '0.95rem' }
-                            }}
-                        >
-                            بازگشت
-                        </Button>
-
                         <Button
                             type="submit"
                             variant="contained"
                             disabled={isSubmitting}
-                            fullWidth={isMobile}
-                            size={isMobile ? "large" : "medium"}
+                            fullWidth
                             sx={{
-                                order: { xs: 1, sm: 2 }, // در موبایل بالا باشد
-                                py: { xs: 1.5, sm: 1.2 },
-                                backgroundColor: employerColors.primary,
+                                py: 1.2,
+                                backgroundColor: EMPLOYER_THEME.primary,
+                                background: `linear-gradient(135deg, ${EMPLOYER_THEME.primary}, ${EMPLOYER_THEME.light})`,
                                 '&:hover': {
-                                    backgroundColor: employerColors.dark,
+                                    background: `linear-gradient(135deg, ${EMPLOYER_THEME.dark}, ${EMPLOYER_THEME.primary})`,
+                                    transform: 'translateY(-2px)',
+                                    boxShadow: '0 8px 25px rgba(65, 135, 255, 0.3)',
                                 },
-                                fontSize: { xs: '1rem', sm: '0.95rem' }
+                                '&:active': {
+                                    transform: 'translateY(0)',
+                                    boxShadow: '0 4px 15px rgba(65, 135, 255, 0.2)',
+                                },
+                                borderRadius: 2,
+                                fontSize: '0.95rem',
+                                fontWeight: 600,
+                                textTransform: 'none',
+                                transition: 'all 0.3s ease',
+                                boxShadow: '0 4px 15px rgba(65, 135, 255, 0.2)',
+                                width: '100%'
                             }}
                         >
                             {isSubmitting ? <CircularProgress size={24} color="inherit" /> : 'دریافت کد تایید'}
                         </Button>
                     </Box>
+                    )}
                 </Box>
             </Box>
         );
@@ -824,24 +1295,55 @@ export default function RegisterForm({ onSuccess }: RegisterFormProps) {
     // رندر فرم مرحله سوم (تایید شماره تلفن با کد OTP)
     const renderOtpForm = () => {
         return (
-            <Box component="form" onSubmit={handleOtpSubmit}>
+            <Box component="form" id="register-otp-form" onSubmit={handleOtpSubmit}>
                 <Box sx={{ display: 'flex', flexDirection: 'column', gap: { xs: 2.5, sm: 2 } }}>
-                    <Typography 
-                        variant={isMobile ? "body1" : "body1"} 
-                        sx={{ textAlign: 'center', mb: { xs: 0, sm: 0 } }}
-                        gutterBottom
-                    >
-                        کد تایید به شماره {formData.phone} ارسال شد.
-                    </Typography>
-                    <Typography 
-                        variant={isMobile ? "body2" : "body1"} 
-                        color="text.secondary" 
-                        sx={{ textAlign: 'center', mt: { xs: 0, sm: -1 } }}
-                        gutterBottom
-                    >
-                        لطفاً کد دریافتی را وارد کنید
-                    </Typography>
-
+                    <Box sx={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        flexWrap: 'nowrap',
+                        gap: 0.5,
+                        px: { xs: 1, sm: 2 },
+                        mb: 1
+                    }}>
+                        <Typography 
+                            variant="body2"
+                            sx={{
+                                fontSize: { xs: '0.8rem', sm: '0.9rem' },
+                                fontWeight: 500,
+                                color: 'text.secondary',
+                                whiteSpace: 'nowrap',
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: 0.5,
+                            }}
+                        >
+                            کد تأیید به شماره
+                            <span style={{ 
+                                color: EMPLOYER_THEME.primary, 
+                                fontWeight: 600,
+                                whiteSpace: 'nowrap'
+                            }}>
+                                {toPersianNumbers(formData.phone)}
+                            </span>
+                            ارسال شد
+                        </Typography>
+                        <IconButton
+                            onClick={() => setActiveStep(0)}
+                            size="small"
+                            sx={{
+                                color: EMPLOYER_THEME.primary,
+                                p: 0.5,
+                                minWidth: 'auto',
+                                '&:hover': {
+                                    backgroundColor: alpha(EMPLOYER_THEME.primary, 0.08),
+                                },
+                                transition: 'all 0.2s ease',
+                            }}
+                        >
+                            <EditIcon sx={{ fontSize: '0.9rem' }} />
+                        </IconButton>
+                    </Box>
                     <Box sx={{ mt: { xs: 0, sm: -0.5 } }}>
                         <OtpInput
                             value={phoneOtpCode}
@@ -851,111 +1353,641 @@ export default function RegisterForm({ onSuccess }: RegisterFormProps) {
                             helperText={otpError}
                             autoFocus={true}
                             disabled={isSubmitting}
+                            onFocus={() => setIsOtpFocusedStep3(true)}
+                            onBlur={() => {
+                                if (inlineOtpSubmitPressedStep3) return;
+                                setIsOtpFocusedStep3(false);
+                            }}
                         />
+                        {/* ثانیه‌شمار/دکمه ارسال مجدد کد زیر فیلد کد */}
+                        <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', mt: 1 }}>
+                            {resendTimer > 0 ? (
+                                <Typography 
+                                    variant="body2" 
+                                    color="text.secondary"
+                                    sx={{ 
+                                        fontSize: { xs: '0.75rem', sm: '0.875rem' },
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        color: '#666',
+                                        fontWeight: 500,
+                                    }}
+                                >
+                                    ارسال مجدد تا {formatTime(resendTimer)}
+                                </Typography>
+                            ) : (
+                                <Button
+                                    variant="text"
+                                    onClick={handleResendOtp}
+                                    disabled={isSubmitting || resendTimer > 0}
+                                    sx={{ 
+                                        fontSize: { xs: '0.75rem', sm: '0.875rem' },
+                                        color: EMPLOYER_THEME.primary,
+                                        '&:hover': {
+                                            backgroundColor: EMPLOYER_THEME.bgLight,
+                                            transform: 'translateY(-1px)',
+                                        },
+                                        '&:disabled': {
+                                            color: '#ccc',
+                                            backgroundColor: 'transparent',
+                                        },
+                                        transition: 'all 0.2s ease',
+                                        fontWeight: 500,
+                                    }}
+                                >
+                                    ارسال مجدد کد
+                                </Button>
+                            )}
+                        </Box>
+
+                        {/* دکمه تایید کد زیر «ارسال مجدد» هنگام فوکوس روی OTP (فقط موبایل) */}
+                        {isMobile && isOtpFocusedStep3 && (
+                            <Box>
+                                <Button
+                                    type="button"
+                                    fullWidth
+                                    variant="contained"
+                                    size="large"
+                                    disabled={isSubmitting}
+                                    onMouseDown={() => {
+                                        setInlineOtpSubmitPressedStep3(true);
+                                        const form = document.getElementById('register-otp-form') as HTMLFormElement | null;
+                                        form?.requestSubmit();
+                                        setTimeout(() => setInlineOtpSubmitPressedStep3(false), 0);
+                                    }}
+                                    onTouchStart={() => {
+                                        setInlineOtpSubmitPressedStep3(true);
+                                        const form = document.getElementById('register-otp-form') as HTMLFormElement | null;
+                                        form?.requestSubmit();
+                                        setTimeout(() => setInlineOtpSubmitPressedStep3(false), 0);
+                                    }}
+                                    sx={{
+                                        mt: 1.5,
+                                        py: 1.2,
+                                        backgroundColor: EMPLOYER_THEME.primary,
+                                        background: `linear-gradient(135deg, ${EMPLOYER_THEME.primary}, ${EMPLOYER_THEME.light})`,
+                                        '&:hover': {
+                                            background: `linear-gradient(135deg, ${EMPLOYER_THEME.dark}, ${EMPLOYER_THEME.primary})`,
+                                            transform: 'translateY(-2px)',
+                                            boxShadow: '0 8px 25px rgba(65, 135, 255, 0.3)',
+                                        },
+                                        '&:active': {
+                                            transform: 'translateY(0)',
+                                            boxShadow: '0 4px 15px rgba(65, 135, 255, 0.2)',
+                                        },
+                                        borderRadius: 2,
+                                        fontSize: '1rem',
+                                        fontWeight: 600,
+                                        textTransform: 'none',
+                                        transition: 'all 0.3s ease',
+                                        boxShadow: '0 4px 15px rgba(65, 135, 255, 0.2)',
+                                    }}
+                                >
+                                    تایید کد
+                                </Button>
+                            </Box>
+                        )}
                     </Box>
 
+                    {/* دکمه‌ها در حالت موبایل در پایین صفحه قرار می‌گیرند */}
+                    {!isMobile && (
                     <Box sx={{
                         display: 'flex',
-                        flexDirection: { xs: 'column', sm: 'row' },
-                        justifyContent: 'space-between',
-                        gap: { xs: 2, sm: 2 },
-                        mt: { xs: 1, sm: 1 }
+                        flexDirection: 'row',
+                        justifyContent: 'flex-end',
+                        gap: 2,
+                        mt: 1,
+                        width: '100%'
                     }}>
-                        <Button
-                            variant="outlined"
-                            onClick={() => {
-                                // پاک کردن توکن OTP قبلی هنگام بازگشت به مرحله قبل
-                                const phoneKey = formData.phone.trim();
-                                localStorage.removeItem(`reg_otp_timer_${phoneKey}`);
-                                localStorage.removeItem(`reg_otp_token_${phoneKey}`);
-                                setActiveStep(1);  // برگشت به مرحله اطلاعات کاربر (مرحله قبلی)
-                            }}
-                            disabled={isSubmitting}
-                            fullWidth={isMobile}
-                            size={isMobile ? "large" : "medium"}
-                            sx={{
-                                order: { xs: 2, sm: 1 }, // در موبایل پایین باشد
-                                py: { xs: 1.5, sm: 1.2 },
-                                borderColor: employerColors.primary,
-                                color: employerColors.primary,
-                                '&:hover': {
-                                    borderColor: employerColors.dark,
-                                    backgroundColor: 'rgba(0, 0, 0, 0.04)',
-                                },
-                                fontSize: { xs: '1rem', sm: '0.95rem' }
-                            }}
-                        >
-                            بازگشت
-                        </Button>
-
                         <Button
                             type="submit"
                             variant="contained"
                             disabled={isSubmitting}
-                            fullWidth={isMobile}
-                            size={isMobile ? "large" : "medium"}
+                            fullWidth
                             sx={{
-                                order: { xs: 1, sm: 2 }, // در موبایل بالا باشد
-                                py: { xs: 1.5, sm: 1.2 },
-                                backgroundColor: employerColors.primary,
+                                py: 1.2,
+                                backgroundColor: EMPLOYER_THEME.primary,
+                                background: `linear-gradient(135deg, ${EMPLOYER_THEME.primary}, ${EMPLOYER_THEME.light})`,
                                 '&:hover': {
-                                    backgroundColor: employerColors.dark,
+                                    background: `linear-gradient(135deg, ${EMPLOYER_THEME.dark}, ${EMPLOYER_THEME.primary})`,
+                                    transform: 'translateY(-2px)',
+                                    boxShadow: '0 8px 25px rgba(65, 135, 255, 0.3)',
                                 },
-                                fontSize: { xs: '1rem', sm: '0.95rem' }
+                                '&:active': {
+                                    transform: 'translateY(0)',
+                                    boxShadow: '0 4px 15px rgba(65, 135, 255, 0.2)',
+                                },
+                                borderRadius: 2,
+                                fontSize: '0.95rem',
+                                fontWeight: 600,
+                                textTransform: 'none',
+                                transition: 'all 0.3s ease',
+                                boxShadow: '0 4px 15px rgba(65, 135, 255, 0.2)',
+                                width: '100%'
                             }}
                         >
                             {isSubmitting ? <CircularProgress size={24} color="inherit" /> : 'تایید کد'}
                         </Button>
                     </Box>
-
-                    <Box sx={{ display: 'flex', justifyContent: 'center', mt: { xs: 1, sm: 1 } }}>
-                        {resendTimer > 0 ? (
-                            <Typography 
-                                variant="body2" 
-                                color="text.secondary"
-                                sx={{ 
-                                    textAlign: 'center',
-                                    fontSize: { xs: '0.9rem', sm: '0.9rem' }
-                                }}
-                            >
-                                امکان ارسال مجدد کد تا {formatTime(resendTimer)} دیگر
-                            </Typography>
-                        ) : (
-                            <Button
-                                variant="text"
-                                onClick={handleResendOtp}
-                                disabled={isSubmitting || resendTimer > 0}
-                                size={isMobile ? "medium" : "medium"}
-                                sx={{
-                                    color: employerColors.primary,
-                                    fontSize: { xs: '0.9rem', sm: '0.9rem' },
-                                    '&:hover': {
-                                        backgroundColor: 'rgba(0, 0, 0, 0.04)',
-                                    },
-                                }}
-                            >
-                                ارسال مجدد کد تایید
-                            </Button>
-                        )}
-                    </Box>
+                    )}
                 </Box>
             </Box>
         );
     };
 
+
+
+    if (isMobile) {
+        return (
+            <Box
+                sx={{
+                    height: isMobile ? viewportHeight : '100vh',
+                    minHeight: isMobile ? viewportHeight : '100vh',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    overflow: 'hidden', // جلوگیری از اسکرول
+                    position: 'relative',
+                    backgroundColor: '#ffffff'
+                }}
+            >
+                {/* هدر موبایل - لینک برگشت */}
+                <Box
+                    sx={{
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        alignItems: 'center',
+                        p: 2,
+                        pt: 3, // فاصله بیشتر از بالا برای نوار مرورگر
+                        flexShrink: 0,
+                        zIndex: 10
+                    }}
+                >
+                    {/* گزینه بازگشت به مرحله قبل (فقط در مراحل 1 و 2) */}
+                    {(activeStep === 1 || activeStep === 2) ? (
+                        <Button
+                            variant="text"
+                            onClick={() => setActiveStep(activeStep - 1)}
+                            sx={{
+                                color: EMPLOYER_THEME.primary,
+                                fontSize: '0.85rem',
+                                fontWeight: 500,
+                                borderRadius: 2,
+                                px: 2,
+                                py: 1,
+                                '&:hover': {
+                                    backgroundColor: alpha(EMPLOYER_THEME.primary, 0.08),
+                                    color: EMPLOYER_THEME.dark,
+                                },
+                                transition: 'all 0.2s ease',
+                            }}
+                        >
+                            ← بازگشت
+                        </Button>
+                    ) : (
+                        <Box />
+                    )}
+
+                    {/* لینک بازگشت به سایت */}
+                    <Link href="/" passHref>
+                        <Button
+                            variant="text"
+                            sx={{
+                                color: EMPLOYER_THEME.primary,
+                                fontSize: '0.85rem',
+                                fontWeight: 500,
+                                borderRadius: 2,
+                                px: 2,
+                                py: 1,
+                                '&:hover': {
+                                    backgroundColor: alpha(EMPLOYER_THEME.primary, 0.08),
+                                    color: EMPLOYER_THEME.dark,
+                                },
+                                transition: 'all 0.2s ease',
+                            }}
+                        >
+                            ← بازگشت به سایت
+                        </Button>
+                    </Link>
+                </Box>
+
+                {/* محتوای اصلی - فرم در بالای صفحه */}
+                <Box
+                    sx={{
+                        flex: 1,
+                        display: 'flex',
+                        flexDirection: 'column',
+                        px: 2,
+                        pt: 0,
+                        overflowY: 'auto',
+                        overflowX: 'hidden',
+                        WebkitOverflowScrolling: 'touch',
+                        pb: 12
+                    }}
+                    ref={contentRef}
+                >
+                    <Paper
+                        elevation={0}
+                        sx={{
+                            p: 2.5,
+                            borderRadius: 0,
+                            display: 'flex',
+                            flexDirection: 'column',
+                            justifyContent: 'center',
+                            width: '100%',
+                            boxShadow: 'none',
+                            backgroundColor: 'transparent',
+                            mt: 0
+                        }}
+                    >
+                        {/* هدر انیمیشنی با اطلاعات مرحله */}
+                        <Box
+                            id="reg-step-header"
+                            sx={{
+                                mb: 3,
+                                textAlign: 'center',
+                                position: 'relative',
+                                overflow: 'hidden',
+                                mt: isMobile ? 1 : 0
+                            }}
+                        >
+                            {/* عنوان اصلی */}
+                            <Typography
+                                variant="h5"
+                                component="h1"
+                                sx={{
+                                    fontWeight: 'bold',
+                                    mb: 2,
+                                    fontSize: '1.5rem',
+                                    letterSpacing: '0.01em',
+                                    background: `linear-gradient(135deg, ${EMPLOYER_THEME.primary}, ${EMPLOYER_THEME.light})`,
+                                    backgroundClip: 'text',
+                                    WebkitBackgroundClip: 'text',
+                                    WebkitTextFillColor: 'transparent',
+                                    textAlign: 'center'
+                                }}
+                            >
+                                ثبت‌نام در ماهرکار
+                            </Typography>
+
+                            {/* کارت اطلاعات مرحله ثابت */}
+                            <Box
+                                sx={{
+                                    background: `linear-gradient(135deg, ${alpha(EMPLOYER_THEME.primary, 0.08)}, ${alpha(EMPLOYER_THEME.light, 0.05)})`,
+                                    borderRadius: 3,
+                                    px: 3,
+                                    py: 2,
+                                    border: `1px solid ${alpha(EMPLOYER_THEME.primary, 0.12)}`,
+                                    backdropFilter: 'blur(10px)',
+                                    maxWidth: '320px',
+                                    mx: 'auto',
+                                    position: 'relative',
+                                    minHeight: '90px' // حفظ ارتفاع ثابت
+                                }}
+                            >
+                                {/* شماره مرحله با انیمیشن محو و پیدا */}
+                                <Typography
+                                    key={`step-number-${activeStep}`}
+                                    variant="caption"
+                                    sx={{
+                                        color: alpha(EMPLOYER_THEME.primary, 0.7),
+                                        fontWeight: 600,
+                                        fontSize: '0.75rem',
+                                        textTransform: 'uppercase',
+                                        letterSpacing: '1px',
+                                        mb: 0.5,
+                                        display: 'block',
+                                        animation: 'fadeChange 0.6s ease-in-out',
+                                        '@keyframes fadeChange': {
+                                            '0%': { opacity: 1 },
+                                            '30%': { opacity: 0, transform: 'translateY(-5px)' },
+                                            '70%': { opacity: 0, transform: 'translateY(5px)' },
+                                            '100%': { opacity: 1, transform: 'translateY(0)' }
+                                        }
+                                    }}
+                                >
+                                    مرحله {toPersianNumbers(activeStep + 1)} از {toPersianNumbers(3)}
+                                </Typography>
+
+                                {/* عنوان مرحله با انیمیشن محو و پیدا */}
+                                <Typography
+                                    key={`step-title-${activeStep}`}
+                                    variant="subtitle1"
+                                    sx={{
+                                        color: EMPLOYER_THEME.primary,
+                                        fontWeight: 700,
+                                        fontSize: '1rem',
+                                        lineHeight: 1.3,
+                                        animation: 'fadeChange 0.6s ease-in-out 0.1s both',
+                                    }}
+                                >
+                                    {activeStep === 0 && 'تایید شماره تلفن'}
+                                    {activeStep === 1 && 'تکمیل اطلاعات'}
+                                    {activeStep === 2 && 'تایید کد ارسالی'}
+                                </Typography>
+
+                                {/* Progress Bar مینیمال */}
+                                <Box
+                                    sx={{
+                                        width: '100%',
+                                        height: 3,
+                                        backgroundColor: alpha(EMPLOYER_THEME.primary, 0.1),
+                                        borderRadius: 1.5,
+                                        mt: 2,
+                                        overflow: 'hidden',
+                                    }}
+                                >
+                                    <Box
+                                        sx={{
+                                            height: '100%',
+                                            background: `linear-gradient(90deg, ${EMPLOYER_THEME.primary}, ${EMPLOYER_THEME.light})`,
+                                            borderRadius: 1.5,
+                                            transition: 'width 0.8s cubic-bezier(0.4, 0, 0.2, 1)',
+                                            width: `${((activeStep + 1) / 3) * 100}%`,
+                                            position: 'relative',
+                                            '&::after': {
+                                                content: '""',
+                                                position: 'absolute',
+                                                top: 0,
+                                                left: '-100%',
+                                                width: '100%',
+                                                height: '100%',
+                                                background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.6), transparent)',
+                                                animation: 'shimmer 2s ease-in-out infinite 1s'
+                                            }
+                                        }}
+                                    />
+                                </Box>
+                            </Box>
+
+                            {/* انیمیشن‌های CSS */}
+                            <style jsx>{`
+                                @keyframes shimmer {
+                                    0% { left: -100%; }
+                                    100% { left: 100%; }
+                                }
+                            `}</style>
+                        </Box>
+
+                        {/* فرم‌ها */}
+                        {activeStep === 0 && renderPhoneForm()}
+                        {activeStep === 1 && renderUserInfoForm()}
+                        {activeStep === 2 && renderOtpForm()}
+                    </Paper>
+                </Box>
+
+                {/* فوتر موبایل - دکمه‌ها در پایین */}
+                <Box
+                    sx={{
+                        flexShrink: 0,
+                        p: 2,
+                        pt: 0,
+                        display: 'flex',
+                        flexDirection: 'column',
+                        gap: 2,
+                        backgroundColor: 'transparent'
+                    }}
+                >
+                        {/* دکمه‌های اصلی در پایین صفحه */}
+                    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                        {/* عبارت شرایط و قوانین - فقط مرحله 1 */}
+                        {activeStep === 0 && (
+                        <Box sx={{ textAlign: 'center', mb: 1 }}>
+                            <Typography variant="caption" sx={{ 
+                                color: 'text.secondary',
+                                fontSize: '0.7rem',
+                                lineHeight: 1.2,
+                                display: 'flex',
+                                flexWrap: 'nowrap',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                gap: 0.5,
+                                whiteSpace: 'nowrap'
+                            }}>
+                                با ثبت‌نام در ماهرکار،{' '}
+                                <MuiLink
+                                    component={Link}
+                                    href="/terms"
+                                    underline="hover"
+                                    sx={{
+                                        color: EMPLOYER_THEME.primary,
+                                        fontWeight: 600,
+                                        fontSize: '0.7rem',
+                                        whiteSpace: 'nowrap',
+                                        '&:hover': {
+                                            color: EMPLOYER_THEME.dark,
+                                        },
+                                        transition: 'color 0.2s ease',
+                                    }}
+                                >
+                                    شرایط و قوانین
+                                </MuiLink>
+                                {' '}و{' '}
+                                <MuiLink
+                                    component={Link}
+                                    href="/privacy"
+                                    underline="hover"
+                                    sx={{
+                                        color: EMPLOYER_THEME.primary,
+                                        fontWeight: 600,
+                                        fontSize: '0.7rem',
+                                        whiteSpace: 'nowrap',
+                                        '&:hover': {
+                                            color: EMPLOYER_THEME.dark,
+                                        },
+                                        transition: 'color 0.2s ease',
+                                    }}
+                                >
+                                    بیانیه حریم خصوصی
+                                </MuiLink>
+                                {' '}را می‌پذیرید
+                            </Typography>
+                        </Box>
+                        )}
+
+                        {/* دکمه ادامه یا دریافت کد تایید */}
+                        {(((activeStep === 0) && !isPhoneFocused) || ((activeStep === 1) && !isFullNameFocused) || (activeStep === 2 && !isOtpFocusedStep3)) && (
+                        <Button
+                            fullWidth
+                            variant="contained"
+                            size="large"
+                            disabled={isSubmitting}
+                            onClick={() => {
+                                // اگر در مرحله اول هستیم، فرم شماره تلفن را ارسال کن
+                                if (activeStep === 0) {
+                                    const form = document.getElementById('register-phone-form') as HTMLFormElement | null;
+                                    form?.requestSubmit();
+                                } else if (activeStep === 1) {
+                                    // اگر در مرحله دوم هستیم، فرم اطلاعات کاربر را ارسال کن
+                                    const form = document.querySelector('form');
+                                    if (form) form.dispatchEvent(new Event('submit', { bubbles: true }));
+                                } else {
+                                    // اگر در مرحله سوم هستیم، فرم OTP را ارسال کن
+                                    const form = document.querySelector('form');
+                                    if (form) form.dispatchEvent(new Event('submit', { bubbles: true }));
+                                }
+                            }}
+                            sx={{
+                                py: 1.5,
+                                backgroundColor: EMPLOYER_THEME.primary,
+                                background: `linear-gradient(135deg, ${EMPLOYER_THEME.primary}, ${EMPLOYER_THEME.light})`,
+                                '&:hover': {
+                                    background: `linear-gradient(135deg, ${EMPLOYER_THEME.dark}, ${EMPLOYER_THEME.primary})`,
+                                    transform: 'translateY(-2px)',
+                                    boxShadow: '0 8px 25px rgba(65, 135, 255, 0.3)',
+                                },
+                                '&:active': {
+                                    transform: 'translateY(0)',
+                                    boxShadow: '0 4px 15px rgba(65, 135, 255, 0.2)',
+                                },
+                                borderRadius: 2,
+                                fontSize: '1rem',
+                                fontWeight: 600,
+                                textTransform: 'none',
+                                transition: 'all 0.3s ease',
+                                boxShadow: '0 4px 15px rgba(65, 135, 255, 0.2)',
+                    }}
+                >
+                            {isSubmitting ? (
+                                <CircularProgress size={24} color="inherit" />
+                            ) : activeStep === 0 ? (
+                                'ادامه'
+                            ) : activeStep === 1 ? (
+                                'دریافت کد تایید'
+                            ) : (
+                                'تایید کد'
+                            )}
+                        </Button>
+                        )}
+
+                        {/* لینک ورود - فقط مرحله 1 */}
+                        {activeStep === 0 && (
+                        <Box sx={{ textAlign: 'center' }}>
+                            <Typography variant="body2">
+                                قبلاً ثبت‌نام کرده‌اید؟{' '}
+                                <MuiLink
+                                    component={Link}
+                                    href="/login"
+                                    underline="hover"
+                                    sx={{
+                                        fontWeight: 'bold',
+                                        color: EMPLOYER_THEME.primary,
+                                        fontSize: '0.9rem',
+                                        '&:hover': {
+                                            color: EMPLOYER_THEME.dark,
+                                        },
+                                        transition: 'color 0.2s ease',
+                                    }}
+                                >
+                                    ورود به حساب
+                                </MuiLink>
+                            </Typography>
+                        </Box>
+                        )}
+                    </Box>
+                </Box>
+            </Box>
+        );
+    }
+
+    // نمایش loading تا زمانی که کامپوننت mount نشده
+    if (!mounted) {
+        return (
+            <Box
+                sx={{
+                    minHeight: '100vh',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    backgroundColor: '#f8fafd'
+                }}
+            >
+                <CircularProgress size={40} sx={{ color: EMPLOYER_THEME.primary }} />
+            </Box>
+        );
+    }
+
+    // حالت دسکتاپ
     return (
         <Box
             sx={{
+                minHeight: '100vh',
                 display: 'flex',
                 flexDirection: 'column',
-                width: '100%',
                 alignItems: 'center',
-                justifyContent: 'flex-start',
-                minHeight: isMobile ? 'calc(100vh - 80px)' : 'auto',
-                py: isMobile ? 0 : 1.5,
-                mt: isMobile ? 0 : 1
+                justifyContent: 'center',
+                px: 3,
+                py: 4,
+                position: 'relative'
             }}
         >
+            {/* هدر دسکتاپ - مشابه موبایل */}
+            <Box
+                sx={{
+                    width: '100%',
+                    maxWidth: '480px',
+                    display: 'flex',
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    mb: 3,
+                    mt: { xs: 0, sm: 2 },
+                    px: { xs: 0, sm: 0 },
+                }}
+            >
+                {/* دکمه بازگشت به مرحله قبل */}
+                {activeStep > 0 ? (
+                    <Button
+                        variant="text"
+                        onClick={() => setActiveStep(activeStep - 1)}
+                        sx={{
+                            color: EMPLOYER_THEME.primary,
+                            fontSize: '0.95rem',
+                            fontWeight: 500,
+                            borderRadius: 2,
+                            px: 2,
+                            py: 1,
+                            '&:hover': {
+                                backgroundColor: alpha(EMPLOYER_THEME.primary, 0.08),
+                                color: EMPLOYER_THEME.dark,
+                            },
+                            transition: 'all 0.2s ease',
+                        }}
+                    >
+                        ← بازگشت
+                    </Button>
+                ) : <Box />}
+                {/* دکمه بازگشت به سایت */}
+                <Link href="/" passHref>
+                    <Button
+                        variant="text"
+                        sx={{
+                            color: EMPLOYER_THEME.primary,
+                            fontSize: '0.95rem',
+                            fontWeight: 500,
+                            borderRadius: 2,
+                            px: 2,
+                            py: 1,
+                            '&:hover': {
+                                backgroundColor: alpha(EMPLOYER_THEME.primary, 0.08),
+                                color: EMPLOYER_THEME.dark,
+                            },
+                            transition: 'all 0.2s ease',
+                        }}
+                    >
+                        ← بازگشت به سایت
+                    </Button>
+                </Link>
+            </Box>
+            {/* فرم ثبت‌نام */}
+            <Box
+                sx={{
+                    width: '100%',
+                    maxWidth: '480px',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center'
+                }}
+            >
             <Paper 
                 elevation={isMobile ? 0 : 3} 
                 sx={{ 
@@ -974,44 +2006,140 @@ export default function RegisterForm({ onSuccess }: RegisterFormProps) {
                     maxWidth: isMobile ? '100%' : '480px'
                 }}
             >
-                {/* عنوان با استایل بهبود یافته */}
-                <Box sx={{ mb: isMobile ? 2.5 : 2, textAlign: 'center' }}>
+                {/* هدر انیمیشنی با اطلاعات مرحله */}
+                <Box 
+                    sx={{ 
+                        mb: { xs: 3, sm: 4 }, 
+                        textAlign: 'center',
+                        position: 'relative',
+                        overflow: 'hidden'
+                    }}
+                >
+                    {/* عنوان اصلی */}
                     <Typography 
                         variant="h5" 
                         component="h1" 
                         sx={{ 
                             fontWeight: 'bold', 
-                            color: EMPLOYER_THEME.primary,
-                            mb: 0.5,
-                            fontSize: { xs: '1.4rem', sm: '1.6rem' },
-                            letterSpacing: '0.01em'
+                            mb: 2,
+                            fontSize: { xs: '1.5rem', sm: '1.7rem' },
+                            letterSpacing: '0.01em',
+                            background: `linear-gradient(135deg, ${EMPLOYER_THEME.primary}, ${EMPLOYER_THEME.light})`,
+                            backgroundClip: 'text',
+                            WebkitBackgroundClip: 'text',
+                            WebkitTextFillColor: 'transparent',
+                            textAlign: 'center'
                         }}
                     >
                         ثبت‌نام در ماهرکار
                     </Typography>
+                    {/* کارت اطلاعات مرحله ثابت */}
+                    <Box
+                        sx={{
+                            background: `linear-gradient(135deg, ${alpha(EMPLOYER_THEME.primary, 0.08)}, ${alpha(EMPLOYER_THEME.light, 0.05)})`,
+                            borderRadius: 3,
+                            px: 3,
+                            py: 2,
+                            border: `1px solid ${alpha(EMPLOYER_THEME.primary, 0.12)}`,
+                            backdropFilter: 'blur(10px)',
+                            maxWidth: '320px',
+                            mx: 'auto',
+                            position: 'relative',
+                            minHeight: '90px' // حفظ ارتفاع ثابت
+                        }}
+                    >
+                        {/* شماره مرحله با انیمیشن محو و پیدا */}
+                        <Typography 
+                            key={`step-number-${activeStep}`}
+                            variant="caption" 
+                            sx={{ 
+                                color: alpha(EMPLOYER_THEME.primary, 0.7),
+                                fontWeight: 600,
+                                fontSize: '0.75rem',
+                                textTransform: 'uppercase',
+                                letterSpacing: '1px',
+                                mb: 0.5,
+                                display: 'block',
+                                animation: 'fadeChange 0.6s ease-in-out',
+                                '@keyframes fadeChange': {
+                                    '0%': { opacity: 1 },
+                                    '30%': { opacity: 0, transform: 'translateY(-5px)' },
+                                    '70%': { opacity: 0, transform: 'translateY(5px)' },
+                                    '100%': { opacity: 1, transform: 'translateY(0)' }
+                                }
+                            }}
+                        >
+                            مرحله {toPersianNumbers(activeStep + 1)} از {toPersianNumbers(3)}
+                        </Typography>
+                        
+                        {/* عنوان مرحله با انیمیشن محو و پیدا */}
+                        <Typography 
+                            key={`step-title-${activeStep}`}
+                            variant="subtitle1" 
+                            sx={{ 
+                                color: EMPLOYER_THEME.primary,
+                                fontWeight: 700,
+                                fontSize: { xs: '1rem', sm: '1.1rem' },
+                                lineHeight: 1.3,
+                                animation: 'fadeChange 0.6s ease-in-out 0.1s both',
+                            }}
+                        >
+                            {activeStep === 0 && 'تایید شماره تلفن'}
+                            {activeStep === 1 && 'تکمیل اطلاعات'}
+                            {activeStep === 2 && 'تایید کد ارسالی'}
+                        </Typography>
+
+                        {/* Progress Bar مینیمال */}
+                        <Box
+                            sx={{
+                                width: '100%',
+                                height: 3,
+                                backgroundColor: alpha(EMPLOYER_THEME.primary, 0.1),
+                                borderRadius: 1.5,
+                                mt: 2,
+                                overflow: 'hidden',
+                            }}
+                        >
+                            <Box
+                                sx={{
+                                    height: '100%',
+                                    background: `linear-gradient(90deg, ${EMPLOYER_THEME.primary}, ${EMPLOYER_THEME.light})`,
+                                    borderRadius: 1.5,
+                                    transition: 'width 0.8s cubic-bezier(0.4, 0, 0.2, 1)',
+                                    width: `${((activeStep + 1) / 3) * 100}%`,
+                                    position: 'relative',
+                                    '&::after': {
+                                        content: '""',
+                                        position: 'absolute',
+                                        top: 0,
+                                        left: '-100%',
+                                        width: '100%',
+                                        height: '100%',
+                                        background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.6), transparent)',
+                                        animation: 'shimmer 2s ease-in-out infinite 1s'
+                                    }
+                                }}
+                            />
+                        </Box>
+                    </Box>
+
+                    {/* انیمیشن‌های CSS */}
+                    <style jsx>{`
+                        @keyframes shimmer {
+                            0% { left: -100%; }
+                            100% { left: 100%; }
+                        }
+                    `}</style>
                 </Box>
 
-                {/* استپر */}
-                {isMobile ? (
-                    <MobileDotStepper 
-                        activeStep={activeStep} 
-                        steps={['شماره تلفن', 'اطلاعات کاربری', 'تایید کد']} 
-                    />
-                ) : (
-                    <Stepper activeStep={activeStep} sx={{ mb: 3, maxWidth: '500px', mx: 'auto', width: '100%' }}>
-                        {['شماره تلفن', 'اطلاعات کاربری', 'تایید کد'].map((label, index) => (
-                            <Step key={label}>
-                                <StepLabel StepIconComponent={PersianStepIcon}>{label}</StepLabel>
-                            </Step>
-                        ))}
-                    </Stepper>
-                )}
 
-                {/* فرم‌ها */}
-                {activeStep === 0 && renderPhoneForm()}
-                {activeStep === 1 && renderUserInfoForm()}
-                {activeStep === 2 && renderOtpForm()}
-            </Paper>
+
+                    {/* فرم‌ها */}
+                    {activeStep === 0 && renderPhoneForm()}
+                    {activeStep === 1 && renderUserInfoForm()}
+                    {activeStep === 2 && renderOtpForm()}
+                </Paper>
+            </Box>
         </Box>
     );
 } 

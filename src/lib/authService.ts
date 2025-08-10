@@ -36,6 +36,7 @@ export interface UserData {
     last_login?: string;
     user_type_original?: string;
     company_name?: string;
+    profile_picture?: string;
 }
 
 export interface RegisterValidateResponse {
@@ -120,7 +121,7 @@ const authService = {
     // بررسی وجود شماره تلفن در دیتابیس با استفاده از API ورود
     checkPhoneExists: async (phone: string): Promise<boolean> => {
         try {
-            const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:8000';
+            const BASE_URL = process.env.NEXT_PUBLIC_API_URL;
             
             // تلاش برای ارسال کد OTP به شماره تلفن
             // اگر شماره تلفن وجود داشته باشد، کد OTP ارسال می‌شود
@@ -152,7 +153,7 @@ const authService = {
     // مرحله اول ثبت‌نام: درخواست کد OTP
     registerOtp: async (userData: RegisterData): Promise<string> => {
         try {
-            const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:8000';
+            const BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
             const response = await axios.post<RegisterOtpResponse>(
                 `${BASE_URL}/auth/register-otp/`,
@@ -227,7 +228,7 @@ const authService = {
     // مرحله دوم ثبت‌نام: تایید کد OTP
     validateOtp: async (token: string, code: string): Promise<RegisterValidateResponse> => {
         try {
-            const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:8000';
+            const BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
             // تنظیم تایم‌اوت برای درخواست
             const response = await axios.post<RegisterValidateResponse>(
@@ -330,7 +331,7 @@ const authService = {
     // تابع بروزرسانی نوع کاربر
     updateUserType: async (user_type: string): Promise<UserData> => {
         try {
-            const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:8000';
+            const BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
             const accessToken = cookieService.getCookie(COOKIE_NAMES.ACCESS_TOKEN);
             if (!accessToken) {
@@ -388,7 +389,7 @@ const authService = {
     // درخواست OTP برای ورود
     loginOtp: async (phone: string): Promise<string> => {
         try {
-            const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:8000';
+            const BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
             const response = await axios.post<RegisterOtpResponse>(
                 `${BASE_URL}/auth/login-otp/`,
@@ -452,7 +453,7 @@ const authService = {
     // تایید OTP برای ورود
     validateLoginOtp: async (token: string, code: string): Promise<UserData> => {
         try {
-            const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:8000';
+            const BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
             const response = await axios.post<TokenResponse | any>(
                 `${BASE_URL}/auth/login-validate-otp/${token}/`,
@@ -501,24 +502,16 @@ const authService = {
 
             // اگر اطلاعات کاربر در پاسخ وجود داشت، از آن استفاده می‌کنیم
             if (userData) {
-                // بررسی و مپ کردن نوع کاربر
-                if (userData.user_type === 'EM') {
-                    const mappedUserData = {
-                        ...userData,
-                        user_type_original: userData.user_type,
-                        user_type: 'employer'
-                    };
-                    
-                    // ذخیره در کش
-                    userDataCache = mappedUserData;
-                    userDataCacheTime = Date.now();
-                    
-                    return mappedUserData;
-                }
+                // حذف تنظیم وضعیت ادمین در localStorage
+                // const isAdmin = userData.user_type === 'AD';
+                // setAdminStatus(isAdmin);
                 
                 // ذخیره در کش
                 userDataCache = userData;
                 userDataCacheTime = Date.now();
+                
+                // ذخیره در کوکی user_data با تابع جدید
+                authService.storeUserDataInCookie(userData);
                 
                 return userData;
             }
@@ -582,6 +575,9 @@ const authService = {
             cookieService.deleteCookie(COOKIE_NAMES.ACCESS_TOKEN);
             cookieService.deleteCookie(COOKIE_NAMES.REFRESH_TOKEN);
             
+            // حذف پاک کردن وضعیت ادمین از localStorage
+            // clearAdminStatus();
+            
             // پاک کردن کش
             userDataCache = null;
             userDataCacheTime = 0;
@@ -630,6 +626,10 @@ const authService = {
                         if (userData) {
                             userDataCache = userData;
                             userDataCacheTime = Date.now();
+                            
+                            // حذف تنظیم وضعیت ادمین در localStorage
+                            // const isAdmin = userData.user_type === 'AD';
+                            // setAdminStatus(isAdmin);
                         }
                         
                         return userData;
@@ -654,6 +654,10 @@ const authService = {
             if (userData) {
                 userDataCache = userData;
                 userDataCacheTime = Date.now();
+                
+                // حذف تنظیم وضعیت ادمین در localStorage
+                // const isAdmin = userData.user_type === 'AD';
+                // setAdminStatus(isAdmin);
             }
             
             return userData;
@@ -665,8 +669,61 @@ const authService = {
     // تابع جدید برای دریافت اطلاعات کاربر از API
     fetchUserDataFromAPI: async (accessToken: string): Promise<UserData | null> => {
         try {
-            const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:8000';
+            const BASE_URL = process.env.NEXT_PUBLIC_API_URL;
             
+            // ابتدا تلاش می‌کنیم از مسیر /profiles/me/ اطلاعات کاربر را دریافت کنیم
+            try {
+                const profileResponse = await axios.get(`${BASE_URL}/profiles/me/`, {
+                    headers: {
+                        'Authorization': `Bearer ${accessToken}`
+                    }
+                });
+                
+                if (profileResponse.status === 200 && profileResponse.data) {
+                    // اطلاعات پروفایل را دریافت کردیم، حالا اطلاعات اصلی کاربر را از مسیر /users/ دریافت می‌کنیم
+                    const userResponse = await axios.get(`${BASE_URL}/users/`, {
+                        headers: {
+                            'Authorization': `Bearer ${accessToken}`
+                        }
+                    });
+                    
+                    if (userResponse.status === 200 && userResponse.data) {
+                        let userData = userResponse.data;
+                        
+                        // اگر سرور آرایه‌ای از کاربران برگرداند (برای ادمین‌ها)، کاربر ادمین را پیدا کن
+                        if (Array.isArray(userData)) {
+                            // برای ادمین‌ها، اطلاعات خودشان را از طریق توکن استخراج می‌کنیم
+                            const decodedToken = authService.decodeToken(accessToken);
+                            if (decodedToken && decodedToken.user_id) {
+                                // پیدا کردن کاربر ادمین در آرایه
+                                const adminUser = userData.find((user: any) => user.id === decodedToken.user_id);
+                                if (adminUser) {
+                                    userData = adminUser;
+                                } else {
+                                    // اگر پیدا نشد، اولین کاربر را بگیر (که احتمالاً خود ادمین است)
+                                    userData = userData[0];
+                                }
+                            } else {
+                                // اگر نتوانستیم از توکن استخراج کنیم، اولین کاربر را بگیر
+                                userData = userData[0];
+                            }
+                        }
+                        
+                        // ترکیب اطلاعات کاربر با اطلاعات پروفایل
+                        const combinedUserData = {
+                            ...userData,
+                            profile: profileResponse.data
+                        };
+                        
+                        return combinedUserData;
+                    }
+                }
+            } catch (profileError: any) {
+                // اگر خطای 404 باشد (پروفایل وجود ندارد) یا خطای دیگری، از مسیر اصلی کاربران استفاده می‌کنیم
+                console.log('[authService] مسیر پروفایل در دسترس نیست یا پروفایل وجود ندارد، استفاده از مسیر اصلی کاربران');
+            }
+            
+            // استفاده از مسیر اصلی کاربران به عنوان fallback
             const response = await axios.get(`${BASE_URL}/users/`, {
                 headers: {
                     'Authorization': `Bearer ${accessToken}`
@@ -674,15 +731,25 @@ const authService = {
             });
             
             if (response.status === 200 && response.data) {
-                const userData = response.data;
+                let userData = response.data;
                 
-                // بررسی و مپ کردن نوع کاربر
-                if (userData.user_type === 'EM') {
-                    return {
-                        ...userData,
-                        user_type: 'employer',
-                        user_type_original: userData.user_type
-                    };
+                // اگر سرور آرایه‌ای از کاربران برگرداند (برای ادمین‌ها)، کاربر ادمین را پیدا کن
+                if (Array.isArray(userData)) {
+                    // برای ادمین‌ها، اطلاعات خودشان را از طریق توکن استخراج می‌کنیم
+                    const decodedToken = authService.decodeToken(accessToken);
+                    if (decodedToken && decodedToken.user_id) {
+                        // پیدا کردن کاربر ادمین در آرایه
+                        const adminUser = userData.find((user: any) => user.id === decodedToken.user_id);
+                        if (adminUser) {
+                            userData = adminUser;
+                        } else {
+                            // اگر پیدا نشد، اولین کاربر را بگیر (که احتمالاً خود ادمین است)
+                            userData = userData[0];
+                        }
+                    } else {
+                        // اگر نتوانستیم از توکن استخراج کنیم، اولین کاربر را بگیر
+                        userData = userData[0];
+                    }
                 }
                 
                 return userData;
@@ -724,7 +791,7 @@ const authService = {
                 return null;
             }
             
-            const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:8000';
+            const BASE_URL = process.env.NEXT_PUBLIC_API_URL;
             
             // استفاده از مسیر صحیح API برای رفرش توکن
             const response = await axios.post<{ access: string }>(
@@ -822,6 +889,27 @@ const authService = {
     getAccessToken: (): string | null => {
         if (typeof window === 'undefined') return null; // اجرای سمت سرور
         return cookieService.getCookie(COOKIE_NAMES.ACCESS_TOKEN);
+    },
+
+    // تابع جدید برای ذخیره اطلاعات کاربر در کوکی
+    storeUserDataInCookie: (userData: UserData): void => {
+        try {
+            // ذخیره مستقیم در کوکی با استفاده از document.cookie
+            if (typeof document !== 'undefined') {
+                const jsonValue = encodeURIComponent(JSON.stringify(userData));
+                const date = new Date();
+                date.setTime(date.getTime() + 30 * 24 * 60 * 60 * 1000); // 30 روز
+                const expires = `expires=${date.toUTCString()}`;
+                document.cookie = `user_data=${jsonValue}; ${expires}; path=/; SameSite=Lax`;
+                
+                console.log('🔍 User data stored in cookie:', {
+                    user_type: userData.user_type,
+                    username: userData.username
+                });
+            }
+        } catch (error) {
+            console.error('🔍 Error storing user data in cookie:', error);
+        }
     }
 };
 

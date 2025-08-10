@@ -1,7 +1,9 @@
 import type { Metadata } from 'next'
 import ThemeRegistry from '@/components/ThemeRegistry/ThemeRegistry'
-import Header from '@/components/layout/Header'
-import PromoBar from '@/components/layout/PromoBar'
+import TopBarsWrapper from '@/components/layout/TopBarsWrapper'
+import ContentWrapper from '@/components/layout/ContentWrapper'
+import { ApiProgressProvider, RealProgressProvider } from '@/components/common'
+import DynamicScrollbar from '@/components/common/DynamicScrollbar'
 import "./globals.css"
 import "./fonts.css"
 import { iranSansFont } from '@/lib/fonts'
@@ -9,6 +11,8 @@ import { JobSeekerThemeProvider } from '@/contexts/JobSeekerThemeContext'
 import { Toaster } from 'react-hot-toast'
 import { AuthInitializer } from '@/components/auth'
 import { AuthProvider } from '@/contexts/AuthContext'
+import { Suspense } from 'react'
+import FontLoader from '@/components/common/FontLoader'
 
 export const metadata: Metadata = {
   title: "ماهرکار - سامانه کاریابی",
@@ -23,23 +27,41 @@ export default function RootLayout({
   return (
     <html lang="fa" dir="rtl" className={iranSansFont.variable}>
       <head>
-        <style type="text/css">
-          {`
-            html, body, input, button, textarea, select {
-              font-family: 'IRANSansX', system-ui, sans-serif !important;
-            }
-          `}
-        </style>
+        <title>ماهرکار - سامانه کاریابی</title>
+        <meta name="description" content="سامانه کاریابی و استخدام متخصصین" />
+        {/* Preload critical fonts */}
+        <link
+          rel="preload"
+          href="/fonts/IRANSansX-Regular.woff2"
+          as="font"
+          type="font/woff2"
+          crossOrigin="anonymous"
+        />
+        <link
+          rel="preload"
+          href="/fonts/IRANSansX-Bold.woff2"
+          as="font"
+          type="font/woff2"
+          crossOrigin="anonymous"
+        />
       </head>
       <body className={iranSansFont.className}>
         <ThemeRegistry>
           <JobSeekerThemeProvider>
             <AuthProvider>
-              <Toaster position="top-center" />
-              <AuthInitializer />
-              <PromoBar />
-              <Header />
-              {children}
+              <ApiProgressProvider>
+                <Suspense fallback={null}>
+                  <RealProgressProvider />
+                </Suspense>
+                <DynamicScrollbar />
+                <Toaster position="top-center" />
+                <FontLoader />
+                <AuthInitializer />
+                <TopBarsWrapper />
+                <ContentWrapper>
+                  {children}
+                </ContentWrapper>
+              </ApiProgressProvider>
             </AuthProvider>
           </JobSeekerThemeProvider>
         </ThemeRegistry>

@@ -140,7 +140,7 @@ export interface JobAdvertisement {
   gender?: 'M' | 'F' | 'N'; // M=مرد، F=زن، N=مهم نیست
   soldier_status?: 'CO' | 'EE' | 'NS'; // CO=پایان خدمت، EE=معافیت تحصیلی، NS=مهم نیست
   degree?: 'BD' | 'DI' | 'AS' | 'BA' | 'MA' | 'DO'; // BD=زیر دیپلم، DI=دیپلم، AS=فوق دیپلم، BA=لیسانس، MA=فوق لیسانس، DO=دکترا
-  salary?: '5 to 10' | '10 to 15' | '15 to 20' | '20 to 30' | '30 to 50' | 'More than 50' | 'Negotiable';
+  salary?: '5_to_10' | '10_to_15' | '15_to_20' | '20_to_30' | '30_to_50' | 'more_than_50' | 'negotiable';
   job_type?: 'FT' | 'PT' | 'RE' | 'IN'; // FT=تمام وقت، PT=پاره وقت، RE=دورکاری، IN=کارآموزی
   created_at: string;
   updated_at: string;
@@ -154,7 +154,7 @@ export interface CreateJobData {
   gender?: 'M' | 'F' | 'N';
   soldier_status?: 'CO' | 'EE' | 'NS';
   degree?: 'BD' | 'DI' | 'AS' | 'BA' | 'MA' | 'DO';
-  salary?: '5 to 10' | '10 to 15' | '15 to 20' | '20 to 30' | '30 to 50' | 'More than 50' | 'Negotiable';
+  salary?: '5_to_10' | '10_to_15' | '15_to_20' | '20_to_30' | '30_to_50' | 'more_than_50' | 'negotiable';
   job_type?: 'FT' | 'PT' | 'RE' | 'IN';
 }
 
@@ -193,8 +193,8 @@ export interface JobApplication {
 
 // Constants for choices
 export const GENDER_CHOICES = {
-  M: 'مرد',
-  F: 'زن',
+  M: 'آقا',
+  F: 'خانم',
   N: 'مهم نیست'
 } as const;
 
@@ -214,13 +214,13 @@ export const DEGREE_CHOICES = {
 } as const;
 
 export const SALARY_CHOICES = {
-  '5 to 10': '5 تا 10 میلیون تومان',
-  '10 to 15': '10 تا 15 میلیون تومان',
-  '15 to 20': '15 تا 20 میلیون تومان',
-  '20 to 30': '20 تا 30 میلیون تومان',
-  '30 to 50': '30 تا 50 میلیون تومان',
-  'More than 50': 'بیش از 50 میلیون تومان',
-  'Negotiable': 'توافقی'
+  '5_to_10': "۵ تا ۱۰ میلیون تومان",
+  '10_to_15': '۱۰ تا ۱۵ میلیون تومان',
+  '15_to_20': '۱۵ تا ۲۰ میلیون تومان',
+  '20_to_30': '۲۰ تا ۳۰ میلیون تومان', 
+  '30_to_50': '۳۰ تا ۵۰ میلیون تومان',
+  'more_than_50': 'بیش از ۵۰ میلیون تومان',
+  'negotiable': 'توافقی'
 } as const;
 
 export const JOB_TYPE_CHOICES = {

@@ -106,6 +106,12 @@ interface Company {
   instagram?: string;
   created_at: string;
   updated_at?: string;
+  status?: 'P' | 'A' | 'R';
+  photos?: Array<{
+    id: number;
+    image: string;
+    created_at: string;
+  }>;
 }
 
 interface CompanyDetailsProps {
@@ -221,6 +227,26 @@ const CompanyDetails: React.FC<CompanyDetailsProps> = ({ company, loading = fals
             </Box>
           )}
         </Box>
+
+        {/* وضعیت شرکت */}
+        {company.status && company.status !== ('A' as any) && (
+          <Box sx={{ p: 3, position: 'relative' }}>
+            <Box sx={{ position: 'absolute', top: 12, right: 12, zIndex: 2 }}>
+              <Box sx={{
+                px: 1.5,
+                py: 0.75,
+                borderRadius: 1.5,
+                fontSize: '0.8rem',
+                fontWeight: 800,
+                color: '#fff',
+                bgcolor: company.status === 'R' ? '#c62828' : '#f9a825',
+                boxShadow: '0 2px 6px rgba(0,0,0,0.15)'
+              }}>
+                {company.status === 'R' ? 'رد شده' : 'در انتظار تایید'}
+              </Box>
+            </Box>
+          </Box>
+        )}
 
         {/* محتوای اصلی */}
         <Box sx={{ p: 3 }}>
@@ -410,6 +436,32 @@ const CompanyDetails: React.FC<CompanyDetailsProps> = ({ company, loading = fals
               </Box>
             </Box>
           </Box>
+
+          {/* گالری عکس‌های شرکت */}
+          {company.photos && company.photos.length > 0 && (
+            <Box sx={{ mt: 4 }}>
+              <SectionTitle variant="h6">
+                گالری عکس‌ها
+              </SectionTitle>
+              <Box sx={{
+                display: 'grid',
+                gridTemplateColumns: { xs: '1fr 1fr', sm: 'repeat(3, 1fr)' },
+                gap: 2
+              }}>
+                {company.photos.map((p) => (
+                  <Box key={p.id} sx={{ position: 'relative', width: '100%', aspectRatio: '1 / 1', borderRadius: 2, overflow: 'hidden', bgcolor: '#f5f5f5' }}>
+                    <Image
+                      src={getImageUrl(p.image) || ''}
+                      alt={`company-photo-${p.id}`}
+                      fill
+                      sizes="(max-width: 600px) 50vw, 33vw"
+                      style={{ objectFit: 'cover' }}
+                    />
+                  </Box>
+                ))}
+              </Box>
+            </Box>
+          )}
           
           {/* ویدیوی معرفی شرکت */}
           {company.intro_video && (

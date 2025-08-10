@@ -65,7 +65,7 @@ export const HeaderProvider: React.FC<HeaderProviderProps> = ({ children }) => {
   const [expandedMobileMenu, setExpandedMobileMenu] = useState<string | null>(null);
 
   const handleDrawerToggle = () => {
-    setMobileOpen(!mobileOpen);
+    setMobileOpen(prev => !prev);
     setExpandedMobileMenu(null);
   };
 

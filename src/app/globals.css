@@ -1,58 +1,134 @@
 @import "tailwindcss";
 
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss/preflight";
+@import "tailwindcss/utilities";
 
-@font-face {
-  font-family: 'IRANSansX';
-  src: url('/fonts/IRANSansX-Regular.woff2') format('woff2'),
-       url('/fonts/IRANSansX-Regular.woff') format('woff');
-  font-weight: normal;
-  font-style: normal;
-  font-display: swap;
+/* فونت‌های فارسی - تعریف در fonts.css */
+
+/* تنظیمات کلی */
+* {
+  box-sizing: border-box;
+  padding: 0;
+  margin: 0;
 }
 
-@font-face {
-  font-family: 'IRANSansX';
-  src: url('/fonts/IRANSansX-Bold.woff2') format('woff2'),
-       url('/fonts/IRANSansX-Bold.woff') format('woff');
-  font-weight: bold;
-  font-weight: 700;
-  font-style: normal;
-  font-display: swap;
+/* تنظیمات پایه اسکرول بار */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
 }
 
-:root {
-  --foreground-rgb: 0, 0, 0;
-  --background-start-rgb: 214, 219, 220;
-  --background-end-rgb: 255, 255, 255;
-  --primary-color: #1976d2;
-  --secondary-color: #333;
+::-webkit-scrollbar-track {
+  background: transparent;
+  border-radius: 3px;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+::-webkit-scrollbar-thumb {
+  background: rgba(107, 114, 128, 0.3);
+  border-radius: 3px;
+  transition: background 0.2s ease;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(107, 114, 128, 0.5);
+}
+
+::-webkit-scrollbar-corner {
+  background: transparent;
+}
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(107, 114, 128, 0.3) transparent;
+}
+
+/* جلوگیری از shift شدن المان‌ها هنگام ظاهر شدن اسکرول بار */
+html {
+  overflow-y: scroll;
+  scrollbar-gutter: stable;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: 'IRANSansX', system-ui, sans-serif;
+  overflow-x: hidden;
+  padding-right: 0 !important;
+  margin-right: 0 !important;
+}
+
+/* برای مرورگرهای قدیمی که scrollbar-gutter رو پشتیبانی نمی‌کنند */
+@supports not (scrollbar-gutter: stable) {
+  html {
+    overflow-y: scroll;
+  }
+
+  body {
+    padding-right: 6px !important;
+  }
+}
+
+html,
+body {
+  max-width: 100vw;
+  overflow-x: hidden;
+  font-family: var(--font-family-primary);
   direction: rtl;
 }
 
+body {
+  color: rgb(var(--foreground-rgb));
+  background: linear-gradient(
+      to bottom,
+      transparent,
+      rgb(var(--background-end-rgb))
+    )
+    rgb(var(--background-start-rgb));
+}
+
 a {
-  text-decoration: none;
   color: inherit;
+  text-decoration: none;
+}
+
+/* تنظیمات NProgress سفارشی */
+#nprogress {
+  pointer-events: none;
+}
+
+#nprogress .bar {
+  background: linear-gradient(90deg, #64b5f6, #42a5f5);
+  position: fixed;
+  z-index: 9999;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 3px;
+}
+
+#nprogress .peg {
+  display: block;
+  position: absolute;
+  right: 0px;
+  width: 100px;
+  height: 100%;
+  box-shadow: 0 0 10px #64b5f6, 0 0 5px #64b5f6;
+  opacity: 1;
+  transform: rotate(3deg) translate(0px, -4px);
+}
+
+/* انیمیشن fade برای NProgress */
+#nprogress .bar {
+  transition: all 0.3s ease;
+}
+
+/* تنظیمات برای موبایل */
+@media (max-width: 768px) {
+  #nprogress .bar {
+    height: 2px;
+  }
+}
+
+/* تنظیمات برای حالت تاریک */
+@media (prefers-color-scheme: dark) {
+  #nprogress .bar {
+    background: linear-gradient(90deg, #42a5f5, #64b5f6);
+  }
 }

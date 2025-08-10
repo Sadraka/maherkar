@@ -14,7 +14,6 @@ const protectedPaths = [
   '/profile',
   '/dashboard',
   '/projects',
-  '/settings',
   '/messages'
 ];
 
@@ -75,7 +74,6 @@ export const config = {
     '/profile/:path*',
     '/dashboard/:path*',
     '/projects/:path*',
-    '/settings/:path*',
     '/messages/:path*',
     // مسیرهای ورود و ثبت‌نام
     '/login',

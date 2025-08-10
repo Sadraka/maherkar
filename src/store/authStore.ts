@@ -75,7 +75,7 @@ export const useAuthStore = create<AuthState>()(
                 
                 // اگر کمتر از 2 ثانیه از آخرین فراخوانی گذشته باشد، از اجرای مجدد خودداری می‌کنیم
                 const now = Date.now();
-                const lastFetch = (window as any)._lastUserDataFetch || 0;
+                const lastFetch = typeof window !== 'undefined' ? (window as any)._lastUserDataFetch || 0 : 0;
                 if (now - lastFetch < 2000) {
                     console.log('[AuthStore] فاصله زمانی تا فراخوانی قبلی کمتر از حد مجاز است، از اجرای مجدد خودداری می‌شود');
                     return;
@@ -83,7 +83,9 @@ export const useAuthStore = create<AuthState>()(
                 
                 // شروع فراخوانی
                 isUserDataFetchInProgress = true;
-                (window as any)._lastUserDataFetch = now;
+                if (typeof window !== 'undefined') {
+                    (window as any)._lastUserDataFetch = now;
+                }
                 
                 try {
                     set({ loading: true });
@@ -149,7 +151,9 @@ export const useAuthStore = create<AuthState>()(
                     set({ user: userData, isAuthenticated: true });
 
                     // ثبت زمان فراخوانی فعلی برای throttling
-                    (window as any)._lastUserDataFetch = Date.now();
+                    if (typeof window !== 'undefined') {
+                        (window as any)._lastUserDataFetch = Date.now();
+                    }
 
                     toast.success('ورود با موفقیت انجام شد');
                     return userData;
@@ -207,7 +211,9 @@ export const useAuthStore = create<AuthState>()(
                         });
                         
                         // ثبت زمان فراخوانی فعلی برای throttling
-                        (window as any)._lastUserDataFetch = Date.now();
+                        if (typeof window !== 'undefined') {
+                            (window as any)._lastUserDataFetch = Date.now();
+                        }
                     }
 
                     return response;
@@ -279,7 +285,7 @@ export const useAuthStore = create<AuthState>()(
                 // اگر کمتر از 1 ثانیه از آخرین فراخوانی گذشته باشد، از اجرای مجدد خودداری می‌کنیم
                 // برای refreshUserData زمان کمتری در نظر می‌گیریم چون ممکن است به صورت مستقیم فراخوانی شود
                 const now = Date.now();
-                const lastFetch = (window as any)._lastUserDataFetch || 0;
+                const lastFetch = typeof window !== 'undefined' ? (window as any)._lastUserDataFetch || 0 : 0;
                 if (now - lastFetch < 1000) {
                     console.log('[AuthStore] فاصله زمانی تا فراخوانی قبلی کمتر از حد مجاز است، از اجرای مجدد خودداری می‌شود');
                     return;
@@ -287,7 +293,9 @@ export const useAuthStore = create<AuthState>()(
                 
                 // شروع فراخوانی
                 isUserDataFetchInProgress = true;
-                (window as any)._lastUserDataFetch = now;
+                if (typeof window !== 'undefined') {
+                    (window as any)._lastUserDataFetch = now;
+                }
                 
                 try {
                     set({ loading: true });

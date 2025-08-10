@@ -112,6 +112,7 @@ const cookieService = {
     clearAuthCookies: (): void => {
         cookieService.deleteCookie(COOKIE_NAMES.ACCESS_TOKEN);
         cookieService.deleteCookie(COOKIE_NAMES.REFRESH_TOKEN);
+        cookieService.deleteCookie('user_data'); // اضافه کردن حذف کوکی user_data
     },
 
     /**

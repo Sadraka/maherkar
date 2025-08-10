@@ -20,6 +20,7 @@ interface Company {
   description?: string;
   logo?: string;
   banner?: string;
+  status?: 'P' | 'A' | 'R';
   industry?: {
     id: number;
     name: string;
@@ -98,6 +99,22 @@ const CompanyCard = ({ company, index }: CompanyCardProps) => {
               fill
               style={{ objectFit: 'cover' }}
             />
+            {/* برچسب وضعیت */}
+            {company.status && company.status !== 'A' && (
+              <Box sx={{ position: 'absolute', top: 8, right: 8, zIndex: 2 }}>
+                <Box sx={{
+                  px: 1,
+                  py: 0.5,
+                  borderRadius: 1,
+                  fontSize: '0.7rem',
+                  fontWeight: 700,
+                  color: '#fff',
+                  bgcolor: company.status === 'R' ? '#c62828' : '#f9a825',
+                }}>
+                  {company.status === 'R' ? 'رد شده' : 'در انتظار تایید'}
+                </Box>
+              </Box>
+            )}
             <Box
               sx={{
                 position: 'absolute',
@@ -111,12 +128,29 @@ const CompanyCard = ({ company, index }: CompanyCardProps) => {
             />
           </>
         ) : (
-          <CorporateFareIcon sx={{ fontSize: 42, color: EMPLOYER_THEME.primary }} />
+          <>
+            <CorporateFareIcon sx={{ fontSize: 42, color: EMPLOYER_THEME.primary }} />
+            {company.status && company.status !== 'A' && (
+              <Box sx={{ position: 'absolute', top: 8, right: 8, zIndex: 2 }}>
+                <Box sx={{
+                  px: 1,
+                  py: 0.5,
+                  borderRadius: 1,
+                  fontSize: '0.7rem',
+                  fontWeight: 700,
+                  color: '#fff',
+                  bgcolor: company.status === 'R' ? '#c62828' : '#f9a825',
+                }}>
+                  {company.status === 'R' ? 'رد شده' : 'در انتظار تایید'}
+                </Box>
+              </Box>
+            )}
+          </>
         )}
       </Box>
       
       <Box sx={{ 
-        p: 2, 
+        p: { xs: 1.5, sm: 2 }, 
         borderBottom: '1px solid #f5f5f5', 
         flexGrow: 1,
         display: 'flex',
@@ -124,15 +158,15 @@ const CompanyCard = ({ company, index }: CompanyCardProps) => {
         overflow: 'hidden'
       }}>
         {/* لوگو و نام شرکت */}
-        <Box sx={{ display: 'flex', alignItems: 'center', mb: 1.5, justifyContent: 'flex-start' }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', mb: { xs: 1, sm: 1.5 }, justifyContent: 'flex-start' }}>
           <Box
             sx={{
-              width: 40,
-              height: 40,
+              width: { xs: 36, sm: 40 },
+              height: { xs: 36, sm: 40 },
               position: 'relative',
               borderRadius: '50%',
               overflow: 'hidden',
-              ml: 1.5,
+              ml: { xs: 1, sm: 1.5 },
               border: '1px solid #e3f2fd',
               boxShadow: '0 2px 8px rgba(66, 133, 244, 0.1)',
               bgcolor: '#f8fafd',
@@ -165,25 +199,22 @@ const CompanyCard = ({ company, index }: CompanyCardProps) => {
           <Typography 
             fontWeight="bold" 
             sx={{ 
-              fontSize: '1rem', 
+              fontSize: { xs: '0.8rem', sm: '0.9rem' }, 
               color: EMPLOYER_THEME.dark,
               maxWidth: 'calc(100% - 60px)',
               overflow: 'hidden',
               textOverflow: 'ellipsis',
               whiteSpace: 'nowrap',
-              '&:after': {
-                content: company.name.length > 13 ? '"..."' : '""',
-                display: 'inline'
-              }
+              lineHeight: 1.3
             }}
           >
-            {company.name.length > 13 ? company.name.substring(0, 13) : company.name}
+            {company.name.length > 16 ? `${company.name.substring(0, 16)}...` : company.name}
           </Typography>
         </Box>
         
         {/* اطلاعات اضافی */}
-        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1, mb: 2 }}>
-          {/* صنعت - فقط اگر وجود داشت */}
+        <Box sx={{ display: 'flex', flexDirection: 'column', gap: { xs: 0.5, sm: 1 }, mb: { xs: 1.5, sm: 2 } }}>
+          {/* گروه کاری - فقط اگر وجود داشت */}
           {company.industry?.name && (
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, justifyContent: 'flex-start' }}>
               <CategoryIcon sx={{ fontSize: 16, color: EMPLOYER_THEME.primary, flexShrink: 0 }} />
@@ -191,7 +222,7 @@ const CompanyCard = ({ company, index }: CompanyCardProps) => {
                 variant="body2" 
                 color="text.secondary" 
                 sx={{ 
-                  fontSize: '0.85rem',
+                  fontSize: { xs: '0.75rem', sm: '0.85rem' },
                   maxWidth: 'calc(100% - 24px)',
                   overflow: 'hidden',
                   textOverflow: 'ellipsis',
