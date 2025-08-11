@@ -125,15 +125,15 @@ export default function SkillsForm() {
     setErrors([]);
 
     try {
-      let response;
+      let response: any;
       if (editingId) {
         response = await apiPut(`/resumes/skills/${editingId}/`, data);
         setSkills(prev => prev.map(skill => 
-          skill.id === editingId ? response.data : skill
+          skill.id === editingId ? response.data as Skill : skill
         ));
       } else {
         response = await apiPost('/resumes/skills/', data);
-        setSkills(prev => [...prev, response.data]);
+        setSkills(prev => [...prev, response.data as Skill]);
       }
 
       setSuccess(true);
@@ -375,11 +375,16 @@ export default function SkillsForm() {
           severity="info" 
           icon={<InfoIcon />}
           sx={{ 
-            '& .MuiAlert-message': {
-              width: '100%'
-            },
+            backgroundColor: jobseekerColors.bgVeryLight,
+            borderColor: jobseekerColors.primary,
+            color: '#333',
             '& .MuiAlert-icon': {
+              color: jobseekerColors.primary,
               display: { xs: 'none', sm: 'flex' }
+            },
+            '& .MuiAlert-message': {
+              width: '100%',
+              color: '#333'
             }
           }}
         >

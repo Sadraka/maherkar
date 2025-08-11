@@ -430,11 +430,16 @@ export default function ExperiencesForm() {
             severity="info" 
             icon={<InfoIcon />}
             sx={{ 
-              '& .MuiAlert-message': {
-                width: '100%'
-              },
+              backgroundColor: jobseekerColors.bgVeryLight,
+              borderColor: jobseekerColors.primary,
+              color: '#333',
               '& .MuiAlert-icon': {
+                color: jobseekerColors.primary,
                 display: { xs: 'none', sm: 'flex' }
+              },
+              '& .MuiAlert-message': {
+                width: '100%',
+                color: '#333'
               }
             }}
           >

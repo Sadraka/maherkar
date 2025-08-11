@@ -148,15 +148,15 @@ export default function EducationForm() {
         end_year: data.is_current ? null : data.end_year
       };
 
-      let response;
+      let response: any;
       if (editingId) {
         response = await apiPut(`/resumes/educations/${editingId}/`, educationData);
         setEducations(prev => prev.map(edu => 
-          edu.id === editingId ? response.data : edu
+          edu.id === editingId ? response.data as Education : edu
         ));
       } else {
         response = await apiPost('/resumes/educations/', educationData);
-        setEducations(prev => [...prev, response.data]);
+        setEducations(prev => [...prev, response.data as Education]);
       }
 
       setSuccess(true);
@@ -391,11 +391,16 @@ export default function EducationForm() {
           severity="info" 
           icon={<InfoIcon />}
           sx={{ 
-            '& .MuiAlert-message': {
-              width: '100%'
-            },
+            backgroundColor: jobseekerColors.bgVeryLight,
+            borderColor: jobseekerColors.primary,
+            color: '#333',
             '& .MuiAlert-icon': {
+              color: jobseekerColors.primary,
               display: { xs: 'none', sm: 'flex' }
+            },
+            '& .MuiAlert-message': {
+              width: '100%',
+              color: '#333'
             }
           }}
         >
