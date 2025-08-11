@@ -60,7 +60,8 @@ import {
     faEdit,
     faGraduationCap,
     faTools,
-    faUserCheck
+    faUserCheck,
+    faSearch
 } from '@fortawesome/free-solid-svg-icons';
 import { useAuthStore, useAuthActions } from '@/store/authStore';
 import { useJobStatsStore } from '@/store/jobStatsStore';
@@ -150,9 +151,19 @@ const jobSeekerMenuItems = [
         icon: faTachometerAlt,
     },
     {
-        title: 'پروفایل',
-        path: '/jobseeker/profile',
-        icon: faUser,
+        title: 'ایجاد آگهی رزومه',
+        path: '/jobseeker/resume-ads/create',
+        icon: faPlus,
+    },
+    {
+        title: 'آگهی‌های رزومه',
+        path: '/jobseeker/resume-ads',
+        icon: faBullhorn,
+    },
+    {
+        title: 'مشخصات شخصی',
+        path: '/jobseeker/resume',
+        icon: faFileAlt,
         hasSubmenu: true,
         submenu: [
             { title: 'اطلاعات شخصی', path: '/jobseeker/resume', icon: faUser },
@@ -162,11 +173,6 @@ const jobSeekerMenuItems = [
         ]
     },
     {
-        title: 'آگهی‌های رزومه',
-        path: '/jobseeker/resume-ads',
-        icon: faBullhorn,
-    },
-    {
         title: 'درخواست‌های ارسالی',
         path: '/jobseeker/applications',
         icon: faClipboardList,
@@ -174,7 +180,12 @@ const jobSeekerMenuItems = [
     {
         title: 'آگهی‌های شغلی',
         path: '/jobseeker/job-ads',
-        icon: faBriefcase,
+        icon: faSearch,
+    },
+    {
+        title: 'پروفایل',
+        path: '/jobseeker/profile',
+        icon: faUser
     }
 ];
 

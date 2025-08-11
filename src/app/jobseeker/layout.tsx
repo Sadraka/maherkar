@@ -35,9 +35,19 @@ const jobSeekerMenuItems = [
     icon: faTachometerAlt,
   },
   { 
-    title: 'پروفایل', 
+    title: 'ایجاد آگهی رزومه', 
+    path: '/jobseeker/resume-ads/create', 
+    icon: faPlus,
+  },
+  { 
+    title: 'آگهی‌های رزومه', 
+    path: '/jobseeker/resume-ads', 
+    icon: faBullhorn,
+  },
+  { 
+    title: 'مشخصات شخصی', 
     path: '', // بدون مسیر - فقط header
-    icon: faUser,
+    icon: faFileAlt,
     hasSubmenu: true,
     submenu: [
       { title: 'اطلاعات شخصی', path: '/jobseeker/resume', icon: faUser },
@@ -45,11 +55,6 @@ const jobSeekerMenuItems = [
       { title: 'تحصیلات', path: '/jobseeker/resume/educations', icon: faGraduationCap },
       { title: 'مهارت‌ها', path: '/jobseeker/resume/skills', icon: faTools },
     ]
-  },
-  { 
-    title: 'آگهی‌های رزومه', 
-    path: '/jobseeker/resume-ads', 
-    icon: faBullhorn,
   },
   { 
     title: 'درخواست‌های ارسالی', 
@@ -60,6 +65,11 @@ const jobSeekerMenuItems = [
     title: 'آگهی‌های شغلی', 
     path: '/jobseeker/job-ads', 
     icon: faSearch,
+  },
+  { 
+    title: 'پروفایل', 
+    path: '/jobseeker/profile', 
+    icon: faUser,
   }
 ];
 
@@ -83,6 +93,7 @@ export default function JobSeekerLayout({ children }: { children: React.ReactNod
     if (path === '/jobseeker/applications' && pathname?.startsWith('/jobseeker/applications/')) return true;
     if (path === '/jobseeker/job-ads' && pathname?.startsWith('/jobseeker/job-ads/')) return true;
     if (path === '/jobseeker/resume-ads' && pathname?.startsWith('/jobseeker/resume-ads/')) return true;
+    if (path === '/jobseeker/profile' && pathname?.startsWith('/jobseeker/profile/')) return true;
     
     return false;
   };

@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
-import { apiGet, apiPut } from '@/lib/axios';
+import { apiGet, apiPost, apiPut } from '@/lib/axios';
 import { useForm, Controller, SubmitHandler } from 'react-hook-form';
 import { 
   Box, 
@@ -34,13 +34,15 @@ import LocationOnIcon from '@mui/icons-material/LocationOn';
 import BusinessIcon from '@mui/icons-material/Business';
 import CategoryIcon from '@mui/icons-material/Category';
 import PeopleIcon from '@mui/icons-material/People';
-import CakeIcon from '@mui/icons-material/Cake';
-import ChildCareIcon from '@mui/icons-material/ChildCare';
-import LanguageIcon from '@mui/icons-material/Language';
-import LinkedInIcon from '@mui/icons-material/LinkedIn';
+import SchoolIcon from '@mui/icons-material/School';
+import WorkIcon from '@mui/icons-material/Work';
+import MonetizationOnIcon from '@mui/icons-material/MonetizationOn';
+import AccessTimeIcon from '@mui/icons-material/AccessTime';
+import SecurityIcon from '@mui/icons-material/Security';
+
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import { JOB_SEEKER_THEME } from '@/constants/colors';
-import ImageCropper from '@/components/common/ImageCropper';
+import AdditionalResumeFields from './AdditionalResumeFields';
 
 // تابع تبدیل اعداد انگلیسی به فارسی
 const convertToPersianNumbers = (num: number | string): string => {
@@ -88,8 +90,7 @@ type JobSeekerProfile = {
   headline?: string;
   bio?: string;
   profile_picture?: string;
-  website?: string;
-  linkedin_profile?: string;
+
   location?: {
     id: number;
     name: string;
@@ -115,15 +116,20 @@ type JobSeekerProfile = {
 interface PersonalInfoFormInputs {
   headline: string;
   bio: string;
-  profile_picture: FileList;
   province_id: number;
   city_id: number;
   industry_id: number;
   gender: string;
-  age: number;
-  kids_count: number;
   website: string;
   linkedin_profile: string;
+  soldier_status: string;
+  degree: string;
+  years_of_experience_numeric: number; // سال سابقه به صورت عددی
+  experience: string; // سابقه کاری انتخابی
+  expected_salary: string;
+  preferred_job_type: string;
+  availability: string;
+  cv?: FileList; // فایل رزومه
 }
 
 /**
@@ -140,9 +146,7 @@ export default function PersonalInfoForm() {
   const [dataLoading, setDataLoading] = useState(true);
   const [errors, setErrors] = useState<string[]>([]);
   const [success, setSuccess] = useState(false);
-  const [profilePicturePreview, setProfilePicturePreview] = useState<string | null>(null);
-  const [showImageCropper, setShowImageCropper] = useState(false);
-  const [selectedImageFile, setSelectedImageFile] = useState<File | null>(null);
+  const [resumeId, setResumeId] = useState<number | null>(null);
   
   const formRef = useRef<HTMLDivElement>(null);
   
@@ -162,10 +166,15 @@ export default function PersonalInfoForm() {
       city_id: 0,
       industry_id: 0,
       gender: '',
-      age: 0,
-      kids_count: 0,
       website: '',
-      linkedin_profile: ''
+      linkedin_profile: '',
+      soldier_status: '',
+      degree: '',
+      years_of_experience_numeric: 0,
+      experience: '',
+      expected_salary: '',
+      preferred_job_type: '',
+      availability: ''
     }
   });
 
@@ -191,8 +200,55 @@ export default function PersonalInfoForm() {
 
   // تبدیل constants به آرایه گزینه‌ها برای Select ها
   const genderOptions = [
-    { value: 'W', label: 'خانم' },
-    { value: 'M', label: 'آقا' }
+    { value: 'Male', label: 'مرد' },
+    { value: 'Female', label: 'زن' }
+  ];
+
+  const soldierStatusOptions = [
+    { value: 'Completed', label: 'پایان خدمت' },
+    { value: 'Permanent Exemption', label: 'معافیت دائم' },
+    { value: 'Educational Exemption', label: 'معافیت تحصیلی' },
+    { value: 'Not Completed', label: 'نااتمام' }
+  ];
+
+  const degreeOptions = [
+    { value: 'Below Diploma', label: 'زیر دیپلم' },
+    { value: 'Diploma', label: 'دیپلم' },
+    { value: 'Associate', label: 'فوق دیپلم' },
+    { value: 'Bachelor', label: 'لیسانس' },
+    { value: 'Master', label: 'فوق لیسانس' },
+    { value: 'Doctorate', label: 'دکترا' }
+  ];
+
+  // گزینه‌های سابقه کاری انتخابی (experience field)
+  const experienceOptions = [
+    { value: 'No EXPERIENCE', label: 'بدون سابقه کار' },
+    { value: 'Less than Three', label: 'کمتر از 3 سال' },
+    { value: 'Three or More', label: '3 تا 6 سال' },
+    { value: 'Six or More', label: 'بیشتر از 6 سال' }
+  ];
+
+  const salaryOptions = [
+    { value: '5 to 10', label: '5 تا 10 میلیون تومان' },
+    { value: '10 to 15', label: '10 تا 15 میلیون تومان' },
+    { value: '15 to 20', label: '15 تا 20 میلیون تومان' },
+    { value: '20 to 30', label: '20 تا 30 میلیون تومان' },
+    { value: '30 to 50', label: '30 تا 50 میلیون تومان' },
+    { value: 'More than 50', label: 'بیش از 50 میلیون تومان' },
+    { value: 'Negotiable', label: 'توافقی' }
+  ];
+
+  const jobTypeOptions = [
+    { value: 'Full-Time', label: 'تمام وقت' },
+    { value: 'Part-Time', label: 'پاره وقت' },
+    { value: 'Remote', label: 'دورکاری' },
+    { value: 'Internship', label: 'کارآموزی' }
+  ];
+
+  const availabilityOptions = [
+    { value: 'immediately', label: 'فوری' },
+    { value: 'with_notice', label: 'با اطلاع' },
+    { value: 'not_available', label: 'غیرقابل دسترسی' }
   ];
 
   // لود داده‌های مورد نیاز
@@ -200,36 +256,41 @@ export default function PersonalInfoForm() {
     const fetchData = async () => {
       setDataLoading(true);
       try {
-        const [profileResponse, industriesResponse, citiesResponse, provincesResponse] = await Promise.all([
-          apiGet('/profiles/me/'),
+        const [resumeResponse, industriesResponse, citiesResponse, provincesResponse] = await Promise.all([
+          apiGet('/resumes/resumes/'),
           apiGet('/industries/industries/'),
           apiGet('/locations/cities/'),
           apiGet('/locations/provinces/')
         ]);
         
-        // تنظیم داده‌های فرم
-        const profile = profileResponse.data as JobSeekerProfile;
-        if (profile) {
-          reset({
-            headline: profile.headline || '',
-            bio: profile.bio || '',
-            province_id: profile.location?.province?.id || 0,
-            city_id: profile.location?.id || 0,
-            industry_id: profile.industry?.id || 0,
-            gender: profile.personal_info?.gender || '',
-            age: profile.personal_info?.age || 0,
-            kids_count: profile.personal_info?.kids_count || 0,
-            website: profile.website || '',
-            linkedin_profile: profile.linkedin_profile || ''
-          });
+        // دریافت رزومه کاربر (اولین رزومه لیست)
+        const resumes = Array.isArray(resumeResponse.data) ? resumeResponse.data : [];
+        const resume = resumes.length > 0 ? resumes[0] : null;
 
-          // نمایش تصویر پروفایل اگر وجود داشته باشد
-          if (profile.profile_picture) {
-            const imageUrl = profile.profile_picture.startsWith('http') 
-              ? profile.profile_picture 
-              : `${process.env.NEXT_PUBLIC_API_URL}${profile.profile_picture}`;
-            setProfilePicturePreview(imageUrl);
-          }
+        if (resume) {
+          setResumeId(resume.id);
+          const allCities = citiesResponse.data as City[];
+          const cityObj = allCities.find((c) => c.id === resume.location);
+          reset({
+            headline: resume.headline || '',
+            bio: resume.bio || '',
+            province_id: cityObj?.province?.id || 0,
+            city_id: resume.location || 0,
+            industry_id: resume.industry || 0,
+            gender: resume.gender || '',
+            website: resume.website || '',
+            linkedin_profile: resume.linkedin_profile || '',
+            soldier_status: resume.soldier_status || '',
+            degree: resume.degree || '',
+            years_of_experience_numeric: resume.years_of_experience || 0,
+            experience: resume.experience || '',
+            expected_salary: resume.expected_salary || '',
+            preferred_job_type: resume.preferred_job_type || '',
+            availability: resume.availability || ''
+          });
+        } else {
+          // در صورت نبود رزومه، فرم روی مقادیر پیش‌فرض باقی می‌ماند
+          setResumeId(null);
         }
         
         setIndustries(industriesResponse.data as Industry[]);
@@ -246,78 +307,58 @@ export default function PersonalInfoForm() {
     fetchData();
   }, [reset]);
 
-  // تابع پردازش فایل تصویر
-  const handleImageFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (file) {
-      setSelectedImageFile(file);
-      setShowImageCropper(true);
-    }
-  };
-
-  // تابع تکمیل کراپ تصویر
-  const handleImageCropComplete = (croppedImage: File) => {
-    const dataTransfer = new DataTransfer();
-    dataTransfer.items.add(croppedImage);
-    const fileList = dataTransfer.files;
-    
-    setValue('profile_picture', fileList);
-    
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      setProfilePicturePreview(e.target?.result as string);
-    };
-    reader.readAsDataURL(croppedImage);
-    
-    setShowImageCropper(false);
-    setSelectedImageFile(null);
-  };
-
-  // تابع حذف تصویر پروفایل
-  const handleDeleteProfilePicture = () => {
-    setValue('profile_picture', undefined as any);
-    setProfilePicturePreview(null);
-  };
-
   const onSubmit: SubmitHandler<PersonalInfoFormInputs> = async (data) => {
     setLoading(true);
     setErrors([]);
 
     try {
-      const formDataToSend = new FormData();
-      
-      // اضافه کردن فیلدهای متنی
-      formDataToSend.append('headline', data.headline || '');
-      formDataToSend.append('bio', data.bio || '');
-      formDataToSend.append('website', data.website || '');
-      formDataToSend.append('linkedin_profile', data.linkedin_profile || '');
-      
-      // اضافه کردن شهر و صنعت
-      if (data.city_id && data.city_id !== 0) {
-        formDataToSend.append('location_id', String(data.city_id));
-      }
-      if (data.industry_id && data.industry_id !== 0) {
-        formDataToSend.append('industry_id', String(data.industry_id));
-      }
-      
-      // اضافه کردن اطلاعات شخصی
-      const personalInfo = {
-        gender: data.gender || '',
-        age: data.age || 0,
-        kids_count: data.kids_count || 0
+      // ساخت payload مطابق مدل رزومه
+      const payload: any = {
+        headline: data.headline || '',
+        bio: data.bio || '',
+        gender: data.gender || null,
+        website: data.website || '',
+        linkedin_profile: data.linkedin_profile || '',
+        industry: data.industry_id || null,
+        location: data.city_id || null,
+        soldier_status: data.soldier_status || null,
+        degree: data.degree || null,
+        years_of_experience: data.years_of_experience_numeric || null,
+        experience: data.experience || null,
+        expected_salary: data.expected_salary || null,
+        preferred_job_type: data.preferred_job_type || null,
+        availability: data.availability || null
       };
-      formDataToSend.append('personal_info', JSON.stringify(personalInfo));
-      
-      // اضافه کردن تصویر پروفایل
-      if (data.profile_picture && data.profile_picture.length > 0) {
-        formDataToSend.append('profile_picture', data.profile_picture[0]);
-      }
 
-      await apiPut('/profiles/job-seekers/update/me/', formDataToSend, {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
-      });
+      // اگر فایل CV انتخاب شده، از FormData استفاده کنیم
+      if (data.cv && data.cv[0]) {
+        const formData = new FormData();
+        Object.keys(payload).forEach(key => {
+          if (payload[key] !== null) {
+            formData.append(key, payload[key]);
+          }
+        });
+        formData.append('cv', data.cv[0]);
+
+        if (resumeId) {
+          await apiPut(`/resumes/resumes/${resumeId}/`, formData, {
+            headers: { 'Content-Type': 'multipart/form-data' }
+          });
+        } else {
+          const response = await apiPost('/resumes/resumes/', formData, {
+            headers: { 'Content-Type': 'multipart/form-data' }
+          });
+          setResumeId((response.data as any).id);
+        }
+      } else {
+        // بدون فایل، JSON معمولی ارسال کنیم
+        if (resumeId) {
+          await apiPut(`/resumes/resumes/${resumeId}/`, payload);
+        } else {
+          const response = await apiPost('/resumes/resumes/', payload);
+          setResumeId((response.data as any).id);
+        }
+      }
 
       setSuccess(true);
       
@@ -525,7 +566,7 @@ export default function PersonalInfoForm() {
           }}
         >
           <Box>
-            تکمیل اطلاعات شخصی به بهتر دیده شدن پروفایل شما کمک می‌کند.
+            تکمیل اطلاعات شخصی به بهتر دیده شدن رزومه شما در نظر کارفرمایان کمک می‌کند.
           </Box>
         </Alert>
       </Box>
@@ -604,7 +645,7 @@ export default function PersonalInfoForm() {
                 color: jobseekerColors.primary,
                 fontWeight: 600
               }}>
-                عنوان شغلی
+                                    عنوان شغلی
               </Typography>
             </Box>
             <Controller
@@ -614,7 +655,7 @@ export default function PersonalInfoForm() {
                 <TextField
                   {...field}
                   fullWidth
-                  placeholder="مثال: برنامه‌نویس React"
+                  placeholder="مثال: برنامه‌نویس فرانت‌اند"
                   error={Boolean(formErrors.headline)}
                   helperText={formErrors.headline?.message}
                   variant="outlined"
@@ -646,7 +687,7 @@ export default function PersonalInfoForm() {
               color: jobseekerColors.primary,
               fontWeight: 600
             }}>
-              درباره من
+              بیوگرافی
             </Typography>
           </Box>
           <Controller
@@ -658,7 +699,7 @@ export default function PersonalInfoForm() {
                 fullWidth
                 multiline
                 rows={4}
-                placeholder="توضیح کوتاهی درباره خودتان، تخصص‌ها و علایق شغلی..."
+                placeholder="توضیح مختصری درباره خودتان، تجربیات و مهارت‌های شغلی..."
                 error={Boolean(formErrors.bio)}
                 helperText={formErrors.bio?.message}
                 variant="outlined"
@@ -807,7 +848,7 @@ export default function PersonalInfoForm() {
                 color: jobseekerColors.primary,
                 fontWeight: 600
               }}>
-                حوزه کاری
+                                    گروه کاری
               </Typography>
             </Box>
             <Controller
@@ -823,7 +864,7 @@ export default function PersonalInfoForm() {
                       const selectedIndustry = industries.find(i => i.id === field.value);
                       return (
                         <Box component="div" sx={{ display: 'flex', justifyContent: 'center', width: '100%' }}>
-                          {selectedIndustry ? selectedIndustry.name : 'انتخاب حوزه کاری'}
+                                                        {selectedIndustry ? selectedIndustry.name : 'انتخاب گروه کاری'}
                         </Box>
                       );
                     }}
@@ -837,7 +878,7 @@ export default function PersonalInfoForm() {
                       <KeyboardArrowDownIcon {...props} sx={{ color: jobseekerColors.primary }} />
                     )}
                   >
-                    <MenuItem value={0} disabled>انتخاب حوزه کاری</MenuItem>
+                    <MenuItem value={0} disabled>انتخاب گروه کاری</MenuItem>
                     {industries.map((industry) => (
                       <MenuItem key={industry.id} value={industry.id}>
                         {industry.name}
@@ -908,121 +949,11 @@ export default function PersonalInfoForm() {
           </Box>
         </Box>
 
-        {/* سن و تعداد فرزندان */}
-        <Box sx={{ display: 'flex', flexDirection: { xs: 'column', md: 'row' }, gap: { xs: 1.5, md: 3 }, mb: { xs: 2, md: 4 } }}>
-          {/* سن */}
-          <Box sx={{ flex: 1 }}>
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
-              <CakeIcon sx={{ color: jobseekerColors.primary, fontSize: 20 }} />
-              <Typography variant="body2" fontWeight="medium" sx={{
-                fontSize: { xs: '0.7rem', sm: '0.875rem' },
-                lineHeight: { xs: 1.1, sm: 1.3 },
-                color: jobseekerColors.primary,
-                fontWeight: 600
-              }}>
-                سن
-              </Typography>
-            </Box>
-            <Controller
-              name="age"
-              control={control}
-              render={({ field }) => (
-                <TextField
-                  {...field}
-                  value={field.value ? convertToPersianNumbers(field.value) : ''}
-                  onChange={(e) => {
-                    // تبدیل اعداد فارسی به انگلیسی برای ذخیره
-                    const englishValue = e.target.value.replace(/[۰-۹]/g, (d) => {
-                      const persianNumbers = ['۰', '۱', '۲', '۳', '۴', '۵', '۶', '۷', '۸', '۹'];
-                      return persianNumbers.indexOf(d).toString();
-                    });
-                    field.onChange(parseInt(englishValue) || 0);
-                  }}
-                  fullWidth
-                  placeholder="سن شما"
-                  error={Boolean(formErrors.age)}
-                  helperText={formErrors.age?.message}
-                  variant="outlined"
-                  inputProps={{ min: 0, max: 100 }}
-                  sx={{ 
-                    '& .MuiOutlinedInput-root': { 
-                      borderRadius: '6px',
-                      '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-                        borderColor: jobseekerColors.primary
-                      }
-                    },
-                    '& .MuiInputBase-input': { 
-                      textAlign: 'left', 
-                      direction: 'ltr',
-                      fontSize: { xs: '0.8rem', sm: '1rem' },
-                      padding: { xs: '8px 14px', sm: '16.5px 14px' }
-                    }
-                  }}
-                />
-              )}
-            />
-          </Box>
-
-          {/* تعداد فرزندان */}
-          <Box sx={{ flex: 1 }}>
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
-              <ChildCareIcon sx={{ color: jobseekerColors.primary, fontSize: 20 }} />
-              <Typography variant="body2" fontWeight="medium" sx={{
-                fontSize: { xs: '0.7rem', sm: '0.875rem' },
-                lineHeight: { xs: 1.1, sm: 1.3 },
-                color: jobseekerColors.primary,
-                fontWeight: 600
-              }}>
-                تعداد فرزندان
-              </Typography>
-            </Box>
-            <Controller
-              name="kids_count"
-              control={control}
-              render={({ field }) => (
-                <TextField
-                  {...field}
-                  value={field.value ? convertToPersianNumbers(field.value) : ''}
-                  onChange={(e) => {
-                    // تبدیل اعداد فارسی به انگلیسی برای ذخیره
-                    const englishValue = e.target.value.replace(/[۰-۹]/g, (d) => {
-                      const persianNumbers = ['۰', '۱', '۲', '۳', '۴', '۵', '۶', '۷', '۸', '۹'];
-                      return persianNumbers.indexOf(d).toString();
-                    });
-                    field.onChange(parseInt(englishValue) || 0);
-                  }}
-                  fullWidth
-                  placeholder="تعداد فرزندان"
-                  error={Boolean(formErrors.kids_count)}
-                  helperText={formErrors.kids_count?.message}
-                  variant="outlined"
-                  inputProps={{ min: 0, max: 20 }}
-                  sx={{ 
-                    '& .MuiOutlinedInput-root': { 
-                      borderRadius: '6px',
-                      '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-                        borderColor: jobseekerColors.primary
-                      }
-                    },
-                    '& .MuiInputBase-input': { 
-                      textAlign: 'left', 
-                      direction: 'ltr',
-                      fontSize: { xs: '0.8rem', sm: '1rem' },
-                      padding: { xs: '8px 14px', sm: '16.5px 14px' }
-                    }
-                  }}
-                />
-              )}
-            />
-          </Box>
-        </Box>
-
-        {/* وب‌سایت و لینکدین */}
+        {/* وب‌سایت شخصی و پروفایل لینکدین */}
         <Box sx={{ display: 'flex', flexDirection: { xs: 'column', md: 'row' }, gap: { xs: 1.5, md: 3 }, mb: { xs: 2, md: 4 } }}>
           {/* وب‌سایت */}
           <Box sx={{ flex: 1 }}>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
-              <LanguageIcon sx={{ color: jobseekerColors.primary, fontSize: 20 }} />
               <Typography variant="body2" fontWeight="medium" sx={{
                 fontSize: { xs: '0.7rem', sm: '0.875rem' },
                 lineHeight: { xs: 1.1, sm: 1.3 },
@@ -1039,7 +970,7 @@ export default function PersonalInfoForm() {
                 <TextField
                   {...field}
                   fullWidth
-                  placeholder="example.com یا www.example.com"
+                  placeholder="www.example.com"
                   error={Boolean(formErrors.website)}
                   helperText={formErrors.website?.message}
                   variant="outlined"
@@ -1065,7 +996,6 @@ export default function PersonalInfoForm() {
           {/* لینکدین */}
           <Box sx={{ flex: 1 }}>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
-              <LinkedInIcon sx={{ color: jobseekerColors.primary, fontSize: 20 }} />
               <Typography variant="body2" fontWeight="medium" sx={{
                 fontSize: { xs: '0.7rem', sm: '0.875rem' },
                 lineHeight: { xs: 1.1, sm: 1.3 },
@@ -1106,6 +1036,225 @@ export default function PersonalInfoForm() {
           </Box>
         </Box>
 
+        {/* وضعیت سربازی و سال سابقه کاری (عدد) - کنار هم */}
+        <Box sx={{ display: 'flex', flexDirection: { xs: 'column', md: 'row' }, gap: { xs: 1.5, md: 3 }, mb: { xs: 2, md: 4 } }}>
+          {/* وضعیت سربازی */}
+          <Box sx={{ flex: 1 }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
+            <SecurityIcon sx={{ color: jobseekerColors.primary, fontSize: 20 }} />
+            <Typography variant="body2" fontWeight="medium" sx={{
+              fontSize: { xs: '0.7rem', sm: '0.875rem' },
+              lineHeight: { xs: 1.1, sm: 1.3 },
+              color: jobseekerColors.primary,
+              fontWeight: 600
+            }}>
+              وضعیت سربازی
+            </Typography>
+          </Box>
+          <Controller
+            name="soldier_status"
+            control={control}
+            render={({ field }) => (
+              <FormControl fullWidth error={Boolean(formErrors.soldier_status)}>
+                <Select
+                  {...field}
+                  displayEmpty
+                  input={<OutlinedInput sx={selectStyles} />}
+                  renderValue={() => {
+                    const selectedOption = soldierStatusOptions.find(opt => opt.value === field.value);
+                    return (
+                      <Box component="div" sx={{ display: 'flex', justifyContent: 'center', width: '100%' }}>
+                        {selectedOption ? selectedOption.label : 'انتخاب وضعیت سربازی'}
+                      </Box>
+                    );
+                  }}
+                  MenuProps={menuPropsRTL}
+                  startAdornment={
+                    <InputAdornment position="start" sx={{ position: 'absolute', right: '10px' }}>
+                      <SecurityIcon fontSize="small" sx={{ color: jobseekerColors.primary }} />
+                    </InputAdornment>
+                  }
+                  IconComponent={(props: any) => (
+                    <KeyboardArrowDownIcon {...props} sx={{ color: jobseekerColors.primary }} />
+                  )}
+                >
+                  <MenuItem value="" disabled>انتخاب وضعیت سربازی</MenuItem>
+                  {soldierStatusOptions.map((option) => (
+                    <MenuItem key={option.value} value={option.value}>
+                      {option.label}
+                    </MenuItem>
+                  ))}
+                </Select>
+                {formErrors.soldier_status && (
+                  <FormHelperText>{formErrors.soldier_status.message}</FormHelperText>
+                )}
+              </FormControl>
+            )}
+          />
+          </Box>
+
+          {/* سال سابقه کاری (عددی) */}
+          <Box sx={{ flex: 1 }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
+            <WorkIcon sx={{ color: jobseekerColors.primary, fontSize: 20 }} />
+            <Typography variant="body2" fontWeight="medium" sx={{
+              fontSize: { xs: '0.7rem', sm: '0.875rem' },
+              lineHeight: { xs: 1.1, sm: 1.3 },
+              color: jobseekerColors.primary,
+              fontWeight: 600
+            }}>
+              سال سابقه کاری (عدد)
+            </Typography>
+          </Box>
+          <Controller
+            name="years_of_experience_numeric"
+            control={control}
+            render={({ field }) => (
+              <TextField
+                {...field}
+                fullWidth
+                type="number"
+                placeholder="مثال: ۵"
+                error={Boolean(formErrors.years_of_experience_numeric)}
+                helperText={formErrors.years_of_experience_numeric?.message}
+                variant="outlined"
+                inputProps={{ min: 0, max: 50 }}
+                sx={{ 
+                  '& .MuiOutlinedInput-root': { 
+                    borderRadius: '6px',
+                    '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                      borderColor: jobseekerColors.primary,
+                      borderWidth: '2px'
+                    }
+                  },
+                  '& .MuiInputLabel-root.Mui-focused': {
+                    color: jobseekerColors.primary
+                  }
+                }}
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <WorkIcon sx={{ color: jobseekerColors.primary }} />
+                    </InputAdornment>
+                  )
+                }}
+              />
+            )}
+          />
+          </Box>
+        </Box>
+
+        {/* فیلدهای اضافی رزومه */}
+        <AdditionalResumeFields 
+          control={control}
+          formErrors={formErrors}
+          selectStyles={selectStyles}
+          menuPropsRTL={menuPropsRTL}
+        />
+
+        {/* فایل رزومه و وضعیت دسترسی - کنار هم */}
+        <Box sx={{ display: 'flex', flexDirection: { xs: 'column', md: 'row' }, gap: { xs: 1.5, md: 3 }, mb: { xs: 2, md: 4 } }}>
+          {/* فایل رزومه */}
+          <Box sx={{ flex: 1 }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
+              <PersonIcon sx={{ color: jobseekerColors.primary, fontSize: 20 }} />
+              <Typography variant="body2" fontWeight="medium" sx={{
+                fontSize: { xs: '0.7rem', sm: '0.875rem' },
+                lineHeight: { xs: 1.1, sm: 1.3 },
+                color: jobseekerColors.primary,
+                fontWeight: 600
+              }}>
+                فایل رزومه (PDF)
+              </Typography>
+            </Box>
+            <Controller
+              name="cv"
+              control={control}
+              render={({ field: { onChange, value, ...field } }) => (
+                <TextField
+                  {...field}
+                  fullWidth
+                  type="file"
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                    onChange(e.target.files);
+                  }}
+                  error={Boolean(formErrors.cv)}
+                  helperText={formErrors.cv?.message || 'فرمت‌های مجاز: PDF، حداکثر 5 مگابایت'}
+                  variant="outlined"
+                  inputProps={{ 
+                    accept: '.pdf',
+                    multiple: false
+                  }}
+                  sx={{ 
+                    '& .MuiOutlinedInput-root': { 
+                      borderRadius: '6px',
+                      '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                        borderColor: jobseekerColors.primary,
+                        borderWidth: '2px'
+                      }
+                    }
+                  }}
+                />
+              )}
+            />
+          </Box>
+
+          {/* وضعیت دسترسی */}
+          <Box sx={{ flex: 1 }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
+              <AccessTimeIcon sx={{ color: jobseekerColors.primary, fontSize: 20 }} />
+              <Typography variant="body2" fontWeight="medium" sx={{
+                fontSize: { xs: '0.7rem', sm: '0.875rem' },
+                lineHeight: { xs: 1.1, sm: 1.3 },
+                color: jobseekerColors.primary,
+                fontWeight: 600
+              }}>
+                وضعیت دسترسی
+              </Typography>
+            </Box>
+            <Controller
+              name="availability"
+              control={control}
+              render={({ field }) => (
+                <FormControl fullWidth error={Boolean(formErrors.availability)}>
+                  <Select
+                    {...field}
+                    displayEmpty
+                    input={<OutlinedInput sx={selectStyles} />}
+                    renderValue={() => {
+                      const selectedOption = availabilityOptions.find(opt => opt.value === field.value);
+                      return (
+                        <Box component="div" sx={{ display: 'flex', justifyContent: 'center', width: '100%' }}>
+                          {selectedOption ? selectedOption.label : 'انتخاب وضعیت دسترسی'}
+                        </Box>
+                      );
+                    }}
+                    MenuProps={menuPropsRTL}
+                    startAdornment={
+                      <InputAdornment position="start" sx={{ position: 'absolute', right: '10px' }}>
+                        <AccessTimeIcon fontSize="small" sx={{ color: jobseekerColors.primary }} />
+                      </InputAdornment>
+                    }
+                    IconComponent={(props: any) => (
+                      <KeyboardArrowDownIcon {...props} sx={{ color: jobseekerColors.primary }} />
+                    )}
+                  >
+                    <MenuItem value="" disabled>انتخاب وضعیت دسترسی</MenuItem>
+                    {availabilityOptions.map((option) => (
+                      <MenuItem key={option.value} value={option.value}>
+                        {option.label}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                  {formErrors.availability && (
+                    <FormHelperText>{formErrors.availability.message}</FormHelperText>
+                  )}
+                </FormControl>
+              )}
+            />
+          </Box>
+        </Box>
+
         {/* دکمه ذخیره */}
         <Box sx={{ 
           textAlign: { xs: 'center', sm: 'right' }, 
@@ -1131,20 +1280,12 @@ export default function PersonalInfoForm() {
                 <CircularProgress size={20} color="inherit" sx={{ ml: 1 }} />
                 در حال ذخیره...
               </>
-            ) : 'ذخیره اطلاعات'}
+            ) : 'ذخیره'}
           </Button>
         </Box>
       </form>
 
-      {/* ImageCropper برای تصویر پروفایل */}
-      <ImageCropper
-        open={showImageCropper}
-        onClose={() => setShowImageCropper(false)}
-        imageFile={selectedImageFile}
-        onCropComplete={handleImageCropComplete}
-        aspectRatio={1}
-        title="ویرایش تصویر پروفایل"
-      />
+      {/* آپلود تصویر در صفحه پروفایل انجام می‌شود */}
     </Paper>
   );
 }
