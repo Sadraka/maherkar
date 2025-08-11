@@ -1255,32 +1255,47 @@ export default function PersonalInfoForm() {
           </Box>
         </Box>
 
-        {/* دکمه ذخیره */}
+        {/* دکمه ذخیره - هماهنگ با استایل دکمه "ذخیره تغییرات" در JobSeekerProfileForm */}
         <Box sx={{ 
-          textAlign: { xs: 'center', sm: 'right' }, 
-          mt: { xs: 3, md: 4 }
+          mt: { xs: 3, md: 4 },
+          display: 'flex',
+          justifyContent: { xs: 'center', sm: 'flex-start' }
         }}>
           <Button
             type="submit"
             variant="contained"
+            color="success"
             disabled={loading}
-            sx={{ 
-              bgcolor: jobseekerColors.primary,
-              px: { xs: 4, md: 6 },
-              py: { xs: 1, md: 1.5 },
+            sx={{
+              background: jobseekerColors.primary,
+              color: 'white',
+              '&:hover': { 
+                background: jobseekerColors.dark,
+                boxShadow: '0 4px 12px rgba(0,0,0,0.2)'
+              },
+              '&:disabled': {
+                background: jobseekerColors.primary,
+                color: 'white',
+                cursor: 'not-allowed',
+                opacity: 0.5
+              },
               borderRadius: 2,
-              '&:hover': { bgcolor: jobseekerColors.dark },
-              fontSize: { xs: '0.875rem', md: '1rem' },
-              fontWeight: 'medium',
-              width: { xs: '100%', sm: 'auto' }
+              px: 4,
+              py: 1.5,
+              fontSize: '1rem',
+              fontWeight: 'bold',
+              minWidth: '140px',
+              width: '140px',
+              height: '48px',
+              transition: 'all 0.2s ease',
+              boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
+              whiteSpace: 'nowrap',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center'
             }}
           >
-            {loading ? (
-              <>
-                <CircularProgress size={20} color="inherit" sx={{ ml: 1 }} />
-                در حال ذخیره...
-              </>
-            ) : 'ذخیره'}
+            {loading ? '...' : 'ذخیره تغییرات'}
           </Button>
         </Box>
       </form>

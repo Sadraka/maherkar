@@ -439,12 +439,22 @@ export default function JobSeekerProfileForm() {
               fullWidth
               value={user?.full_name || profileData?.user?.full_name || 'نامشخص'}
               sx={{ 
-                mb: 2, 
-                '& .MuiInputBase-input': { textAlign: 'left' }
+                mb: 2,
+                '& .MuiInputBase-input': { textAlign: 'left' },
+                // جلوگیری از تغییر رنگ/ضخامت کادر هنگام هاور و فوکوس برای فیلدهای فقط-خواندنی
+                '& .MuiOutlinedInput-root .MuiOutlinedInput-notchedOutline': { borderColor: 'rgba(0,0,0,0.23)' },
+                '& .MuiOutlinedInput-root:hover .MuiOutlinedInput-notchedOutline': { borderColor: 'rgba(0,0,0,0.23)' },
+                '& .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline': { borderColor: 'rgba(0,0,0,0.23)' }
               }}
               InputProps={{
                 readOnly: true,
                 startAdornment: <PersonIcon sx={{ mr: 1, color: 'text.secondary' }} />
+              }}
+              InputLabelProps={{
+                sx: {
+                  color: 'text.secondary',
+                  '&.Mui-focused': { color: 'text.secondary' }
+                }
               }}
             />
 
@@ -454,12 +464,21 @@ export default function JobSeekerProfileForm() {
               fullWidth
               value={toPersianDigits(profileData?.user?.phone || user?.phone || '') || 'در دسترس نیست'}
               sx={{ 
-                mb: 2, 
-                '& .MuiInputBase-input': { textAlign: 'left' }
+                mb: 2,
+                '& .MuiInputBase-input': { textAlign: 'left' },
+                '& .MuiOutlinedInput-root .MuiOutlinedInput-notchedOutline': { borderColor: 'rgba(0,0,0,0.23)' },
+                '& .MuiOutlinedInput-root:hover .MuiOutlinedInput-notchedOutline': { borderColor: 'rgba(0,0,0,0.23)' },
+                '& .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline': { borderColor: 'rgba(0,0,0,0.23)' }
               }}
               InputProps={{
                 readOnly: true,
                 startAdornment: <PhoneIcon sx={{ mr: 1, color: 'text.secondary' }} />
+              }}
+              InputLabelProps={{
+                sx: {
+                  color: 'text.secondary',
+                  '&.Mui-focused': { color: 'text.secondary' }
+                }
               }}
             />
 
@@ -469,12 +488,21 @@ export default function JobSeekerProfileForm() {
               fullWidth
               value={profileData?.created_at ? toPersianDigits(new Date(profileData.created_at).toLocaleDateString('fa-IR')) : '-'}
               sx={{ 
-                mb: 2, 
-                '& .MuiInputBase-input': { textAlign: 'left' }
+                mb: 2,
+                '& .MuiInputBase-input': { textAlign: 'left' },
+                '& .MuiOutlinedInput-root .MuiOutlinedInput-notchedOutline': { borderColor: 'rgba(0,0,0,0.23)' },
+                '& .MuiOutlinedInput-root:hover .MuiOutlinedInput-notchedOutline': { borderColor: 'rgba(0,0,0,0.23)' },
+                '& .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline': { borderColor: 'rgba(0,0,0,0.23)' }
               }}
               InputProps={{
                 readOnly: true,
                 startAdornment: <CalendarTodayIcon sx={{ mr: 1, color: 'text.secondary' }} />
+              }}
+              InputLabelProps={{
+                sx: {
+                  color: 'text.secondary',
+                  '&.Mui-focused': { color: 'text.secondary' }
+                }
               }}
             />
 

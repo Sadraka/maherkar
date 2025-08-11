@@ -541,16 +541,26 @@ export default function EducationForm() {
       {!showAddForm && (
         <Box sx={{ textAlign: 'center', mb: 3 }}>
           <Button
-            variant="outlined"
-            startIcon={<AddIcon />}
+            variant="contained"
+            color="success"
             onClick={() => setShowAddForm(true)}
             sx={{
-              borderColor: jobseekerColors.primary,
-              color: jobseekerColors.primary,
-              '&:hover': {
-                borderColor: jobseekerColors.dark,
-                backgroundColor: alpha(jobseekerColors.primary, 0.05)
-              }
+              background: jobseekerColors.primary,
+              color: 'white',
+              '&:hover': { 
+                background: jobseekerColors.dark,
+                boxShadow: '0 4px 12px rgba(0,0,0,0.2)'
+              },
+              borderRadius: 2,
+              px: 4,
+              py: 1.5,
+              fontSize: '1rem',
+              fontWeight: 'bold',
+              minWidth: '140px',
+              width: 'auto',
+              height: '48px',
+              transition: 'all 0.2s ease',
+              boxShadow: '0 2px 8px rgba(0,0,0,0.15)'
             }}
           >
             افزودن تحصیلات جدید
@@ -928,25 +938,39 @@ export default function EducationForm() {
               <Button
                 type="submit"
                 variant="contained"
-                startIcon={<SaveIcon />}
+                color="success"
                 disabled={loading}
-                sx={{ 
-                  bgcolor: jobseekerColors.primary,
-                  px: { xs: 4, md: 6 },
-                  py: { xs: 1, md: 1.5 },
+                sx={{
+                  background: jobseekerColors.primary,
+                  color: 'white',
+                  '&:hover': { 
+                    background: jobseekerColors.dark,
+                    boxShadow: '0 4px 12px rgba(0,0,0,0.2)'
+                  },
+                  '&:disabled': {
+                    background: jobseekerColors.primary,
+                    color: 'white',
+                    cursor: 'not-allowed',
+                    opacity: 0.5
+                  },
                   borderRadius: 2,
-                  '&:hover': { bgcolor: jobseekerColors.dark },
-                  fontSize: { xs: '0.875rem', md: '1rem' },
-                  fontWeight: 'medium',
+                  px: 4,
+                  py: 1.5,
+                  fontSize: '1rem',
+                  fontWeight: 'bold',
+                  minWidth: '140px',
+                  width: '140px',
+                  height: '48px',
+                  transition: 'all 0.2s ease',
+                  boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
+                  whiteSpace: 'nowrap',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
                   order: { xs: 1, sm: 2 }
                 }}
               >
-                {loading ? (
-                  <>
-                    <CircularProgress size={20} color="inherit" sx={{ ml: 1 }} />
-                    در حال ذخیره...
-                  </>
-                ) : (editingId ? 'به‌روزرسانی' : 'ذخیره')}
+                {loading ? '...' : 'ذخیره تغییرات'}
               </Button>
             </Box>
           </form>

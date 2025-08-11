@@ -412,14 +412,36 @@ export default function ExperiencesForm() {
             
             <Button
               variant="contained"
-              startIcon={<AddIcon />}
+              color="success"
               onClick={() => setShowAddForm(true)}
               disabled={showAddForm}
               sx={{
-                bgcolor: jobseekerColors.primary,
-                '&:hover': { bgcolor: jobseekerColors.dark },
+                background: jobseekerColors.primary,
+                color: 'white',
+                '&:hover': { 
+                  background: jobseekerColors.dark,
+                  boxShadow: '0 4px 12px rgba(0,0,0,0.2)'
+                },
+                '&:disabled': {
+                  background: jobseekerColors.primary,
+                  color: 'white',
+                  cursor: 'not-allowed',
+                  opacity: 0.5
+                },
                 borderRadius: 2,
-                px: 3
+                px: 4,
+                py: 1.5,
+                fontSize: '1rem',
+                fontWeight: 'bold',
+                minWidth: '140px',
+                width: '140px',
+                height: '48px',
+                transition: 'all 0.2s ease',
+                boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
+                whiteSpace: 'nowrap',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center'
               }}
             >
               افزودن تجربه
@@ -896,14 +918,38 @@ export default function ExperiencesForm() {
               <Button
                 type="submit"
                 variant="contained"
+                color="success"
                 disabled={loading}
-                startIcon={loading ? <CircularProgress size={20} /> : <SaveIcon />}
                 sx={{
-                  bgcolor: jobseekerColors.primary,
-                  '&:hover': { bgcolor: jobseekerColors.dark }
+                  background: jobseekerColors.primary,
+                  color: 'white',
+                  '&:hover': { 
+                    background: jobseekerColors.dark,
+                    boxShadow: '0 4px 12px rgba(0,0,0,0.2)'
+                  },
+                  '&:disabled': {
+                    background: jobseekerColors.primary,
+                    color: 'white',
+                    cursor: 'not-allowed',
+                    opacity: 0.5
+                  },
+                  borderRadius: 2,
+                  px: 4,
+                  py: 1.5,
+                  fontSize: '1rem',
+                  fontWeight: 'bold',
+                  minWidth: '140px',
+                  width: '140px',
+                  height: '48px',
+                  transition: 'all 0.2s ease',
+                  boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
+                  whiteSpace: 'nowrap',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center'
                 }}
               >
-                {loading ? 'در حال ذخیره...' : 'ذخیره'}
+                {loading ? '...' : 'ذخیره تغییرات'}
               </Button>
             </Box>
           </form>
