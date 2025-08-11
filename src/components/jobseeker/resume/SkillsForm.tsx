@@ -106,7 +106,7 @@ export default function SkillsForm() {
     const fetchSkills = async () => {
       setDataLoading(true);
       try {
-        const response = await apiGet('/profiles/job-seekers/skills/');
+        const response = await apiGet('/resumes/skills/');
         setSkills(response.data as Skill[]);
       } catch (err) {
         console.error('خطا در دریافت مهارت‌ها:', err);
@@ -127,12 +127,12 @@ export default function SkillsForm() {
     try {
       let response;
       if (editingId) {
-        response = await apiPut(`/profiles/job-seekers/skills/${editingId}/`, data);
+        response = await apiPut(`/resumes/skills/${editingId}/`, data);
         setSkills(prev => prev.map(skill => 
           skill.id === editingId ? response.data : skill
         ));
       } else {
-        response = await apiPost('/profiles/job-seekers/skills/', data);
+        response = await apiPost('/resumes/skills/', data);
         setSkills(prev => [...prev, response.data]);
       }
 
@@ -183,7 +183,7 @@ export default function SkillsForm() {
     if (!confirm('آیا از حذف این مهارت اطمینان دارید؟')) return;
     
     try {
-      await apiDelete(`/profiles/job-seekers/skills/${id}/`);
+      await apiDelete(`/resumes/skills/${id}/`);
       setSkills(prev => prev.filter(skill => skill.id !== id));
       setSuccess(true);
     } catch (err) {

@@ -206,7 +206,7 @@ export default function JobSeekerLayout({ children }: { children: React.ReactNod
                         fontSize: '0.7rem',
                         lineHeight: 1.2,
                         color: '#fff',
-                        fontWeight: 'medium'
+                        fontWeight: 500
                       }}
                     >
                       کارجو
@@ -214,55 +214,58 @@ export default function JobSeekerLayout({ children }: { children: React.ReactNod
                   </Box>
                 </Box>
 
-                <Divider sx={{ mx: 2, mb: 1 }} />
+                <Divider sx={{ mb: 1.5 }} />
 
                 {/* منوی اصلی */}
                 <List sx={{ 
-                  px: 0, 
-                  pb: 2,
-                  transition: 'all 0.3s ease-in-out',
-                  overflow: 'visible'
+                  px: 1, 
+                  width: '100%',
+                  pb: 2
                 }}>
                     {jobSeekerMenuItems.map((item) => (
                       <Box key={item.path}>
                         {/* آیتم اصلی منو */}
-                        <ListItem disablePadding sx={{ mb: 0.5 }}>
+                        <ListItem sx={{ p: 0.5 }}>
                           <ListItemButton
                             component={item.hasSubmenu ? 'div' : Link}
                             href={!item.hasSubmenu ? item.path : undefined}
                             onClick={item.hasSubmenu ? () => toggleSubmenu(item.title) : undefined}
+                            selected={isActiveMenuItem(item.path)}
                             sx={{
-                              borderRadius: '8px',
-                              mx: 0,
-                              py: 1.5,
-                              px: 2,
-                              cursor: 'pointer',
-                              '&:hover': {
+                              borderRadius: 1,
+                              py: 1,
+                              width: '100%',
+                              '&.Mui-selected': {
                                 bgcolor: JOB_SEEKER_THEME.bgLight,
-                                color: JOB_SEEKER_THEME.primary,
-                              },
-                              ...(isActiveMenuItem(item.path) && {
-                                bgcolor: JOB_SEEKER_THEME.bgLight,
-                                color: JOB_SEEKER_THEME.primary,
+                                '&:hover': {
+                                  bgcolor: JOB_SEEKER_THEME.bgVeryLight,
+                                },
                                 '& .MuiListItemIcon-root': {
                                   color: JOB_SEEKER_THEME.primary,
                                 },
-                              }),
+                                '& .MuiListItemText-primary': {
+                                  color: JOB_SEEKER_THEME.primary,
+                                  fontWeight: 'bold'
+                                }
+                              },
+                              '&:hover': {
+                                bgcolor: JOB_SEEKER_THEME.bgVeryLight,
+                              },
                             }}
                           >
                             <ListItemIcon
                               sx={{
-                                minWidth: 36,
+                                minWidth: 56,
                                 color: isActiveMenuItem(item.path) ? JOB_SEEKER_THEME.primary : 'text.secondary',
                               }}
                             >
-                              <FontAwesomeIcon icon={item.icon} style={{ fontSize: '1rem' }} />
+                              <FontAwesomeIcon icon={item.icon} style={{ fontSize: '1.1rem' }} />
                             </ListItemIcon>
                             <ListItemText
                               primary={item.title}
                               primaryTypographyProps={{
-                                fontSize: '0.9rem',
-                                fontWeight: isActiveMenuItem(item.path) ? 'medium' : 'normal',
+                                fontSize: '0.875rem',
+                                fontWeight: isActiveMenuItem(item.path) ? 'bold' : 'normal',
                               }}
                             />
                             {item.hasSubmenu && (
@@ -294,43 +297,48 @@ export default function JobSeekerLayout({ children }: { children: React.ReactNod
                               width: '100%',
                             }}>
                               {item.submenu.map((subItem: any) => (
-                                <ListItem key={subItem.path} disablePadding sx={{ mb: 0.3 }}>
+                                <ListItem key={subItem.path} sx={{ p: 0.5 }}>
                                   <ListItemButton
                                     component={Link}
                                     href={subItem.path}
+                                    selected={isActiveMenuItem(subItem.path)}
                                     sx={{
-                                      borderRadius: '6px',
-                                      mx: 0,
+                                      borderRadius: 1,
                                       py: 1,
-                                      px: 1.5,
+                                      width: '100%',
                                       minHeight: '40px',
-                                      '&:hover': {
+                                      '&.Mui-selected': {
                                         bgcolor: JOB_SEEKER_THEME.bgVeryLight,
-                                        color: JOB_SEEKER_THEME.primary,
-                                      },
-                                      ...(isActiveMenuItem(subItem.path) && {
-                                        bgcolor: JOB_SEEKER_THEME.bgVeryLight,
-                                        color: JOB_SEEKER_THEME.primary,
                                         borderRight: `3px solid ${JOB_SEEKER_THEME.primary}`,
+                                        '&:hover': {
+                                          bgcolor: JOB_SEEKER_THEME.bgLight,
+                                        },
                                         '& .MuiListItemIcon-root': {
                                           color: JOB_SEEKER_THEME.primary,
                                         },
-                                      }),
+                                        '& .MuiListItemText-primary': {
+                                          color: JOB_SEEKER_THEME.primary,
+                                          fontWeight: 'bold'
+                                        }
+                                      },
+                                      '&:hover': {
+                                        bgcolor: JOB_SEEKER_THEME.bgVeryLight,
+                                      },
                                     }}
                                   >
                                     <ListItemIcon
                                       sx={{
-                                        minWidth: 32,
+                                        minWidth: 48,
                                         color: isActiveMenuItem(subItem.path) ? JOB_SEEKER_THEME.primary : 'text.secondary',
                                       }}
                                     >
-                                      <FontAwesomeIcon icon={subItem.icon} style={{ fontSize: '0.85rem' }} />
+                                      <FontAwesomeIcon icon={subItem.icon} style={{ fontSize: '0.9rem' }} />
                                     </ListItemIcon>
                                     <ListItemText
                                       primary={subItem.title}
                                       primaryTypographyProps={{
-                                        fontSize: '0.85rem',
-                                        fontWeight: isActiveMenuItem(subItem.path) ? 'medium' : 'normal',
+                                        fontSize: '0.8rem',
+                                        fontWeight: isActiveMenuItem(subItem.path) ? 'bold' : 'normal',
                                       }}
                                     />
                                   </ListItemButton>

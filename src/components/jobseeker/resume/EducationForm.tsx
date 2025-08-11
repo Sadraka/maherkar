@@ -124,7 +124,7 @@ export default function EducationForm() {
     const fetchEducations = async () => {
       setDataLoading(true);
       try {
-        const response = await apiGet('/profiles/job-seekers/educations/');
+        const response = await apiGet('/resumes/educations/');
         setEducations(response.data as Education[]);
       } catch (err) {
         console.error('خطا در دریافت تحصیلات:', err);
@@ -150,12 +150,12 @@ export default function EducationForm() {
 
       let response;
       if (editingId) {
-        response = await apiPut(`/profiles/job-seekers/educations/${editingId}/`, educationData);
+        response = await apiPut(`/resumes/educations/${editingId}/`, educationData);
         setEducations(prev => prev.map(edu => 
           edu.id === editingId ? response.data : edu
         ));
       } else {
-        response = await apiPost('/profiles/job-seekers/educations/', educationData);
+        response = await apiPost('/resumes/educations/', educationData);
         setEducations(prev => [...prev, response.data]);
       }
 
@@ -206,7 +206,7 @@ export default function EducationForm() {
     if (!confirm('آیا از حذف این تحصیلات اطمینان دارید؟')) return;
     
     try {
-      await apiDelete(`/profiles/job-seekers/educations/${id}/`);
+      await apiDelete(`/resumes/educations/${id}/`);
       setEducations(prev => prev.filter(edu => edu.id !== id));
       setSuccess(true);
     } catch (err) {
