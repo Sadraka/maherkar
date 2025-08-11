@@ -10,7 +10,7 @@ import EducationForm from '@/components/jobseeker/resume/EducationForm';
 export default function EducationsPage() {
   return (
     <Container maxWidth="lg" sx={{ py: 6 }}>
-      <EducationsForm />
+      <EducationForm />
     </Container>
   );
 }
