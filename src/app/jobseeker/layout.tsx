@@ -36,7 +36,7 @@ const jobSeekerMenuItems = [
   },
   { 
     title: 'پروفایل', 
-    path: '/jobseeker/profile', 
+    path: '', // بدون مسیر - فقط header
     icon: faUser,
     hasSubmenu: true,
     submenu: [
@@ -76,12 +76,14 @@ export default function JobSeekerLayout({ children }: { children: React.ReactNod
   
   // بررسی اینکه آیا در صفحه‌ای هستیم که آیتم منو با آن تطبیق دارد
   const isActiveMenuItem = (path: string) => {
+    // تطبیق دقیق
     if (path === pathname) return true;
-    // بررسی برای زیرصفحات
-    if (path === '/jobseeker/resume' && pathname?.startsWith('/jobseeker/resume/')) return true;
+    
+    // بررسی برای زیرصفحات (فقط برای آیتم‌هایی که زیرمنو ندارند)
     if (path === '/jobseeker/applications' && pathname?.startsWith('/jobseeker/applications/')) return true;
     if (path === '/jobseeker/job-ads' && pathname?.startsWith('/jobseeker/job-ads/')) return true;
     if (path === '/jobseeker/resume-ads' && pathname?.startsWith('/jobseeker/resume-ads/')) return true;
+    
     return false;
   };
 
@@ -222,8 +224,8 @@ export default function JobSeekerLayout({ children }: { children: React.ReactNod
                   width: '100%',
                   pb: 2
                 }}>
-                    {jobSeekerMenuItems.map((item) => (
-                      <Box key={item.path}>
+                    {jobSeekerMenuItems.map((item, index) => (
+                      <Box key={item.path || `menu-item-${index}`}>
                         {/* آیتم اصلی منو */}
                         <ListItem sx={{ p: 0.5 }}>
                           <ListItemButton
