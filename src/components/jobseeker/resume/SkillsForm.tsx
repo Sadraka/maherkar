@@ -96,10 +96,10 @@ export default function SkillsForm() {
 
   // مقادیر ثابت برای سطح مهارت
   const skillLevelOptions = [
-    { value: 'مبتدی', label: 'مبتدی', color: '#ff9800' },
-    { value: 'متوسط', label: 'متوسط', color: '#2196f3' },
-    { value: 'پیشرفته', label: 'پیشرفته', color: '#4caf50' },
-    { value: 'خبره', label: 'خبره', color: '#9c27b0' }
+    { value: 'beginner', label: 'مبتدی', color: '#ff9800' },
+    { value: 'intermediate', label: 'متوسط', color: '#2196f3' },
+    { value: 'advanced', label: 'پیشرفته', color: '#4caf50' },
+    { value: 'expert', label: 'خبره', color: '#9c27b0' }
   ];
 
   // لود مهارت‌ها و رزومه
@@ -330,15 +330,47 @@ export default function SkillsForm() {
     }
   };
 
+  // تابع دریافت برچسب فارسی برای سطح مهارت
+  const getLevelLabel = (level: string) => {
+    // ابتدا در skillLevelOptions جستجو کن
+    const option = skillLevelOptions.find(opt => opt.value === level);
+    if (option) return option.label;
+    
+    // اگر پیدا نشد، مقادیر قدیمی فارسی رو چک کن
+    switch(level) {
+      case 'مبتدی': return 'مبتدی';
+      case 'متوسط': return 'متوسط';
+      case 'پیشرفته': return 'پیشرفته';
+      case 'خبره': return 'خبره';
+      default: return level; // اگر هیچ‌کدام نبود، همون مقدار اصلی رو برگردون
+    }
+  };
+
   // تابع دریافت رنگ بر اساس سطح مهارت
   const getLevelColor = (level: string) => {
+    // ابتدا در skillLevelOptions جستجو کن
     const option = skillLevelOptions.find(opt => opt.value === level);
-    return option ? option.color : jobseekerColors.primary;
+    if (option) return option.color;
+    
+    // اگر پیدا نشد، مقادیر قدیمی فارسی رو چک کن
+    switch(level) {
+      case 'مبتدی': return '#ff9800';
+      case 'متوسط': return '#2196f3';
+      case 'پیشرفته': return '#4caf50';
+      case 'خبره': return '#9c27b0';
+      default: return jobseekerColors.primary;
+    }
   };
 
   // تابع دریافت تعداد ستاره بر اساس سطح
   const getStarsCount = (level: string) => {
+    // ابتدا در skillLevelOptions جستجو کن
     switch(level) {
+      case 'beginner': return 1;
+      case 'intermediate': return 2;
+      case 'advanced': return 3;
+      case 'expert': return 4;
+      // مقادیر قدیمی فارسی
       case 'مبتدی': return 1;
       case 'متوسط': return 2;
       case 'پیشرفته': return 3;
@@ -507,29 +539,29 @@ export default function SkillsForm() {
                         {skill.name}
                       </Typography>
                       
-                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
-                        <Chip 
-                          label={skill.level}
-                          size="small"
-                          sx={{ 
-                            backgroundColor: getLevelColor(skill.level),
-                            color: 'white',
-                            fontWeight: 'bold'
-                          }}
-                        />
-                        <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                          {Array.from({ length: 4 }, (_, i) => (
-                            <StarIcon 
-                              key={i}
-                              fontSize="small"
-                              sx={{ 
-                                color: i < getStarsCount(skill.level) ? getLevelColor(skill.level) : '#e0e0e0',
-                                fontSize: '16px'
-                              }}
-                            />
-                          ))}
-                        </Box>
-                      </Box>
+                                             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
+                         <Chip 
+                           label={getLevelLabel(skill.level)}
+                           size="small"
+                           sx={{ 
+                             backgroundColor: getLevelColor(skill.level),
+                             color: 'white',
+                             fontWeight: 'bold'
+                           }}
+                         />
+                         <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                           {Array.from({ length: 4 }, (_, i) => (
+                             <StarIcon 
+                               key={i}
+                               fontSize="small"
+                               sx={{ 
+                                 color: i < getStarsCount(skill.level) ? getLevelColor(skill.level) : '#e0e0e0',
+                                 fontSize: '16px'
+                               }}
+                             />
+                           ))}
+                         </Box>
+                       </Box>
                       
                       {skill.description && (
                         <Typography variant="body2" color="text.secondary" sx={{ 
