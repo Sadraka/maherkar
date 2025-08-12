@@ -63,6 +63,7 @@ import {
     faUserCheck,
     faSearch
 } from '@fortawesome/free-solid-svg-icons';
+import BuildIcon from '@mui/icons-material/Build';
 import { useAuthStore, useAuthActions } from '@/store/authStore';
 import { useJobStatsStore } from '@/store/jobStatsStore';
 import { EMPLOYER_THEME, JOB_SEEKER_THEME, ADMIN_THEME } from '@/constants/colors';
@@ -236,6 +237,11 @@ const adminMenuItems = [
         title: 'گروه‌های کاری',
         path: '/admin#industries',
         icon: faIndustry,
+    },
+    {
+        title: 'مهارت‌ها',
+        path: '/admin#skills',
+        icon: faTools,
     },
     {
         title: 'درخواست‌ها',

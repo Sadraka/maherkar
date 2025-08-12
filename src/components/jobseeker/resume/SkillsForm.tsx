@@ -47,18 +47,24 @@ import { JOB_SEEKER_THEME } from '@/constants/colors';
  */
 type Skill = {
   id?: number;
-  name: string;
+  skill?: {
+    id: number;
+    name: string;
+    icon?: string;
+    industry: {
+      id: number;
+      name: string;
+    };
+  };
   level: string;
-  description?: string;
 };
 
 /**
  * ورودی‌های فرم مهارت‌ها
  */
 interface SkillFormInputs {
-  name: string;
+  skill_id: number;
   level: string;
-  description?: string;
 }
 
 /**
@@ -69,6 +75,7 @@ export default function SkillsForm() {
   const theme = useTheme();
   const jobseekerColors = JOB_SEEKER_THEME;
   const [skills, setSkills] = useState<Skill[]>([]);
+  const [availableSkills, setAvailableSkills] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [dataLoading, setDataLoading] = useState(true);
   const [errors, setErrors] = useState<string[]>([]);
@@ -88,9 +95,8 @@ export default function SkillsForm() {
     reset
   } = useForm<SkillFormInputs>({
     defaultValues: {
-      name: '',
-      level: '',
-      description: ''
+      skill_id: 0,
+      level: ''
     }
   });
 
@@ -102,17 +108,19 @@ export default function SkillsForm() {
     { value: 'expert', label: 'خبره', color: '#9c27b0' }
   ];
 
-  // لود مهارت‌ها و رزومه
+  // لود مهارت‌ها، مهارت‌های موجود و رزومه
   useEffect(() => {
     const fetchData = async () => {
       setDataLoading(true);
       try {
-        const [skillsResponse, resumesResponse] = await Promise.all([
+        const [skillsResponse, availableSkillsResponse, resumesResponse] = await Promise.all([
           apiGet('/resumes/skills/'),
+          apiGet('/industries/skills/'),
           apiGet('/resumes/resumes/')
         ]);
         
         setSkills(skillsResponse.data as Skill[]);
+        setAvailableSkills(availableSkillsResponse.data ? (availableSkillsResponse.data as any[]) : []);
         const resumes = Array.isArray(resumesResponse.data) ? resumesResponse.data : [];
         if (resumes.length > 0) {
           setResumeId(resumes[0].id as number);
@@ -145,12 +153,12 @@ export default function SkillsForm() {
 
       let response: any;
       if (editingId) {
-        response = await apiPut(`/resumes/skills/${editingId}/`, { ...data, resume_id: resumeId });
+        response = await apiPut(`/resumes/skills/${editingId}/`, { skill_id: data.skill_id, level: data.level, resume_id: resumeId });
         setSkills(prev => prev.map(skill => 
           skill.id === editingId ? response.data as Skill : skill
         ));
       } else {
-        response = await apiPost('/resumes/skills/', { ...data, resume_id: resumeId });
+        response = await apiPost('/resumes/skills/', { skill_id: data.skill_id, level: data.level, resume_id: resumeId });
         setSkills(prev => [...prev, response.data as Skill]);
       }
 
@@ -212,12 +220,16 @@ export default function SkillsForm() {
 
   // تابع شروع ویرایش
   const handleEdit = (skill: Skill) => {
+    if (!skill.skill) {
+      setErrors(['این مهارت قابل ویرایش نیست. لطفاً دوباره تلاش کنید.']);
+      return;
+    }
+    
     setEditingId(skill.id || null);
     setShowAddForm(true);
     reset({
-      name: skill.name,
-      level: skill.level,
-      description: skill.description || ''
+      skill_id: skill.skill.id,
+      level: skill.level
     });
   };
 
@@ -226,9 +238,8 @@ export default function SkillsForm() {
     setEditingId(null);
     setShowAddForm(false);
     reset({
-      name: '',
-      level: '',
-      description: ''
+      skill_id: 0,
+      level: ''
     });
   };
 
@@ -521,23 +532,23 @@ export default function SkillsForm() {
             gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr', md: '1fr 1fr 1fr' },
             gap: 2
           }}>
-            {skills.map((skill, index) => (
-              <Card key={skill.id || index} sx={{ 
-                border: `1px solid ${alpha(jobseekerColors.primary, 0.2)}`,
-                boxShadow: '0 2px 8px rgba(0,0,0,0.05)',
-                position: 'relative'
-              }}>
+                         {skills.filter(skill => skill.skill).map((skill, index) => (
+               <Card key={skill.id || index} sx={{ 
+                 border: `1px solid ${alpha(jobseekerColors.primary, 0.2)}`,
+                 boxShadow: '0 2px 8px rgba(0,0,0,0.05)',
+                 position: 'relative'
+               }}>
                 <CardContent sx={{ pb: 2 }}>
                   <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 2 }}>
                     <Box sx={{ flex: 1 }}>
-                      <Typography variant="h6" sx={{ 
-                        color: jobseekerColors.primary, 
-                        fontWeight: 'bold',
-                        mb: 1,
-                        fontSize: '1rem'
-                      }}>
-                        {skill.name}
-                      </Typography>
+                                             <Typography variant="h6" sx={{ 
+                         color: jobseekerColors.primary, 
+                         fontWeight: 'bold',
+                         mb: 1,
+                         fontSize: '1rem'
+                       }}>
+                         {skill.skill?.name || 'مهارت نامشخص'}
+                       </Typography>
                       
                                              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
                          <Chip 
@@ -563,14 +574,7 @@ export default function SkillsForm() {
                          </Box>
                        </Box>
                       
-                      {skill.description && (
-                        <Typography variant="body2" color="text.secondary" sx={{ 
-                          fontSize: '0.875rem',
-                          lineHeight: 1.4
-                        }}>
-                          {skill.description}
-                        </Typography>
-                      )}
+                      
                     </Box>
                     
                     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }}>
@@ -597,94 +601,74 @@ export default function SkillsForm() {
         </Box>
       )}
 
-      {/* دکمه افزودن مهارت جدید */}
-      {!showAddForm && (
-        <Box sx={{ textAlign: 'center', mb: 3 }}>
-          <Button
-            variant="contained"
-            color="success"
-            onClick={() => setShowAddForm(true)}
-            sx={{
-              background: jobseekerColors.primary,
-              color: 'white',
-              '&:hover': { 
-                background: jobseekerColors.dark,
-                boxShadow: '0 4px 12px rgba(0,0,0,0.2)'
-              },
-              borderRadius: 2,
-              px: 4,
-              py: 1.5,
-              fontSize: '1rem',
-              fontWeight: 'bold',
-              minWidth: '140px',
-              width: 'auto',
-              height: '48px',
-              transition: 'all 0.2s ease',
-              boxShadow: '0 2px 8px rgba(0,0,0,0.15)'
-            }}
-          >
-            افزودن مهارت جدید
-          </Button>
-        </Box>
-      )}
-
-      {/* فرم افزودن/ویرایش مهارت */}
-      {showAddForm && (
-        <Box sx={{ mt: 3 }}>
-          <Divider sx={{ mb: 3 }} />
-          
-          <Typography variant="h6" sx={{ 
-            mb: 3, 
-            color: jobseekerColors.primary,
-            fontWeight: 'bold'
-          }}>
-            {editingId ? 'ویرایش مهارت' : 'افزودن مهارت جدید'}
-          </Typography>
+             {/* فرم افزودن/ویرایش مهارت */}
+       {showAddForm && (
+         <Box sx={{ mb: 4 }}>
+           <Divider sx={{ mb: 3 }} />
+           
+           <Typography variant="h6" sx={{ 
+             mb: 3, 
+             color: jobseekerColors.primary,
+             fontWeight: 'bold'
+           }}>
+             {editingId ? 'ویرایش مهارت' : 'افزودن مهارت جدید'}
+           </Typography>
 
           <form onSubmit={handleSubmit(onSubmit)}>
-            {/* نام مهارت و سطح */}
-            <Box sx={{ display: 'flex', flexDirection: { xs: 'column', md: 'row' }, gap: { xs: 1.5, md: 3 }, mb: { xs: 2, md: 4 } }}>
-              {/* نام مهارت */}
-              <Box sx={{ flex: 1 }}>
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
-                  <BuildIcon sx={{ color: jobseekerColors.primary, fontSize: 20 }} />
-                  <Typography variant="body2" fontWeight="medium" sx={{
-                    fontSize: { xs: '0.7rem', sm: '0.875rem' },
-                    lineHeight: { xs: 1.1, sm: 1.3 },
-                    color: jobseekerColors.primary,
-                    fontWeight: 600
-                  }}>
-                    نام مهارت *
-                  </Typography>
-                </Box>
-                <Controller
-                  name="name"
-                  control={control}
-                  rules={{ required: 'نام مهارت الزامی است' }}
-                  render={({ field }) => (
-                    <TextField
-                      {...field}
-                      fullWidth
-                      placeholder="مثال: React.js، فتوشاپ، زبان انگلیسی"
-                      error={Boolean(formErrors.name)}
-                      helperText={formErrors.name?.message}
-                      variant="outlined"
-                      sx={{ 
-                        '& .MuiOutlinedInput-root': { 
-                          borderRadius: '6px',
-                          '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-                            borderColor: jobseekerColors.primary
-                          }
-                        },
-                        '& .MuiInputBase-input': {
-                          fontSize: { xs: '0.8rem', sm: '1rem' },
-                          padding: { xs: '8px 14px', sm: '16.5px 14px' }
-                        }
-                      }}
-                    />
-                  )}
-                />
-              </Box>
+                         {/* انتخاب مهارت و سطح */}
+             <Box sx={{ display: 'flex', flexDirection: { xs: 'column', md: 'row' }, gap: { xs: 1.5, md: 3 }, mb: { xs: 2, md: 4 } }}>
+               {/* انتخاب مهارت */}
+               <Box sx={{ flex: 1 }}>
+                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
+                   <BuildIcon sx={{ color: jobseekerColors.primary, fontSize: 20 }} />
+                   <Typography variant="body2" fontWeight="medium" sx={{
+                     fontSize: { xs: '0.7rem', sm: '0.875rem' },
+                     lineHeight: { xs: 1.1, sm: 1.3 },
+                     color: jobseekerColors.primary,
+                     fontWeight: 600
+                   }}>
+                     انتخاب مهارت *
+                   </Typography>
+                 </Box>
+                 <Controller
+                   name="skill_id"
+                   control={control}
+                   rules={{ required: 'انتخاب مهارت الزامی است' }}
+                   render={({ field }) => (
+                     <FormControl fullWidth error={Boolean(formErrors.skill_id)}>
+                       <Select
+                         {...field}
+                         displayEmpty
+                         input={<OutlinedInput sx={selectStyles} />}
+                         renderValue={() => {
+                           const selectedSkill = availableSkills.find(s => s.id === field.value);
+                           return (
+                             <Box component="div" sx={{ display: 'flex', justifyContent: 'center', width: '100%' }}>
+                               {selectedSkill ? selectedSkill.name : 'انتخاب مهارت'}
+                             </Box>
+                           );
+                         }}
+                         MenuProps={menuPropsRTL}
+                         IconComponent={(props: any) => (
+                           <KeyboardArrowDownIcon {...props} sx={{ color: jobseekerColors.primary }} />
+                         )}
+                       >
+                         <MenuItem value={0} disabled>انتخاب مهارت</MenuItem>
+                         {availableSkills.map((skill) => (
+                           <MenuItem key={skill.id} value={skill.id}>
+                             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                               <Typography>{skill.name}</Typography>
+                             </Box>
+                           </MenuItem>
+                         ))}
+                       </Select>
+                       {formErrors.skill_id && (
+                         <FormHelperText>{formErrors.skill_id.message}</FormHelperText>
+                       )}
+                     </FormControl>
+                   )}
+                 />
+               </Box>
 
               {/* سطح مهارت */}
               <Box sx={{ flex: 1 }}>
@@ -760,48 +744,7 @@ export default function SkillsForm() {
               </Box>
             </Box>
 
-            {/* توضیحات */}
-            <Box sx={{ mb: { xs: 2, md: 4 } }}>
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
-                <InfoIcon sx={{ color: jobseekerColors.primary, fontSize: 20 }} />
-                <Typography variant="body2" fontWeight="medium" sx={{
-                  fontSize: { xs: '0.7rem', sm: '0.875rem' },
-                  lineHeight: { xs: 1.1, sm: 1.3 },
-                  color: jobseekerColors.primary,
-                  fontWeight: 600
-                }}>
-                  توضیحات (اختیاری)
-                </Typography>
-              </Box>
-              <Controller
-                name="description"
-                control={control}
-                render={({ field }) => (
-                  <TextField
-                    {...field}
-                    fullWidth
-                    multiline
-                    rows={3}
-                    placeholder="توضیحات اضافی درباره این مهارت، تجربیات، پروژه‌ها و..."
-                    error={Boolean(formErrors.description)}
-                    helperText={formErrors.description?.message}
-                    variant="outlined"
-                    sx={{ 
-                      '& .MuiOutlinedInput-root': { 
-                        borderRadius: '6px',
-                        '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-                          borderColor: jobseekerColors.primary
-                        }
-                      },
-                      '& .MuiInputBase-input': {
-                        fontSize: { xs: '0.8rem', sm: '1rem' },
-                        padding: { xs: '8px 14px', sm: '16.5px 14px' }
-                      }
-                    }}
-                  />
-                )}
-              />
-            </Box>
+            
 
             {/* دکمه‌های عملیات */}
             <Box sx={{ 
@@ -867,6 +810,37 @@ export default function SkillsForm() {
               </Button>
             </Box>
           </form>
+        </Box>
+      )}
+
+      {/* دکمه افزودن مهارت جدید */}
+      {!showAddForm && (
+        <Box sx={{ textAlign: 'center', mb: 4 }}>
+          <Button
+            variant="contained"
+            color="success"
+            onClick={() => setShowAddForm(true)}
+            sx={{
+              background: jobseekerColors.primary,
+              color: 'white',
+              '&:hover': { 
+                background: jobseekerColors.dark,
+                boxShadow: '0 4px 12px rgba(0,0,0,0.2)'
+              },
+              borderRadius: 2,
+              px: 4,
+              py: 1.5,
+              fontSize: '1rem',
+              fontWeight: 'bold',
+              minWidth: '140px',
+              width: 'auto',
+              height: '48px',
+              transition: 'all 0.2s ease',
+              boxShadow: '0 2px 8px rgba(0,0,0,0.15)'
+            }}
+          >
+            افزودن مهارت جدید
+          </Button>
         </Box>
       )}
     </Paper>

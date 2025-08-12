@@ -20,6 +20,7 @@ import {
   SubscriptionsManagement,
   SubscriptionPlansManagement,
   IndustriesManagement,
+  SkillsManagement,
   EmployerVerificationManagement
 } from './management';
 
@@ -33,6 +34,7 @@ const AdminDashboard: React.FC = () => {
     companies: { component: <CompaniesManagement />, title: 'مدیریت شرکت‌ها' },
     'employer-verification': { component: <EmployerVerificationManagement />, title: 'تایید کارفرمایان' },
     industries: { component: <IndustriesManagement />, title: 'مدیریت گروه‌های کاری' },
+    skills: { component: <SkillsManagement />, title: 'مدیریت مهارت‌ها' },
     jobs: { component: <JobsManagement />, title: 'مدیریت آگهی‌ها' },
     applications: { component: <ApplicationsManagement />, title: 'مدیریت درخواست‌ها' },
     payments: { component: <PaymentsManagement />, title: 'مدیریت پرداخت‌ها' },

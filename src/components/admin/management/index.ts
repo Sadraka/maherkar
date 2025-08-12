@@ -7,5 +7,6 @@ export { default as PaymentAdminDetails } from './PaymentAdminDetails';
 export { default as SubscriptionsManagement } from './SubscriptionsManagement';
 export { default as SubscriptionPlansManagement } from './SubscriptionPlansManagement';
 export { default as IndustriesManagement } from './IndustriesManagement'; 
+export { default as SkillsManagement } from './SkillsManagement';
 export { default as JobAdminDetails } from './JobAdminDetails';
 export { default as EmployerVerificationManagement } from './EmployerVerificationManagement'; 

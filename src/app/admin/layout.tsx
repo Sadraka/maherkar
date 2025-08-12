@@ -40,6 +40,7 @@ import {
   faIndustry,
   faSubscript,
   faTags,
+  faTools,
   faBell,
   faCog,
   faUser,
@@ -51,6 +52,7 @@ import {
   faChevronUp,
   faUserCheck
 } from '@fortawesome/free-solid-svg-icons';
+import BuildIcon from '@mui/icons-material/Build';
 import { useAuthStore } from '@/store/authStore';
 import { useJobStatsStore } from '@/store/jobStatsStore';
 
@@ -95,6 +97,12 @@ const adminMenuItems: Array<{
     path: '/admin#industries',
     icon: faIndustry,
     emoji: '🏭'
+  },
+  {
+    title: 'مهارت‌ها',
+    path: '/admin#skills',
+    icon: faTools,
+    emoji: '🔧'
   },
   {
     title: 'آگهی‌ها',

@@ -542,51 +542,157 @@ const IndustriesManagement: React.FC = () => {
                 ))
                 )
               ) : industries.length > 0 ? (
-                industries.map((industry) => (
-                  <TableRow key={industry.id} sx={{ '&:hover': { bgcolor: ADMIN_THEME.bgVeryLight } }}>
-                    <TableCell>
-                      <Typography variant="body1" sx={{ fontWeight: 600, color: ADMIN_THEME.dark }}>
-                        {industry.name}
-                      </Typography>
-                    </TableCell>
-                    <TableCell>
-                      <Chip
-                        label={industry.category?.name || 'نامشخص'}
-                        size="small"
-                        variant="outlined"
-                        sx={{
-                          fontWeight: 600,
-                          fontSize: '0.8rem',
-                          cursor: industry.category?.name ? 'pointer' : 'default',
-                          color: industry.category?.name ? ADMIN_THEME.primary : undefined,
-                          borderColor: industry.category?.name ? ADMIN_THEME.primary : undefined,
-                          '&:hover': industry.category?.name ? {
-                            bgcolor: ADMIN_THEME.bgLight,
-                            borderColor: ADMIN_THEME.primary,
-                            color: ADMIN_THEME.primary,
-                            textDecoration: 'underline'
-                          } : {},
-                        }}
-                        onClick={industry.category?.name ? () => {
-                          setFilterCategory(industry.category.id.toString());
-                          setSearchInput('');
-                          setSearchQuery('');
-                          setPage(1);
-                        } : undefined}
-                      />
-                    </TableCell>
-                    <TableCell>
-                      <Box sx={{ display: 'flex', gap: 1, justifyContent: 'center' }}>
-                        <IconButton onClick={() => openEditDialog(industry)} size="small" title="ویرایش گروه کاری" sx={{ color: ADMIN_THEME.primary, '&:hover': { bgcolor: ADMIN_THEME.bgLight } }}>
-                          <Edit fontSize="small" />
-                        </IconButton>
-                        <IconButton onClick={() => openWarningModal(industry)} size="small" color="error" title="حذف" sx={{ '&:hover': { bgcolor: 'error.light' } }}>
-                          <Delete fontSize="small" />
-                        </IconButton>
-                      </Box>
-                    </TableCell>
-                  </TableRow>
-                ))
+                isMobile ? (
+                  // نمایش موبایل - کارت‌های صنعت
+                  industries.map((industry) => (
+                    <TableRow key={industry.id}>
+                      <TableCell colSpan={3}>
+                        <Paper sx={{ 
+                          p: 2, 
+                          mb: 2,
+                          borderRadius: 2,
+                          boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
+                          border: `1px solid ${ADMIN_THEME.bgLight}`,
+                          '&:hover': { 
+                            boxShadow: '0 4px 8px rgba(0,0,0,0.15)',
+                            borderColor: ADMIN_THEME.primary 
+                          }
+                        }}>
+                          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
+                            {/* نام صنعت */}
+                            <Box sx={{ 
+                              display: 'flex', 
+                              alignItems: 'center', 
+                              justifyContent: 'space-between',
+                              borderBottom: `1px solid ${ADMIN_THEME.bgLight}`,
+                              pb: 1
+                            }}>
+                              <Typography sx={{ 
+                                fontSize: '1.1rem', 
+                                fontWeight: 700, 
+                                color: ADMIN_THEME.primary 
+                              }}>
+                                {industry.name}
+                              </Typography>
+                              <Box sx={{ display: 'flex', gap: 0.5 }}>
+                                <IconButton
+                                  size="small"
+                                  onClick={() => openEditDialog(industry)}
+                                  sx={{ 
+                                    color: ADMIN_THEME.primary,
+                                    bgcolor: ADMIN_THEME.bgLight,
+                                    '&:hover': { bgcolor: ADMIN_THEME.bgVeryLight }
+                                  }}
+                                >
+                                  <Edit fontSize="small" />
+                                </IconButton>
+                                <IconButton
+                                  size="small"
+                                  onClick={() => openWarningModal(industry)}
+                                  sx={{ 
+                                    color: 'error.main',
+                                    bgcolor: ADMIN_THEME.bgLight,
+                                    '&:hover': { bgcolor: 'error.light', color: 'white' }
+                                  }}
+                                >
+                                  <Delete fontSize="small" />
+                                </IconButton>
+                              </Box>
+                            </Box>
+                            
+                            {/* اطلاعات صنعت */}
+                            <Box sx={{ 
+                              display: 'flex', 
+                              alignItems: 'center', 
+                              gap: 1,
+                              p: 1,
+                              bgcolor: ADMIN_THEME.bgVeryLight,
+                              borderRadius: 1
+                            }}>
+                              <Typography sx={{ 
+                                fontSize: '0.85rem', 
+                                fontWeight: 600, 
+                                color: ADMIN_THEME.dark,
+                                minWidth: '80px'
+                              }}>
+                                گروه کاری:
+                              </Typography>
+                              <Chip
+                                label={industry.category?.name || 'نامشخص'}
+                                size="small"
+                                sx={{
+                                  bgcolor: ADMIN_THEME.primary,
+                                  color: 'white',
+                                  fontSize: '0.75rem',
+                                  fontWeight: 600,
+                                  height: '24px',
+                                  cursor: 'pointer',
+                                  '&:hover': {
+                                    bgcolor: ADMIN_THEME.dark,
+                                    transform: 'scale(1.05)'
+                                  }
+                                }}
+                                onClick={() => {
+                                  setFilterCategory(industry.category.id.toString());
+                                  setSearchInput('');
+                                  setSearchQuery('');
+                                  setPage(1);
+                                }}
+                              />
+                            </Box>
+                          </Box>
+                        </Paper>
+                      </TableCell>
+                    </TableRow>
+                  ))
+                ) : (
+                  // نمایش دسکتاپ - جدول صنایع
+                  industries.map((industry) => (
+                    <TableRow key={industry.id} sx={{ '&:hover': { bgcolor: ADMIN_THEME.bgVeryLight } }}>
+                      <TableCell>
+                        <Typography variant="body1" sx={{ fontWeight: 600, color: ADMIN_THEME.dark }}>
+                          {industry.name}
+                        </Typography>
+                      </TableCell>
+                      <TableCell>
+                        <Chip
+                          label={industry.category?.name || 'نامشخص'}
+                          size="small"
+                          variant="outlined"
+                          sx={{
+                            fontWeight: 600,
+                            fontSize: '0.8rem',
+                            cursor: industry.category?.name ? 'pointer' : 'default',
+                            color: industry.category?.name ? ADMIN_THEME.primary : undefined,
+                            borderColor: industry.category?.name ? ADMIN_THEME.primary : undefined,
+                            '&:hover': industry.category?.name ? {
+                              bgcolor: ADMIN_THEME.bgLight,
+                              borderColor: ADMIN_THEME.primary,
+                              color: ADMIN_THEME.primary,
+                              textDecoration: 'underline'
+                            } : {},
+                          }}
+                          onClick={industry.category?.name ? () => {
+                            setFilterCategory(industry.category.id.toString());
+                            setSearchInput('');
+                            setSearchQuery('');
+                            setPage(1);
+                          } : undefined}
+                        />
+                      </TableCell>
+                      <TableCell>
+                        <Box sx={{ display: 'flex', gap: 1, justifyContent: 'center' }}>
+                          <IconButton onClick={() => openEditDialog(industry)} size="small" title="ویرایش گروه کاری" sx={{ color: ADMIN_THEME.primary, '&:hover': { bgcolor: ADMIN_THEME.bgLight } }}>
+                            <Edit fontSize="small" />
+                          </IconButton>
+                          <IconButton onClick={() => openWarningModal(industry)} size="small" color="error" title="حذف" sx={{ '&:hover': { bgcolor: 'error.light' } }}>
+                            <Delete fontSize="small" />
+                          </IconButton>
+                        </Box>
+                      </TableCell>
+                    </TableRow>
+                  ))
+                )
               ) : (
                 <TableRow>
                   <TableCell colSpan={3} align="center">
