@@ -18,6 +18,14 @@ axiosInstance.interceptors.request.use(
             config.headers.Authorization = `Bearer ${accessToken}`;
         }
         
+        // اگر داده از نوع FormData باشد، اجازه بده مرورگر هدر صحیح با boundary را ست کند
+        // تعیین دستی 'multipart/form-data' بدون boundary باعث مشکل در آپلود فایل می‌شود
+        if (typeof FormData !== 'undefined' && config.data instanceof FormData) {
+            if (config.headers && 'Content-Type' in config.headers) {
+                delete (config.headers as any)['Content-Type'];
+            }
+        }
+
         // اضافه کردن پارامتر timestamp به URL برای جلوگیری از کش شدن درخواست‌ها
         // این روش با محدودیت‌های CORS تداخل ندارد
         if (config.method?.toLowerCase() === 'get') {

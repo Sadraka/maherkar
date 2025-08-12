@@ -39,6 +39,10 @@ import WorkIcon from '@mui/icons-material/Work';
 import MonetizationOnIcon from '@mui/icons-material/MonetizationOn';
 import AccessTimeIcon from '@mui/icons-material/AccessTime';
 import SecurityIcon from '@mui/icons-material/Security';
+import AttachFileIcon from '@mui/icons-material/AttachFile';
+import LanguageIcon from '@mui/icons-material/Language';
+import LinkedInIcon from '@mui/icons-material/LinkedIn';
+import DownloadIcon from '@mui/icons-material/Download';
 
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import { JOB_SEEKER_THEME } from '@/constants/colors';
@@ -124,7 +128,7 @@ interface PersonalInfoFormInputs {
   linkedin_profile: string;
   soldier_status: string;
   degree: string;
-  years_of_experience_numeric: number; // سال سابقه به صورت عددی
+  years_of_experience_numeric: number | '';// سال سابقه به صورت عددی (اجازه خالی)
   experience: string; // سابقه کاری انتخابی
   expected_salary: string;
   preferred_job_type: string;
@@ -147,6 +151,20 @@ export default function PersonalInfoForm() {
   const [errors, setErrors] = useState<string[]>([]);
   const [success, setSuccess] = useState(false);
   const [resumeId, setResumeId] = useState<number | null>(null);
+  const [cvPreviewUrl, setCvPreviewUrl] = useState<string | null>(null);
+  const [existingCvUrl, setExistingCvUrl] = useState<string | null>(null);
+  const [cvFileName, setCvFileName] = useState<string>('');
+  const cvInputRef = useRef<HTMLInputElement>(null);
+
+  const getFileNameFromUrl = (url: string): string => {
+    try {
+      const withoutQuery = url.split('?')[0];
+      const name = withoutQuery.substring(withoutQuery.lastIndexOf('/') + 1);
+      return decodeURIComponent(name || 'resume.pdf');
+    } catch {
+      return 'resume.pdf';
+    }
+  };
   
   const formRef = useRef<HTMLDivElement>(null);
   
@@ -223,18 +241,18 @@ export default function PersonalInfoForm() {
   // گزینه‌های سابقه کاری انتخابی (experience field)
   const experienceOptions = [
     { value: 'No EXPERIENCE', label: 'بدون سابقه کار' },
-    { value: 'Less than Three', label: 'کمتر از 3 سال' },
-    { value: 'Three or More', label: '3 تا 6 سال' },
-    { value: 'Six or More', label: 'بیشتر از 6 سال' }
+    { value: 'Less than Three', label: 'کمتر از ۳ سال' },
+    { value: 'Three or More', label: '۳ تا ۶ سال' },
+    { value: 'Six or More', label: 'بیشتر از ۶ سال' }
   ];
 
   const salaryOptions = [
-    { value: '5 to 10', label: '5 تا 10 میلیون تومان' },
-    { value: '10 to 15', label: '10 تا 15 میلیون تومان' },
-    { value: '15 to 20', label: '15 تا 20 میلیون تومان' },
-    { value: '20 to 30', label: '20 تا 30 میلیون تومان' },
-    { value: '30 to 50', label: '30 تا 50 میلیون تومان' },
-    { value: 'More than 50', label: 'بیش از 50 میلیون تومان' },
+    { value: '5 to 10', label: '۵ تا ۱۰ میلیون تومان' },
+    { value: '10 to 15', label: '۱۰ تا ۱۵ میلیون تومان' },
+    { value: '15 to 20', label: '۱۵ تا ۲۰ میلیون تومان' },
+    { value: '20 to 30', label: '۲۰ تا ۳۰ میلیون تومان' },
+    { value: '30 to 50', label: '۳۰ تا ۵۰ میلیون تومان' },
+    { value: 'More than 50', label: 'بیش از ۵۰ میلیون تومان' },
     { value: 'Negotiable', label: 'توافقی' }
   ];
 
@@ -288,6 +306,14 @@ export default function PersonalInfoForm() {
             preferred_job_type: resume.preferred_job_type || '',
             availability: resume.availability || ''
           });
+          // اگر رزومه فایل دارد، لینک کامل برای دانلود و نمایش آماده کن
+          if ((resume as any).cv) {
+            const cv = (resume as any).cv as string;
+            const fullUrl = cv.startsWith('http') ? cv : `${process.env.NEXT_PUBLIC_API_URL}${cv}`;
+            setExistingCvUrl(fullUrl);
+          } else {
+            setExistingCvUrl(null);
+          }
         } else {
           // در صورت نبود رزومه، فرم روی مقادیر پیش‌فرض باقی می‌ماند
           setResumeId(null);
@@ -645,7 +671,7 @@ export default function PersonalInfoForm() {
                 color: jobseekerColors.primary,
                 fontWeight: 600
               }}>
-                                    عنوان شغلی
+                عنوان شغلی (در یک جمله)
               </Typography>
             </Box>
             <Controller
@@ -655,7 +681,7 @@ export default function PersonalInfoForm() {
                 <TextField
                   {...field}
                   fullWidth
-                  placeholder="مثال: برنامه‌نویس فرانت‌اند"
+                  placeholder="مثال: برنامه‌نویس فرانت‌اند (React)"
                   error={Boolean(formErrors.headline)}
                   helperText={formErrors.headline?.message}
                   variant="outlined"
@@ -694,7 +720,7 @@ export default function PersonalInfoForm() {
             name="bio"
             control={control}
             render={({ field }) => (
-              <TextField
+                <TextField
                 {...field}
                 fullWidth
                 multiline
@@ -988,6 +1014,13 @@ export default function PersonalInfoForm() {
                       padding: { xs: '8px 14px', sm: '16.5px 14px' }
                     }
                   }}
+                  InputProps={{
+                    startAdornment: (
+                      <InputAdornment position="start" sx={{ position: 'absolute', right: '10px' }}>
+                        <LanguageIcon fontSize="small" sx={{ color: jobseekerColors.primary }} />
+                      </InputAdornment>
+                    )
+                  }}
                 />
               )}
             />
@@ -1029,6 +1062,13 @@ export default function PersonalInfoForm() {
                       fontSize: { xs: '0.8rem', sm: '1rem' },
                       padding: { xs: '8px 14px', sm: '16.5px 14px' }
                     }
+                  }}
+                  InputProps={{
+                    startAdornment: (
+                      <InputAdornment position="start" sx={{ position: 'absolute', right: '10px' }}>
+                        <LinkedInIcon fontSize="small" sx={{ color: jobseekerColors.primary }} />
+                      </InputAdornment>
+                    )
                   }}
                 />
               )}
@@ -1109,16 +1149,20 @@ export default function PersonalInfoForm() {
           <Controller
             name="years_of_experience_numeric"
             control={control}
+            rules={{
+              min: { value: 0, message: 'حداقل ۰' },
+              max: { value: 99, message: 'حداکثر ۹۹' }
+            }}
             render={({ field }) => (
               <TextField
                 {...field}
                 fullWidth
-                type="number"
+                type="text"
                 placeholder="مثال: ۵"
                 error={Boolean(formErrors.years_of_experience_numeric)}
                 helperText={formErrors.years_of_experience_numeric?.message}
                 variant="outlined"
-                inputProps={{ min: 0, max: 50 }}
+                inputProps={{ inputMode: 'numeric', pattern: '[0-9۰-۹]*', maxLength: 2 }}
                 sx={{ 
                   '& .MuiOutlinedInput-root': { 
                     borderRadius: '6px',
@@ -1131,12 +1175,18 @@ export default function PersonalInfoForm() {
                     color: jobseekerColors.primary
                   }
                 }}
-                InputProps={{
-                  startAdornment: (
-                    <InputAdornment position="start">
-                      <WorkIcon sx={{ color: jobseekerColors.primary }} />
-                    </InputAdornment>
-                  )
+                // حذف آیکن داخلی طبق درخواست
+                value={field.value === '' ? '' : convertToPersianNumbers(Number(field.value))}
+                onChange={(e) => {
+                  const persianToEnglish = (s: string) => s.replace(/[۰-۹]/g, (d) => String('0123456789'['۰۱۲۳۴۵۶۷۸۹'.indexOf(d)]));
+                  const raw = e.target.value;
+                  const normalized = persianToEnglish(raw).replace(/[^0-9]/g, '');
+                  if (normalized === '') { field.onChange(''); return; }
+                  let n = Number(normalized);
+                  if (Number.isNaN(n)) { field.onChange(''); return; }
+                  if (n < 0) n = 0;
+                  if (n > 99) n = 99;
+                  field.onChange(n);
                 }}
               />
             )}
@@ -1170,31 +1220,103 @@ export default function PersonalInfoForm() {
             <Controller
               name="cv"
               control={control}
-              render={({ field: { onChange, value, ...field } }) => (
-                <TextField
-                  {...field}
-                  fullWidth
-                  type="file"
-                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                    onChange(e.target.files);
-                  }}
-                  error={Boolean(formErrors.cv)}
-                  helperText={formErrors.cv?.message || 'فرمت‌های مجاز: PDF، حداکثر 5 مگابایت'}
-                  variant="outlined"
-                  inputProps={{ 
-                    accept: '.pdf',
-                    multiple: false
-                  }}
-                  sx={{ 
-                    '& .MuiOutlinedInput-root': { 
-                      borderRadius: '6px',
-                      '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-                        borderColor: jobseekerColors.primary,
-                        borderWidth: '2px'
+              render={({ field: { onChange } }) => (
+                <Box>
+                  <input
+                    ref={cvInputRef}
+                    type="file"
+                    accept="application/pdf"
+                    style={{ display: 'none' }}
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                      const file = e.target.files?.[0] || null;
+                      if (file) {
+                        onChange(e.target.files as any);
+                        const url = URL.createObjectURL(file);
+                        setCvPreviewUrl(url);
+                        setCvFileName(file.name);
+                      } else {
+                        onChange(undefined as any);
+                        setCvPreviewUrl(null);
+                        setCvFileName('');
                       }
-                    }
-                  }}
-                />
+                    }}
+                  />
+                  <Button
+                    variant="contained"
+                    color="success"
+                    onClick={() => cvInputRef.current?.click()}
+                    sx={{
+                      background: jobseekerColors.primary,
+                      color: 'white',
+                      '&:hover': { background: jobseekerColors.dark, boxShadow: '0 4px 12px rgba(0,0,0,0.2)' },
+                      borderRadius: 1.5,
+                      px: 2.5,
+                      fontSize: { xs: '0.9rem', sm: '0.95rem' },
+                      fontWeight: 600,
+                      width: '100%',
+                      minWidth: '100%',
+                      height: '56px',
+                      boxShadow: '0 2px 8px rgba(0,0,0,0.15)'
+                    }}
+                  >
+                    انتخاب فایل PDF
+                  </Button>
+                  
+                  <Typography variant="caption" sx={{ display: 'block', mt: 1, color: 'text.secondary' }}>
+                    فرمت مجاز: PDF، حداکثر ۵ مگابایت
+                  </Typography>
+
+                  {/* فقط لینک دانلود و دکمه حذف برای فایل موجود */}
+                  {!cvPreviewUrl && existingCvUrl && (
+                    <Box sx={{ mt: 1.5, display: 'flex', alignItems: 'center', gap: 1 }}>
+                      <Button
+                        variant="text"
+                        size="small"
+                        startIcon={<DownloadIcon />}
+                        href={existingCvUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        sx={{ color: jobseekerColors.primary, textDecoration: 'none', justifyContent: 'flex-start', px: 0 }}
+                      >
+                        {getFileNameFromUrl(existingCvUrl)}
+                      </Button>
+                      <Button
+                        size="small"
+                        color="error"
+                        disabled={!resumeId}
+                        onClick={async () => {
+                          if (!resumeId) return;
+                          try {
+                            await apiPut(`/resumes/resumes/${resumeId}/`, { cv: null });
+                            setExistingCvUrl(null);
+                            if (cvInputRef.current) cvInputRef.current.value = '';
+                            setCvFileName('');
+                          } catch {}
+                        }}
+                        sx={{ ml: 1 }}
+                      >
+                        حذف رزومه
+                      </Button>
+                    </Box>
+                  )}
+
+                  {/* برای فایل انتخاب‌شده جدید فقط نام و دکمه حذف نمایش بده */}
+                  {cvPreviewUrl && (
+                    <Box sx={{ mt: 1.5, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                      <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                        {cvFileName}
+                      </Typography>
+                      <Button size="small" color="error" onClick={() => {
+                        setCvPreviewUrl(null);
+                        if (cvInputRef.current) cvInputRef.current.value = '';
+                        onChange(undefined as any);
+                        setCvFileName('');
+                      }}>
+                        حذف فایل
+                      </Button>
+                    </Box>
+                  )}
+                </Box>
               )}
             />
           </Box>
@@ -1209,7 +1331,7 @@ export default function PersonalInfoForm() {
                 color: jobseekerColors.primary,
                 fontWeight: 600
               }}>
-                وضعیت دسترسی
+                زمان آمادگی برای شروع کار
               </Typography>
             </Box>
             <Controller

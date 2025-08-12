@@ -20,6 +20,7 @@ import AccessTimeIcon from '@mui/icons-material/AccessTime';
 import BusinessIcon from '@mui/icons-material/Business';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import { JOB_SEEKER_THEME } from '@/constants/colors';
+import { getSalaryText } from '@/lib/jobUtils';
 
 interface AdditionalResumeFieldsProps {
   control: any;
@@ -45,14 +46,14 @@ const experienceOptions = [
 ];
 
 const salaryOptions = [
-  { value: '5 to 10', label: '5 تا 10 میلیون تومان' },
-  { value: '10 to 15', label: '10 تا 15 میلیون تومان' },
-  { value: '15 to 20', label: '15 تا 20 میلیون تومان' },
-  { value: '20 to 30', label: '20 تا 30 میلیون تومان' },
-  { value: '30 to 50', label: '30 تا 50 میلیون تومان' },
-  { value: 'More than 50', label: 'بیش از 50 میلیون تومان' },
-  { value: 'Negotiable', label: 'توافقی' }
-];
+  { value: '5 to 10' },
+  { value: '10 to 15' },
+  { value: '15 to 20' },
+  { value: '20 to 30' },
+  { value: '30 to 50' },
+  { value: 'More than 50' },
+  { value: 'Negotiable' }
+] as const;
 
 const jobTypeOptions = [
   { value: 'Full-Time', label: 'تمام وقت' },
@@ -69,6 +70,7 @@ const availabilityOptions = [
 
 export default function AdditionalResumeFields({ control, formErrors, selectStyles, menuPropsRTL }: AdditionalResumeFieldsProps) {
   const jobseekerColors = JOB_SEEKER_THEME;
+  const toPersianDigits = (value: string): string => value.replace(/\d/g, (d) => '۰۱۲۳۴۵۶۷۸۹'[Number(d)]);
 
   return (
     <>
@@ -100,7 +102,7 @@ export default function AdditionalResumeFields({ control, formErrors, selectStyl
                     const selectedOption = degreeOptions.find(opt => opt.value === field.value);
                     return (
                       <Box component="div" sx={{ display: 'flex', justifyContent: 'center', width: '100%' }}>
-                        {selectedOption ? selectedOption.label : 'انتخاب مدرک تحصیلی'}
+                        {selectedOption ? toPersianDigits(selectedOption.label) : 'انتخاب مدرک تحصیلی'}
                       </Box>
                     );
                   }}
@@ -117,7 +119,7 @@ export default function AdditionalResumeFields({ control, formErrors, selectStyl
                   <MenuItem value="" disabled>انتخاب مدرک تحصیلی</MenuItem>
                   {degreeOptions.map((option) => (
                     <MenuItem key={option.value} value={option.value}>
-                      {option.label}
+                      {toPersianDigits(option.label)}
                     </MenuItem>
                   ))}
                 </Select>
@@ -155,7 +157,7 @@ export default function AdditionalResumeFields({ control, formErrors, selectStyl
                     const selectedOption = experienceOptions.find(opt => opt.value === field.value);
                     return (
                       <Box component="div" sx={{ display: 'flex', justifyContent: 'center', width: '100%' }}>
-                        {selectedOption ? selectedOption.label : 'انتخاب سابقه کاری'}
+                        {selectedOption ? toPersianDigits(selectedOption.label) : 'انتخاب سابقه کاری'}
                       </Box>
                     );
                   }}
@@ -172,7 +174,7 @@ export default function AdditionalResumeFields({ control, formErrors, selectStyl
                   <MenuItem value="" disabled>انتخاب سابقه کاری</MenuItem>
                   {experienceOptions.map((option) => (
                     <MenuItem key={option.value} value={option.value}>
-                      {option.label}
+                      {toPersianDigits(option.label)}
                     </MenuItem>
                   ))}
                 </Select>
@@ -212,8 +214,8 @@ export default function AdditionalResumeFields({ control, formErrors, selectStyl
                   renderValue={() => {
                     const selectedOption = salaryOptions.find(opt => opt.value === field.value);
                     return (
-                      <Box component="div" sx={{ display: 'flex', justifyContent: 'center', width: '100%' }}>
-                        {selectedOption ? selectedOption.label : 'انتخاب حقوق مورد انتظار'}
+                      <Box component="div" sx={{ display: 'flex', justifyContent: 'center', width: '100%', direction: 'ltr', textAlign: 'left' }}>
+                        {selectedOption ? getSalaryText(selectedOption.value) : 'انتخاب حقوق مورد انتظار'}
                       </Box>
                     );
                   }}
@@ -229,8 +231,8 @@ export default function AdditionalResumeFields({ control, formErrors, selectStyl
                 >
                   <MenuItem value="" disabled>انتخاب حقوق مورد انتظار</MenuItem>
                   {salaryOptions.map((option) => (
-                    <MenuItem key={option.value} value={option.value}>
-                      {option.label}
+                    <MenuItem key={option.value} value={option.value} sx={{ direction: 'ltr', textAlign: 'left' }}>
+                      {getSalaryText(option.value)}
                     </MenuItem>
                   ))}
                 </Select>
