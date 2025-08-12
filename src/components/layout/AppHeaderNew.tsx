@@ -46,14 +46,28 @@ function AppHeaderNew({ promoBarClosed = false, promoBarLoaded = false }: { prom
   // استفاده از selectorهای جداگانه برای کاهش رندرهای غیرضروری
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
   const user = useAuthStore((state) => state.user);
+  const loading = useAuthStore((state) => state.loading);
   const { refreshUserData } = useAuthActions();
   const dataLoadedRef = useRef(false);
   
   // بررسی نوع کاربر برای تنظیم موقعیت هدر
-  const shouldShowPromoBar = user?.user_type === 'EM' || !user;
-  const headerTop = shouldShowPromoBar 
-    ? (promoBarClosed ? 0 : (promoBarLoaded ? '48px' : 0))
-    : 0; // برای کارجوها همیشه بالا
+  const shouldShowPromoBar = () => {
+    // اگر هنوز در حال بارگذاری اطلاعات کاربر هستیم، منتظر می‌مانیم
+    if (loading) return null;
+    
+    // اگر کاربر لاگین نکرده، پرومو بار را نمایش می‌دهیم
+    if (!isAuthenticated) return true;
+    
+    // اگر کاربر لاگین کرده، فقط کارفرماها پرومو بار را می‌بینند
+    return user?.user_type === 'EM';
+  }
+  
+  const promoBarStatus = shouldShowPromoBar();
+  const headerTop = promoBarStatus === null 
+    ? 0 // منتظر می‌مانیم تا وضعیت مشخص شود
+    : promoBarStatus 
+      ? (promoBarClosed ? 0 : (promoBarLoaded ? '48px' : 0)) // برای کارفرما و کاربران غیرلاگین
+      : 0; // برای کارجو، ادمین و پشتیبان همیشه بالا
 
   const {
     isMobile,

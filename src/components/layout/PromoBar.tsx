@@ -7,10 +7,12 @@ import ArrowForwardIcon from '@mui/icons-material/ArrowForward'
 import { useTheme } from '@mui/material/styles'
 import cookieService, { COOKIE_NAMES } from '@/lib/cookieService'
 import { useAuth } from '@/store/authStore'
+import { useAuthStore } from '@/store/authStore'
 
 export default function PromoBar() {
   const theme = useTheme()
-  const { user } = useAuth()
+  const { user, isAuthenticated } = useAuth()
+  const loading = useAuthStore((state) => state.loading)
   const [isVisible, setIsVisible] = useState(true)
   const [isClosing, setIsClosing] = useState(false)
   const [isMounted, setIsMounted] = useState(false)
@@ -19,7 +21,17 @@ export default function PromoBar() {
   const isInitialMount = useRef(true)
 
   // بررسی نوع کاربر - فقط کارفرماها پرومو بار را ببینند
-  const shouldShowPromoBar = user?.user_type === 'EM' || !user
+  // منتظر می‌مانیم تا اطلاعات کاربر کاملاً بارگذاری شود
+  const shouldShowPromoBar = () => {
+    // اگر هنوز در حال بارگذاری اطلاعات کاربر هستیم، منتظر می‌مانیم
+    if (loading) return null;
+    
+    // اگر کاربر لاگین نکرده، پرومو بار را نمایش می‌دهیم
+    if (!isAuthenticated) return true;
+    
+    // اگر کاربر لاگین کرده، فقط کارفرماها پرومو بار را می‌بینند
+    return user?.user_type === 'EM';
+  }
 
   // برای بستن دستی نوار تبلیغاتی
   const handleClose = () => {
@@ -70,8 +82,14 @@ export default function PromoBar() {
   // این کار از خطای هیدراسیون جلوگیری می‌کند
   if (!isMounted) return null;
 
-  // اگر کاربر کارجو است، هیچ‌چیزی نمایش نده (نه پرومو بار و نه فضای خالی)
-  if (!shouldShowPromoBar) return null;
+  // بررسی وضعیت نمایش پرومو بار
+  const promoBarStatus = shouldShowPromoBar();
+  
+  // اگر هنوز وضعیت احراز هویت مشخص نشده، چیزی نمایش نده
+  if (promoBarStatus === null) return null;
+  
+  // اگر کاربر کارجو، ادمین یا پشتیبان است، هیچ‌چیزی نمایش نده
+  if (!promoBarStatus) return null;
 
   // اگر نوار کاملاً بسته شده، آن را حذف کن
   if (!isVisible) return null;
