@@ -44,18 +44,22 @@ import { JOB_SEEKER_THEME } from '@/constants/colors';
 
 /**
  * تایپ مهارت برای TypeScript
+ * توجه: بک‌اند در JobSeekerSkillSerializer فیلد skill را به‌صورت شناسه عددی برمی‌گرداند.
+ * برای سازگاری با هر دو حالت (آبجکت یا عدد)، نوع skill را union تعریف می‌کنیم.
  */
 type Skill = {
   id?: number;
-  skill?: {
-    id: number;
-    name: string;
-    icon?: string;
-    industry: {
-      id: number;
-      name: string;
-    };
-  };
+  skill?:
+    | number
+    | {
+        id: number;
+        name: string;
+        icon?: string;
+        industry: {
+          id: number;
+          name: string;
+        };
+      };
   level: string;
 };
 
@@ -153,12 +157,12 @@ export default function SkillsForm() {
 
       let response: any;
       if (editingId) {
-        response = await apiPut(`/resumes/skills/${editingId}/`, { skill_id: data.skill_id, level: data.level, resume_id: resumeId });
+        response = await apiPut(`/resumes/skills/${editingId}/`, { skill: data.skill_id, level: data.level, resume_id: resumeId });
         setSkills(prev => prev.map(skill => 
           skill.id === editingId ? response.data as Skill : skill
         ));
       } else {
-        response = await apiPost('/resumes/skills/', { skill_id: data.skill_id, level: data.level, resume_id: resumeId });
+        response = await apiPost('/resumes/skills/', { skill: data.skill_id, level: data.level, resume_id: resumeId });
         setSkills(prev => [...prev, response.data as Skill]);
       }
 
@@ -220,15 +224,18 @@ export default function SkillsForm() {
 
   // تابع شروع ویرایش
   const handleEdit = (skill: Skill) => {
-    if (!skill.skill) {
+    const selectedSkillId =
+      typeof skill.skill === 'object' ? skill.skill?.id : (skill.skill ?? 0);
+
+    if (!selectedSkillId) {
       setErrors(['این مهارت قابل ویرایش نیست. لطفاً دوباره تلاش کنید.']);
       return;
     }
-    
+
     setEditingId(skill.id || null);
     setShowAddForm(true);
     reset({
-      skill_id: skill.skill.id,
+      skill_id: selectedSkillId,
       level: skill.level
     });
   };
@@ -417,19 +424,58 @@ export default function SkillsForm() {
         flexDirection: 'column',
         gap: 2
       }}>
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-          <BuildIcon sx={{ 
-            fontSize: { xs: 32, md: 42 }, 
-            color: jobseekerColors.primary,
-            transform: 'translateY(-2px)'
-          }} />
-          <Typography variant="h5" component="h1" fontWeight="bold" sx={{ 
-            fontSize: { xs: '1.1rem', sm: '1.25rem', md: '1.5rem' },
-            color: jobseekerColors.primary,
-            lineHeight: { xs: 1.3, sm: 1.4 }
-          }}>
-            مهارت‌ها
-          </Typography>
+        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+            <BuildIcon sx={{ 
+              fontSize: { xs: 32, md: 42 }, 
+              color: jobseekerColors.primary,
+              transform: 'translateY(-2px)'
+            }} />
+            <Typography variant="h5" component="h1" fontWeight="bold" sx={{ 
+              fontSize: { xs: '1.1rem', sm: '1.25rem', md: '1.5rem' },
+              color: jobseekerColors.primary,
+              lineHeight: { xs: 1.3, sm: 1.4 }
+            }}>
+              مهارت‌ها
+            </Typography>
+          </Box>
+
+          <Button
+            variant="contained"
+            color="success"
+            onClick={() => setShowAddForm(true)}
+            disabled={showAddForm}
+            sx={{
+              background: jobseekerColors.primary,
+              color: 'white',
+              '&:hover': { 
+                background: jobseekerColors.dark,
+                boxShadow: '0 4px 12px rgba(0,0,0,0.2)'
+              },
+              '&:disabled': {
+                background: jobseekerColors.primary,
+                color: 'white',
+                cursor: 'not-allowed',
+                opacity: 0.5
+              },
+              borderRadius: 2,
+              px: 4,
+              py: 1.5,
+              fontSize: '1rem',
+              fontWeight: 'bold',
+              minWidth: '140px',
+              width: '140px',
+              height: '48px',
+              transition: 'all 0.2s ease',
+              boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
+              whiteSpace: 'nowrap',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center'
+            }}
+          >
+            افزودن مهارت
+          </Button>
         </Box>
 
         <Alert 
@@ -516,88 +562,20 @@ export default function SkillsForm() {
         </Alert>
       )}
 
-      {/* لیست مهارت‌های موجود */}
-      {skills.length > 0 && (
+      {/* فرم افزودن/ویرایش مهارت - بالای صفحه */}
+      {showAddForm && (
         <Box sx={{ mb: 4 }}>
+          <Divider sx={{ mb: 3 }} />
+          
           <Typography variant="h6" sx={{ 
-            mb: 2, 
+            mb: 3, 
             color: jobseekerColors.primary,
             fontWeight: 'bold'
           }}>
-            مهارت‌های شما
+            {editingId ? 'ویرایش مهارت' : 'افزودن مهارت جدید'}
           </Typography>
           
-          <Box sx={{ 
-            display: 'grid',
-            gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr', md: '1fr 1fr 1fr' },
-            gap: 2
-          }}>
-                         {skills.filter(skill => skill.skill).map((skill, index) => (
-               <Card key={skill.id || index} sx={{ 
-                 border: `1px solid ${alpha(jobseekerColors.primary, 0.2)}`,
-                 boxShadow: '0 2px 8px rgba(0,0,0,0.05)',
-                 position: 'relative'
-               }}>
-                <CardContent sx={{ pb: 2 }}>
-                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 2 }}>
-                    <Box sx={{ flex: 1 }}>
-                                             <Typography variant="h6" sx={{ 
-                         color: jobseekerColors.primary, 
-                         fontWeight: 'bold',
-                         mb: 1,
-                         fontSize: '1rem'
-                       }}>
-                         {skill.skill?.name || 'مهارت نامشخص'}
-                       </Typography>
-                      
-                                             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
-                         <Chip 
-                           label={getLevelLabel(skill.level)}
-                           size="small"
-                           sx={{ 
-                             backgroundColor: getLevelColor(skill.level),
-                             color: 'white',
-                             fontWeight: 'bold'
-                           }}
-                         />
-                         <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                           {Array.from({ length: 4 }, (_, i) => (
-                             <StarIcon 
-                               key={i}
-                               fontSize="small"
-                               sx={{ 
-                                 color: i < getStarsCount(skill.level) ? getLevelColor(skill.level) : '#e0e0e0',
-                                 fontSize: '16px'
-                               }}
-                             />
-                           ))}
-                         </Box>
-                       </Box>
-                      
-                      
-                    </Box>
-                    
-                    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }}>
-                      <IconButton 
-                        size="small"
-                        onClick={() => handleEdit(skill)}
-                        sx={{ color: jobseekerColors.primary }}
-                      >
-                        <EditIcon fontSize="small" />
-                      </IconButton>
-                      <IconButton 
-                        size="small"
-                        onClick={() => handleDelete(skill.id!)}
-                        sx={{ color: jobseekerColors.red }}
-                      >
-                        <DeleteIcon fontSize="small" />
-                      </IconButton>
-                    </Box>
-                  </Box>
-                </CardContent>
-              </Card>
-            ))}
-          </Box>
+          {/* فرم موجود بدون تغییر */}
         </Box>
       )}
 
@@ -813,34 +791,90 @@ export default function SkillsForm() {
         </Box>
       )}
 
-      {/* دکمه افزودن مهارت جدید */}
-      {!showAddForm && (
-        <Box sx={{ textAlign: 'center', mb: 4 }}>
-          <Button
-            variant="contained"
-            color="success"
-            onClick={() => setShowAddForm(true)}
-            sx={{
-              background: jobseekerColors.primary,
-              color: 'white',
-              '&:hover': { 
-                background: jobseekerColors.dark,
-                boxShadow: '0 4px 12px rgba(0,0,0,0.2)'
-              },
-              borderRadius: 2,
-              px: 4,
-              py: 1.5,
-              fontSize: '1rem',
-              fontWeight: 'bold',
-              minWidth: '140px',
-              width: 'auto',
-              height: '48px',
-              transition: 'all 0.2s ease',
-              boxShadow: '0 2px 8px rgba(0,0,0,0.15)'
-            }}
-          >
-            افزودن مهارت جدید
-          </Button>
+      {/* لیست مهارت‌های موجود - پایین صفحه */}
+      {skills.length > 0 && (
+        <Box sx={{ mb: 4 }}>
+          <Typography variant="h6" sx={{ 
+            mb: 2, 
+            color: jobseekerColors.primary,
+            fontWeight: 'bold'
+          }}>
+            مهارت‌های شما
+          </Typography>
+          
+          <Box sx={{ 
+            display: 'grid',
+            gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr', md: '1fr 1fr 1fr' },
+            gap: 2
+          }}>
+            {skills.filter(skill => !!skill.skill).map((skill, index) => (
+              <Card key={skill.id || index} sx={{ 
+                border: `1px solid ${alpha(jobseekerColors.primary, 0.2)}`,
+                boxShadow: '0 2px 8px rgba(0,0,0,0.05)',
+                position: 'relative'
+              }}>
+                <CardContent sx={{ pb: 2 }}>
+                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 2 }}>
+                    <Box sx={{ flex: 1 }}>
+                        <Typography variant="h6" sx={{ 
+                          color: jobseekerColors.primary, 
+                          fontWeight: 'bold',
+                          mb: 1,
+                          fontSize: '1rem'
+                        }}>
+                          {typeof skill.skill === 'object'
+                            ? (skill.skill?.name || 'مهارت نامشخص')
+                            : (availableSkills.find(s => s.id === skill.skill)?.name || 'مهارت نامشخص')}
+                        </Typography>
+                        
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
+                          <Chip 
+                            label={getLevelLabel(skill.level)}
+                            size="small"
+                            sx={{ 
+                              backgroundColor: getLevelColor(skill.level),
+                              color: 'white',
+                              fontWeight: 'bold'
+                            }}
+                          />
+                          <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                            {Array.from({ length: 4 }, (_, i) => (
+                              <StarIcon 
+                                key={i}
+                                fontSize="small"
+                                sx={{ 
+                                  color: i < getStarsCount(skill.level) ? getLevelColor(skill.level) : '#e0e0e0',
+                                  fontSize: '16px'
+                                }}
+                              />
+                            ))}
+                          </Box>
+                        </Box>
+                        
+                        
+                    </Box>
+                    
+                    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }}>
+                      <IconButton 
+                        size="small"
+                        onClick={() => handleEdit(skill)}
+                        sx={{ color: jobseekerColors.primary }}
+                      >
+                        <EditIcon fontSize="small" />
+                      </IconButton>
+                      <IconButton 
+                        size="small"
+                        onClick={() => handleDelete(skill.id!)}
+                        sx={{ color: jobseekerColors.red }}
+                      >
+                        <DeleteIcon fontSize="small" />
+                      </IconButton>
+                    </Box>
+                  </Box>
+                </CardContent>
+              </Card>
+            ))}
+          </Box>
         </Box>
       )}
     </Paper>
