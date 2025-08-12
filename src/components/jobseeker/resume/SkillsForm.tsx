@@ -155,6 +155,20 @@ export default function SkillsForm() {
         return;
       }
 
+      // بررسی مهارت تکراری (فقط برای ایجاد جدید)
+      if (!editingId) {
+        const isDuplicate = skills.some(skill => {
+          const skillId = typeof skill.skill === 'object' ? skill.skill?.id : skill.skill;
+          return skillId === data.skill_id;
+        });
+        
+        if (isDuplicate) {
+          setLoading(false);
+          setErrors(['این مهارت قبلاً در لیست مهارت‌های شما ثبت شده است.']);
+          return;
+        }
+      }
+
       let response: any;
       if (editingId) {
         response = await apiPut(`/resumes/skills/${editingId}/`, { skill: data.skill_id, level: data.level, resume_id: resumeId });
@@ -808,26 +822,26 @@ export default function SkillsForm() {
             gap: 2
           }}>
             {skills.filter(skill => !!skill.skill).map((skill, index) => (
-              <Card key={skill.id || index} sx={{ 
-                border: `1px solid ${alpha(jobseekerColors.primary, 0.2)}`,
-                boxShadow: '0 2px 8px rgba(0,0,0,0.05)',
-                position: 'relative'
-              }}>
-                <CardContent sx={{ pb: 2 }}>
-                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 2 }}>
+               <Box key={skill.id || index} sx={{ 
+                 border: `1px solid ${alpha(jobseekerColors.primary, 0.2)}`,
+                 borderRadius: 1,
+                 backgroundColor: 'transparent',
+                 p: 1
+               }}>
+                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 0 }}>
                     <Box sx={{ flex: 1 }}>
                         <Typography variant="h6" sx={{ 
                           color: jobseekerColors.primary, 
-                          fontWeight: 'bold',
-                          mb: 1,
-                          fontSize: '1rem'
+                          fontWeight: 700,
+                          mb: 0.5,
+                          fontSize: '0.95rem'
                         }}>
                           {typeof skill.skill === 'object'
                             ? (skill.skill?.name || 'مهارت نامشخص')
                             : (availableSkills.find(s => s.id === skill.skill)?.name || 'مهارت نامشخص')}
                         </Typography>
                         
-                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.5 }}>
                           <Chip 
                             label={getLevelLabel(skill.level)}
                             size="small"
@@ -844,7 +858,7 @@ export default function SkillsForm() {
                                 fontSize="small"
                                 sx={{ 
                                   color: i < getStarsCount(skill.level) ? getLevelColor(skill.level) : '#e0e0e0',
-                                  fontSize: '16px'
+                              fontSize: '12px'
                                 }}
                               />
                             ))}
@@ -854,25 +868,24 @@ export default function SkillsForm() {
                         
                     </Box>
                     
-                    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }}>
+                    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.25 }}>
                       <IconButton 
                         size="small"
                         onClick={() => handleEdit(skill)}
-                        sx={{ color: jobseekerColors.primary }}
+                        sx={{ color: jobseekerColors.primary, p: 0.25, '&:hover': { backgroundColor: 'transparent' } }}
                       >
                         <EditIcon fontSize="small" />
                       </IconButton>
                       <IconButton 
                         size="small"
                         onClick={() => handleDelete(skill.id!)}
-                        sx={{ color: jobseekerColors.red }}
+                        sx={{ color: jobseekerColors.red, p: 0.25, '&:hover': { backgroundColor: 'transparent' } }}
                       >
                         <DeleteIcon fontSize="small" />
                       </IconButton>
                     </Box>
                   </Box>
-                </CardContent>
-              </Card>
+              </Box>
             ))}
           </Box>
         </Box>
