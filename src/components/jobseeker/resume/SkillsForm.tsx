@@ -75,6 +75,7 @@ export default function SkillsForm() {
   const [success, setSuccess] = useState(false);
   const [editingId, setEditingId] = useState<number | null>(null);
   const [showAddForm, setShowAddForm] = useState(false);
+  const [resumeId, setResumeId] = useState<number | null>(null);
   
   const formRef = useRef<HTMLDivElement>(null);
   
@@ -101,22 +102,32 @@ export default function SkillsForm() {
     { value: 'خبره', label: 'خبره', color: '#9c27b0' }
   ];
 
-  // لود مهارت‌ها
+  // لود مهارت‌ها و رزومه
   useEffect(() => {
-    const fetchSkills = async () => {
+    const fetchData = async () => {
       setDataLoading(true);
       try {
-        const response = await apiGet('/resumes/skills/');
-        setSkills(response.data as Skill[]);
+        const [skillsResponse, resumesResponse] = await Promise.all([
+          apiGet('/resumes/skills/'),
+          apiGet('/resumes/resumes/')
+        ]);
+        
+        setSkills(skillsResponse.data as Skill[]);
+        const resumes = Array.isArray(resumesResponse.data) ? resumesResponse.data : [];
+        if (resumes.length > 0) {
+          setResumeId(resumes[0].id as number);
+        } else {
+          setResumeId(null);
+        }
       } catch (err) {
-        console.error('خطا در دریافت مهارت‌ها:', err);
-        setErrors(['خطا در دریافت مهارت‌ها. لطفاً دوباره تلاش کنید.']);
+        console.error('خطا در دریافت اطلاعات:', err);
+        setErrors(['خطا در دریافت اطلاعات مورد نیاز. لطفاً دوباره تلاش کنید.']);
       } finally {
         setDataLoading(false);
       }
     };
 
-    fetchSkills();
+    fetchData();
   }, []);
 
   // تابع ذخیره مهارت
@@ -125,14 +136,21 @@ export default function SkillsForm() {
     setErrors([]);
 
     try {
+      // بررسی وجود رزومه
+      if (!resumeId) {
+        setLoading(false);
+        setErrors(['ابتدا رزومه خود را ایجاد کنید (شناسه رزومه یافت نشد).']);
+        return;
+      }
+
       let response: any;
       if (editingId) {
-        response = await apiPut(`/resumes/skills/${editingId}/`, data);
+        response = await apiPut(`/resumes/skills/${editingId}/`, { ...data, resume_id: resumeId });
         setSkills(prev => prev.map(skill => 
           skill.id === editingId ? response.data as Skill : skill
         ));
       } else {
-        response = await apiPost('/resumes/skills/', data);
+        response = await apiPost('/resumes/skills/', { ...data, resume_id: resumeId });
         setSkills(prev => [...prev, response.data as Skill]);
       }
 

@@ -22,9 +22,10 @@ import {
   OutlinedInput,
   MenuProps,
   useTheme,
+  Divider,
+  Chip,
   Card,
-  CardContent,
-  Divider
+  CardContent
 } from '@mui/material';
 import { alpha } from '@mui/material/styles';
 
@@ -38,6 +39,8 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import SaveIcon from '@mui/icons-material/Save';
 import CancelIcon from '@mui/icons-material/Cancel';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
+import AccessTimeOutlinedIcon from '@mui/icons-material/AccessTimeOutlined';
+import StarIcon from '@mui/icons-material/Star';
 import { JOB_SEEKER_THEME } from '@/constants/colors';
 
 // تبدیل اعداد انگلیسی به فارسی
@@ -99,6 +102,30 @@ export default function EducationForm() {
   
   const formRef = useRef<HTMLDivElement>(null);
   
+  // تنظیمات منو برای Select
+  const menuProps = {
+    PaperProps: {
+      sx: {
+        '& .MuiMenuItem-root': {
+          fontSize: '0.875rem',
+          padding: '8px 16px'
+        }
+      }
+    }
+  };
+
+  // تابع تبدیل مدرک تحصیلی به فارسی
+  const getDegreeText = (degree: string): string => {
+    const degreeMap: { [key: string]: string } = {
+      'Diploma': 'دیپلم',
+      'Associate': 'کاردانی',
+      'Bachelor': 'کارشناسی',
+      'Master': 'کارشناسی ارشد',
+      'Doctorate': 'دکتری'
+    };
+    return degreeMap[degree] || degree;
+  };
+
   const { 
     register, 
     handleSubmit, 
@@ -207,6 +234,13 @@ export default function EducationForm() {
     setErrors([]);
 
     try {
+      // بررسی تعداد تحصیلات
+      if (!editingId && educations.length >= 5) {
+        setLoading(false);
+        setErrors(['حداکثر تعداد تحصیلات (۵ مورد) ثبت شده است.']);
+        return;
+      }
+
       const payload = mapUiToPayload(data);
 
       // ایجاد یا ویرایش
@@ -295,6 +329,13 @@ export default function EducationForm() {
       description: education.description || '',
       is_current: education.is_current
     });
+    
+    // اسکرول به فرم
+    setTimeout(() => {
+      if (formRef.current) {
+        formRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    }, 100);
   };
 
   // تابع ریست فرم
@@ -438,42 +479,86 @@ export default function EducationForm() {
         flexDirection: 'column',
         gap: 2
       }}>
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-          <SchoolIcon sx={{ 
-            fontSize: { xs: 32, md: 42 }, 
-            color: jobseekerColors.primary,
-            transform: 'translateY(-2px)'
-          }} />
-          <Typography variant="h5" component="h1" fontWeight="bold" sx={{ 
-            fontSize: { xs: '1.1rem', sm: '1.25rem', md: '1.5rem' },
-            color: jobseekerColors.primary,
-            lineHeight: { xs: 1.3, sm: 1.4 }
-          }}>
-            تحصیلات
-          </Typography>
-        </Box>
-
-        <Alert 
-          severity="info" 
-          icon={<InfoIcon />}
-          sx={{ 
-            backgroundColor: jobseekerColors.bgVeryLight,
-            borderColor: jobseekerColors.primary,
-            color: '#333',
-            '& .MuiAlert-icon': {
-              color: jobseekerColors.primary,
-              display: { xs: 'none', sm: 'flex' }
-            },
-            '& .MuiAlert-message': {
-              width: '100%',
-              color: '#333'
-            }
-          }}
-        >
-          <Box>
-            اطلاعات تحصیلی خود را وارد کنید تا کارفرمایان بتوانند سطح تحصیلات شما را بررسی کنند.
+          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+              <SchoolIcon sx={{ 
+                fontSize: { xs: 32, md: 42 }, 
+                color: jobseekerColors.primary,
+                transform: 'translateY(-2px)'
+              }} />
+              <Typography variant="h5" component="h1" fontWeight="bold" sx={{ 
+                fontSize: { xs: '1.1rem', sm: '1.25rem', md: '1.5rem' },
+                color: jobseekerColors.primary,
+                lineHeight: { xs: 1.3, sm: 1.4 }
+              }}>
+                تحصیلات
+              </Typography>
+            </Box>
+            
+            <Button
+              variant="contained"
+              color="success"
+              onClick={() => setShowAddForm(true)}
+              disabled={showAddForm || educations.length >= 5}
+              sx={{
+                background: jobseekerColors.primary,
+                color: 'white',
+                '&:hover': { 
+                  background: jobseekerColors.dark,
+                  boxShadow: '0 4px 12px rgba(0,0,0,0.2)'
+                },
+                '&:disabled': {
+                  background: jobseekerColors.primary,
+                  color: 'white',
+                  cursor: 'not-allowed',
+                  opacity: 0.5
+                },
+                borderRadius: 2,
+                px: 4,
+                py: 1.5,
+                fontSize: '1rem',
+                fontWeight: 'bold',
+                minWidth: '140px',
+                width: '140px',
+                height: '48px',
+                transition: 'all 0.2s ease',
+                boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
+                whiteSpace: 'nowrap',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center'
+              }}
+            >
+              افزودن تحصیلات
+            </Button>
           </Box>
-        </Alert>
+
+                  <Alert 
+            severity="info" 
+            icon={<InfoIcon />}
+            sx={{ 
+              backgroundColor: jobseekerColors.bgVeryLight,
+              borderColor: jobseekerColors.primary,
+              color: '#333',
+              '& .MuiAlert-icon': {
+                color: jobseekerColors.primary,
+                display: { xs: 'none', sm: 'flex' }
+              },
+              '& .MuiAlert-message': {
+                width: '100%',
+                color: '#333'
+              }
+            }}
+          >
+            <Box>
+              اطلاعات تحصیلی خود را وارد کنید تا کارفرمایان بتوانند سطح تحصیلات شما را بررسی کنند.
+                              {educations.length >= 5 && (
+                    <Typography variant="body2" sx={{ mt: 1, fontWeight: 600, color: '#d32f2f' }}>
+                        شما حداکثر تعداد تحصیلات (۵ مورد) را ثبت کرده‌اید. برای افزودن تحصیلات جدید، ابتدا یکی از تحصیلات موجود را حذف کنید.
+                    </Typography>
+                )}
+            </Box>
+          </Alert>
       </Box>
 
       {errors.length > 0 && (
@@ -537,108 +622,9 @@ export default function EducationForm() {
         </Alert>
       )}
 
-      {/* لیست تحصیلات موجود */}
-      {educations.length > 0 && (
-        <Box sx={{ mb: 4 }}>
-          <Typography variant="h6" sx={{ 
-            mb: 2, 
-            color: jobseekerColors.primary,
-            fontWeight: 'bold'
-          }}>
-            تحصیلات شما
-          </Typography>
-          
-          {educations.map((education, index) => (
-            <Card key={education.id || index} sx={{ 
-              mb: 2, 
-              border: `1px solid ${alpha(jobseekerColors.primary, 0.2)}`,
-              boxShadow: '0 2px 8px rgba(0,0,0,0.05)'
-            }}>
-              <CardContent>
-                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 2 }}>
-                  <Box sx={{ flex: 1 }}>
-                    <Typography variant="h6" sx={{ 
-                      color: jobseekerColors.primary, 
-                      fontWeight: 'bold',
-                      mb: 1
-                    }}>
-                      {education.degree} - {education.field_of_study}
-                    </Typography>
-                    <Typography variant="body1" sx={{ mb: 1 }}>
-                      {education.institution}
-                    </Typography>
-                    <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
-                      {education.start_year} - {education.is_current ? 'در حال تحصیل' : education.end_year}
-                    </Typography>
-                    {education.grade && (
-                      <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
-                        معدل: {education.grade}
-                      </Typography>
-                    )}
-                    {education.description && (
-                      <Typography variant="body2" sx={{ mt: 1 }}>
-                        {education.description}
-                      </Typography>
-                    )}
-                  </Box>
-                  
-                  <Box sx={{ display: 'flex', gap: 1 }}>
-                    <IconButton 
-                      onClick={() => handleEdit(education)}
-                      sx={{ color: jobseekerColors.primary }}
-                    >
-                      <EditIcon />
-                    </IconButton>
-                    <IconButton 
-                      onClick={() => handleDelete(education.id!)}
-                      sx={{ color: jobseekerColors.red }}
-                    >
-                      <DeleteIcon />
-                    </IconButton>
-                  </Box>
-                </Box>
-              </CardContent>
-            </Card>
-          ))}
-        </Box>
-      )}
-
-      {/* دکمه افزودن تحصیلات جدید */}
-      {!showAddForm && (
-        <Box sx={{ textAlign: 'center', mb: 3 }}>
-          <Button
-            variant="contained"
-            color="success"
-            onClick={() => setShowAddForm(true)}
-            sx={{
-              background: jobseekerColors.primary,
-              color: 'white',
-              '&:hover': { 
-                background: jobseekerColors.dark,
-                boxShadow: '0 4px 12px rgba(0,0,0,0.2)'
-              },
-              borderRadius: 2,
-              px: 4,
-              py: 1.5,
-              fontSize: '1rem',
-              fontWeight: 'bold',
-              minWidth: '140px',
-              width: 'auto',
-              height: '48px',
-              transition: 'all 0.2s ease',
-              boxShadow: '0 2px 8px rgba(0,0,0,0.15)'
-            }}
-          >
-            افزودن تحصیلات جدید
-          </Button>
-        </Box>
-      )}
-
       {/* فرم افزودن/ویرایش تحصیلات */}
       {showAddForm && (
-        <Box sx={{ mt: 3 }}>
-          <Divider sx={{ mb: 3 }} />
-          
+        <Box sx={{ mb: 4 }}>
           <Typography variant="h6" sx={{ 
             mb: 3, 
             color: jobseekerColors.primary,
@@ -899,14 +885,14 @@ export default function EducationForm() {
                     color: jobseekerColors.primary,
                     fontWeight: 600
                   }}>
-                    سال پایان {!isCurrent && '*'}
+                    سال پایان {!watch('is_current') && '*'}
                   </Typography>
                 </Box>
                 <Controller
                   name="end_year"
                   control={control}
                   rules={{ 
-                    required: !isCurrent ? 'سال پایان الزامی است' : false,
+                    required: !watch('is_current') ? 'سال پایان الزامی است' : false,
                     min: { value: watch('start_year'), message: 'سال پایان باید بیشتر از سال شروع باشد' }
                   }}
                   render={({ field }) => (
@@ -914,7 +900,7 @@ export default function EducationForm() {
                       fullWidth
                       type="text"
                       placeholder="مثال: ۱۴۰۴"
-                      disabled={isCurrent}
+                      disabled={watch('is_current')}
                       value={field.value ? convertToPersianNumbers(field.value) : ''}
                       onChange={(e) => {
                         const raw = e.target.value;
@@ -947,7 +933,41 @@ export default function EducationForm() {
               </Box>
             </Box>
 
-            {/* توضیحات */}
+            {/* در حال تحصیل */}
+            <Box sx={{ mb: { xs: 2, md: 4 } }}>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
+                <SchoolIcon sx={{ color: jobseekerColors.primary, fontSize: 20 }} />
+                <Typography variant="body2" fontWeight="medium" sx={{
+                  fontSize: { xs: '0.7rem', sm: '0.875rem' },
+                  lineHeight: { xs: 1.1, sm: 1.3 },
+                  color: jobseekerColors.primary,
+                  fontWeight: 600
+                }}>
+                  در حال تحصیل
+                </Typography>
+              </Box>
+              <Controller
+                name="is_current"
+                control={control}
+                render={({ field }) => (
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                    <input
+                      type="checkbox"
+                      checked={field.value}
+                      onChange={(e) => field.onChange(e.target.checked)}
+                      style={{ 
+                        width: '18px', 
+                        height: '18px',
+                        accentColor: jobseekerColors.primary
+                      }}
+                    />
+                    <Typography variant="body2" sx={{ fontSize: '0.875rem', color: 'text.secondary' }}>
+                      این تحصیلات هنوز تمام نشده است
+                    </Typography>
+                  </Box>
+                )}
+              />
+            </Box>
 
             {/* توضیحات */}
             <Box sx={{ mb: { xs: 2, md: 4 } }}>
@@ -1058,6 +1078,372 @@ export default function EducationForm() {
           </form>
         </Box>
       )}
+
+      {/* لیست تحصیلات موجود */}
+      {educations.length > 0 && (
+        <Box sx={{ mb: 4 }}>
+          <Typography variant="h6" sx={{ 
+            mb: 2, 
+            color: jobseekerColors.primary,
+            fontWeight: 'bold'
+          }}>
+            تحصیلات شما
+          </Typography>
+          
+          <Box sx={{ 
+            display: 'flex',
+            flexDirection: 'column',
+            gap: 2,
+            mb: 3
+          }}>
+                        {educations.map((education, index) => (
+            <Paper 
+              key={education.id || index} 
+              elevation={0} 
+              sx={{ 
+                border: '1px solid #e0e0e0',
+                borderRadius: 2,
+                overflow: 'hidden',
+                background: 'transparent',
+                boxShadow: 'none'
+              }}
+            >
+              {/* Header Section */}
+              <Box sx={{ 
+                background: 'transparent',
+                p: { xs: 1.5, sm: 2 }
+              }}>
+                {/* Desktop Layout - Action buttons on the right */}
+                <Box sx={{ 
+                  display: { xs: 'none', sm: 'flex' }, 
+                  justifyContent: 'space-between', 
+                  alignItems: 'flex-start', 
+                  mb: 1 
+                }}>
+                  <Box sx={{ flex: 1 }}>
+                    <Typography variant="h5" sx={{ 
+                      fontWeight: 700, 
+                      mb: 0.25,
+                      color: jobseekerColors.primary,
+                      fontSize: '1.1rem'
+                    }}>
+                      {education.degree} - {education.field_of_study}
+                    </Typography>
+                    <Typography variant="h6" sx={{ 
+                      fontWeight: 600, 
+                      mb: 0.75,
+                      color: 'text.primary',
+                      fontSize: '0.95rem'
+                    }}>
+                      {education.institution}
+                    </Typography>
+                    
+                    {/* Chips Section */}
+                    <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.75, mb: 1 }}>
+                      <Chip 
+                        label={getDegreeText(education.degree)}
+                        size="small"
+                        sx={{ 
+                          bgcolor: alpha(jobseekerColors.primary, 0.15),
+                          color: jobseekerColors.primary,
+                          fontWeight: 600,
+                          fontSize: '0.7rem',
+                          height: '22px',
+                          '& .MuiChip-label': {
+                            px: 1.25
+                          }
+                        }}
+                      />
+                      {education.is_current && (
+                        <Chip 
+                          label="در حال تحصیل"
+                          size="small"
+                          color="success"
+                          sx={{ 
+                            fontWeight: 600,
+                            fontSize: '0.7rem',
+                            height: '22px',
+                            '& .MuiChip-label': {
+                              px: 1.25
+                            }
+                          }}
+                        />
+                      )}
+                      {education.grade && (
+                        <Chip 
+                          label={`معدل: ${convertToPersianNumbers(education.grade || '')}`}
+                          size="small"
+                          variant="outlined"
+                          sx={{ 
+                            borderColor: alpha(jobseekerColors.primary, 0.3),
+                            color: jobseekerColors.primary,
+                            fontWeight: 500,
+                            fontSize: '0.7rem',
+                            height: '22px',
+                            '& .MuiChip-label': {
+                              px: 1.25
+                            }
+                          }}
+                        />
+                      )}
+                    </Box>
+
+                    {/* Date Section */}
+                    <Box sx={{ 
+                      display: 'flex', 
+                      alignItems: 'center', 
+                      gap: 0.75,
+                      color: 'text.secondary',
+                      fontSize: '0.75rem',
+                      mb: education.description ? 0.75 : 0
+                    }}>
+                      <SchoolIcon sx={{ fontSize: 14, color: jobseekerColors.primary }} />
+                      <Typography variant="body2" sx={{ fontWeight: 500 }}>
+                        سال شروع: {convertToPersianNumbers(education.start_year || '')} 
+                        {education.is_current ? ' - در حال تحصیل' : ` - سال پایان: ${convertToPersianNumbers(education.end_year || '')}`}
+                      </Typography>
+                    </Box>
+
+                    {/* Description Section */}
+                    {education.description && (
+                      <Box sx={{ mt: 0.75 }}>
+                        <Typography variant="body2" sx={{ 
+                          fontWeight: 600,
+                          color: jobseekerColors.primary,
+                          mb: 0.25,
+                          fontSize: '0.7rem'
+                        }}>
+                          توضیحات:
+                        </Typography>
+                        <Typography variant="body2" sx={{ 
+                          whiteSpace: 'pre-line',
+                          lineHeight: 1.3,
+                          color: 'text.secondary',
+                          fontSize: '0.7rem'
+                        }}>
+                          {education.description}
+                        </Typography>
+                      </Box>
+                    )}
+                  </Box>
+
+                  {/* Desktop Action Buttons */}
+                  <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.25, ml: 1 }}>
+                    <Button
+                      size="small"
+                      startIcon={<EditIcon />}
+                      onClick={() => handleEdit(education)}
+                      variant="outlined"
+                      sx={{ 
+                        borderColor: jobseekerColors.primary,
+                        color: jobseekerColors.primary,
+                        fontWeight: 600,
+                        fontSize: '0.7rem',
+                        px: 1.25,
+                        py: 0.25,
+                        minWidth: '65px',
+                        height: '26px',
+                        '&:hover': {
+                          borderColor: jobseekerColors.dark,
+                          backgroundColor: alpha(jobseekerColors.primary, 0.05)
+                        }
+                      }}
+                    >
+                      ویرایش
+                    </Button>
+                    <Button
+                      size="small"
+                      startIcon={<DeleteIcon />}
+                      onClick={() => handleDelete(education.id!)}
+                      variant="outlined"
+                      color="error"
+                      sx={{ 
+                        fontWeight: 600,
+                        fontSize: '0.7rem',
+                        px: 1.25,
+                        py: 0.25,
+                        minWidth: '65px',
+                        height: '26px',
+                        '&:hover': {
+                          backgroundColor: alpha('#f44336', 0.05)
+                        }
+                      }}
+                    >
+                      حذف
+                    </Button>
+                  </Box>
+                </Box>
+
+                {/* Mobile Layout - Action buttons below content */}
+                <Box sx={{ 
+                  display: { xs: 'block', sm: 'none' }
+                }}>
+                  <Typography variant="h5" sx={{ 
+                    fontWeight: 700, 
+                    mb: 0.25,
+                    color: jobseekerColors.primary,
+                    fontSize: '0.95rem'
+                  }}>
+                    {education.degree} - {education.field_of_study}
+                  </Typography>
+                  <Typography variant="h6" sx={{ 
+                    fontWeight: 600, 
+                    mb: 0.75,
+                    color: 'text.primary',
+                    fontSize: '0.85rem'
+                  }}>
+                    {education.institution}
+                  </Typography>
+                  
+                  {/* Chips Section */}
+                  <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.75, mb: 1 }}>
+                    <Chip 
+                      label={getDegreeText(education.degree)}
+                      size="small"
+                      sx={{ 
+                        bgcolor: alpha(jobseekerColors.primary, 0.15),
+                        color: jobseekerColors.primary,
+                        fontWeight: 600,
+                        fontSize: '0.7rem',
+                        height: '22px',
+                        '& .MuiChip-label': {
+                          px: 1.25
+                        }
+                      }}
+                    />
+                    {education.is_current && (
+                      <Chip 
+                        label="در حال تحصیل"
+                        size="small"
+                        color="success"
+                        sx={{ 
+                          fontWeight: 600,
+                          fontSize: '0.7rem',
+                          height: '22px',
+                          '& .MuiChip-label': {
+                            px: 1.25
+                          }
+                        }}
+                      />
+                    )}
+                    {education.grade && (
+                      <Chip 
+                        label={`معدل: ${convertToPersianNumbers(education.grade || '')}`}
+                        size="small"
+                        variant="outlined"
+                        sx={{ 
+                          borderColor: alpha(jobseekerColors.primary, 0.3),
+                          color: jobseekerColors.primary,
+                          fontWeight: 500,
+                          fontSize: '0.7rem',
+                          height: '22px',
+                          '& .MuiChip-label': {
+                            px: 1.25
+                          }
+                        }}
+                      />
+                    )}
+                  </Box>
+
+                  {/* Date Section */}
+                  <Box sx={{ 
+                    display: 'flex', 
+                    alignItems: 'center', 
+                    gap: 0.75,
+                    color: 'text.secondary',
+                    fontSize: '0.75rem',
+                    mb: education.description ? 0.75 : 0
+                  }}>
+                    <SchoolIcon sx={{ fontSize: 14, color: jobseekerColors.primary }} />
+                    <Typography variant="body2" sx={{ fontWeight: 500 }}>
+                      سال شروع: {convertToPersianNumbers(education.start_year || '')} 
+                      {education.is_current ? ' - در حال تحصیل' : ` - سال پایان: ${convertToPersianNumbers(education.end_year || '')}`}
+                    </Typography>
+                  </Box>
+
+                  {/* Description Section */}
+                  {education.description && (
+                    <Box sx={{ mt: 0.75 }}>
+                      <Typography variant="body2" sx={{ 
+                        fontWeight: 600,
+                        color: jobseekerColors.primary,
+                        mb: 0.25,
+                        fontSize: '0.7rem'
+                      }}>
+                        توضیحات:
+                      </Typography>
+                      <Typography variant="body2" sx={{ 
+                        whiteSpace: 'pre-line',
+                        lineHeight: 1.3,
+                        color: 'text.secondary',
+                        fontSize: '0.7rem'
+                      }}>
+                        {education.description}
+                      </Typography>
+                    </Box>
+                  )}
+
+                  {/* Mobile Action Buttons - Below content */}
+                  <Box sx={{ 
+                    display: 'flex', 
+                    flexDirection: 'row', 
+                    gap: 1, 
+                    mt: 2,
+                    justifyContent: 'flex-end'
+                  }}>
+                    <Button
+                      size="small"
+                      startIcon={<EditIcon />}
+                      onClick={() => handleEdit(education)}
+                      variant="outlined"
+                      sx={{ 
+                        borderColor: jobseekerColors.primary,
+                        color: jobseekerColors.primary,
+                        fontWeight: 600,
+                        fontSize: '0.7rem',
+                        px: 1.25,
+                        py: 0.25,
+                        minWidth: '65px',
+                        height: '26px',
+                        '&:hover': {
+                          borderColor: jobseekerColors.dark,
+                          backgroundColor: alpha(jobseekerColors.primary, 0.05)
+                        }
+                      }}
+                    >
+                      ویرایش
+                    </Button>
+                    <Button
+                      size="small"
+                      startIcon={<DeleteIcon />}
+                      onClick={() => handleDelete(education.id!)}
+                      variant="outlined"
+                      color="error"
+                      sx={{ 
+                        fontWeight: 600,
+                        fontSize: '0.7rem',
+                        px: 1.25,
+                        py: 0.25,
+                        minWidth: '65px',
+                        height: '26px',
+                        '&:hover': {
+                          backgroundColor: alpha('#f44336', 0.05)
+                        }
+                      }}
+                    >
+                      حذف
+                    </Button>
+                  </Box>
+                </Box>
+              </Box>
+
+              {/* Description Section - removed from here */}
+            </Paper>
+            ))}
+          </Box>
+        </Box>
+      )}
     </Paper>
   );
 }
+

@@ -22,6 +22,7 @@ import {
   OutlinedInput,
   MenuProps,
   useTheme,
+  useMediaQuery,
   Card,
   CardContent,
   CardActions,
@@ -504,8 +505,7 @@ export default function ExperiencesForm() {
           p: { xs: 2, sm: 3, md: 4 }, 
           borderRadius: { xs: 2, md: 3 },
           boxShadow: '0 3px 10px rgba(0,0,0,0.08)',
-          border: '1px solid #f0f0f0',
-          mb: 3
+          border: '1px solid #f0f0f0'
         }}
       >
         <Box sx={{ 
@@ -530,70 +530,70 @@ export default function ExperiencesForm() {
               </Typography>
             </Box>
             
-                         <Button
-               variant="contained"
-               color="success"
-               onClick={() => setShowAddForm(true)}
-               disabled={showAddForm || experiences.length >= 10}
-               sx={{
-                 background: jobseekerColors.primary,
-                 color: 'white',
-                 '&:hover': { 
-                   background: jobseekerColors.dark,
-                   boxShadow: '0 4px 12px rgba(0,0,0,0.2)'
-                 },
-                 '&:disabled': {
-                   background: jobseekerColors.primary,
-                   color: 'white',
-                   cursor: 'not-allowed',
-                   opacity: 0.5
-                 },
-                 borderRadius: 2,
-                 px: 4,
-                 py: 1.5,
-                 fontSize: '1rem',
-                 fontWeight: 'bold',
-                 minWidth: '140px',
-                 width: '140px',
-                 height: '48px',
-                 transition: 'all 0.2s ease',
-                 boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
-                 whiteSpace: 'nowrap',
-                 display: 'flex',
-                 alignItems: 'center',
-                 justifyContent: 'center'
-               }}
-             >
-               افزودن تجربه
-             </Button>
+            <Button
+              variant="contained"
+              color="success"
+              onClick={() => setShowAddForm(true)}
+              disabled={showAddForm || experiences.length >= 10}
+              sx={{
+                background: jobseekerColors.primary,
+                color: 'white',
+                '&:hover': { 
+                  background: jobseekerColors.dark,
+                  boxShadow: '0 4px 12px rgba(0,0,0,0.2)'
+                },
+                '&:disabled': {
+                  background: jobseekerColors.primary,
+                  color: 'white',
+                  cursor: 'not-allowed',
+                  opacity: 0.5
+                },
+                borderRadius: 2,
+                px: 4,
+                py: 1.5,
+                fontSize: '1rem',
+                fontWeight: 'bold',
+                minWidth: '140px',
+                width: '140px',
+                height: '48px',
+                transition: 'all 0.2s ease',
+                boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
+                whiteSpace: 'nowrap',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center'
+              }}
+            >
+              افزودن تجربه
+            </Button>
           </Box>
 
-                     <Alert 
-             severity="info" 
-             icon={<InfoIcon />}
-             sx={{ 
-               backgroundColor: jobseekerColors.bgVeryLight,
-               borderColor: jobseekerColors.primary,
-               color: '#333',
-               '& .MuiAlert-icon': {
-                 color: jobseekerColors.primary,
-                 display: { xs: 'none', sm: 'flex' }
-               },
-               '& .MuiAlert-message': {
-                 width: '100%',
-                 color: '#333'
-               }
-             }}
-           >
-             <Box>
-               ثبت تجربیات کاری شما به بهتر دیده شدن رزومه کمک می‌کند.
-               {experiences.length >= 10 && (
-                 <Typography variant="body2" sx={{ mt: 1, fontWeight: 600, color: '#d32f2f' }}>
-                    شما حداکثر تعداد تجربیات کاری (۱۰ مورد) را ثبت کرده‌اید. برای افزودن تجربه جدید، ابتدا یکی از تجربیات موجود را حذف کنید.
-                 </Typography>
-               )}
-             </Box>
-           </Alert>
+          <Alert 
+            severity="info" 
+            icon={<InfoIcon />}
+            sx={{ 
+              backgroundColor: jobseekerColors.bgVeryLight,
+              borderColor: jobseekerColors.primary,
+              color: '#333',
+              '& .MuiAlert-icon': {
+                color: jobseekerColors.primary,
+                display: { xs: 'none', sm: 'flex' }
+              },
+              '& .MuiAlert-message': {
+                width: '100%',
+                color: '#333'
+              }
+            }}
+          >
+            <Box>
+              ثبت تجربیات کاری شما به بهتر دیده شدن رزومه کمک می‌کند.
+              {experiences.length >= 10 && (
+                <Typography variant="body2" sx={{ mt: 1, fontWeight: 600, color: '#d32f2f' }}>
+                   شما حداکثر تعداد تجربیات کاری (۱۰ مورد) را ثبت کرده‌اید. برای افزودن تجربه جدید، ابتدا یکی از تجربیات موجود را حذف کنید.
+                </Typography>
+              )}
+            </Box>
+          </Alert>
         </Box>
 
         {errors.length > 0 && (
@@ -611,7 +611,7 @@ export default function ExperiencesForm() {
                 </IconButton>
               }
             >
-              <AlertTitle>خطا در ثبت تجربه</AlertTitle>
+              <AlertTitle>خطا در ثبت اطلاعات</AlertTitle>
               {errors.length === 1 ? errors[0] : (
                 <Box>
                   <Typography variant="body2" sx={{ mb: 1 }}>
@@ -653,99 +653,45 @@ export default function ExperiencesForm() {
             severity="success" 
             sx={{ mb: 3 }}
           >
-            عملیات با موفقیت انجام شد.
+            تجربه کاری با موفقیت به‌روزرسانی شد.
           </Alert>
         )}
-      </Paper>
 
-      {/* فرم افزودن/ویرایش */}
-      {showAddForm && (
-        <Paper 
-          ref={formRef}
-          elevation={0} 
-          sx={{ 
-            p: { xs: 2, sm: 3, md: 4 }, 
-            borderRadius: { xs: 2, md: 3 },
-            boxShadow: '0 3px 10px rgba(0,0,0,0.08)',
-            border: '1px solid #f0f0f0',
-            mb: 3
-          }}
-        >
-          <Typography variant="h6" component="h2" sx={{ 
-            mb: 3, 
-            color: jobseekerColors.primary,
-            fontWeight: 600
-          }}>
-            {editingId ? 'ویرایش تجربه کاری' : 'افزودن تجربه کاری جدید'}
-          </Typography>
+        {/* فرم افزودن/ویرایش تجربه */}
+        {showAddForm && (
+          <Box sx={{ mb: 4 }}>
+            <Typography variant="h6" sx={{ 
+              mb: 3, 
+              color: jobseekerColors.primary,
+              fontWeight: 'bold'
+            }}>
+              {editingId ? 'ویرایش تجربه کاری' : 'افزودن تجربه کاری جدید'}
+            </Typography>
 
-          <form onSubmit={handleSubmit(onSubmit)}>
-            {/* عنوان شغل */}
-            <Box sx={{ mb: { xs: 2, md: 3 } }}>
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
-                <WorkIcon sx={{ color: jobseekerColors.primary, fontSize: 20 }} />
-                <Typography variant="body2" fontWeight="medium" sx={{
-                  fontSize: { xs: '0.7rem', sm: '0.875rem' },
-                  color: jobseekerColors.primary,
-                  fontWeight: 600
-                }}>
-                  عنوان شغل *
-                </Typography>
-              </Box>
-              <Controller
-                name="title"
-                control={control}
-                rules={{ required: 'عنوان شغل الزامی است' }}
-                render={({ field }) => (
-                  <TextField
-                    {...field}
-                    fullWidth
-                    placeholder="مثال: برنامه‌نویس React"
-                    error={Boolean(formErrors.title)}
-                    helperText={formErrors.title?.message}
-                    variant="outlined"
-                    sx={{ 
-                      '& .MuiOutlinedInput-root': { 
-                        borderRadius: '6px',
-                        '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-                          borderColor: jobseekerColors.primary
-                        }
-                      },
-                      '& .MuiInputBase-input': {
-                        fontSize: { xs: '0.8rem', sm: '1rem' },
-                        padding: { xs: '8px 14px', sm: '16.5px 14px' }
-                      }
-                    }}
-                  />
-                )}
-              />
-            </Box>
-
-            {/* نام شرکت و نوع استخدام */}
-            <Box sx={{ display: 'flex', flexDirection: { xs: 'column', md: 'row' }, gap: { xs: 1.5, md: 3 }, mb: { xs: 2, md: 3 } }}>
-              {/* نام شرکت */}
-              <Box sx={{ flex: 1 }}>
+            <form onSubmit={handleSubmit(onSubmit)}>
+              {/* عنوان شغل */}
+              <Box sx={{ mb: { xs: 2, md: 3 } }}>
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
-                  <BusinessIcon sx={{ color: jobseekerColors.primary, fontSize: 20 }} />
+                  <WorkIcon sx={{ color: jobseekerColors.primary, fontSize: 20 }} />
                   <Typography variant="body2" fontWeight="medium" sx={{
                     fontSize: { xs: '0.7rem', sm: '0.875rem' },
                     color: jobseekerColors.primary,
                     fontWeight: 600
                   }}>
-                    نام شرکت *
+                    عنوان شغل *
                   </Typography>
                 </Box>
                 <Controller
-                  name="company"
+                  name="title"
                   control={control}
-                  rules={{ required: 'نام شرکت الزامی است' }}
+                  rules={{ required: 'عنوان شغل الزامی است' }}
                   render={({ field }) => (
                     <TextField
                       {...field}
                       fullWidth
-                      placeholder="نام شرکت یا سازمان"
-                      error={Boolean(formErrors.company)}
-                      helperText={formErrors.company?.message}
+                      placeholder="مثال: برنامه‌نویس React"
+                      error={Boolean(formErrors.title)}
+                      helperText={formErrors.title?.message}
                       variant="outlined"
                       sx={{ 
                         '& .MuiOutlinedInput-root': { 
@@ -764,204 +710,247 @@ export default function ExperiencesForm() {
                 />
               </Box>
 
-              {/* نوع استخدام */}
-              <Box sx={{ flex: 1 }}>
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
-                  <WorkIcon sx={{ color: jobseekerColors.primary, fontSize: 20 }} />
-                  <Typography variant="body2" fontWeight="medium" sx={{
-                    fontSize: { xs: '0.7rem', sm: '0.875rem' },
-                    color: jobseekerColors.primary,
-                    fontWeight: 600
-                  }}>
-                    نوع استخدام *
-                  </Typography>
-                </Box>
-                <Controller
-                  name="employment_type"
-                  control={control}
-                  rules={{ required: 'نوع استخدام الزامی است' }}
-                  render={({ field }) => (
-                    <FormControl fullWidth error={Boolean(formErrors.employment_type)}>
-                      <Select
-                        {...field}
-                        displayEmpty
-                        input={<OutlinedInput sx={selectStyles} />}
-                        renderValue={() => {
-                          const selectedOption = employmentTypeOptions.find(opt => opt.value === field.value);
-                          return (
-                            <Box component="div" sx={{ display: 'flex', justifyContent: 'center', width: '100%' }}>
-                              {selectedOption ? selectedOption.label : 'انتخاب نوع استخدام'}
-                            </Box>
-                          );
-                        }}
-                        MenuProps={menuPropsRTL}
-                        startAdornment={
-                          <InputAdornment position="start" sx={{ position: 'absolute', right: '10px' }}>
-                            <WorkIcon fontSize="small" sx={{ color: jobseekerColors.primary }} />
-                          </InputAdornment>
-                        }
-                        IconComponent={(props: any) => (
-                          <KeyboardArrowDownIcon {...props} sx={{ color: jobseekerColors.primary }} />
-                        )}
-                      >
-                        <MenuItem value="" disabled>انتخاب نوع استخدام</MenuItem>
-                        {employmentTypeOptions.map((option) => (
-                          <MenuItem key={option.value} value={option.value}>
-                            {option.label}
-                          </MenuItem>
-                        ))}
-                      </Select>
-                      {formErrors.employment_type && (
-                        <FormHelperText>{formErrors.employment_type.message}</FormHelperText>
-                      )}
-                    </FormControl>
-                  )}
-                />
-              </Box>
-            </Box>
-
-            {/* استان و شهر */}
-            <Box sx={{ display: 'flex', flexDirection: { xs: 'column', md: 'row' }, gap: { xs: 1.5, md: 3 }, mb: { xs: 2, md: 3 } }}>
-              {/* استان */}
-              <Box sx={{ flex: 1 }}>
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
-                  <LocationOnIcon sx={{ color: jobseekerColors.primary, fontSize: 20 }} />
-                  <Typography variant="body2" fontWeight="medium" sx={{
-                    fontSize: { xs: '0.7rem', sm: '0.875rem' },
-                    color: jobseekerColors.primary,
-                    fontWeight: 600
-                  }}>
-                    استان
-                  </Typography>
-                </Box>
-                <Controller
-                  name="province_id"
-                  control={control}
-                  render={({ field }) => (
-                    <FormControl fullWidth error={Boolean(formErrors.province_id)}>
-                      <Select
-                        {...field}
-                        displayEmpty
-                        input={<OutlinedInput sx={selectStyles} />}
-                        renderValue={() => {
-                          const selectedProvince = provinces.find(p => p.id === field.value);
-                          return (
-                            <Box component="div" sx={{ display: 'flex', justifyContent: 'center', width: '100%' }}>
-                              {selectedProvince ? selectedProvince.name : 'انتخاب استان'}
-                            </Box>
-                          );
-                        }}
-                        MenuProps={menuPropsRTL}
-                        startAdornment={
-                          <InputAdornment position="start" sx={{ position: 'absolute', right: '10px' }}>
-                            <LocationOnIcon fontSize="small" sx={{ color: jobseekerColors.primary }} />
-                          </InputAdornment>
-                        }
-                        IconComponent={(props: any) => (
-                          <KeyboardArrowDownIcon {...props} sx={{ color: jobseekerColors.primary }} />
-                        )}
-                      >
-                        <MenuItem value={0} disabled>انتخاب استان</MenuItem>
-                        {provinces.map((province) => (
-                          <MenuItem key={province.id} value={province.id}>
-                            {province.name}
-                          </MenuItem>
-                        ))}
-                      </Select>
-                      {formErrors.province_id && (
-                        <FormHelperText>{formErrors.province_id.message}</FormHelperText>
-                      )}
-                    </FormControl>
-                  )}
-                />
-              </Box>
-
-              {/* شهر */}
-              <Box sx={{ flex: 1 }}>
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
-                  <LocationOnIcon sx={{ color: jobseekerColors.primary, fontSize: 20 }} />
-                  <Typography variant="body2" fontWeight="medium" sx={{
-                    fontSize: { xs: '0.7rem', sm: '0.875rem' },
-                    color: jobseekerColors.primary,
-                    fontWeight: 600
-                  }}>
-                    شهر
-                  </Typography>
-                </Box>
-                <Controller
-                  name="location_id"
-                  control={control}
-                  render={({ field }) => (
-                    <FormControl fullWidth error={Boolean(formErrors.location_id)}>
-                      <Select
-                        {...field}
-                        displayEmpty
-                        disabled={!selectedProvinceId}
-                        input={<OutlinedInput sx={selectStyles} />}
-                        renderValue={() => {
-                          const selectedCity = cities.filter(c => !selectedProvinceId || c.province?.id === selectedProvinceId).find(c => c.id === field.value);
-                          return (
-                            <Box component="div" sx={{ display: 'flex', justifyContent: 'center', width: '100%' }}>
-                              {selectedCity ? selectedCity.name : 'انتخاب شهر'}
-                            </Box>
-                          );
-                        }}
-                        MenuProps={menuPropsRTL}
-                        startAdornment={
-                          <InputAdornment position="start" sx={{ position: 'absolute', right: '10px' }}>
-                            <LocationOnIcon fontSize="small" sx={{ color: jobseekerColors.primary }} />
-                          </InputAdornment>
-                        }
-                        IconComponent={(props: any) => (
-                          <KeyboardArrowDownIcon {...props} sx={{ color: jobseekerColors.primary }} />
-                        )}
-                      >
-                        <MenuItem value={0} disabled>انتخاب شهر</MenuItem>
-                        {cities.filter(c => !selectedProvinceId || c.province?.id === selectedProvinceId).map((city) => (
-                          <MenuItem key={city.id} value={city.id}>
-                            {city.name}
-                          </MenuItem>
-                        ))}
-                      </Select>
-                      {formErrors.location_id && (
-                        <FormHelperText>{formErrors.location_id.message}</FormHelperText>
-                      )}
-                    </FormControl>
-                  )}
-                />
-              </Box>
-            </Box>
-
-
-
-            {/* تاریخ شروع و پایان */}
-            <Box sx={{ display: 'flex', flexDirection: { xs: 'column', md: 'row' }, gap: { xs: 1.5, md: 3 }, mb: { xs: 2, md: 3 } }}>
-              {/* تاریخ شروع */}
-              <Box sx={{ flex: 1 }}>
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
-                  <CalendarTodayIcon sx={{ color: jobseekerColors.primary, fontSize: 20 }} />
-                  <Typography variant="body2" fontWeight="medium" sx={{
-                    fontSize: { xs: '0.7rem', sm: '0.875rem' },
-                    color: jobseekerColors.primary,
-                    fontWeight: 600
-                  }}>
-                    تاریخ شروع *
-                  </Typography>
-                </Box>
-                <Controller
-                  name="start_date"
-                  control={control}
-                  rules={{ required: 'تاریخ شروع الزامی است' }}
-                  render={({ field }) => (
-                    <Box sx={{
-                      '& .MuiOutlinedInput-root': {
-                        borderRadius: '6px',
-                        '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-                          borderColor: jobseekerColors.primary
-                        }
-                      }
+              {/* نام شرکت و نوع استخدام */}
+              <Box sx={{ display: 'flex', flexDirection: { xs: 'column', md: 'row' }, gap: { xs: 1.5, md: 3 }, mb: { xs: 2, md: 3 } }}>
+                {/* نام شرکت */}
+                <Box sx={{ flex: 1 }}>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
+                    <BusinessIcon sx={{ color: jobseekerColors.primary, fontSize: 20 }} />
+                    <Typography variant="body2" fontWeight="medium" sx={{
+                      fontSize: { xs: '0.7rem', sm: '0.875rem' },
+                      color: jobseekerColors.primary,
+                      fontWeight: 600
                     }}>
-                                             <JalaliDatePicker
+                      نام شرکت *
+                    </Typography>
+                  </Box>
+                  <Controller
+                    name="company"
+                    control={control}
+                    rules={{ required: 'نام شرکت الزامی است' }}
+                    render={({ field }) => (
+                      <TextField
+                        {...field}
+                        fullWidth
+                        placeholder="نام شرکت یا سازمان"
+                        error={Boolean(formErrors.company)}
+                        helperText={formErrors.company?.message}
+                        variant="outlined"
+                        sx={{ 
+                          '& .MuiOutlinedInput-root': { 
+                            borderRadius: '6px',
+                            '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                              borderColor: jobseekerColors.primary
+                            }
+                          },
+                          '& .MuiInputBase-input': {
+                            fontSize: { xs: '0.8rem', sm: '1rem' },
+                            padding: { xs: '8px 14px', sm: '16.5px 14px' }
+                          }
+                        }}
+                      />
+                    )}
+                  />
+                </Box>
+
+                {/* نوع استخدام */}
+                <Box sx={{ flex: 1 }}>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
+                    <WorkIcon sx={{ color: jobseekerColors.primary, fontSize: 20 }} />
+                    <Typography variant="body2" fontWeight="medium" sx={{
+                      fontSize: { xs: '0.7rem', sm: '0.875rem' },
+                      color: jobseekerColors.primary,
+                      fontWeight: 600
+                    }}>
+                      نوع استخدام *
+                    </Typography>
+                  </Box>
+                  <Controller
+                    name="employment_type"
+                    control={control}
+                    rules={{ required: 'نوع استخدام الزامی است' }}
+                    render={({ field }) => (
+                      <FormControl fullWidth error={Boolean(formErrors.employment_type)}>
+                        <Select
+                          {...field}
+                          displayEmpty
+                          input={<OutlinedInput sx={selectStyles} />}
+                          renderValue={() => {
+                            const selectedOption = employmentTypeOptions.find(opt => opt.value === field.value);
+                            return (
+                              <Box component="div" sx={{ display: 'flex', justifyContent: 'center', width: '100%' }}>
+                                {selectedOption ? selectedOption.label : 'انتخاب نوع استخدام'}
+                              </Box>
+                            );
+                          }}
+                          MenuProps={menuPropsRTL}
+                          startAdornment={
+                            <InputAdornment position="start" sx={{ position: 'absolute', right: '10px' }}>
+                              <WorkIcon fontSize="small" sx={{ color: jobseekerColors.primary }} />
+                            </InputAdornment>
+                          }
+                          IconComponent={(props: any) => (
+                            <KeyboardArrowDownIcon {...props} sx={{ color: jobseekerColors.primary }} />
+                          )}
+                        >
+                          <MenuItem value="" disabled>انتخاب نوع استخدام</MenuItem>
+                          {employmentTypeOptions.map((option) => (
+                            <MenuItem key={option.value} value={option.value}>
+                              {option.label}
+                            </MenuItem>
+                          ))}
+                        </Select>
+                        {formErrors.employment_type && (
+                          <FormHelperText>{formErrors.employment_type.message}</FormHelperText>
+                        )}
+                      </FormControl>
+                    )}
+                  />
+                </Box>
+              </Box>
+
+              {/* استان و شهر */}
+              <Box sx={{ display: 'flex', flexDirection: { xs: 'column', md: 'row' }, gap: { xs: 1.5, md: 3 }, mb: { xs: 2, md: 3 } }}>
+                {/* استان */}
+                <Box sx={{ flex: 1 }}>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
+                    <LocationOnIcon sx={{ color: jobseekerColors.primary, fontSize: 20 }} />
+                    <Typography variant="body2" fontWeight="medium" sx={{
+                      fontSize: { xs: '0.7rem', sm: '0.875rem' },
+                      color: jobseekerColors.primary,
+                      fontWeight: 600
+                    }}>
+                      استان
+                    </Typography>
+                  </Box>
+                  <Controller
+                    name="province_id"
+                    control={control}
+                    render={({ field }) => (
+                      <FormControl fullWidth error={Boolean(formErrors.province_id)}>
+                        <Select
+                          {...field}
+                          displayEmpty
+                          input={<OutlinedInput sx={selectStyles} />}
+                          renderValue={() => {
+                            const selectedProvince = provinces.find(p => p.id === field.value);
+                            return (
+                              <Box component="div" sx={{ display: 'flex', justifyContent: 'center', width: '100%' }}>
+                                {selectedProvince ? selectedProvince.name : 'انتخاب استان'}
+                              </Box>
+                            );
+                          }}
+                          MenuProps={menuPropsRTL}
+                          startAdornment={
+                            <InputAdornment position="start" sx={{ position: 'absolute', right: '10px' }}>
+                              <LocationOnIcon fontSize="small" sx={{ color: jobseekerColors.primary }} />
+                            </InputAdornment>
+                          }
+                          IconComponent={(props: any) => (
+                            <KeyboardArrowDownIcon {...props} sx={{ color: jobseekerColors.primary }} />
+                          )}
+                        >
+                          <MenuItem value={0} disabled>انتخاب استان</MenuItem>
+                          {provinces.map((province) => (
+                            <MenuItem key={province.id} value={province.id}>
+                              {province.name}
+                            </MenuItem>
+                          ))}
+                        </Select>
+                        {formErrors.province_id && (
+                          <FormHelperText>{formErrors.province_id.message}</FormHelperText>
+                        )}
+                      </FormControl>
+                    )}
+                  />
+                </Box>
+
+                {/* شهر */}
+                <Box sx={{ flex: 1 }}>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
+                    <LocationOnIcon sx={{ color: jobseekerColors.primary, fontSize: 20 }} />
+                    <Typography variant="body2" fontWeight="medium" sx={{
+                      fontSize: { xs: '0.7rem', sm: '0.875rem' },
+                      color: jobseekerColors.primary,
+                      fontWeight: 600
+                    }}>
+                      شهر
+                    </Typography>
+                  </Box>
+                  <Controller
+                    name="location_id"
+                    control={control}
+                    render={({ field }) => (
+                      <FormControl fullWidth error={Boolean(formErrors.location_id)}>
+                        <Select
+                          {...field}
+                          displayEmpty
+                          disabled={!selectedProvinceId}
+                          input={<OutlinedInput sx={selectStyles} />}
+                          renderValue={() => {
+                            const selectedCity = cities.filter(c => !selectedProvinceId || c.province?.id === selectedProvinceId).find(c => c.id === field.value);
+                            return (
+                              <Box component="div" sx={{ display: 'flex', justifyContent: 'center', width: '100%' }}>
+                                {selectedCity ? selectedCity.name : 'انتخاب شهر'}
+                              </Box>
+                            );
+                          }}
+                          MenuProps={menuPropsRTL}
+                          startAdornment={
+                            <InputAdornment position="start" sx={{ position: 'absolute', right: '10px' }}>
+                              <LocationOnIcon fontSize="small" sx={{ color: jobseekerColors.primary }} />
+                            </InputAdornment>
+                          }
+                          IconComponent={(props: any) => (
+                            <KeyboardArrowDownIcon {...props} sx={{ color: jobseekerColors.primary }} />
+                          )}
+                        >
+                          <MenuItem value={0} disabled>انتخاب شهر</MenuItem>
+                          {cities.filter(c => !selectedProvinceId || c.province?.id === selectedProvinceId).map((city) => (
+                            <MenuItem key={city.id} value={city.id}>
+                              {city.name}
+                            </MenuItem>
+                          ))}
+                        </Select>
+                        {formErrors.location_id && (
+                          <FormHelperText>{formErrors.location_id.message}</FormHelperText>
+                        )}
+                      </FormControl>
+                    )}
+                  />
+                </Box>
+              </Box>
+
+
+
+              {/* تاریخ شروع و پایان */}
+              <Box sx={{ display: 'flex', flexDirection: { xs: 'column', md: 'row' }, gap: { xs: 1.5, md: 3 }, mb: { xs: 2, md: 3 } }}>
+                {/* تاریخ شروع */}
+                <Box sx={{ flex: 1 }}>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
+                    <CalendarTodayIcon sx={{ color: jobseekerColors.primary, fontSize: 20 }} />
+                    <Typography variant="body2" fontWeight="medium" sx={{
+                      fontSize: { xs: '0.7rem', sm: '0.875rem' },
+                      color: jobseekerColors.primary,
+                      fontWeight: 600
+                    }}>
+                      تاریخ شروع *
+                    </Typography>
+                  </Box>
+                  <Controller
+                    name="start_date"
+                    control={control}
+                    rules={{ required: 'تاریخ شروع الزامی است' }}
+                    render={({ field }) => (
+                      <Box sx={{
+                        '& .MuiOutlinedInput-root': {
+                          borderRadius: '6px',
+                          '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                            borderColor: jobseekerColors.primary
+                          }
+                        }
+                      }}>
+                                               <JalaliDatePicker
                          value={field.value}
                          onChange={field.onChange}
                          fullWidth
@@ -969,38 +958,38 @@ export default function ExperiencesForm() {
                          helperText={formErrors.start_date?.message}
                          maxDate={watch('end_date') || undefined}
                        />
-                    </Box>
-                  )}
-                />
-              </Box>
-
-              {/* تاریخ پایان */}
-              <Box sx={{ flex: 1 }}>
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
-                  <CalendarTodayIcon sx={{ color: jobseekerColors.primary, fontSize: 20 }} />
-                  <Typography variant="body2" fontWeight="medium" sx={{
-                    fontSize: { xs: '0.7rem', sm: '0.875rem' },
-                    color: jobseekerColors.primary,
-                    fontWeight: 600
-                  }}>
-                    تاریخ پایان
-                  </Typography>
+                      </Box>
+                    )}
+                  />
                 </Box>
-                <Controller
-                  name="end_date"
-                  control={control}
-                  render={({ field }) => (
-                    <Box sx={{
-                      '& .MuiOutlinedInput-root': {
-                        borderRadius: '6px',
-                        opacity: isCurrent ? 0.5 : 1,
-                        pointerEvents: isCurrent ? 'none' : 'auto',
-                        '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-                          borderColor: jobseekerColors.primary
-                        }
-                      }
+
+                {/* تاریخ پایان */}
+                <Box sx={{ flex: 1 }}>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
+                    <CalendarTodayIcon sx={{ color: jobseekerColors.primary, fontSize: 20 }} />
+                    <Typography variant="body2" fontWeight="medium" sx={{
+                      fontSize: { xs: '0.7rem', sm: '0.875rem' },
+                      color: jobseekerColors.primary,
+                      fontWeight: 600
                     }}>
-                                             <JalaliDatePicker
+                      تاریخ پایان
+                    </Typography>
+                  </Box>
+                  <Controller
+                    name="end_date"
+                    control={control}
+                    render={({ field }) => (
+                      <Box sx={{
+                        '& .MuiOutlinedInput-root': {
+                          borderRadius: '6px',
+                          opacity: isCurrent ? 0.5 : 1,
+                          pointerEvents: isCurrent ? 'none' : 'auto',
+                          '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                            borderColor: jobseekerColors.primary
+                          }
+                        }
+                      }}>
+                                               <JalaliDatePicker
                          value={isCurrent ? '' : (field.value || '')}
                          onChange={isCurrent ? () => {} : field.onChange}
                          fullWidth
@@ -1010,330 +999,552 @@ export default function ExperiencesForm() {
                          minDate={startDate || undefined}
                          disabled={isCurrent || !startDate}
                        />
-                    </Box>
-                  )}
-                />
-                
-                {/* چک باکس شغل فعلی */}
-                <Box sx={{ mt: 1 }}>
-                  <Controller
-                    name="is_current"
-                    control={control}
-                    render={({ field }) => (
-                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                        <input
-                          type="checkbox"
-                          checked={field.value}
-                          onChange={field.onChange}
-                          style={{ 
-                            accentColor: jobseekerColors.primary,
-                            transform: 'scale(1.2)'
-                          }}
-                        />
-                        <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-                          این شغل فعلی من است
-                        </Typography>
                       </Box>
                     )}
                   />
-                </Box>
-              </Box>
-            </Box>
-
-            {/* توضیحات */}
-            <Box sx={{ mb: { xs: 2, md: 3 } }}>
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
-                <InfoIcon sx={{ color: jobseekerColors.primary, fontSize: 20 }} />
-                <Typography variant="body2" fontWeight="medium" sx={{
-                  fontSize: { xs: '0.7rem', sm: '0.875rem' },
-                  color: jobseekerColors.primary,
-                  fontWeight: 600
-                }}>
-                  شرح وظایف
-                </Typography>
-              </Box>
-              <Controller
-                name="description"
-                control={control}
-                render={({ field }) => (
-                  <TextField
-                    {...field}
-                    fullWidth
-                    multiline
-                    rows={4}
-                    placeholder="شرح وظایف، مسئولیت‌ها و دستاوردهای شما در این شغل..."
-                    error={Boolean(formErrors.description)}
-                    helperText={formErrors.description?.message}
-                    variant="outlined"
-                    sx={{ 
-                      '& .MuiOutlinedInput-root': { 
-                        borderRadius: '6px',
-                        '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-                          borderColor: jobseekerColors.primary
-                        }
-                      },
-                      '& .MuiInputBase-input': {
-                        fontSize: { xs: '0.8rem', sm: '1rem' },
-                        padding: { xs: '8px 14px', sm: '16.5px 14px' }
-                      }
-                    }}
-                  />
-                )}
-              />
-            </Box>
-
-            {/* دکمه‌های عمل */}
-            <Box sx={{ display: 'flex', gap: 2, justifyContent: 'flex-end' }}>
-              <Button
-                type="button"
-                variant="outlined"
-                onClick={handleCancel}
-                startIcon={<CancelIcon />}
-                sx={{
-                  borderColor: jobseekerColors.primary,
-                  color: jobseekerColors.primary,
-                  '&:hover': {
-                    borderColor: jobseekerColors.dark,
-                    color: jobseekerColors.dark
-                  }
-                }}
-              >
-                لغو
-              </Button>
-              <Button
-                type="submit"
-                variant="contained"
-                color="success"
-                disabled={loading}
-                sx={{
-                  background: jobseekerColors.primary,
-                  color: 'white',
-                  '&:hover': { 
-                    background: jobseekerColors.dark,
-                    boxShadow: '0 4px 12px rgba(0,0,0,0.2)'
-                  },
-                  '&:disabled': {
-                    background: jobseekerColors.primary,
-                    color: 'white',
-                    cursor: 'not-allowed',
-                    opacity: 0.5
-                  },
-                  borderRadius: 2,
-                  px: 4,
-                  py: 1.5,
-                  fontSize: '1rem',
-                  fontWeight: 'bold',
-                  minWidth: '140px',
-                  width: '140px',
-                  height: '48px',
-                  transition: 'all 0.2s ease',
-                  boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
-                  whiteSpace: 'nowrap',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center'
-                }}
-              >
-                {loading ? '...' : 'ذخیره تغییرات'}
-              </Button>
-            </Box>
-          </form>
-        </Paper>
-      )}
-
-      {/* لیست تجربیات */}
-      <Box sx={{ 
-        display: 'grid', 
-        gridTemplateColumns: { xs: '1fr', md: 'repeat(2, 1fr)' },
-        gap: 3
-      }}>
-        {experiences.length === 0 ? (
-          <Paper 
-            elevation={0} 
-            sx={{ 
-              p: 4, 
-              textAlign: 'center',
-              borderRadius: 2,
-              border: '1px solid #e0e0e0',
-              background: '#ffffff',
-              gridColumn: { xs: '1', md: '1 / -1' }
-            }}
-          >
-            <WorkIcon sx={{ fontSize: 48, color: 'text.disabled', mb: 2 }} />
-            <Typography variant="h6" color="text.secondary" sx={{ mb: 1 }}>
-              هنوز تجربه کاری ثبت نشده
-            </Typography>
-            <Typography variant="body2" color="text.secondary">
-              برای شروع، روی دکمه "افزودن تجربه" کلیک کنید.
-            </Typography>
-          </Paper>
-        ) : (
-          experiences.map((experience) => (
-            <Paper 
-              key={experience.id} 
-              elevation={0} 
-              sx={{ 
-                border: '1px solid #e0e0e0',
-                borderRadius: 2,
-                overflow: 'hidden',
-                background: '#ffffff'
-              }}
-            >
-              {/* Header Section */}
-              <Box sx={{ 
-                background: '#fafafa',
-                p: 3,
-                borderBottom: '1px solid #e0e0e0'
-              }}>
-                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 2 }}>
-                  <Box sx={{ flex: 1 }}>
-                    <Typography variant="h5" sx={{ 
-                      fontWeight: 700, 
-                      mb: 1,
-                      color: jobseekerColors.primary,
-                      fontSize: { xs: '1.1rem', sm: '1.3rem' }
-                    }}>
-                      {experience.title}
-                    </Typography>
-                    <Typography variant="h6" sx={{ 
-                      fontWeight: 600, 
-                      mb: 1.5,
-                      color: 'text.primary',
-                      fontSize: { xs: '1rem', sm: '1.1rem' }
-                    }}>
-                      {experience.company}
-                    </Typography>
-                    
-                    {/* Chips Section */}
-                    <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1.5, mb: 2 }}>
-                      <Chip 
-                        label={employmentTypeOptions.find(opt => opt.value === experience.employment_type)?.label || experience.employment_type}
-                        size="medium"
-                        sx={{ 
-                          bgcolor: alpha(jobseekerColors.primary, 0.15),
-                          color: jobseekerColors.primary,
-                          fontWeight: 600,
-                          fontSize: '0.85rem',
-                          height: '28px',
-                          '& .MuiChip-label': {
-                            px: 2
-                          }
-                        }}
-                      />
-                      {experience.location && (
-                        <Chip 
-                          label={experience.location.name}
-                          size="medium"
-                          variant="outlined"
-                          sx={{ 
-                            borderColor: alpha(jobseekerColors.primary, 0.3),
-                            color: jobseekerColors.primary,
-                            fontWeight: 500,
-                            fontSize: '0.85rem',
-                            height: '28px',
-                            '& .MuiChip-label': {
-                              px: 2
-                            }
-                          }}
-                        />
+                  
+                  {/* چک باکس شغل فعلی */}
+                  <Box sx={{ mt: 1 }}>
+                    <Controller
+                      name="is_current"
+                      control={control}
+                      render={({ field }) => (
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                          <input
+                            type="checkbox"
+                            checked={field.value}
+                            onChange={field.onChange}
+                            style={{ 
+                              accentColor: jobseekerColors.primary,
+                              transform: 'scale(1.2)'
+                            }}
+                          />
+                          <Typography variant="body2" sx={{ color: 'text.secondary' }}>
+                            این شغل فعلی من است
+                          </Typography>
+                        </Box>
                       )}
-                      {experience.is_current && (
-                        <Chip 
-                          label="شغل فعلی"
-                          size="medium"
-                          color="success"
-                          sx={{ 
-                            fontWeight: 600,
-                            fontSize: '0.85rem',
-                            height: '28px',
-                            '& .MuiChip-label': {
-                              px: 2
-                            }
-                          }}
-                        />
-                      )}
-                    </Box>
-
-                    {/* Date Section */}
-                    <Box sx={{ 
-                      display: 'flex', 
-                      alignItems: 'center', 
-                      gap: 1,
-                      color: 'text.secondary',
-                      fontSize: '0.9rem'
-                    }}>
-                      <CalendarTodayIcon sx={{ fontSize: 18, color: jobseekerColors.primary }} />
-                      <Typography variant="body2" sx={{ fontWeight: 500 }}>
-                        {formatDate(experience.start_date)} 
-                        {experience.end_date ? ` تا ${formatDate(experience.end_date)}` : ' تاکنون'}
-                      </Typography>
-                    </Box>
-                  </Box>
-
-                  {/* Action Buttons */}
-                  <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1, ml: 2 }}>
-                    <Button
-                      size="small"
-                      startIcon={<EditIcon />}
-                      onClick={() => handleEdit(experience)}
-                      variant="outlined"
-                      sx={{ 
-                        borderColor: jobseekerColors.primary,
-                        color: jobseekerColors.primary,
-                        fontWeight: 600,
-                        fontSize: '0.8rem',
-                        px: 2,
-                        py: 0.5,
-                        minWidth: '80px',
-                        '&:hover': {
-                          borderColor: jobseekerColors.dark,
-                          backgroundColor: alpha(jobseekerColors.primary, 0.05)
-                        }
-                      }}
-                    >
-                      ویرایش
-                    </Button>
-                    <Button
-                      size="small"
-                      startIcon={<DeleteIcon />}
-                      onClick={() => handleDelete(experience.id!)}
-                      variant="outlined"
-                      color="error"
-                      sx={{ 
-                        fontWeight: 600,
-                        fontSize: '0.8rem',
-                        px: 2,
-                        py: 0.5,
-                        minWidth: '80px',
-                        '&:hover': {
-                          backgroundColor: alpha('#f44336', 0.05)
-                        }
-                      }}
-                    >
-                      حذف
-                    </Button>
+                    />
                   </Box>
                 </Box>
               </Box>
 
-              {/* Description Section */}
-              {experience.description && (
-                <Box sx={{ p: 3, pt: 2 }}>
-                  <Divider sx={{ mb: 2, borderColor: '#e0e0e0' }} />
-                  <Typography variant="body1" sx={{ 
-                    whiteSpace: 'pre-line',
-                    lineHeight: 1.6,
-                    color: 'text.secondary',
-                    fontSize: '0.9rem'
+              {/* توضیحات */}
+              <Box sx={{ mb: { xs: 2, md: 3 } }}>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
+                  <InfoIcon sx={{ color: jobseekerColors.primary, fontSize: 20 }} />
+                  <Typography variant="body2" fontWeight="medium" sx={{
+                    fontSize: { xs: '0.7rem', sm: '0.875rem' },
+                    color: jobseekerColors.primary,
+                    fontWeight: 600
                   }}>
-                    {experience.description}
+                    شرح وظایف
                   </Typography>
                 </Box>
-              )}
-            </Paper>
-          ))
+                <Controller
+                  name="description"
+                  control={control}
+                  render={({ field }) => (
+                    <TextField
+                      {...field}
+                      fullWidth
+                      multiline
+                      rows={4}
+                      placeholder="شرح وظایف، مسئولیت‌ها و دستاوردهای شما در این شغل..."
+                      error={Boolean(formErrors.description)}
+                      helperText={formErrors.description?.message}
+                      variant="outlined"
+                      sx={{ 
+                        '& .MuiOutlinedInput-root': { 
+                          borderRadius: '6px',
+                          '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                            borderColor: jobseekerColors.primary
+                          }
+                        },
+                        '& .MuiInputBase-input': {
+                          fontSize: { xs: '0.8rem', sm: '1rem' },
+                          padding: { xs: '8px 14px', sm: '16.5px 14px' }
+                        }
+                      }}
+                    />
+                  )}
+                />
+              </Box>
+
+              {/* دکمه‌های عمل */}
+              <Box sx={{ display: 'flex', gap: 2, justifyContent: 'flex-end' }}>
+                <Button
+                  type="button"
+                  variant="outlined"
+                  onClick={handleCancel}
+                  startIcon={<CancelIcon />}
+                  sx={{
+                    borderColor: jobseekerColors.primary,
+                    color: jobseekerColors.primary,
+                    '&:hover': {
+                      borderColor: jobseekerColors.dark,
+                      color: jobseekerColors.dark
+                    }
+                  }}
+                >
+                  لغو
+                </Button>
+                <Button
+                  type="submit"
+                  variant="contained"
+                  color="success"
+                  disabled={loading}
+                  sx={{
+                    background: jobseekerColors.primary,
+                    color: 'white',
+                    '&:hover': { 
+                      background: jobseekerColors.dark,
+                      boxShadow: '0 4px 12px rgba(0,0,0,0.2)'
+                    },
+                    '&:disabled': {
+                      background: jobseekerColors.primary,
+                      color: 'white',
+                      cursor: 'not-allowed',
+                      opacity: 0.5
+                    },
+                    borderRadius: 2,
+                    px: 4,
+                    py: 1.5,
+                    fontSize: '1rem',
+                    fontWeight: 'bold',
+                    minWidth: '140px',
+                    width: '140px',
+                    height: '48px',
+                    transition: 'all 0.2s ease',
+                    boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
+                    whiteSpace: 'nowrap',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center'
+                  }}
+                >
+                  {loading ? '...' : 'ذخیره تغییرات'}
+                </Button>
+              </Box>
+            </form>
+          </Box>
         )}
-      </Box>
+
+        {/* لیست تجربیات */}
+        {experiences.length > 0 && (
+          <Box>
+            <Typography variant="h6" sx={{ 
+              mb: 2, 
+              color: jobseekerColors.primary,
+              fontWeight: 'bold'
+            }}>
+              تجربیات کاری شما
+            </Typography>
+            
+            <Box sx={{ 
+              display: 'flex',
+              flexDirection: 'column',
+              gap: 2,
+              mb: 3
+            }}>
+              {experiences.map((experience) => (
+                <Paper 
+                  key={experience.id} 
+                  elevation={0} 
+                  sx={{ 
+                    border: '1px solid #e0e0e0',
+                    borderRadius: 2,
+                    overflow: 'hidden',
+                    background: '#ffffff',
+                    boxShadow: 'none'
+                  }}
+                >
+                  {/* Header Section */}
+                  <Box sx={{ 
+                    background: '#ffffff',
+                    p: { xs: 1.5, sm: 2 }
+                  }}>
+                    {/* Desktop Layout - Action buttons on the right */}
+                    <Box sx={{ 
+                      display: { xs: 'none', sm: 'flex' }, 
+                      justifyContent: 'space-between', 
+                      alignItems: 'flex-start', 
+                      mb: 1 
+                    }}>
+                      <Box sx={{ flex: 1 }}>
+                        {/* خط اول: عنوان و شرکت */}
+                        <Box sx={{ 
+                          display: 'flex', 
+                          flexDirection: 'row',
+                          alignItems: 'center', 
+                          gap: 3, 
+                          mb: 1 
+                        }}>
+                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75 }}>
+                            <WorkIcon sx={{ fontSize: 16, color: jobseekerColors.primary }} />
+                            <Typography variant="h5" sx={{ 
+                              fontWeight: 700, 
+                              color: jobseekerColors.primary,
+                              fontSize: '1.1rem'
+                            }}>
+                              {experience.title}
+                            </Typography>
+                          </Box>
+                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75 }}>
+                            <BusinessIcon sx={{ fontSize: 16, color: jobseekerColors.primary }} />
+                            <Typography variant="h6" sx={{ 
+                              fontWeight: 600, 
+                              color: 'text.primary',
+                              fontSize: '0.95rem'
+                            }}>
+                              {experience.company}
+                            </Typography>
+                          </Box>
+                        </Box>
+                        
+                        {/* خط دوم: chips و تاریخ */}
+                        <Box sx={{ 
+                          display: 'flex', 
+                          flexDirection: 'row',
+                          alignItems: 'center',
+                          gap: 1.5, 
+                          flexWrap: 'wrap' 
+                        }}>
+                          {/* Chips Section */}
+                          <Box sx={{ 
+                            display: 'flex', 
+                            flexWrap: 'wrap', 
+                            gap: 0.75,
+                            flexDirection: 'row'
+                          }}>
+                            <Chip 
+                              label={employmentTypeOptions.find(opt => opt.value === experience.employment_type)?.label || experience.employment_type}
+                              size="small"
+                              sx={{ 
+                                bgcolor: alpha(jobseekerColors.primary, 0.15),
+                                color: jobseekerColors.primary,
+                                fontWeight: 600,
+                                fontSize: '0.7rem',
+                                height: '22px',
+                                '& .MuiChip-label': {
+                                  px: 1.25
+                                }
+                              }}
+                            />
+                            {experience.location && (
+                              <Chip 
+                                label={experience.location.name}
+                                size="small"
+                                variant="outlined"
+                                sx={{ 
+                                  borderColor: alpha(jobseekerColors.primary, 0.3),
+                                  color: jobseekerColors.primary,
+                                  fontWeight: 500,
+                                  fontSize: '0.7rem',
+                                  height: '22px',
+                                  '& .MuiChip-label': {
+                                    px: 1.25
+                                  }
+                                }}
+                              />
+                            )}
+                            {experience.is_current && (
+                              <Chip 
+                                label="شغل فعلی"
+                                size="small"
+                                color="success"
+                                sx={{ 
+                                  fontWeight: 600,
+                                  fontSize: '0.7rem',
+                                  height: '22px',
+                                  '& .MuiChip-label': {
+                                    px: 1.25
+                                  }
+                                }}
+                              />
+                            )}
+                          </Box>
+
+                          {/* Date Section */}
+                          <Box sx={{ 
+                            display: 'flex', 
+                            alignItems: 'center', 
+                            gap: 0.75,
+                            color: 'text.secondary',
+                            fontSize: '0.75rem'
+                          }}>
+                            <CalendarTodayIcon sx={{ fontSize: 14, color: jobseekerColors.primary }} />
+                            <Typography variant="body2" sx={{ fontWeight: 500 }}>
+                              {formatDate(experience.start_date)} 
+                              {experience.end_date ? ` تا ${formatDate(experience.end_date)}` : ' تاکنون'}
+                            </Typography>
+                          </Box>
+                        </Box>
+
+                        {/* Description Section */}
+                        {experience.description && (
+                          <Box sx={{ mt: 1 }}>
+                            <Typography variant="body2" sx={{ 
+                              fontWeight: 600,
+                              color: jobseekerColors.primary,
+                              mb: 0.25,
+                              fontSize: '0.7rem'
+                            }}>
+                              توضیحات:
+                            </Typography>
+                            <Typography variant="body2" sx={{ 
+                              whiteSpace: 'pre-line',
+                              lineHeight: 1.3,
+                              color: 'text.secondary',
+                              fontSize: '0.7rem'
+                            }}>
+                              {experience.description}
+                            </Typography>
+                          </Box>
+                        )}
+                      </Box>
+
+                      {/* Desktop Action Buttons */}
+                      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.25, ml: 1 }}>
+                        <Button
+                          size="small"
+                          startIcon={<EditIcon />}
+                          onClick={() => handleEdit(experience)}
+                          variant="outlined"
+                          sx={{ 
+                            borderColor: jobseekerColors.primary,
+                            color: jobseekerColors.primary,
+                            fontWeight: 600,
+                            fontSize: '0.7rem',
+                            px: 1.25,
+                            py: 0.25,
+                            minWidth: '65px',
+                            height: '26px',
+                            '&:hover': {
+                              borderColor: jobseekerColors.dark,
+                              backgroundColor: alpha(jobseekerColors.primary, 0.05)
+                            }
+                          }}
+                        >
+                          ویرایش
+                        </Button>
+                        <Button
+                          size="small"
+                          startIcon={<DeleteIcon />}
+                          onClick={() => handleDelete(experience.id!)}
+                          variant="outlined"
+                          color="error"
+                          sx={{ 
+                            fontWeight: 600,
+                            fontSize: '0.7rem',
+                            px: 1.25,
+                            py: 0.25,
+                            minWidth: '65px',
+                            height: '26px',
+                            '&:hover': {
+                              backgroundColor: alpha('#f44336', 0.05)
+                            }
+                          }}
+                        >
+                          حذف
+                        </Button>
+                      </Box>
+                    </Box>
+
+                    {/* Mobile Layout - Action buttons below content */}
+                    <Box sx={{ 
+                      display: { xs: 'block', sm: 'none' }
+                    }}>
+                      {/* خط اول: عنوان و شرکت */}
+                      <Box sx={{ 
+                        display: 'flex', 
+                        flexDirection: 'column',
+                        alignItems: 'flex-start', 
+                        gap: 1, 
+                        mb: 1 
+                      }}>
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75 }}>
+                          <WorkIcon sx={{ fontSize: 16, color: jobseekerColors.primary }} />
+                          <Typography variant="h5" sx={{ 
+                            fontWeight: 700, 
+                            color: jobseekerColors.primary,
+                            fontSize: '0.95rem'
+                          }}>
+                            {experience.title}
+                          </Typography>
+                        </Box>
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75 }}>
+                          <BusinessIcon sx={{ fontSize: 16, color: jobseekerColors.primary }} />
+                          <Typography variant="h6" sx={{ 
+                            fontWeight: 600, 
+                            color: 'text.primary',
+                            fontSize: '0.85rem'
+                          }}>
+                            {experience.company}
+                          </Typography>
+                        </Box>
+                      </Box>
+                      
+                      {/* خط دوم: chips و تاریخ */}
+                      <Box sx={{ 
+                        display: 'flex', 
+                        flexDirection: 'column',
+                        alignItems: 'flex-start',
+                        gap: 1, 
+                        flexWrap: 'wrap' 
+                      }}>
+                        {/* Chips Section */}
+                        <Box sx={{ 
+                          display: 'flex', 
+                          flexWrap: 'wrap', 
+                          gap: 0.75,
+                          flexDirection: 'column'
+                        }}>
+                          <Chip 
+                            label={employmentTypeOptions.find(opt => opt.value === experience.employment_type)?.label || experience.employment_type}
+                            size="small"
+                            sx={{ 
+                              bgcolor: alpha(jobseekerColors.primary, 0.15),
+                              color: jobseekerColors.primary,
+                              fontWeight: 600,
+                              fontSize: '0.7rem',
+                              height: '22px',
+                              '& .MuiChip-label': {
+                                px: 1.25
+                              }
+                            }}
+                          />
+                          {experience.location && (
+                            <Chip 
+                              label={experience.location.name}
+                              size="small"
+                              variant="outlined"
+                              sx={{ 
+                                borderColor: alpha(jobseekerColors.primary, 0.3),
+                                color: jobseekerColors.primary,
+                                fontWeight: 500,
+                                fontSize: '0.7rem',
+                                height: '22px',
+                                '& .MuiChip-label': {
+                                  px: 1.25
+                                }
+                              }}
+                            />
+                          )}
+                          {experience.is_current && (
+                            <Chip 
+                              label="شغل فعلی"
+                              size="small"
+                              color="success"
+                              sx={{ 
+                                fontWeight: 600,
+                                fontSize: '0.7rem',
+                                height: '22px',
+                                '& .MuiChip-label': {
+                                  px: 1.25
+                                }
+                              }}
+                            />
+                          )}
+                        </Box>
+
+                        {/* Date Section */}
+                        <Box sx={{ 
+                          display: 'flex', 
+                          alignItems: 'center', 
+                          gap: 0.75,
+                          color: 'text.secondary',
+                          fontSize: '0.75rem'
+                        }}>
+                          <CalendarTodayIcon sx={{ fontSize: 14, color: jobseekerColors.primary }} />
+                          <Typography variant="body2" sx={{ fontWeight: 500 }}>
+                            {formatDate(experience.start_date)} 
+                            {experience.end_date ? ` تا ${formatDate(experience.end_date)}` : ' تاکنون'}
+                          </Typography>
+                        </Box>
+                      </Box>
+
+                      {/* Description Section */}
+                      {experience.description && (
+                        <Box sx={{ mt: 1 }}>
+                          <Typography variant="body2" sx={{ 
+                            fontWeight: 600,
+                            color: jobseekerColors.primary,
+                            mb: 0.25,
+                            fontSize: '0.7rem'
+                          }}>
+                            توضیحات:
+                          </Typography>
+                          <Typography variant="body2" sx={{ 
+                            whiteSpace: 'pre-line',
+                            lineHeight: 1.3,
+                            color: 'text.secondary',
+                            fontSize: '0.7rem'
+                          }}>
+                            {experience.description}
+                          </Typography>
+                        </Box>
+                      )}
+
+                      {/* Mobile Action Buttons - Below content */}
+                      <Box sx={{ 
+                        display: 'flex', 
+                        flexDirection: 'row', 
+                        gap: 1, 
+                        mt: 2,
+                        justifyContent: 'flex-end'
+                      }}>
+                        <Button
+                          size="small"
+                          startIcon={<EditIcon />}
+                          onClick={() => handleEdit(experience)}
+                          variant="outlined"
+                          sx={{ 
+                            borderColor: jobseekerColors.primary,
+                            color: jobseekerColors.primary,
+                            fontWeight: 600,
+                            fontSize: '0.7rem',
+                            px: 1.25,
+                            py: 0.25,
+                            minWidth: '65px',
+                            height: '26px',
+                            '&:hover': {
+                              borderColor: jobseekerColors.dark,
+                              backgroundColor: alpha(jobseekerColors.primary, 0.05)
+                            }
+                          }}
+                        >
+                          ویرایش
+                        </Button>
+                        <Button
+                          size="small"
+                          startIcon={<DeleteIcon />}
+                          onClick={() => handleDelete(experience.id!)}
+                          variant="outlined"
+                          color="error"
+                          sx={{ 
+                            fontWeight: 600,
+                            fontSize: '0.7rem',
+                            px: 1.25,
+                            py: 0.25,
+                            minWidth: '65px',
+                            height: '26px',
+                            '&:hover': {
+                              backgroundColor: alpha('#f44336', 0.05)
+                            }
+                          }}
+                        >
+                          حذف
+                        </Button>
+                      </Box>
+                    </Box>
+                  </Box>
+                </Paper>
+              ))}
+            </Box>
+          </Box>
+        )}
+      </Paper>
     </Box>
   );
 }
