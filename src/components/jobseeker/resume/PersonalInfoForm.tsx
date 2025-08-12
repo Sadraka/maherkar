@@ -198,6 +198,7 @@ export default function PersonalInfoForm() {
 
   // نظارت بر تغییرات استان برای فیلتر کردن شهرها
   const selectedProvinceId = watch('province_id');
+  const selectedGender = watch('gender');
   
   // فیلتر کردن شهرها بر اساس استان انتخاب شده
   const filteredCities = React.useMemo(() => {
@@ -347,7 +348,7 @@ export default function PersonalInfoForm() {
         linkedin_profile: data.linkedin_profile || '',
         industry: data.industry_id || null,
         location: data.city_id || null,
-        soldier_status: data.soldier_status || null,
+        soldier_status: (data.gender === 'Female') ? null : (data.soldier_status || null),
         degree: data.degree || null,
         years_of_experience: data.years_of_experience_numeric || null,
         experience: data.experience || null,
@@ -1117,7 +1118,8 @@ export default function PersonalInfoForm() {
                   IconComponent={(props: any) => (
                     <KeyboardArrowDownIcon {...props} sx={{ color: jobseekerColors.primary }} />
                   )}
-                >
+                  disabled={selectedGender === 'Female'}
+                  >
                   <MenuItem value="" disabled>انتخاب وضعیت سربازی</MenuItem>
                   {soldierStatusOptions.map((option) => (
                     <MenuItem key={option.value} value={option.value}>
