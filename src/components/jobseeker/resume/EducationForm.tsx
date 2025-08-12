@@ -1100,13 +1100,13 @@ export default function EducationForm() {
             <Paper 
               key={education.id || index} 
               elevation={0} 
-              sx={{ 
-                border: '1px solid #e0e0e0',
-                borderRadius: 2,
-                overflow: 'hidden',
-                background: 'transparent',
-                boxShadow: 'none'
-              }}
+                                sx={{ 
+                    border: `1px solid ${alpha(jobseekerColors.primary, 0.2)}`,
+                    borderRadius: 2,
+                    overflow: 'hidden',
+                    background: 'transparent',
+                    boxShadow: 'none'
+                  }}
             >
               {/* Header Section */}
               <Box sx={{ 

@@ -1152,7 +1152,7 @@ export default function ExperiencesForm() {
                   key={experience.id} 
                   elevation={0} 
                   sx={{ 
-                    border: '1px solid #e0e0e0',
+                    border: `1px solid ${alpha(jobseekerColors.primary, 0.2)}`,
                     borderRadius: 2,
                     overflow: 'hidden',
                     background: '#ffffff',
