@@ -29,6 +29,9 @@ interface JalaliDatePickerProps {
   error?: boolean;
   helperText?: string;
   fullWidth?: boolean;
+  minDate?: string; // YYYY-MM-DD - تاریخ حداقل مجاز (میلادی)
+  maxDate?: string; // YYYY-MM-DD - تاریخ حداکثر مجاز (میلادی)
+  disabled?: boolean; // غیرفعال کردن کامپوننت
 }
 
 // ماه‌های شمسی
@@ -179,6 +182,9 @@ export default function JalaliDatePicker({
   error = false,
   helperText,
   fullWidth = false,
+  minDate,
+  maxDate,
+  disabled = false,
 }: JalaliDatePickerProps) {
   const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
   const [selectedDate, setSelectedDate] = useState<[number, number, number]>(() => {
@@ -223,6 +229,7 @@ export default function JalaliDatePicker({
 
   // باز و بسته کردن تقویم
   const handleClick = (event: React.MouseEvent<HTMLElement>) => {
+    if (disabled) return;
     setAnchorEl(event.currentTarget);
     // هنگام باز شدن تقویم، نمایش را به سال‌ها تغییر می‌دهیم
     setCurrentView('years');
@@ -364,17 +371,25 @@ export default function JalaliDatePicker({
       dayGrid.push(<Box key={`empty-${i}`} sx={{ width: '100%', height: '36px' }}></Box>);
     }
 
+    // تبدیل min/max به تایم‌استمپ برای مقایسه سریع
+    const minTs = minDate ? new Date(minDate).setHours(0,0,0,0) : null;
+    const maxTs = maxDate ? new Date(maxDate).setHours(0,0,0,0) : null;
+
     for (let day = 1; day <= daysInMonth; day++) {
       const isSelected = 
         selectedDate[0] === displayYear && 
         selectedDate[1] === displayMonth && 
         selectedDate[2] === day;
+      const gForDay = jalaliToGregorian(displayYear, displayMonth, day);
+      const dayTs = new Date(gForDay[0], gForDay[1] - 1, gForDay[2]).setHours(0,0,0,0);
+      const isDisabled = (minTs !== null && dayTs < minTs) || (maxTs !== null && dayTs > maxTs);
       
       dayGrid.push(
         <DayButton 
           key={day} 
           className={isSelected ? 'selected' : ''}
-          onClick={() => handleDaySelect(displayYear, displayMonth, day)}
+          onClick={() => !isDisabled && handleDaySelect(displayYear, displayMonth, day)}
+          disabled={isDisabled}
           sx={{
             transform: 'scale(1)',
             transition: 'transform 0.2s ease',
@@ -445,58 +460,72 @@ export default function JalaliDatePicker({
     );
   };
 
-  // ساخت سال‌ها برای انتخاب
-  const renderYears = () => {
-    // محاسبه سال‌های قابل نمایش (از 1350 تا 1450)
-    const startYear = 1350;
-    const endYear = 1450;
-    const years = [];
-    
-    for (let year = startYear; year <= endYear; year++) {
-      const isSelected = displayYear === year;
-      years.push(
-        <Typography 
-          key={year} 
-          component="button"
-          variant="body2"
-          ref={isSelected ? selectedYearRef : null}
-          sx={{
-            width: '100%',
-            padding: '8px 4px',
-            textAlign: 'center',
-            backgroundColor: isSelected ? '#1976d2' : 'transparent',
-            color: isSelected ? 'white' : 'inherit',
-            border: 'none',
-            borderRadius: '4px',
-            cursor: 'pointer',
-            transition: 'all 0.2s ease-in-out',
-            '&:hover': {
-              backgroundColor: isSelected ? '#1976d2' : '#f0f0f0',
-              transform: 'scale(1.05)',
-            },
+      // ساخت سال‌ها برای انتخاب
+    const renderYears = () => {
+      // محاسبه سال‌های قابل نمایش (از 1350 تا 1450)
+      const startYear = 1350;
+      const endYear = 1450;
+      const years = [];
+      
+      // تبدیل minDate به سال شمسی برای محدودیت
+      let minYear = startYear;
+      if (minDate) {
+        const [gYear, gMonth, gDay] = minDate.split('-').map(Number);
+        if (!isNaN(gYear) && !isNaN(gMonth) && !isNaN(gDay)) {
+          const [jYear] = gregorianToJalali(gYear, gMonth, gDay);
+          minYear = Math.max(startYear, jYear);
+        }
+      }
+      
+      for (let year = startYear; year <= endYear; year++) {
+        const isSelected = displayYear === year;
+        const isDisabled = year < minYear;
+        
+        years.push(
+          <Typography 
+            key={year} 
+            component="button"
+            variant="body2"
+            ref={isSelected ? selectedYearRef : null}
+            sx={{
+              width: '100%',
+              padding: '8px 4px',
+              textAlign: 'center',
+              backgroundColor: isSelected ? '#1976d2' : 'transparent',
+              color: isSelected ? 'white' : 'inherit',
+              border: 'none',
+              borderRadius: '4px',
+              cursor: isDisabled ? 'default' : 'pointer',
+              transition: 'all 0.2s ease-in-out',
+              opacity: isDisabled ? 0.3 : 1,
+              '&:hover': {
+                backgroundColor: isDisabled ? 'transparent' : (isSelected ? '#1976d2' : '#f0f0f0'),
+                transform: isDisabled ? 'scale(1)' : 'scale(1.05)',
+              },
+            }}
+            onClick={() => !isDisabled && handleYearSelect(year)}
+          >
+            {convertToPersianNumbers(year)}
+          </Typography>
+        );
+      }
+      
+      return (
+        <AnimatedBox 
+          sx={{ 
+            display: 'grid', 
+            gridTemplateColumns: 'repeat(5, 1fr)',
+            gap: 1, 
+            padding: 1,
+            maxHeight: '280px',
+            overflow: 'auto',
+            overflowX: 'hidden'
           }}
-          onClick={() => handleYearSelect(year)}
         >
-          {convertToPersianNumbers(year)}
-        </Typography>
+          {years}
+        </AnimatedBox>
       );
-    }
-    
-    return (
-      <AnimatedBox 
-        sx={{ 
-          display: 'grid', 
-          gridTemplateColumns: 'repeat(5, 1fr)',
-          gap: 1, 
-          padding: 1,
-          maxHeight: '280px',
-          overflow: 'auto'
-        }}
-      >
-        {years}
-      </AnimatedBox>
-    );
-  };
+    };
 
   // نمایش هدر تقویم براساس حالت نمایش
   const renderCalendarHeader = () => {
@@ -581,15 +610,17 @@ export default function JalaliDatePicker({
         onClick={handleClick}
         error={error}
         helperText={helperText}
+        disabled={disabled}
         InputProps={{
           readOnly: true,
           endAdornment: (
             <IconButton 
               onClick={handleClick}
+              disabled={disabled}
               sx={{ 
                 transition: 'transform 0.3s ease',
                 '&:hover': {
-                  transform: 'rotate(15deg)'
+                  transform: disabled ? 'none' : 'rotate(15deg)'
                 }
               }}
             >
@@ -597,7 +628,7 @@ export default function JalaliDatePicker({
             </IconButton>
           ),
           sx: {
-            cursor: 'pointer',
+            cursor: disabled ? 'default' : 'pointer',
             textAlign: 'left',
             direction: 'ltr',
             borderRadius: 2,
@@ -609,12 +640,12 @@ export default function JalaliDatePicker({
             transition: 'all 0.3s ease',
             '&:hover': {
               '& .MuiOutlinedInput-notchedOutline': {
-                borderColor: '#1976d2',
+                borderColor: disabled ? 'inherit' : '#1976d2',
                 borderWidth: '1px'
               }
             },
             '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-              borderColor: '#1976d2',
+              borderColor: disabled ? 'inherit' : '#1976d2',
             },
           },
         }}
@@ -638,6 +669,7 @@ export default function JalaliDatePicker({
             width: 280,
             boxShadow: '0 8px 16px rgba(0, 0, 0, 0.15)',
             borderRadius: '8px',
+            overflowX: 'hidden',
             animation: 'popoverFadeIn 0.3s ease-in-out',
             '@keyframes popoverFadeIn': {
               '0%': { opacity: 0, transform: 'translateY(-10px)' },

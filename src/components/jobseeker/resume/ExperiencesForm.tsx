@@ -46,6 +46,63 @@ import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import { JOB_SEEKER_THEME } from '@/constants/colors';
 import JalaliDatePicker from '@/components/common/JalaliDatePicker';
 
+// تابع تبدیل اعداد انگلیسی به فارسی
+const convertToPersianNumbers = (num: number | string): string => {
+  const persianNumbers = ['۰', '۱', '۲', '۳', '۴', '۵', '۶', '۷', '۸', '۹'];
+  return num.toString().replace(/[0-9]/g, (d) => persianNumbers[parseInt(d)]);
+};
+
+// تابع تبدیل تاریخ میلادی به شمسی
+const gregorianToJalali = (gy: number, gm: number, gd: number): [number, number, number] => {
+  const gdm = [0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334];
+  let jy = 0;
+  
+  let gy2 = (gm > 2) ? (gy + 1) : gy;
+  let days = 355666 + (365 * gy) + Math.floor((gy2 + 3) / 4) - Math.floor((gy2 + 99) / 100) + Math.floor((gy2 + 399) / 400) + gd + gdm[gm - 1];
+  
+  jy = -1595 + (33 * Math.floor(days / 12053));
+  days %= 12053;
+  jy += 4 * Math.floor(days / 1461);
+  days %= 1461;
+  
+  if (days > 365) {
+    jy += Math.floor((days - 1) / 365);
+    days = (days - 1) % 365;
+  }
+  
+  let jm = (days < 186) ? 1 + Math.floor(days / 31) : 7 + Math.floor((days - 186) / 30);
+  let jd = 1 + ((days < 186) ? (days % 31) : ((days - 186) % 30));
+  
+  return [jy, jm, jd];
+};
+
+// تابع فرمت کردن تاریخ
+const formatDate = (dateString: string) => {
+  if (!dateString) return 'نامشخص';
+  try {
+    const date = new Date(dateString);
+    if (isNaN(date.getTime())) return 'نامشخص';
+    
+    const [year, month, day] = gregorianToJalali(
+      date.getFullYear(),
+      date.getMonth() + 1,
+      date.getDate()
+    );
+    
+    return `${convertToPersianNumbers(year)}/${convertToPersianNumbers(month.toString().padStart(2, '0'))}/${convertToPersianNumbers(day.toString().padStart(2, '0'))}`;
+  } catch (error) {
+    return 'نامشخص';
+  }
+};
+
+/**
+ * تایپ استان برای TypeScript
+ */
+type Province = {
+  id: number;
+  name: string;
+};
+
 /**
  * تایپ شهر برای TypeScript
  */
@@ -81,9 +138,10 @@ interface ExperienceFormInputs {
   employment_type: string;
   title: string;
   company: string;
+  province_id: number;
   location_id: number;
   start_date: string;
-  end_date: string;
+  end_date: string | null;
   description: string;
   is_current: boolean;
 }
@@ -95,7 +153,9 @@ export default function ExperiencesForm() {
   const router = useRouter();
   const theme = useTheme();
   const jobseekerColors = JOB_SEEKER_THEME;
+  const [provinces, setProvinces] = useState<Province[]>([]);
   const [cities, setCities] = useState<City[]>([]);
+  const [resumeId, setResumeId] = useState<number | null>(null);
   const [experiences, setExperiences] = useState<Experience[]>([]);
   const [loading, setLoading] = useState(false);
   const [dataLoading, setDataLoading] = useState(true);
@@ -119,16 +179,19 @@ export default function ExperiencesForm() {
       employment_type: '',
       title: '',
       company: '',
+      province_id: 0,
       location_id: 0,
       start_date: '',
-      end_date: '',
+      end_date: null,
       description: '',
       is_current: false
     }
   });
 
-  // نظارت بر تغییرات "شغل فعلی"
+  // نظارت بر تغییرات "شغل فعلی"، "استان" و "تاریخ شروع"
   const isCurrent = watch('is_current');
+  const selectedProvinceId = watch('province_id');
+  const startDate = watch('start_date');
 
   // تبدیل constants به آرایه گزینه‌ها برای Select ها
   const employmentTypeOptions = [
@@ -142,13 +205,22 @@ export default function ExperiencesForm() {
     const fetchData = async () => {
       setDataLoading(true);
       try {
-        const [experiencesResponse, citiesResponse] = await Promise.all([
+        const [experiencesResponse, provincesResponse, citiesResponse, resumesResponse] = await Promise.all([
           apiGet('/resumes/experiences/'),
-          apiGet('/locations/cities/')
+          apiGet('/locations/provinces/'),
+          apiGet('/locations/cities/'),
+          apiGet('/resumes/resumes/')
         ]);
         
         setExperiences(experiencesResponse.data as Experience[]);
+        setProvinces(provincesResponse.data as Province[]);
         setCities(citiesResponse.data as City[]);
+        const resumes = Array.isArray(resumesResponse.data) ? resumesResponse.data : [];
+        if (resumes.length > 0) {
+          setResumeId(resumes[0].id as number);
+        } else {
+          setResumeId(null);
+        }
       } catch (err) {
         console.error('خطا در دریافت اطلاعات:', err);
         setErrors(['خطا در دریافت اطلاعات مورد نیاز. لطفاً دوباره تلاش کنید.']);
@@ -165,27 +237,56 @@ export default function ExperiencesForm() {
     setErrors([]);
 
     try {
+      // بررسی تعداد تجربیات
+      if (!editingId && experiences.length >= 10) {
+        setLoading(false);
+        setErrors(['حداکثر تعداد تجربیات کاری (۱۰ مورد) ثبت شده است.']);
+        return;
+      }
+
+      // اعتبارسنجی تاریخ ها: تاریخ پایان قبل از شروع نباشد
+      if (!data.is_current && data.end_date && data.start_date) {
+        const start = new Date(data.start_date as string).getTime();
+        const end = new Date(data.end_date as string).getTime();
+        if (!Number.isNaN(start) && !Number.isNaN(end) && end < start) {
+          setLoading(false);
+          setErrors(['تاریخ پایان نمی‌تواند قبل از تاریخ شروع باشد']);
+          return;
+        }
+      }
+
       const experienceData = {
         employment_type: data.employment_type,
         title: data.title,
         company: data.company,
         location_id: data.location_id || null,
         start_date: data.start_date,
-        end_date: data.is_current ? null : data.end_date,
+        end_date: data.is_current ? null : (data.end_date || null),
         description: data.description || '',
         is_current: data.is_current
       };
 
       if (editingId) {
         // ویرایش تجربه موجود
-        const response = await apiPut(`/resumes/experiences/${editingId}/`, experienceData);
+        if (!resumeId) {
+          setLoading(false);
+          setErrors(['ابتدا رزومه خود را ایجاد کنید (شناسه رزومه یافت نشد).']);
+          return;
+        }
+        const response = await apiPut(`/resumes/experiences/${editingId}/`, { ...experienceData, resume_id: resumeId });
         setExperiences(prev => prev.map(exp => 
           exp.id === editingId ? response.data as Experience : exp
         ));
         setEditingId(null);
+        setShowAddForm(false);
       } else {
         // اضافه کردن تجربه جدید
-        const response = await apiPost('/resumes/experiences/', experienceData);
+        if (!resumeId) {
+          setLoading(false);
+          setErrors(['ابتدا رزومه خود را ایجاد کنید (شناسه رزومه یافت نشد).']);
+          return;
+        }
+        const response = await apiPost('/resumes/experiences/', { ...experienceData, resume_id: resumeId });
         setExperiences(prev => [...prev, response.data as Experience]);
         setShowAddForm(false);
       }
@@ -230,20 +331,21 @@ export default function ExperiencesForm() {
     }
   };
 
-  // شروع ویرایش تجربه
+    // شروع ویرایش تجربه
   const handleEdit = (experience: Experience) => {
     setEditingId(experience.id || null);
     setShowAddForm(true);
-    reset({
-      employment_type: experience.employment_type,
-      title: experience.title,
-      company: experience.company,
-      location_id: experience.location?.id || 0,
-      start_date: experience.start_date,
-      end_date: experience.end_date || '',
-      description: experience.description || '',
-      is_current: experience.is_current || false
-    });
+            reset({
+          employment_type: experience.employment_type,
+          title: experience.title,
+          company: experience.company,
+          province_id: experience.location?.province?.id || 0,
+          location_id: experience.location?.id || 0,
+          start_date: experience.start_date,
+          end_date: experience.end_date || null,
+          description: experience.description || '',
+          is_current: experience.is_current || false
+        });
   };
 
   // حذف تجربه
@@ -267,12 +369,30 @@ export default function ExperiencesForm() {
     setShowAddForm(false);
     reset();
     setErrors([]);
+    // پاک کردن شهر انتخاب شده وقتی استان تغییر می‌کند
+    setValue('location_id', 0);
+    // پاک کردن تاریخ پایان
+    setValue('end_date', null);
   };
 
   // حذف یک خطا از لیست خطاها
   const removeError = (index: number) => {
     setErrors(errors.filter((_, i) => i !== index));
   };
+
+  // پاک کردن شهر وقتی استان تغییر می‌کند
+  useEffect(() => {
+    if (selectedProvinceId) {
+      setValue('location_id', 0);
+    }
+  }, [selectedProvinceId, setValue]);
+
+  // پاک کردن تاریخ پایان وقتی تاریخ شروع تغییر می‌کند
+  useEffect(() => {
+    if (startDate) {
+      setValue('end_date', null);
+    }
+  }, [startDate, setValue]);
 
   // تنظیمات مشترک منوی کشویی
   const menuPropsRTL: Partial<MenuProps> = {
@@ -410,65 +530,70 @@ export default function ExperiencesForm() {
               </Typography>
             </Box>
             
-            <Button
-              variant="contained"
-              color="success"
-              onClick={() => setShowAddForm(true)}
-              disabled={showAddForm}
-              sx={{
-                background: jobseekerColors.primary,
-                color: 'white',
-                '&:hover': { 
-                  background: jobseekerColors.dark,
-                  boxShadow: '0 4px 12px rgba(0,0,0,0.2)'
-                },
-                '&:disabled': {
-                  background: jobseekerColors.primary,
-                  color: 'white',
-                  cursor: 'not-allowed',
-                  opacity: 0.5
-                },
-                borderRadius: 2,
-                px: 4,
-                py: 1.5,
-                fontSize: '1rem',
-                fontWeight: 'bold',
-                minWidth: '140px',
-                width: '140px',
-                height: '48px',
-                transition: 'all 0.2s ease',
-                boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
-                whiteSpace: 'nowrap',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center'
-              }}
-            >
-              افزودن تجربه
-            </Button>
+                         <Button
+               variant="contained"
+               color="success"
+               onClick={() => setShowAddForm(true)}
+               disabled={showAddForm || experiences.length >= 10}
+               sx={{
+                 background: jobseekerColors.primary,
+                 color: 'white',
+                 '&:hover': { 
+                   background: jobseekerColors.dark,
+                   boxShadow: '0 4px 12px rgba(0,0,0,0.2)'
+                 },
+                 '&:disabled': {
+                   background: jobseekerColors.primary,
+                   color: 'white',
+                   cursor: 'not-allowed',
+                   opacity: 0.5
+                 },
+                 borderRadius: 2,
+                 px: 4,
+                 py: 1.5,
+                 fontSize: '1rem',
+                 fontWeight: 'bold',
+                 minWidth: '140px',
+                 width: '140px',
+                 height: '48px',
+                 transition: 'all 0.2s ease',
+                 boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
+                 whiteSpace: 'nowrap',
+                 display: 'flex',
+                 alignItems: 'center',
+                 justifyContent: 'center'
+               }}
+             >
+               افزودن تجربه
+             </Button>
           </Box>
 
-          <Alert 
-            severity="info" 
-            icon={<InfoIcon />}
-            sx={{ 
-              backgroundColor: jobseekerColors.bgVeryLight,
-              borderColor: jobseekerColors.primary,
-              color: '#333',
-              '& .MuiAlert-icon': {
-                color: jobseekerColors.primary,
-                display: { xs: 'none', sm: 'flex' }
-              },
-              '& .MuiAlert-message': {
-                width: '100%',
-                color: '#333'
-              }
-            }}
-          >
-            <Box>
-              ثبت تجربیات کاری شما به بهتر دیده شدن رزومه کمک می‌کند.
-            </Box>
-          </Alert>
+                     <Alert 
+             severity="info" 
+             icon={<InfoIcon />}
+             sx={{ 
+               backgroundColor: jobseekerColors.bgVeryLight,
+               borderColor: jobseekerColors.primary,
+               color: '#333',
+               '& .MuiAlert-icon': {
+                 color: jobseekerColors.primary,
+                 display: { xs: 'none', sm: 'flex' }
+               },
+               '& .MuiAlert-message': {
+                 width: '100%',
+                 color: '#333'
+               }
+             }}
+           >
+             <Box>
+               ثبت تجربیات کاری شما به بهتر دیده شدن رزومه کمک می‌کند.
+               {experiences.length >= 10 && (
+                 <Typography variant="body2" sx={{ mt: 1, fontWeight: 600, color: '#d32f2f' }}>
+                    شما حداکثر تعداد تجربیات کاری (۱۰ مورد) را ثبت کرده‌اید. برای افزودن تجربه جدید، ابتدا یکی از تجربیات موجود را حذف کنید.
+                 </Typography>
+               )}
+             </Box>
+           </Alert>
         </Box>
 
         {errors.length > 0 && (
@@ -555,49 +680,49 @@ export default function ExperiencesForm() {
           </Typography>
 
           <form onSubmit={handleSubmit(onSubmit)}>
-            {/* عنوان شغل و شرکت */}
-            <Box sx={{ display: 'flex', flexDirection: { xs: 'column', md: 'row' }, gap: { xs: 1.5, md: 3 }, mb: { xs: 2, md: 3 } }}>
-              {/* عنوان شغل */}
-              <Box sx={{ flex: 1 }}>
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
-                  <WorkIcon sx={{ color: jobseekerColors.primary, fontSize: 20 }} />
-                  <Typography variant="body2" fontWeight="medium" sx={{
-                    fontSize: { xs: '0.7rem', sm: '0.875rem' },
-                    color: jobseekerColors.primary,
-                    fontWeight: 600
-                  }}>
-                    عنوان شغل *
-                  </Typography>
-                </Box>
-                <Controller
-                  name="title"
-                  control={control}
-                  rules={{ required: 'عنوان شغل الزامی است' }}
-                  render={({ field }) => (
-                    <TextField
-                      {...field}
-                      fullWidth
-                      placeholder="مثال: برنامه‌نویس React"
-                      error={Boolean(formErrors.title)}
-                      helperText={formErrors.title?.message}
-                      variant="outlined"
-                      sx={{ 
-                        '& .MuiOutlinedInput-root': { 
-                          borderRadius: '6px',
-                          '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-                            borderColor: jobseekerColors.primary
-                          }
-                        },
-                        '& .MuiInputBase-input': {
-                          fontSize: { xs: '0.8rem', sm: '1rem' },
-                          padding: { xs: '8px 14px', sm: '16.5px 14px' }
-                        }
-                      }}
-                    />
-                  )}
-                />
+            {/* عنوان شغل */}
+            <Box sx={{ mb: { xs: 2, md: 3 } }}>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
+                <WorkIcon sx={{ color: jobseekerColors.primary, fontSize: 20 }} />
+                <Typography variant="body2" fontWeight="medium" sx={{
+                  fontSize: { xs: '0.7rem', sm: '0.875rem' },
+                  color: jobseekerColors.primary,
+                  fontWeight: 600
+                }}>
+                  عنوان شغل *
+                </Typography>
               </Box>
+              <Controller
+                name="title"
+                control={control}
+                rules={{ required: 'عنوان شغل الزامی است' }}
+                render={({ field }) => (
+                  <TextField
+                    {...field}
+                    fullWidth
+                    placeholder="مثال: برنامه‌نویس React"
+                    error={Boolean(formErrors.title)}
+                    helperText={formErrors.title?.message}
+                    variant="outlined"
+                    sx={{ 
+                      '& .MuiOutlinedInput-root': { 
+                        borderRadius: '6px',
+                        '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                          borderColor: jobseekerColors.primary
+                        }
+                      },
+                      '& .MuiInputBase-input': {
+                        fontSize: { xs: '0.8rem', sm: '1rem' },
+                        padding: { xs: '8px 14px', sm: '16.5px 14px' }
+                      }
+                    }}
+                  />
+                )}
+              />
+            </Box>
 
+            {/* نام شرکت و نوع استخدام */}
+            <Box sx={{ display: 'flex', flexDirection: { xs: 'column', md: 'row' }, gap: { xs: 1.5, md: 3 }, mb: { xs: 2, md: 3 } }}>
               {/* نام شرکت */}
               <Box sx={{ flex: 1 }}>
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
@@ -638,10 +763,7 @@ export default function ExperiencesForm() {
                   )}
                 />
               </Box>
-            </Box>
 
-            {/* نوع استخدام و شهر */}
-            <Box sx={{ display: 'flex', flexDirection: { xs: 'column', md: 'row' }, gap: { xs: 1.5, md: 3 }, mb: { xs: 2, md: 3 } }}>
               {/* نوع استخدام */}
               <Box sx={{ flex: 1 }}>
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
@@ -696,6 +818,63 @@ export default function ExperiencesForm() {
                   )}
                 />
               </Box>
+            </Box>
+
+            {/* استان و شهر */}
+            <Box sx={{ display: 'flex', flexDirection: { xs: 'column', md: 'row' }, gap: { xs: 1.5, md: 3 }, mb: { xs: 2, md: 3 } }}>
+              {/* استان */}
+              <Box sx={{ flex: 1 }}>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
+                  <LocationOnIcon sx={{ color: jobseekerColors.primary, fontSize: 20 }} />
+                  <Typography variant="body2" fontWeight="medium" sx={{
+                    fontSize: { xs: '0.7rem', sm: '0.875rem' },
+                    color: jobseekerColors.primary,
+                    fontWeight: 600
+                  }}>
+                    استان
+                  </Typography>
+                </Box>
+                <Controller
+                  name="province_id"
+                  control={control}
+                  render={({ field }) => (
+                    <FormControl fullWidth error={Boolean(formErrors.province_id)}>
+                      <Select
+                        {...field}
+                        displayEmpty
+                        input={<OutlinedInput sx={selectStyles} />}
+                        renderValue={() => {
+                          const selectedProvince = provinces.find(p => p.id === field.value);
+                          return (
+                            <Box component="div" sx={{ display: 'flex', justifyContent: 'center', width: '100%' }}>
+                              {selectedProvince ? selectedProvince.name : 'انتخاب استان'}
+                            </Box>
+                          );
+                        }}
+                        MenuProps={menuPropsRTL}
+                        startAdornment={
+                          <InputAdornment position="start" sx={{ position: 'absolute', right: '10px' }}>
+                            <LocationOnIcon fontSize="small" sx={{ color: jobseekerColors.primary }} />
+                          </InputAdornment>
+                        }
+                        IconComponent={(props: any) => (
+                          <KeyboardArrowDownIcon {...props} sx={{ color: jobseekerColors.primary }} />
+                        )}
+                      >
+                        <MenuItem value={0} disabled>انتخاب استان</MenuItem>
+                        {provinces.map((province) => (
+                          <MenuItem key={province.id} value={province.id}>
+                            {province.name}
+                          </MenuItem>
+                        ))}
+                      </Select>
+                      {formErrors.province_id && (
+                        <FormHelperText>{formErrors.province_id.message}</FormHelperText>
+                      )}
+                    </FormControl>
+                  )}
+                />
+              </Box>
 
               {/* شهر */}
               <Box sx={{ flex: 1 }}>
@@ -717,9 +896,10 @@ export default function ExperiencesForm() {
                       <Select
                         {...field}
                         displayEmpty
+                        disabled={!selectedProvinceId}
                         input={<OutlinedInput sx={selectStyles} />}
                         renderValue={() => {
-                          const selectedCity = cities.find(c => c.id === field.value);
+                          const selectedCity = cities.filter(c => !selectedProvinceId || c.province?.id === selectedProvinceId).find(c => c.id === field.value);
                           return (
                             <Box component="div" sx={{ display: 'flex', justifyContent: 'center', width: '100%' }}>
                               {selectedCity ? selectedCity.name : 'انتخاب شهر'}
@@ -737,7 +917,7 @@ export default function ExperiencesForm() {
                         )}
                       >
                         <MenuItem value={0} disabled>انتخاب شهر</MenuItem>
-                        {cities.map((city) => (
+                        {cities.filter(c => !selectedProvinceId || c.province?.id === selectedProvinceId).map((city) => (
                           <MenuItem key={city.id} value={city.id}>
                             {city.name}
                           </MenuItem>
@@ -751,6 +931,8 @@ export default function ExperiencesForm() {
                 />
               </Box>
             </Box>
+
+
 
             {/* تاریخ شروع و پایان */}
             <Box sx={{ display: 'flex', flexDirection: { xs: 'column', md: 'row' }, gap: { xs: 1.5, md: 3 }, mb: { xs: 2, md: 3 } }}>
@@ -779,13 +961,14 @@ export default function ExperiencesForm() {
                         }
                       }
                     }}>
-                      <JalaliDatePicker
-                        value={field.value}
-                        onChange={field.onChange}
-                        fullWidth
-                        error={Boolean(formErrors.start_date)}
-                        helperText={formErrors.start_date?.message}
-                      />
+                                             <JalaliDatePicker
+                         value={field.value}
+                         onChange={field.onChange}
+                         fullWidth
+                         error={Boolean(formErrors.start_date)}
+                         helperText={formErrors.start_date?.message}
+                         maxDate={watch('end_date') || undefined}
+                       />
                     </Box>
                   )}
                 />
@@ -817,14 +1000,16 @@ export default function ExperiencesForm() {
                         }
                       }
                     }}>
-                      <JalaliDatePicker
-                        value={isCurrent ? '' : field.value}
-                        onChange={isCurrent ? () => {} : field.onChange}
-                        fullWidth
-                        error={Boolean(formErrors.end_date)}
-                        helperText={formErrors.end_date?.message}
-                        placeholder={isCurrent ? 'تاریخ پایان (شغل فعلی)' : 'انتخاب تاریخ'}
-                      />
+                                             <JalaliDatePicker
+                         value={isCurrent ? '' : (field.value || '')}
+                         onChange={isCurrent ? () => {} : field.onChange}
+                         fullWidth
+                         error={Boolean(formErrors.end_date)}
+                         helperText={formErrors.end_date?.message}
+                         placeholder={isCurrent ? 'تاریخ پایان (شغل فعلی)' : 'انتخاب تاریخ'}
+                         minDate={startDate || undefined}
+                         disabled={isCurrent || !startDate}
+                       />
                     </Box>
                   )}
                 />
@@ -957,15 +1142,21 @@ export default function ExperiencesForm() {
       )}
 
       {/* لیست تجربیات */}
-      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+      <Box sx={{ 
+        display: 'grid', 
+        gridTemplateColumns: { xs: '1fr', md: 'repeat(2, 1fr)' },
+        gap: 3
+      }}>
         {experiences.length === 0 ? (
           <Paper 
             elevation={0} 
             sx={{ 
               p: 4, 
               textAlign: 'center',
-              borderRadius: 3,
-              border: '1px solid #f0f0f0'
+              borderRadius: 2,
+              border: '1px solid #e0e0e0',
+              background: '#ffffff',
+              gridColumn: { xs: '1', md: '1 / -1' }
             }}
           >
             <WorkIcon sx={{ fontSize: 48, color: 'text.disabled', mb: 2 }} />
@@ -978,73 +1169,168 @@ export default function ExperiencesForm() {
           </Paper>
         ) : (
           experiences.map((experience) => (
-            <Card key={experience.id} elevation={0} sx={{ border: '1px solid #f0f0f0' }}>
-              <CardContent>
+            <Paper 
+              key={experience.id} 
+              elevation={0} 
+              sx={{ 
+                border: '1px solid #e0e0e0',
+                borderRadius: 2,
+                overflow: 'hidden',
+                background: '#ffffff'
+              }}
+            >
+              {/* Header Section */}
+              <Box sx={{ 
+                background: '#fafafa',
+                p: 3,
+                borderBottom: '1px solid #e0e0e0'
+              }}>
                 <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 2 }}>
-                  <Box>
-                    <Typography variant="h6" sx={{ fontWeight: 600, mb: 0.5 }}>
+                  <Box sx={{ flex: 1 }}>
+                    <Typography variant="h5" sx={{ 
+                      fontWeight: 700, 
+                      mb: 1,
+                      color: jobseekerColors.primary,
+                      fontSize: { xs: '1.1rem', sm: '1.3rem' }
+                    }}>
                       {experience.title}
                     </Typography>
-                    <Typography variant="subtitle1" color="text.secondary" sx={{ mb: 1 }}>
+                    <Typography variant="h6" sx={{ 
+                      fontWeight: 600, 
+                      mb: 1.5,
+                      color: 'text.primary',
+                      fontSize: { xs: '1rem', sm: '1.1rem' }
+                    }}>
                       {experience.company}
                     </Typography>
-                    <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
+                    
+                    {/* Chips Section */}
+                    <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1.5, mb: 2 }}>
                       <Chip 
                         label={employmentTypeOptions.find(opt => opt.value === experience.employment_type)?.label || experience.employment_type}
-                        size="small" 
-                        sx={{ bgcolor: alpha(jobseekerColors.primary, 0.1) }}
+                        size="medium"
+                        sx={{ 
+                          bgcolor: alpha(jobseekerColors.primary, 0.15),
+                          color: jobseekerColors.primary,
+                          fontWeight: 600,
+                          fontSize: '0.85rem',
+                          height: '28px',
+                          '& .MuiChip-label': {
+                            px: 2
+                          }
+                        }}
                       />
                       {experience.location && (
                         <Chip 
                           label={experience.location.name}
-                          size="small" 
+                          size="medium"
                           variant="outlined"
+                          sx={{ 
+                            borderColor: alpha(jobseekerColors.primary, 0.3),
+                            color: jobseekerColors.primary,
+                            fontWeight: 500,
+                            fontSize: '0.85rem',
+                            height: '28px',
+                            '& .MuiChip-label': {
+                              px: 2
+                            }
+                          }}
                         />
                       )}
                       {experience.is_current && (
                         <Chip 
                           label="شغل فعلی"
-                          size="small" 
+                          size="medium"
                           color="success"
+                          sx={{ 
+                            fontWeight: 600,
+                            fontSize: '0.85rem',
+                            height: '28px',
+                            '& .MuiChip-label': {
+                              px: 2
+                            }
+                          }}
                         />
                       )}
                     </Box>
+
+                    {/* Date Section */}
+                    <Box sx={{ 
+                      display: 'flex', 
+                      alignItems: 'center', 
+                      gap: 1,
+                      color: 'text.secondary',
+                      fontSize: '0.9rem'
+                    }}>
+                      <CalendarTodayIcon sx={{ fontSize: 18, color: jobseekerColors.primary }} />
+                      <Typography variant="body2" sx={{ fontWeight: 500 }}>
+                        {formatDate(experience.start_date)} 
+                        {experience.end_date ? ` تا ${formatDate(experience.end_date)}` : ' تاکنون'}
+                      </Typography>
+                    </Box>
+                  </Box>
+
+                  {/* Action Buttons */}
+                  <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1, ml: 2 }}>
+                    <Button
+                      size="small"
+                      startIcon={<EditIcon />}
+                      onClick={() => handleEdit(experience)}
+                      variant="outlined"
+                      sx={{ 
+                        borderColor: jobseekerColors.primary,
+                        color: jobseekerColors.primary,
+                        fontWeight: 600,
+                        fontSize: '0.8rem',
+                        px: 2,
+                        py: 0.5,
+                        minWidth: '80px',
+                        '&:hover': {
+                          borderColor: jobseekerColors.dark,
+                          backgroundColor: alpha(jobseekerColors.primary, 0.05)
+                        }
+                      }}
+                    >
+                      ویرایش
+                    </Button>
+                    <Button
+                      size="small"
+                      startIcon={<DeleteIcon />}
+                      onClick={() => handleDelete(experience.id!)}
+                      variant="outlined"
+                      color="error"
+                      sx={{ 
+                        fontWeight: 600,
+                        fontSize: '0.8rem',
+                        px: 2,
+                        py: 0.5,
+                        minWidth: '80px',
+                        '&:hover': {
+                          backgroundColor: alpha('#f44336', 0.05)
+                        }
+                      }}
+                    >
+                      حذف
+                    </Button>
                   </Box>
                 </Box>
+              </Box>
 
-                <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-                  {experience.start_date} {experience.end_date ? `تا ${experience.end_date}` : '- تاکنون'}
-                </Typography>
-
-                {experience.description && (
-                  <>
-                    <Divider sx={{ my: 2 }} />
-                    <Typography variant="body2" sx={{ whiteSpace: 'pre-line' }}>
-                      {experience.description}
-                    </Typography>
-                  </>
-                )}
-              </CardContent>
-
-              <CardActions sx={{ justifyContent: 'flex-end', px: 2, pb: 2 }}>
-                <Button
-                  size="small"
-                  startIcon={<EditIcon />}
-                  onClick={() => handleEdit(experience)}
-                  sx={{ color: jobseekerColors.primary }}
-                >
-                  ویرایش
-                </Button>
-                <Button
-                  size="small"
-                  startIcon={<DeleteIcon />}
-                  onClick={() => handleDelete(experience.id!)}
-                  color="error"
-                >
-                  حذف
-                </Button>
-              </CardActions>
-            </Card>
+              {/* Description Section */}
+              {experience.description && (
+                <Box sx={{ p: 3, pt: 2 }}>
+                  <Divider sx={{ mb: 2, borderColor: '#e0e0e0' }} />
+                  <Typography variant="body1" sx={{ 
+                    whiteSpace: 'pre-line',
+                    lineHeight: 1.6,
+                    color: 'text.secondary',
+                    fontSize: '0.9rem'
+                  }}>
+                    {experience.description}
+                  </Typography>
+                </Box>
+              )}
+            </Paper>
           ))
         )}
       </Box>

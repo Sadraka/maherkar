@@ -143,7 +143,7 @@ export default function PersonalInfoForm() {
   const router = useRouter();
   const theme = useTheme();
   const jobseekerColors = JOB_SEEKER_THEME;
-  const [industries, setIndustries] = useState<Industry[]>([]);
+  const [industryCategories, setIndustryCategories] = useState<Industry[]>([]);
   const [cities, setCities] = useState<City[]>([]);
   const [provinces, setProvinces] = useState<Province[]>([]);
   const [loading, setLoading] = useState(false);
@@ -275,9 +275,9 @@ export default function PersonalInfoForm() {
     const fetchData = async () => {
       setDataLoading(true);
       try {
-        const [resumeResponse, industriesResponse, citiesResponse, provincesResponse] = await Promise.all([
+        const [resumeResponse, industryCategoriesResponse, citiesResponse, provincesResponse] = await Promise.all([
           apiGet('/resumes/resumes/'),
-          apiGet('/industries/industries/'),
+          apiGet('/industries/industry-categories/'),
           apiGet('/locations/cities/'),
           apiGet('/locations/provinces/')
         ]);
@@ -320,7 +320,7 @@ export default function PersonalInfoForm() {
           setResumeId(null);
         }
         
-        setIndustries(industriesResponse.data as Industry[]);
+        setIndustryCategories(industryCategoriesResponse.data as Industry[]);
         setCities(citiesResponse.data as City[]);
         setProvinces(provincesResponse.data as Province[]);
       } catch (err) {
@@ -888,7 +888,7 @@ export default function PersonalInfoForm() {
                     displayEmpty
                     input={<OutlinedInput sx={selectStyles} />}
                     renderValue={() => {
-                      const selectedIndustry = industries.find(i => i.id === field.value);
+                      const selectedIndustry = industryCategories.find(i => i.id === field.value);
                       return (
                         <Box component="div" sx={{ display: 'flex', justifyContent: 'center', width: '100%' }}>
                                                         {selectedIndustry ? selectedIndustry.name : 'انتخاب گروه کاری'}
@@ -906,7 +906,7 @@ export default function PersonalInfoForm() {
                     )}
                   >
                     <MenuItem value={0} disabled>انتخاب گروه کاری</MenuItem>
-                    {industries.map((industry) => (
+                    {industryCategories.map((industry) => (
                       <MenuItem key={industry.id} value={industry.id}>
                         {industry.name}
                       </MenuItem>
