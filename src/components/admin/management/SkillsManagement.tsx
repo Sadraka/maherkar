@@ -61,10 +61,10 @@ const SkillsManagement: React.FC = () => {
   const [warningModal, setWarningModal] = useState(false);
   const [warningSkill, setWarningSkill] = useState<Skill | null>(null);
 
-  // Edit Dialog state
-  const [editDialog, setEditDialog] = useState(false);
-  const [editSkill, setEditSkill] = useState<Skill | null>(null);
-  const [editForm, setEditForm] = useState({ name: '', industry_id: '' });
+     // Edit Dialog state
+   const [editDialog, setEditDialog] = useState(false);
+   const [editSkill, setEditSkill] = useState<Skill | null>(null);
+   const [editForm, setEditForm] = useState({ name: '', category_id: '', industry_id: '' });
 
   // Fetch categories
   const fetchCategories = useCallback(async () => {
@@ -206,14 +206,15 @@ const SkillsManagement: React.FC = () => {
   };
 
   // Edit Dialog functions
-  const openEditDialog = (skill: Skill) => {
-    setEditSkill(skill);
-    setEditForm({ 
-      name: skill.name, 
-      industry_id: skill.industry?.id ? String(skill.industry.id) : '' 
-    });
-    setEditDialog(true);
-  };
+     const openEditDialog = (skill: Skill) => {
+     setEditSkill(skill);
+     setEditForm({ 
+       name: skill.name, 
+       category_id: skill.industry?.category?.id ? String(skill.industry.category.id) : '',
+       industry_id: skill.industry?.id ? String(skill.industry.id) : '' 
+     });
+     setEditDialog(true);
+   };
 
   const handleEditSkillDialog = async () => {
     if (!editSkill) return;
@@ -767,31 +768,50 @@ const SkillsManagement: React.FC = () => {
          }}>
            ویرایش مهارت
          </DialogTitle>
-        <DialogContent>
-          <Box sx={{ pt: 2 }}>
-            <TextField
-              label="نام مهارت"
-              value={editForm.name}
-              onChange={e => setEditForm({ ...editForm, name: e.target.value })}
-              fullWidth
-              sx={{ mb: 2 }}
-            />
-            <FormControl fullWidth>
-              <InputLabel>صنعت</InputLabel>
-              <Select
-                value={editForm.industry_id}
-                label="صنعت"
-                onChange={e => setEditForm({ ...editForm, industry_id: e.target.value })}
-              >
-                {industries.map(industry => (
-                  <MenuItem key={industry.id} value={industry.id}>
-                    {industry.name} - {industry.category.name}
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
-          </Box>
-        </DialogContent>
+                 <DialogContent>
+           <Box sx={{ pt: 2 }}>
+             <TextField
+               label="نام مهارت"
+               value={editForm.name}
+               onChange={e => setEditForm({ ...editForm, name: e.target.value })}
+               fullWidth
+               sx={{ mb: 2 }}
+             />
+             <FormControl fullWidth sx={{ mb: 2 }}>
+               <InputLabel>گروه کاری</InputLabel>
+               <Select
+                 value={editForm.category_id || ''}
+                 label="گروه کاری"
+                 onChange={e => setEditForm({ ...editForm, category_id: e.target.value, industry_id: '' })}
+               >
+                 <MenuItem value="">انتخاب گروه کاری</MenuItem>
+                 {categories.map(category => (
+                   <MenuItem key={category.id} value={category.id}>
+                     {category.name}
+                   </MenuItem>
+                 ))}
+               </Select>
+             </FormControl>
+             <FormControl fullWidth>
+               <InputLabel>زیر گروه کاری</InputLabel>
+               <Select
+                 value={editForm.industry_id}
+                 label="زیر گروه کاری"
+                 disabled={!editForm.category_id}
+                 onChange={e => setEditForm({ ...editForm, industry_id: e.target.value })}
+               >
+                 <MenuItem value="">انتخاب زیر گروه کاری</MenuItem>
+                 {industries
+                   .filter(industry => !editForm.category_id || industry.category.id === Number(editForm.category_id))
+                   .map(industry => (
+                     <MenuItem key={industry.id} value={industry.id}>
+                       {industry.name}
+                     </MenuItem>
+                   ))}
+               </Select>
+             </FormControl>
+           </Box>
+         </DialogContent>
                  <DialogActions sx={{ p: 2 }}>
            <Button 
              onClick={() => setEditDialog(false)}
