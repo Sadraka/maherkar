@@ -40,6 +40,18 @@ import CancelIcon from '@mui/icons-material/Cancel';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import { JOB_SEEKER_THEME } from '@/constants/colors';
 
+// تبدیل اعداد انگلیسی به فارسی
+const convertToPersianNumbers = (num: number | string): string => {
+  const persianNumbers = ['۰','۱','۲','۳','۴','۵','۶','۷','۸','۹'];
+  return num?.toString().replace(/[0-9]/g, (d) => persianNumbers[parseInt(d, 10)]) ?? '';
+};
+
+// تبدیل اعداد فارسی به انگلیسی برای ذخیره‌سازی
+const convertPersianToEnglishNumbers = (value: string): string => {
+  const persianDigits = '۰۱۲۳۴۵۶۷۸۹';
+  return value.replace(/[۰-۹]/g, (d) => String(persianDigits.indexOf(d)));
+};
+
 /**
  * تایپ تحصیلات برای TypeScript
  */
@@ -47,11 +59,12 @@ type Education = {
   id?: number;
   degree: string;
   field_of_study: string;
-  school: string;
-  start_date: string;
-  end_date?: string;
+  institution: string;
+  start_year: number;
+  end_year?: number;
   grade?: string;
   description?: string;
+  is_current: boolean;
 };
 
 /**
@@ -60,12 +73,12 @@ type Education = {
 interface EducationFormInputs {
   degree: string;
   field_of_study: string;
-  school: string;
-  start_date: string;
-  end_date?: string;
+  institution: string;
+  start_year: number;
+  end_year?: number;
   grade?: string;
   description?: string;
-  is_current: boolean;  // برای UI استفاده می‌شود
+  is_current: boolean;
 }
 
 /**
@@ -82,6 +95,7 @@ export default function EducationForm() {
   const [success, setSuccess] = useState(false);
   const [editingId, setEditingId] = useState<number | null>(null);
   const [showAddForm, setShowAddForm] = useState(false);
+  const [resumeId, setResumeId] = useState<number | null>(null);
   
   const formRef = useRef<HTMLDivElement>(null);
   
@@ -97,9 +111,9 @@ export default function EducationForm() {
     defaultValues: {
       degree: '',
       field_of_study: '',
-      school: '',
-      start_date: new Date().toISOString().split('T')[0],
-      end_date: undefined,
+      institution: '',
+      start_year: new Date().getFullYear(),
+      end_year: undefined,
       grade: '',
       description: '',
       is_current: false
@@ -109,26 +123,73 @@ export default function EducationForm() {
   // نظارت بر تغییرات وضعیت تحصیل فعلی
   const isCurrent = watch('is_current');
   
-  // مقادیر ثابت برای درجات تحصیلی - مطابق با بک‌اند
+  // مقادیر ثابت برای درجات تحصیلی
+  // مطابق مدل بک‌اند: Diploma, Associate, Bachelor, Master, Doctorate
   const degreeOptions = [
     { value: 'Diploma', label: 'دیپلم' },
-    { value: 'Associate', label: 'فوق دیپلم' },
-    { value: 'Bachelor', label: 'لیسانس' },
-    { value: 'Master', label: 'فوق لیسانس' },
-    { value: 'Doctorate', label: 'دکترا' }
+    { value: 'Associate', label: 'کاردانی' },
+    { value: 'Bachelor', label: 'کارشناسی' },
+    { value: 'Master', label: 'کارشناسی ارشد' },
+    { value: 'Doctorate', label: 'دکتری' }
   ];
+
+  // تایپ داده‌های دریافتی از بک‌اند
+  type ApiEducation = {
+    id?: number;
+    school: string;
+    degree: string;
+    field_of_study: string;
+    grade?: string | null;
+    start_date: string; // YYYY-MM-DD
+    end_date?: string | null; // YYYY-MM-DD | null
+    description?: string | null;
+  };
+
+  // تبدیل از API به مدل UI (سال‌های عددی + is_current)
+  const mapApiToUi = (e: ApiEducation): Education => {
+    const startYear = e.start_date ? parseInt(e.start_date.slice(0, 4), 10) : new Date().getFullYear();
+    const endYear = e.end_date ? parseInt(e.end_date.slice(0, 4), 10) : undefined;
+    return {
+      id: e.id,
+      degree: e.degree,
+      field_of_study: e.field_of_study,
+      institution: e.school,
+      start_year: startYear,
+      end_year: endYear,
+      grade: e.grade ?? '',
+      description: e.description ?? '',
+      is_current: !e.end_date
+    };
+  };
+
+  // تبدیل از مدل UI به Payload بک‌اند (تاریخ‌ها به YYYY-01-01)
+  const mapUiToPayload = (data: EducationFormInputs) => ({
+    school: data.institution,
+    degree: data.degree,
+    field_of_study: data.field_of_study,
+    grade: data.grade || '',
+    description: data.description || '',
+    start_date: `${data.start_year}-01-01`,
+    end_date: data.is_current ? null : (data.end_year ? `${data.end_year}-01-01` : null)
+  });
 
   // لود تحصیلات
   useEffect(() => {
     const fetchEducations = async () => {
       setDataLoading(true);
       try {
-        const response = await apiGet('/resumes/educations/');
-        const educationsData = response.data as any[];
-        setEducations(educationsData.map(edu => ({
-          ...edu,
-          is_current: !edu.end_date
-        })));
+        const [resumesRes, educationsRes] = await Promise.all([
+          apiGet('/resumes/resumes/'),
+          apiGet('/resumes/educations/')
+        ]);
+
+        const resumes = Array.isArray(resumesRes.data) ? resumesRes.data : [];
+        const resume = resumes.length > 0 ? resumes[0] : null;
+        setResumeId(resume ? resume.id : null);
+
+        const apiList = (educationsRes.data as ApiEducation[]) || [];
+        const mapped = apiList.map(mapApiToUi);
+        setEducations(mapped);
       } catch (err) {
         console.error('خطا در دریافت تحصیلات:', err);
         setErrors(['خطا در دریافت تحصیلات. لطفاً دوباره تلاش کنید.']);
@@ -146,20 +207,22 @@ export default function EducationForm() {
     setErrors([]);
 
     try {
-      const educationData = {
-        ...data,
-        end_date: data.is_current ? null : data.end_date
-      };
+      const payload = mapUiToPayload(data);
 
-      let response: any;
+      // ایجاد یا ویرایش
       if (editingId) {
-        response = await apiPut(`/resumes/educations/${editingId}/`, educationData);
-        setEducations(prev => prev.map(edu => 
-          edu.id === editingId ? { ...response.data, is_current: !response.data.end_date } as any : edu
-        ));
+        const response = await apiPut(`/resumes/educations/${editingId}/`, payload);
+        const mapped = mapApiToUi(response.data as ApiEducation);
+        setEducations(prev => prev.map(edu => (edu.id === editingId ? mapped : edu)));
       } else {
-        response = await apiPost('/resumes/educations/', educationData);
-        setEducations(prev => [...prev, { ...response.data, is_current: !response.data.end_date } as any]);
+        if (!resumeId) {
+          setErrors(['شناسه رزومه یافت نشد. لطفاً ابتدا اطلاعات شخصی را تکمیل کنید.']);
+          setLoading(false);
+          return;
+        }
+        const response = await apiPost('/resumes/educations/', { ...payload, resume_id: resumeId });
+        const mapped = mapApiToUi(response.data as ApiEducation);
+        setEducations(prev => [...prev, mapped]);
       }
 
       setSuccess(true);
@@ -225,12 +288,12 @@ export default function EducationForm() {
     reset({
       degree: education.degree,
       field_of_study: education.field_of_study,
-      school: education.school,
-      start_date: education.start_date,
-      end_date: education.end_date,
+      institution: education.institution,
+      start_year: education.start_year,
+      end_year: education.end_year,
       grade: education.grade || '',
       description: education.description || '',
-      is_current: !education.end_date
+      is_current: education.is_current
     });
   };
 
@@ -241,9 +304,9 @@ export default function EducationForm() {
     reset({
       degree: '',
       field_of_study: '',
-      school: '',
-      start_date: new Date().toISOString().split('T')[0],
-      end_date: undefined,
+      institution: '',
+      start_year: new Date().getFullYear(),
+      end_year: undefined,
       grade: '',
       description: '',
       is_current: false
@@ -502,10 +565,10 @@ export default function EducationForm() {
                       {education.degree} - {education.field_of_study}
                     </Typography>
                     <Typography variant="body1" sx={{ mb: 1 }}>
-                      {education.school}
+                      {education.institution}
                     </Typography>
                     <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
-                      {education.start_date} - {!education.end_date ? 'در حال تحصیل' : education.end_date}
+                      {education.start_year} - {education.is_current ? 'در حال تحصیل' : education.end_year}
                     </Typography>
                     {education.grade && (
                       <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
@@ -681,21 +744,23 @@ export default function EducationForm() {
               </Box>
             </Box>
 
-            {/* نام موسسه */}
-            <Box sx={{ mb: { xs: 2, md: 4 } }}>
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
-                <SchoolIcon sx={{ color: jobseekerColors.primary, fontSize: 20 }} />
-                <Typography variant="body2" fontWeight="medium" sx={{
-                  fontSize: { xs: '0.7rem', sm: '0.875rem' },
-                  lineHeight: { xs: 1.1, sm: 1.3 },
-                  color: jobseekerColors.primary,
-                  fontWeight: 600
-                }}>
-                  نام دانشگاه/موسسه *
-                </Typography>
-              </Box>
-                              <Controller
-                  name="school"
+            {/* نام موسسه و معدل */}
+            <Box sx={{ display: 'flex', flexDirection: { xs: 'column', md: 'row' }, gap: { xs: 1.5, md: 3 }, mb: { xs: 2, md: 4 } }}>
+              {/* نام موسسه */}
+              <Box sx={{ flex: 1 }}>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
+                  <SchoolIcon sx={{ color: jobseekerColors.primary, fontSize: 20 }} />
+                  <Typography variant="body2" fontWeight="medium" sx={{
+                    fontSize: { xs: '0.7rem', sm: '0.875rem' },
+                    lineHeight: { xs: 1.1, sm: 1.3 },
+                    color: jobseekerColors.primary,
+                    fontWeight: 600
+                  }}>
+                    نام دانشگاه/موسسه *
+                  </Typography>
+                </Box>
+                <Controller
+                  name="institution"
                   control={control}
                   rules={{ required: 'نام دانشگاه/موسسه الزامی است' }}
                   render={({ field }) => (
@@ -703,8 +768,8 @@ export default function EducationForm() {
                       {...field}
                       fullWidth
                       placeholder="مثال: دانشگاه تهران"
-                      error={Boolean(formErrors.school)}
-                      helperText={formErrors.school?.message}
+                      error={Boolean(formErrors.institution)}
+                      helperText={formErrors.institution?.message}
                       variant="outlined"
                       sx={{ 
                         '& .MuiOutlinedInput-root': { 
@@ -721,123 +786,8 @@ export default function EducationForm() {
                     />
                   )}
                 />
-            </Box>
-
-            {/* سال شروع و پایان */}
-            <Box sx={{ display: 'flex', flexDirection: { xs: 'column', md: 'row' }, gap: { xs: 1.5, md: 3 }, mb: { xs: 2, md: 4 } }}>
-              {/* سال شروع */}
-              <Box sx={{ flex: 1 }}>
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
-                  <SchoolIcon sx={{ color: jobseekerColors.primary, fontSize: 20 }} />
-                  <Typography variant="body2" fontWeight="medium" sx={{
-                    fontSize: { xs: '0.7rem', sm: '0.875rem' },
-                    lineHeight: { xs: 1.1, sm: 1.3 },
-                    color: jobseekerColors.primary,
-                    fontWeight: 600
-                  }}>
-                    تاریخ شروع *
-                  </Typography>
-                </Box>
-                <Controller
-                  name="start_date"
-                  control={control}
-                  rules={{ 
-                    required: 'تاریخ شروع الزامی است'
-                  }}
-                  render={({ field }) => (
-                    <TextField
-                      {...field}
-                      fullWidth
-                      type="date"
-                      placeholder="تاریخ شروع"
-                      error={Boolean(formErrors.start_date)}
-                      helperText={formErrors.start_date?.message}
-                      variant="outlined"
-                      inputProps={{ 
-                        max: new Date().toISOString().split('T')[0]
-                      }}
-                      sx={{ 
-                        '& .MuiOutlinedInput-root': { 
-                          borderRadius: '6px',
-                          '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-                            borderColor: jobseekerColors.primary
-                          }
-                        },
-                        '& .MuiInputBase-input': { 
-                          textAlign: 'left', 
-                          direction: 'ltr',
-                          fontSize: { xs: '0.8rem', sm: '1rem' },
-                          padding: { xs: '8px 14px', sm: '16.5px 14px' }
-                        }
-                      }}
-                    />
-                  )}
-                />
               </Box>
 
-              {/* سال پایان */}
-              <Box sx={{ flex: 1 }}>
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
-                  <SchoolIcon sx={{ color: jobseekerColors.primary, fontSize: 20 }} />
-                  <Typography variant="body2" fontWeight="medium" sx={{
-                    fontSize: { xs: '0.7rem', sm: '0.875rem' },
-                    lineHeight: { xs: 1.1, sm: 1.3 },
-                    color: jobseekerColors.primary,
-                    fontWeight: 600
-                  }}>
-                    تاریخ پایان {!isCurrent && '*'}
-                  </Typography>
-                </Box>
-                <Controller
-                  name="end_date"
-                  control={control}
-                  rules={{ 
-                    required: !isCurrent ? 'تاریخ پایان الزامی است' : false,
-                    validate: (value) => {
-                      if (!isCurrent && value) {
-                        const startDate = watch('start_date');
-                        if (startDate && value <= startDate) {
-                          return 'تاریخ پایان باید بعد از تاریخ شروع باشد';
-                        }
-                      }
-                      return true;
-                    }
-                  }}
-                  render={({ field }) => (
-                    <TextField
-                      {...field}
-                      fullWidth
-                      type="date"
-                      placeholder="تاریخ پایان"
-                      disabled={isCurrent}
-                      error={Boolean(formErrors.end_date)}
-                      helperText={formErrors.end_date?.message}
-                      variant="outlined"
-                      inputProps={{ 
-                        min: watch('start_date')
-                      }}
-                      sx={{ 
-                        '& .MuiOutlinedInput-root': { 
-                          borderRadius: '6px',
-                          '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-                            borderColor: jobseekerColors.primary
-                          }
-                        },
-                        '& .MuiInputBase-input': { 
-                          textAlign: 'left', 
-                          direction: 'ltr',
-                          fontSize: { xs: '0.8rem', sm: '1rem' },
-                          padding: { xs: '8px 14px', sm: '16.5px 14px' }
-                        }
-                      }}
-                    />
-                  )}
-                />
-              </Box>
-            </Box>
-
-            {/* معدل و توضیحات */}
-            <Box sx={{ display: 'flex', flexDirection: { xs: 'column', md: 'row' }, gap: { xs: 1.5, md: 3 }, mb: { xs: 2, md: 4 } }}>
               {/* معدل */}
               <Box sx={{ flex: 1 }}>
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
@@ -879,6 +829,125 @@ export default function EducationForm() {
                 />
               </Box>
             </Box>
+
+            {/* سال شروع و پایان */}
+            <Box sx={{ display: 'flex', flexDirection: { xs: 'column', md: 'row' }, gap: { xs: 1.5, md: 3 }, mb: { xs: 2, md: 4 } }}>
+              {/* سال شروع */}
+              <Box sx={{ flex: 1 }}>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
+                  <SchoolIcon sx={{ color: jobseekerColors.primary, fontSize: 20 }} />
+                  <Typography variant="body2" fontWeight="medium" sx={{
+                    fontSize: { xs: '0.7rem', sm: '0.875rem' },
+                    lineHeight: { xs: 1.1, sm: 1.3 },
+                    color: jobseekerColors.primary,
+                    fontWeight: 600
+                  }}>
+                    سال شروع *
+                  </Typography>
+                </Box>
+                <Controller
+                  name="start_year"
+                  control={control}
+                  rules={{ 
+                    required: 'سال شروع الزامی است',
+                    min: { value: 1300, message: 'سال شروع باید بیشتر از ۱۳۰۰ باشد' },
+                    max: { value: new Date().getFullYear(), message: 'سال شروع نمی‌تواند در آینده باشد' }
+                  }}
+                  render={({ field }) => (
+                    <TextField
+                      fullWidth
+                      type="text"
+                      placeholder="مثال: ۱۴۰۰"
+                      value={field.value ? convertToPersianNumbers(field.value) : ''}
+                      onChange={(e) => {
+                        const raw = e.target.value;
+                        const eng = convertPersianToEnglishNumbers(raw).replace(/[^0-9]/g, '');
+                        const limited = eng.slice(0, 4);
+                        const num = limited ? parseInt(limited, 10) : '';
+                        field.onChange(num === '' ? '' : num);
+                      }}
+                      inputMode="numeric"
+                      error={Boolean(formErrors.start_year)}
+                      helperText={formErrors.start_year?.message}
+                      variant="outlined"
+                      sx={{ 
+                        '& .MuiOutlinedInput-root': { 
+                          borderRadius: '6px',
+                          '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                            borderColor: jobseekerColors.primary
+                          }
+                        },
+                        '& .MuiInputBase-input': { 
+                          textAlign: 'left', 
+                          direction: 'ltr',
+                          fontSize: { xs: '0.8rem', sm: '1rem' },
+                          padding: { xs: '8px 14px', sm: '16.5px 14px' }
+                        }
+                      }}
+                    />
+                  )}
+                />
+              </Box>
+
+              {/* سال پایان */}
+              <Box sx={{ flex: 1 }}>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
+                  <SchoolIcon sx={{ color: jobseekerColors.primary, fontSize: 20 }} />
+                  <Typography variant="body2" fontWeight="medium" sx={{
+                    fontSize: { xs: '0.7rem', sm: '0.875rem' },
+                    lineHeight: { xs: 1.1, sm: 1.3 },
+                    color: jobseekerColors.primary,
+                    fontWeight: 600
+                  }}>
+                    سال پایان {!isCurrent && '*'}
+                  </Typography>
+                </Box>
+                <Controller
+                  name="end_year"
+                  control={control}
+                  rules={{ 
+                    required: !isCurrent ? 'سال پایان الزامی است' : false,
+                    min: { value: watch('start_year'), message: 'سال پایان باید بیشتر از سال شروع باشد' }
+                  }}
+                  render={({ field }) => (
+                    <TextField
+                      fullWidth
+                      type="text"
+                      placeholder="مثال: ۱۴۰۴"
+                      disabled={isCurrent}
+                      value={field.value ? convertToPersianNumbers(field.value) : ''}
+                      onChange={(e) => {
+                        const raw = e.target.value;
+                        const eng = convertPersianToEnglishNumbers(raw).replace(/[^0-9]/g, '');
+                        const limited = eng.slice(0, 4);
+                        const num = limited ? parseInt(limited, 10) : '';
+                        field.onChange(num === '' ? '' : num);
+                      }}
+                      inputMode="numeric"
+                      error={Boolean(formErrors.end_year)}
+                      helperText={formErrors.end_year?.message}
+                      variant="outlined"
+                      sx={{ 
+                        '& .MuiOutlinedInput-root': { 
+                          borderRadius: '6px',
+                          '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                            borderColor: jobseekerColors.primary
+                          }
+                        },
+                        '& .MuiInputBase-input': { 
+                          textAlign: 'left', 
+                          direction: 'ltr',
+                          fontSize: { xs: '0.8rem', sm: '1rem' },
+                          padding: { xs: '8px 14px', sm: '16.5px 14px' }
+                        }
+                      }}
+                    />
+                  )}
+                />
+              </Box>
+            </Box>
+
+            {/* توضیحات */}
 
             {/* توضیحات */}
             <Box sx={{ mb: { xs: 2, md: 4 } }}>
