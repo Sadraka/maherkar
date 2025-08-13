@@ -39,6 +39,7 @@ import SchoolIcon from '@mui/icons-material/School';
 import PeopleIcon from '@mui/icons-material/People';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import InfoIcon from '@mui/icons-material/Info';
+import JobSeekerSubscriptionPlanSelector from './JobSeekerSubscriptionPlanSelector';
 import { JOB_SEEKER_THEME } from '@/constants/colors';
 import { 
   GENDER_CHOICES,
@@ -86,6 +87,16 @@ type City = {
     id: number;
     name: string;
   };
+};
+
+/**
+ * تایپ حداقلی رزومه برای نمایش اطلاعات اتوماتیک
+ */
+type MinimalResume = {
+  id: string;
+  headline?: string | null;
+  industry?: { id: number; name: string } | null;
+  location?: { id: number; name: string; province?: { id: number; name: string } } | null;
 };
 
 /**
@@ -208,6 +219,7 @@ export default function CreateResumeAdForm({
   const [cities, setCities] = useState<City[]>([]);
   const [provinces, setProvinces] = useState<Province[]>([]);
   const [subscriptionPlans, setSubscriptionPlans] = useState<SubscriptionPlan[]>([]);
+  const [resumeInfo, setResumeInfo] = useState<MinimalResume | null>(null);
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState<string[]>([]);
   const [dataLoading, setDataLoading] = useState(true);
@@ -269,7 +281,7 @@ export default function CreateResumeAdForm({
     return cities.filter(city => city.province?.id === selectedProvinceId);
   }, [cities, selectedProvinceId]);
 
-  // فیلتر کردن صنایع بر اساس دسته‌بندی انتخاب شده
+  // فیلتر کردن صنایع بر اساس گروه کاری انتخاب شده
   const filteredIndustries = React.useMemo(() => {
     if (!selectedIndustryCategoryId || selectedIndustryCategoryId === 0) return [];
     return industries.filter(industry => industry.category?.id === selectedIndustryCategoryId);
@@ -286,7 +298,7 @@ export default function CreateResumeAdForm({
     }
   }, [selectedProvinceId, filteredCities, setValue, watch]);
 
-  // ریست کردن صنعت هنگام تغییر دسته‌بندی
+  // ریست کردن صنعت هنگام تغییر گروه کاری
   useEffect(() => {
     if (selectedIndustryCategoryId && selectedIndustryCategoryId !== 0) {
       const currentIndustryId = watch('industry_id');
@@ -445,7 +457,17 @@ export default function CreateResumeAdForm({
         
         // بررسی وجود رزومه
         const resumeData = resumeResponse.data;
-        setHasResume(Array.isArray(resumeData) && resumeData.length > 0);
+        const has = Array.isArray(resumeData) && resumeData.length > 0;
+        setHasResume(has);
+        if (has) {
+          const r = resumeData[0];
+          setResumeInfo({
+            id: r?.id ?? '',
+            headline: r?.headline ?? r?.title ?? '',
+            industry: r?.industry ?? null,
+            location: r?.location ?? null
+          });
+        }
         
         setIndustries(industriesResponse.data as Industry[]);
         setIndustryCategories(industryCategoriesResponse.data as IndustryCategory[]);
@@ -938,86 +960,46 @@ export default function CreateResumeAdForm({
       {/* محتوای مراحل مختلف */}
       {currentStep === FormStep.RESUME_DETAILS && (
         <Box>
-        {/* فیلدهای اجباری */}
-        <Box sx={{ mb: 4 }}>
-          <Typography 
-            variant="h6" 
-            component="h2" 
-            sx={{ 
-              color: JOB_SEEKER_THEME.primary,
+          {/* فیلدهای اجباری */}
+          <Box sx={{ mb: 4 }}>
+            <Typography 
+              variant="h6" 
+              component="h2" 
+              sx={{ 
+                color: JOB_SEEKER_THEME.primary,
                 fontSize: { xs: '1rem', sm: '1.2rem', md: '1.4rem' },
-              fontWeight: 700,
+                fontWeight: 700,
                 lineHeight: { xs: 1.2, sm: 1.3 },
                 textShadow: '0 1px 2px rgba(76, 175, 80, 0.1)',
                 mb: { xs: 1.5, sm: 2, md: 3 }
-            }}
-          >
-            اطلاعات ضروری آگهی رزومه
-          </Typography>
+              }}
+            >
+              اطلاعات ضروری آگهی رزومه
+            </Typography>
 
-          <Box sx={{ 
-            display: 'flex', 
-            flexDirection: 'column', 
+            <Box sx={{ 
+              display: 'flex', 
+              flexDirection: 'column', 
               gap: { xs: 1.5, sm: 3 },
-            opacity: !hasResume ? 0.5 : 1,
-            pointerEvents: !hasResume ? 'none' : 'auto'
-          }}>
-            
-            {/* عنوان آگهی */}
-            <Box>
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
-                <CampaignIcon sx={{ color: JOB_SEEKER_THEME.primary, fontSize: 20 }} />
-                <Typography variant="body2" fontWeight="medium" sx={{
-                  fontSize: { xs: '0.7rem', sm: '0.875rem' },
-                  lineHeight: { xs: 1.1, sm: 1.3 },
-                  mb: { xs: 0.5, sm: 1 },
-                  color: JOB_SEEKER_THEME.primary,
-                  fontWeight: 600
-                }}>
-                  عنوان آگهی رزومه <Box component="span" sx={{ color: 'error.main' }}>*</Box>
-                </Typography>
-              </Box>
-              <Controller
-                name="title"
-                control={control}
-                rules={{ 
-                  required: 'عنوان آگهی رزومه الزامی است', 
-                  minLength: { value: 3, message: 'عنوان باید حداقل 3 حرف باشد' } 
-                }}
-                render={({ field }) => (
-                  <TextField
-                    {...field}
-                    fullWidth
-                    placeholder="مثال: برنامه‌نویس React با ۳ سال تجربه"
-                    error={Boolean(formErrors.title)}
-                    helperText={formErrors.title?.message}
-                    variant="outlined"
-                    sx={{ 
-                      '& .MuiOutlinedInput-root': { 
-                        borderRadius: '6px',
-                        '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-                          borderColor: JOB_SEEKER_THEME.primary
-                        }
-                      },
-                      '& .MuiInputBase-input': {
-                        fontSize: { xs: '0.8rem', sm: '1rem' },
-                        padding: { xs: '8px 14px', sm: '16.5px 14px' }
-                      },
-                      '& .MuiFormHelperText-root': {
-                        fontSize: { xs: '0.75rem', sm: '0.75rem' }
-                      }
-                    }}
-                  />
-                )}
-              />
-            </Box>
+              opacity: !hasResume ? 0.5 : 1,
+              pointerEvents: !hasResume ? 'none' : 'auto'
+            }}>
 
-            {/* ردیف اول: استان و شهر */}
-            <Box sx={{ display: 'flex', flexDirection: { xs: 'column', md: 'row' }, gap: { xs: 1.5, sm: 3 } }}>
-              {/* استان */}
-              <Box sx={{ flex: 1 }}>
+              {/* خلاصه رزومه متصل */}
+              {resumeInfo && (
+                <Alert severity="info" sx={{ mb: 2 }}>
+                  <Box sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, gap: 1.5, alignItems: { xs: 'flex-start', sm: 'center' } }}>
+                    <Typography variant="body2" sx={{ fontWeight: 600 }}>رزومه انتخاب‌شده:</Typography>
+                    <Typography variant="body2">{resumeInfo.headline || 'بدون عنوان'}</Typography>
+                    <Typography variant="caption" color="text.secondary">(ID: {resumeInfo.id})</Typography>
+                  </Box>
+                </Alert>
+              )}
+              
+              {/* عنوان آگهی */}
+              <Box>
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
-                  <LocationOnIcon sx={{ color: JOB_SEEKER_THEME.primary, fontSize: 20 }} />
+                  <CampaignIcon sx={{ color: JOB_SEEKER_THEME.primary, fontSize: 20 }} />
                   <Typography variant="body2" fontWeight="medium" sx={{
                     fontSize: { xs: '0.7rem', sm: '0.875rem' },
                     lineHeight: { xs: 1.1, sm: 1.3 },
@@ -1025,18 +1007,69 @@ export default function CreateResumeAdForm({
                     color: JOB_SEEKER_THEME.primary,
                     fontWeight: 600
                   }}>
-                    استان <Box component="span" sx={{ color: 'error.main' }}>*</Box>
+                    عنوان آگهی رزومه <Box component="span" sx={{ color: 'error.main' }}>*</Box>
                   </Typography>
                 </Box>
                 <Controller
-                  name="province_id"
+                  name="title"
                   control={control}
-                  rules={{ required: 'انتخاب استان الزامی است' }}
+                  rules={{ 
+                    required: 'عنوان آگهی رزومه الزامی است', 
+                    minLength: { value: 3, message: 'عنوان باید حداقل 3 حرف باشد' } 
+                  }}
                   render={({ field }) => (
-                    <FormControl fullWidth error={Boolean(formErrors.province_id)}>
-                      <Select
-                        {...field}
-                        displayEmpty
+                    <TextField
+                      {...field}
+                      fullWidth
+                      placeholder="مثال: برنامه‌نویس React با ۳ سال تجربه"
+                      error={Boolean(formErrors.title)}
+                      helperText={formErrors.title?.message}
+                      variant="outlined"
+                      sx={{ 
+                        '& .MuiOutlinedInput-root': { 
+                          borderRadius: '6px',
+                          '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                            borderColor: JOB_SEEKER_THEME.primary
+                          }
+                        },
+                        '& .MuiInputBase-input': {
+                          fontSize: { xs: '0.8rem', sm: '1rem' },
+                          padding: { xs: '8px 14px', sm: '16.5px 14px' }
+                        },
+                        '& .MuiFormHelperText-root': {
+                          fontSize: { xs: '0.75rem', sm: '0.75rem' }
+                        }
+                      }}
+                    />
+                  )}
+                />
+              </Box>
+
+              {/* استان و شهر */}
+              <Box sx={{ display: 'flex', flexDirection: { xs: 'column', md: 'row' }, gap: { xs: 1.5, sm: 3 } }}>
+                {/* استان */}
+                <Box sx={{ flex: 1 }}>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
+                    <LocationOnIcon sx={{ color: JOB_SEEKER_THEME.primary, fontSize: 20 }} />
+                    <Typography variant="body2" fontWeight="medium" sx={{
+                      fontSize: { xs: '0.7rem', sm: '0.875rem' },
+                      lineHeight: { xs: 1.1, sm: 1.3 },
+                      mb: { xs: 0.5, sm: 1 },
+                      color: JOB_SEEKER_THEME.primary,
+                      fontWeight: 600
+                    }}>
+                      استان <Box component="span" sx={{ color: 'error.main' }}>*</Box>
+                    </Typography>
+                  </Box>
+                  <Controller
+                    name="province_id"
+                    control={control}
+                    rules={{ required: 'انتخاب استان الزامی است' }}
+                    render={({ field }) => (
+                      <FormControl fullWidth error={Boolean(formErrors.province_id)}>
+                        <Select
+                          {...field}
+                          displayEmpty
                           input={<OutlinedInput sx={selectStyles} />}
                           renderValue={() => {
                             const selectedProvince = provinces.find(p => p.id === field.value);
@@ -1055,45 +1088,45 @@ export default function CreateResumeAdForm({
                           IconComponent={(props: any) => (
                             <KeyboardArrowDownIcon {...props} sx={{ color: jobSeekerColors.primary }} />
                           )}
-                      >
-                        <MenuItem value={0} disabled>انتخاب استان</MenuItem>
-                        {provinces.map((province) => (
-                          <MenuItem key={province.id} value={province.id}>
-                            {province.name}
-                          </MenuItem>
-                        ))}
-                      </Select>
-                      {formErrors.province_id && (
-                        <FormHelperText>{formErrors.province_id.message}</FormHelperText>
-                      )}
-                    </FormControl>
-                  )}
-                />
-              </Box>
-
-              {/* شهر */}
-              <Box sx={{ flex: 1 }}>
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
-                  <LocationOnIcon sx={{ color: JOB_SEEKER_THEME.primary, fontSize: 20 }} />
-                  <Typography variant="body2" fontWeight="medium" sx={{
-                    fontSize: { xs: '0.7rem', sm: '0.875rem' },
-                    lineHeight: { xs: 1.1, sm: 1.3 },
-                    mb: { xs: 0.5, sm: 1 },
-                    color: JOB_SEEKER_THEME.primary,
-                    fontWeight: 600
-                  }}>
-                    شهر <Box component="span" sx={{ color: 'error.main' }}>*</Box>
-                  </Typography>
+                        >
+                          <MenuItem value={0} disabled>انتخاب استان</MenuItem>
+                          {provinces.map((province) => (
+                            <MenuItem key={province.id} value={province.id}>
+                              {province.name}
+                            </MenuItem>
+                          ))}
+                        </Select>
+                        {formErrors.province_id && (
+                          <FormHelperText>{formErrors.province_id.message}</FormHelperText>
+                        )}
+                      </FormControl>
+                    )}
+                  />
                 </Box>
-                <Controller
-                  name="city_id"
-                  control={control}
-                  rules={{ required: 'انتخاب شهر الزامی است' }}
-                  render={({ field }) => (
-                    <FormControl fullWidth error={Boolean(formErrors.city_id)}>
-                      <Select
-                        {...field}
-                        displayEmpty
+
+                {/* شهر */}
+                <Box sx={{ flex: 1 }}>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
+                    <LocationOnIcon sx={{ color: JOB_SEEKER_THEME.primary, fontSize: 20 }} />
+                    <Typography variant="body2" fontWeight="medium" sx={{
+                      fontSize: { xs: '0.7rem', sm: '0.875rem' },
+                      lineHeight: { xs: 1.1, sm: 1.3 },
+                      mb: { xs: 0.5, sm: 1 },
+                      color: JOB_SEEKER_THEME.primary,
+                      fontWeight: 600
+                    }}>
+                      شهر <Box component="span" sx={{ color: 'error.main' }}>*</Box>
+                    </Typography>
+                  </Box>
+                  <Controller
+                    name="city_id"
+                    control={control}
+                    rules={{ required: 'انتخاب شهر الزامی است' }}
+                    render={({ field }) => (
+                      <FormControl fullWidth error={Boolean(formErrors.city_id)}>
+                        <Select
+                          {...field}
+                          displayEmpty
                           input={<OutlinedInput sx={selectStyles} />}
                           renderValue={() => {
                             const selectedCity = filteredCities.find(c => c.id === field.value);
@@ -1113,50 +1146,50 @@ export default function CreateResumeAdForm({
                             <KeyboardArrowDownIcon {...props} sx={{ color: jobSeekerColors.primary }} />
                           )}
                           disabled={!selectedProvinceId || selectedProvinceId === 0}
-                      >
-                        <MenuItem value={0} disabled>
-                          {selectedProvinceId ? 'انتخاب شهر' : 'ابتدا استان را انتخاب کنید'}
-                        </MenuItem>
-                        {filteredCities.map((city) => (
-                          <MenuItem key={city.id} value={city.id}>
-                            {city.name}
+                        >
+                          <MenuItem value={0} disabled>
+                            {selectedProvinceId ? 'انتخاب شهر' : 'ابتدا استان را انتخاب کنید'}
                           </MenuItem>
-                        ))}
-                      </Select>
-                      {formErrors.city_id && (
-                        <FormHelperText>{formErrors.city_id.message}</FormHelperText>
-                      )}
-                    </FormControl>
-                  )}
-                />
-              </Box>
-            </Box>
-
-            {/* ردیف دوم: گروه کاری و زیرگروه کاری */}
-            <Box sx={{ display: 'flex', flexDirection: { xs: 'column', md: 'row' }, gap: { xs: 1.5, sm: 3 } }}>
-              {/* گروه کاری */}
-              <Box sx={{ flex: 1 }}>
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
-                    <CategoryIcon sx={{ color: JOB_SEEKER_THEME.primary, fontSize: 20 }} />
-                  <Typography variant="body2" fontWeight="medium" sx={{
-                    fontSize: { xs: '0.7rem', sm: '0.875rem' },
-                    lineHeight: { xs: 1.1, sm: 1.3 },
-                    mb: { xs: 0.5, sm: 1 },
-                    color: JOB_SEEKER_THEME.primary,
-                    fontWeight: 600
-                  }}>
-                    گروه کاری <Box component="span" sx={{ color: 'error.main' }}>*</Box>
-                  </Typography>
+                          {filteredCities.map((city) => (
+                            <MenuItem key={city.id} value={city.id}>
+                              {city.name}
+                            </MenuItem>
+                          ))}
+                        </Select>
+                        {formErrors.city_id && (
+                          <FormHelperText>{formErrors.city_id.message}</FormHelperText>
+                        )}
+                      </FormControl>
+                    )}
+                  />
                 </Box>
-                <Controller
-                  name="industry_category_id"
-                  control={control}
-                  rules={{ required: 'انتخاب گروه کاری الزامی است' }}
-                  render={({ field }) => (
-                    <FormControl fullWidth error={Boolean(formErrors.industry_category_id)}>
-                      <Select
-                        {...field}
-                        displayEmpty
+              </Box>
+
+              {/* گروه و زیرگروه کاری */}
+              <Box sx={{ display: 'flex', flexDirection: { xs: 'column', md: 'row' }, gap: { xs: 1.5, sm: 3 } }}>
+                {/* گروه کاری */}
+                <Box sx={{ flex: 1 }}>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
+                    <CategoryIcon sx={{ color: JOB_SEEKER_THEME.primary, fontSize: 20 }} />
+                    <Typography variant="body2" fontWeight="medium" sx={{
+                      fontSize: { xs: '0.7rem', sm: '0.875rem' },
+                      lineHeight: { xs: 1.1, sm: 1.3 },
+                      mb: { xs: 0.5, sm: 1 },
+                      color: JOB_SEEKER_THEME.primary,
+                      fontWeight: 600
+                    }}>
+                      گروه کاری <Box component="span" sx={{ color: 'error.main' }}>*</Box>
+                    </Typography>
+                  </Box>
+                  <Controller
+                    name="industry_category_id"
+                    control={control}
+                    rules={{ required: 'انتخاب گروه کاری الزامی است' }}
+                    render={({ field }) => (
+                      <FormControl fullWidth error={Boolean(formErrors.industry_category_id)}>
+                        <Select
+                          {...field}
+                          displayEmpty
                           input={<OutlinedInput sx={selectStyles} />}
                           renderValue={() => {
                             const selectedCategory = industryCategories.find(c => c.id === field.value);
@@ -1175,45 +1208,45 @@ export default function CreateResumeAdForm({
                           IconComponent={(props: any) => (
                             <KeyboardArrowDownIcon {...props} sx={{ color: jobSeekerColors.primary }} />
                           )}
-                      >
-                        <MenuItem value={0} disabled>انتخاب گروه کاری</MenuItem>
-                        {industryCategories.map((category) => (
-                          <MenuItem key={category.id} value={category.id}>
-                            {category.name}
-                          </MenuItem>
-                        ))}
-                      </Select>
-                      {formErrors.industry_category_id && (
-                        <FormHelperText>{formErrors.industry_category_id.message}</FormHelperText>
-                      )}
-                    </FormControl>
-                  )}
-                />
-              </Box>
-
-              {/* زیرگروه کاری */}
-              <Box sx={{ flex: 1 }}>
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
-                    <CategoryIcon sx={{ color: JOB_SEEKER_THEME.primary, fontSize: 20 }} />
-                  <Typography variant="body2" fontWeight="medium" sx={{
-                    fontSize: { xs: '0.7rem', sm: '0.875rem' },
-                    lineHeight: { xs: 1.1, sm: 1.3 },
-                    mb: { xs: 0.5, sm: 1 },
-                    color: JOB_SEEKER_THEME.primary,
-                    fontWeight: 600
-                  }}>
-                    زیرگروه کاری <Box component="span" sx={{ color: 'error.main' }}>*</Box>
-                  </Typography>
+                        >
+                          <MenuItem value={0} disabled>انتخاب گروه کاری</MenuItem>
+                          {industryCategories.map((category) => (
+                            <MenuItem key={category.id} value={category.id}>
+                              {category.name}
+                            </MenuItem>
+                          ))}
+                        </Select>
+                        {formErrors.industry_category_id && (
+                          <FormHelperText>{formErrors.industry_category_id.message}</FormHelperText>
+                        )}
+                      </FormControl>
+                    )}
+                  />
                 </Box>
-                <Controller
-                  name="industry_id"
-                  control={control}
-                  rules={{ required: 'انتخاب زیرگروه کاری الزامی است' }}
-                  render={({ field }) => (
-                    <FormControl fullWidth error={Boolean(formErrors.industry_id)}>
-                      <Select
-                        {...field}
-                        displayEmpty
+
+                {/* زیرگروه کاری */}
+                <Box sx={{ flex: 1 }}>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
+                    <CategoryIcon sx={{ color: JOB_SEEKER_THEME.primary, fontSize: 20 }} />
+                    <Typography variant="body2" fontWeight="medium" sx={{
+                      fontSize: { xs: '0.7rem', sm: '0.875rem' },
+                      lineHeight: { xs: 1.1, sm: 1.3 },
+                      mb: { xs: 0.5, sm: 1 },
+                      color: JOB_SEEKER_THEME.primary,
+                      fontWeight: 600
+                    }}>
+                      زیرگروه کاری <Box component="span" sx={{ color: 'error.main' }}>*</Box>
+                    </Typography>
+                  </Box>
+                  <Controller
+                    name="industry_id"
+                    control={control}
+                    rules={{ required: 'انتخاب زیرگروه کاری الزامی است' }}
+                    render={({ field }) => (
+                      <FormControl fullWidth error={Boolean(formErrors.industry_id)}>
+                        <Select
+                          {...field}
+                          displayEmpty
                           input={<OutlinedInput sx={selectStyles} />}
                           renderValue={() => {
                             const selectedIndustry = filteredIndustries.find(i => i.id === field.value);
@@ -1233,311 +1266,306 @@ export default function CreateResumeAdForm({
                             <KeyboardArrowDownIcon {...props} sx={{ color: jobSeekerColors.primary }} />
                           )}
                           disabled={!selectedIndustryCategoryId || selectedIndustryCategoryId === 0}
-                      >
-                        <MenuItem value={0} disabled>
-                          {selectedIndustryCategoryId ? 'انتخاب زیرگروه کاری' : 'ابتدا گروه کاری را انتخاب کنید'}
-                        </MenuItem>
-                        {filteredIndustries.map((industry) => (
-                          <MenuItem key={industry.id} value={industry.id}>
-                            {industry.name}
+                        >
+                          <MenuItem value={0} disabled>
+                            {selectedIndustryCategoryId ? 'انتخاب زیرگروه کاری' : 'ابتدا گروه کاری را انتخاب کنید'}
                           </MenuItem>
-                        ))}
-                      </Select>
-                      {formErrors.industry_id && (
-                        <FormHelperText>{formErrors.industry_id.message}</FormHelperText>
+                          {filteredIndustries.map((industry) => (
+                            <MenuItem key={industry.id} value={industry.id}>
+                              {industry.name}
+                            </MenuItem>
+                          ))}
+                        </Select>
+                        {formErrors.industry_id && (
+                          <FormHelperText>{formErrors.industry_id.message}</FormHelperText>
+                        )}
+                      </FormControl>
+                    )}
+                  />
+                </Box>
+              </Box>
+
+              {/* فیلدهای اختیاری */}
+              <Box sx={{ mt: 3, display: 'flex', flexDirection: 'column', gap: { xs: 1.5, sm: 3 } }}>
+                {/* ردیف اول: جنسیت و نظام وظیفه */}
+                <Box sx={{ display: 'flex', flexDirection: { xs: 'column', md: 'row' }, gap: { xs: 1.5, sm: 3 } }}>
+                  {/* جنسیت */}
+                  <Box sx={{ flex: 1 }}>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
+                      <PeopleIcon sx={{ color: JOB_SEEKER_THEME.primary, fontSize: 20 }} />
+                      <Typography variant="body2" fontWeight="medium" sx={{ fontSize: { xs: '0.7rem', sm: '0.875rem' }, lineHeight: { xs: 1.1, sm: 1.3 }, mb: { xs: 0.5, sm: 1 }, color: JOB_SEEKER_THEME.primary, fontWeight: 600 }}>
+                        جنسیت (اختیاری)
+                      </Typography>
+                    </Box>
+                    <Controller
+                      name="gender"
+                      control={control}
+                      render={({ field }) => (
+                        <FormControl fullWidth>
+                          <Select
+                            {...field}
+                            displayEmpty
+                            input={<OutlinedInput sx={selectStyles} />}
+                            renderValue={() => {
+                              const selected = genderOptions.find(o => o.value === field.value);
+                              return <Box component="div" sx={{ display: 'flex', justifyContent: 'center', width: '100%' }}>{selected ? selected.label : 'انتخاب جنسیت'}</Box>;
+                            }}
+                            MenuProps={menuPropsRTL}
+                            startAdornment={<InputAdornment position="start" sx={{ position: 'absolute', right: '10px' }}><PeopleIcon fontSize="small" sx={{ color: jobSeekerColors.primary }} /></InputAdornment>}
+                            IconComponent={(props: any) => <KeyboardArrowDownIcon {...props} sx={{ color: jobSeekerColors.primary }} />}
+                          >
+                            <MenuItem value="">انتخاب جنسیت</MenuItem>
+                            {genderOptions.map(opt => <MenuItem key={opt.value} value={opt.value}>{opt.label}</MenuItem>)}
+                          </Select>
+                        </FormControl>
                       )}
-                    </FormControl>
-                  )}
-                />
+                    />
+                  </Box>
+
+                  {/* وضعیت نظام وظیفه */}
+                  <Box sx={{ flex: 1 }}>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
+                      <WorkIcon sx={{ color: JOB_SEEKER_THEME.primary, fontSize: 20 }} />
+                      <Typography variant="body2" fontWeight="medium" sx={{ fontSize: { xs: '0.7rem', sm: '0.875rem' }, lineHeight: { xs: 1.1, sm: 1.3 }, mb: { xs: 0.5, sm: 1 }, color: JOB_SEEKER_THEME.primary, fontWeight: 600 }}>
+                        وضعیت نظام وظیفه (اختیاری)
+                      </Typography>
+                    </Box>
+                    <Controller
+                      name="soldier_status"
+                      control={control}
+                      render={({ field }) => (
+                        <FormControl fullWidth>
+                          <Select
+                            {...field}
+                            displayEmpty
+                            disabled={isFemale}
+                            input={<OutlinedInput sx={selectStyles} />}
+                            renderValue={() => {
+                              const selected = soldierStatusOptions.find(o => o.value === field.value);
+                              return <Box component="div" sx={{ display: 'flex', justifyContent: 'center', width: '100%' }}>{selected ? selected.label : 'انتخاب وضعیت'}</Box>;
+                            }}
+                            MenuProps={menuPropsRTL}
+                            startAdornment={<InputAdornment position="start" sx={{ position: 'absolute', right: '10px' }}><WorkIcon fontSize="small" sx={{ color: jobSeekerColors.primary }} /></InputAdornment>}
+                            IconComponent={(props: any) => <KeyboardArrowDownIcon {...props} sx={{ color: jobSeekerColors.primary }} />}
+                          >
+                            <MenuItem value="">انتخاب وضعیت</MenuItem>
+                            {soldierStatusOptions.map(opt => <MenuItem key={opt.value} value={opt.value}>{opt.label}</MenuItem>)}
+                          </Select>
+                        </FormControl>
+                      )}
+                    />
+                  </Box>
+                </Box>
+
+                {/* ردیف دوم: مدرک، نوع کار، حقوق */}
+                <Box sx={{ display: 'flex', flexDirection: { xs: 'column', md: 'row' }, gap: { xs: 1.5, sm: 3 } }}>
+                  {/* مدرک */}
+                  <Box sx={{ flex: 1 }}>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
+                      <SchoolIcon sx={{ color: JOB_SEEKER_THEME.primary, fontSize: 20 }} />
+                      <Typography variant="body2" fontWeight="medium" sx={{ fontSize: { xs: '0.7rem', sm: '0.875rem' }, lineHeight: { xs: 1.1, sm: 1.3 }, mb: { xs: 0.5, sm: 1 }, color: JOB_SEEKER_THEME.primary, fontWeight: 600 }}>
+                        حداقل مدرک تحصیلی (اختیاری)
+                      </Typography>
+                    </Box>
+                    <Controller
+                      name="degree"
+                      control={control}
+                      render={({ field }) => (
+                        <FormControl fullWidth>
+                          <Select
+                            {...field}
+                            displayEmpty
+                            input={<OutlinedInput sx={selectStyles} />}
+                            renderValue={() => {
+                              const selected = degreeOptions.find(o => o.value === field.value);
+                              return <Box component="div" sx={{ display: 'flex', justifyContent: 'center', width: '100%' }}>{selected ? selected.label : 'انتخاب مدرک'}</Box>;
+                            }}
+                            MenuProps={menuPropsRTL}
+                            startAdornment={<InputAdornment position="start" sx={{ position: 'absolute', right: '10px' }}><SchoolIcon fontSize="small" sx={{ color: jobSeekerColors.primary }} /></InputAdornment>}
+                            IconComponent={(props: any) => <KeyboardArrowDownIcon {...props} sx={{ color: jobSeekerColors.primary }} />}
+                          >
+                            <MenuItem value="">انتخاب مدرک</MenuItem>
+                            {degreeOptions.map(opt => <MenuItem key={opt.value} value={opt.value}>{opt.label}</MenuItem>)}
+                          </Select>
+                        </FormControl>
+                      )}
+                    />
+                  </Box>
+
+                  {/* نوع کار */}
+                  <Box sx={{ flex: 1 }}>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
+                      <WorkIcon sx={{ color: JOB_SEEKER_THEME.primary, fontSize: 20 }} />
+                      <Typography variant="body2" fontWeight="medium" sx={{ fontSize: { xs: '0.7rem', sm: '0.875rem' }, lineHeight: { xs: 1.1, sm: 1.3 }, mb: { xs: 0.5, sm: 1 }, color: JOB_SEEKER_THEME.primary, fontWeight: 600 }}>
+                        نوع کار (اختیاری)
+                      </Typography>
+                    </Box>
+                    <Controller
+                      name="job_type"
+                      control={control}
+                      render={({ field }) => (
+                        <FormControl fullWidth>
+                          <Select
+                            {...field}
+                            displayEmpty
+                            input={<OutlinedInput sx={selectStyles} />}
+                            renderValue={() => {
+                              const selected = jobTypeOptions.find(o => o.value === field.value);
+                              return <Box component="div" sx={{ display: 'flex', justifyContent: 'center', width: '100%' }}>{selected ? selected.label : 'انتخاب نوع کار'}</Box>;
+                            }}
+                            MenuProps={menuPropsRTL}
+                            startAdornment={<InputAdornment position="start" sx={{ position: 'absolute', right: '10px' }}><WorkIcon fontSize="small" sx={{ color: jobSeekerColors.primary }} /></InputAdornment>}
+                            IconComponent={(props: any) => <KeyboardArrowDownIcon {...props} sx={{ color: jobSeekerColors.primary }} />}
+                          >
+                            <MenuItem value="">انتخاب نوع کار</MenuItem>
+                            {jobTypeOptions.map(opt => <MenuItem key={opt.value} value={opt.value}>{opt.label}</MenuItem>)}
+                          </Select>
+                        </FormControl>
+                      )}
+                    />
+                  </Box>
+
+                  {/* محدوده حقوق */}
+                  <Box sx={{ flex: 1 }}>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
+                      <AttachMoneyIcon sx={{ color: JOB_SEEKER_THEME.primary, fontSize: 20 }} />
+                      <Typography variant="body2" fontWeight="medium" sx={{ fontSize: { xs: '0.7rem', sm: '0.875rem' }, lineHeight: { xs: 1.1, sm: 1.3 }, mb: { xs: 0.5, sm: 1 }, color: JOB_SEEKER_THEME.primary, fontWeight: 600 }}>
+                        محدوده حقوق (اختیاری)
+                      </Typography>
+                    </Box>
+                    <Controller
+                      name="salary"
+                      control={control}
+                      render={({ field }) => (
+                        <FormControl fullWidth>
+                          <Select
+                            {...field}
+                            displayEmpty
+                            input={<OutlinedInput sx={selectStyles} />}
+                            renderValue={() => {
+                              const selected = salaryOptions.find(o => o.value === field.value);
+                              return <Box component="div" sx={{ display: 'flex', justifyContent: 'center', width: '100%' }}>{selected ? selected.label : 'انتخاب حقوق'}</Box>;
+                            }}
+                            MenuProps={menuPropsRTL}
+                            startAdornment={<InputAdornment position="start" sx={{ position: 'absolute', right: '10px' }}><AttachMoneyIcon fontSize="small" sx={{ color: jobSeekerColors.primary }} /></InputAdornment>}
+                            IconComponent={(props: any) => <KeyboardArrowDownIcon {...props} sx={{ color: jobSeekerColors.primary }} />}
+                          >
+                            <MenuItem value="">انتخاب حقوق</MenuItem>
+                            {salaryOptions.map(opt => <MenuItem key={opt.value} value={opt.value}>{opt.label}</MenuItem>)}
+                          </Select>
+                        </FormControl>
+                      )}
+                    />
+                  </Box>
+                </Box>
+              </Box>
+
+              {/* Action Buttons */}
+              <Box sx={{ display: 'flex', gap: 2, justifyContent: 'center', flexDirection: { xs: 'column', sm: 'row' }, mt: 4 }}>
+                <Button
+                  variant="contained"
+                  size="large"
+                  onClick={handleNextStep}
+                  disabled={loading}
+                  sx={{ 
+                    backgroundColor: JOB_SEEKER_THEME.primary,
+                    color: 'white',
+                    borderRadius: 2,
+                    px: { xs: 4, sm: 6 },
+                    py: { xs: 1.25, sm: 1.5 },
+                    fontSize: { xs: '0.9rem', sm: '1rem' },
+                    fontWeight: 600,
+                    minWidth: { xs: '100%', sm: 200 },
+                    boxShadow: '0 4px 12px rgba(76, 175, 80, 0.3)',
+                    '&:hover': {
+                      backgroundColor: JOB_SEEKER_THEME.dark,
+                      boxShadow: '0 6px 16px rgba(76, 175, 80, 0.4)',
+                      transform: 'translateY(-1px)'
+                    },
+                    '&:disabled': {
+                      backgroundColor: '#ccc',
+                      boxShadow: 'none',
+                      transform: 'none'
+                    },
+                    transition: 'all 0.3s ease'
+                  }}
+                >
+                  ادامه - انتخاب اشتراک
+                </Button>
               </Box>
             </Box>
-          </Box>
-
-            {/* Action Buttons */}
-            <Box sx={{ display: 'flex', gap: 2, justifyContent: 'center', flexDirection: { xs: 'column', sm: 'row' }, mt: 4 }}>
-              <Button
-                variant="contained"
-                size="large"
-                onClick={handleNextStep}
-                disabled={loading}
-                sx={{
-                  backgroundColor: JOB_SEEKER_THEME.primary,
-                  color: 'white',
-                  borderRadius: 2,
-                  px: { xs: 4, sm: 6 },
-                  py: { xs: 1.25, sm: 1.5 },
-                  fontSize: { xs: '0.9rem', sm: '1rem' },
-                  fontWeight: 600,
-                  minWidth: { xs: '100%', sm: 200 },
-                  boxShadow: '0 4px 12px rgba(76, 175, 80, 0.3)',
-                  '&:hover': {
-                    backgroundColor: JOB_SEEKER_THEME.dark,
-                    boxShadow: '0 6px 16px rgba(76, 175, 80, 0.4)',
-                    transform: 'translateY(-1px)'
-                  },
-                  '&:disabled': {
-                    backgroundColor: '#ccc',
-                    boxShadow: 'none',
-                    transform: 'none'
-                  },
-                  transition: 'all 0.3s ease'
-                }}
-              >
-                ادامه - انتخاب اشتراک
-              </Button>
-        </Box>
           </Box>
         </Box>
       )}
 
       {currentStep === FormStep.SUBSCRIPTION && (
         <form ref={formRef} onSubmit={handleSubmit(onSubmit)}>
-        <Box sx={{ mb: 4 }}>
-          <Typography 
-            variant="h6" 
-            component="h2"
-            sx={{ 
-              color: JOB_SEEKER_THEME.primary,
-                fontSize: { xs: '1rem', sm: '1.2rem', md: '1.4rem' },
-              fontWeight: 700,
-                lineHeight: { xs: 1.2, sm: 1.3 },
-                textShadow: '0 1px 2px rgba(76, 175, 80, 0.1)',
-              mb: 3
-            }}
-          >
-              انتخاب طرح اشتراک
-          </Typography>
-          
-            <Alert 
-              severity="info" 
-              icon={<InfoIcon />}
-                        sx={{ 
-                mb: 3,
-                '& .MuiAlert-message': {
-                  width: '100%'
-                },
-                '& .MuiAlert-icon': {
-                  display: { xs: 'none', sm: 'flex' }
+          <JobSeekerSubscriptionPlanSelector
+            selectedPlan={selectedPlan}
+            selectedDuration={selectedDuration}
+            onPlanChange={setSelectedPlan}
+            onDurationChange={setSelectedDuration}
+            disabled={loading}
+          />
+
+          <Box sx={{ display: 'flex', gap: 2, justifyContent: 'center', flexDirection: { xs: 'column', sm: 'row' }, mt: 4 }}>
+            <Button
+              variant="outlined"
+              size="large"
+              onClick={handleBackStep}
+              disabled={loading}
+              sx={{
+                borderColor: JOB_SEEKER_THEME.primary,
+                color: JOB_SEEKER_THEME.primary,
+                borderRadius: 2,
+                px: { xs: 3, sm: 4 },
+                py: { xs: 1.25, sm: 1.5 },
+                fontSize: { xs: '0.9rem', sm: '1rem' },
+                fontWeight: 600,
+                minWidth: { xs: '100%', sm: 150 },
+                '&:hover': {
+                  borderColor: JOB_SEEKER_THEME.dark,
+                  color: JOB_SEEKER_THEME.dark,
+                  backgroundColor: 'rgba(76, 175, 80, 0.05)'
                 }
               }}
             >
-              <Box>
-                لطفاً طرح اشتراک مناسب برای انتشار آگهی رزومه خود را انتخاب کنید.
-              </Box>
-            </Alert>
-
-            {/* انتخاب مدت زمان */}
-            <Box sx={{ mb: 4 }}>
-              <Typography variant="subtitle1" sx={{ mb: 2, fontWeight: 600, color: JOB_SEEKER_THEME.primary }}>
-                مدت زمان انتشار
-              </Typography>
-              <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
-                {[
-                  { value: 7, label: '۷ روز' },
-                  { value: 15, label: '۱۵ روز' },
-                  { value: 30, label: '۳۰ روز' },
-                  { value: 60, label: '۶۰ روز' },
-                  { value: 90, label: '۹۰ روز' },
-                ].map((option) => (
-                  <Button
-                    key={option.value}
-                    variant={selectedDuration === option.value ? 'contained' : 'outlined'}
-                    onClick={() => setSelectedDuration(option.value)}
-                        sx={{ 
-                      borderRadius: 2,
-                      px: 3,
-                      py: 1,
-                      fontSize: '0.875rem',
-                      fontWeight: 600,
-                      ...(selectedDuration === option.value ? {
-                        backgroundColor: JOB_SEEKER_THEME.primary,
-                        color: 'white',
-                        '&:hover': {
-                          backgroundColor: JOB_SEEKER_THEME.dark,
-                        }
-                      } : {
-                        borderColor: JOB_SEEKER_THEME.primary,
-                        color: JOB_SEEKER_THEME.primary,
-                        '&:hover': {
-                          borderColor: JOB_SEEKER_THEME.dark,
-                          backgroundColor: 'rgba(76, 175, 80, 0.05)'
-                        }
-                      })
-                    }}
-                  >
-                            {option.label}
-                  </Button>
-                        ))}
-              </Box>
-            </Box>
-
-            {/* طرح‌های اشتراک */}
-            <Box sx={{ mb: 4 }}>
-              <Typography variant="subtitle1" sx={{ mb: 3, fontWeight: 600, color: JOB_SEEKER_THEME.primary }}>
-                انتخاب طرح اشتراک
-              </Typography>
-              
-              <Box sx={{ 
-                display: 'grid', 
-                gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr', md: '1fr 1fr 1fr' },
-                gap: 3
-              }}>
-                {subscriptionPlans.filter(plan => plan.active).map((plan) => (
-                  <Paper
-                    key={plan.id}
-                    elevation={selectedPlan?.id === plan.id ? 8 : 2}
-                        sx={{ 
-                      p: 3,
-                      cursor: 'pointer',
-                      border: selectedPlan?.id === plan.id ? `2px solid ${JOB_SEEKER_THEME.primary}` : '2px solid transparent',
-                      borderRadius: 3,
-                      transition: 'all 0.3s ease',
-                      position: 'relative',
-                      backgroundColor: selectedPlan?.id === plan.id ? JOB_SEEKER_THEME.bgVeryLight : 'white',
-                      '&:hover': {
-                        transform: 'translateY(-2px)',
-                        boxShadow: '0 8px 25px rgba(76, 175, 80, 0.15)'
-                      }
-                    }}
-                    onClick={() => setSelectedPlan(plan)}
-                  >
-                    {plan.is_free && (
-                      <Box sx={{
-                        position: 'absolute',
-                        top: -8,
-                        right: 16,
-                        backgroundColor: '#4CAF50',
-                        color: 'white',
-                        px: 2,
-                        py: 0.5,
-                        borderRadius: 2,
-                        fontSize: '0.75rem',
-                  fontWeight: 600,
-                      }}>
-                        رایگان
-              </Box>
-                    )}
-
-                    <Typography variant="h6" sx={{ 
-                      mb: 1, 
-                      fontWeight: 700,
-                      color: selectedPlan?.id === plan.id ? JOB_SEEKER_THEME.primary : 'text.primary'
-                    }}>
-                      {plan.name}
-                    </Typography>
-                    
-                    <Typography variant="body2" sx={{ 
-                      mb: 2, 
-                      color: 'text.secondary',
-                      lineHeight: 1.5,
-                      minHeight: 40
-                    }}>
-                      {plan.description}
-                    </Typography>
-                    
-                    <Box sx={{ textAlign: 'center', mb: 2 }}>
-                      <Typography variant="h4" sx={{ 
-                        fontWeight: 700,
-                        color: selectedPlan?.id === plan.id ? JOB_SEEKER_THEME.primary : 'text.primary'
-                      }}>
-                        {plan.price_per_day.toLocaleString('fa-IR')} تومان
-                      </Typography>
-                      <Typography variant="caption" sx={{ color: 'text.secondary' }}>
-                        در روز
-                      </Typography>
-            </Box>
-
-                    <Box sx={{ 
-                      p: 2, 
-                      backgroundColor: selectedPlan?.id === plan.id ? 'white' : JOB_SEEKER_THEME.bgVeryLight,
-                      borderRadius: 2,
-                      textAlign: 'center'
-                    }}>
-                      <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 1 }}>
-                        قیمت کل برای {toPersianDigits(selectedDuration.toString())} روز:
-                      </Typography>
-                      <Typography variant="h5" sx={{ 
-                        fontWeight: 700,
-                color: JOB_SEEKER_THEME.primary
-              }}>
-                        {(plan.price_per_day * selectedDuration).toLocaleString('fa-IR')} تومان
-                      </Typography>
-                    </Box>
-
-                    {selectedPlan?.id === plan.id && (
-                      <CheckCircleOutlineIcon sx={{
-                        position: 'absolute',
-                        top: 12,
-                        left: 12,
-                        color: JOB_SEEKER_THEME.primary,
-                        fontSize: 24
-                      }} />
-                    )}
-                  </Paper>
-                ))}
-            </Box>
-          </Box>
-        </Box>
-
-        {/* دکمه‌های عمل */}
-          <Box sx={{ display: 'flex', gap: 2, justifyContent: 'center', flexDirection: { xs: 'column', sm: 'row' }, mt: 4 }}>
-          <Button
-            variant="outlined"
-            size="large"
-              onClick={handleBackStep}
-            disabled={loading}
-            sx={{
-              borderColor: JOB_SEEKER_THEME.primary,
-              color: JOB_SEEKER_THEME.primary,
-              borderRadius: 2,
-              px: { xs: 3, sm: 4 },
-                py: { xs: 1.25, sm: 1.5 },
-              fontSize: { xs: '0.9rem', sm: '1rem' },
-              fontWeight: 600,
-              minWidth: { xs: '100%', sm: 150 },
-              '&:hover': {
-                borderColor: JOB_SEEKER_THEME.dark,
-                color: JOB_SEEKER_THEME.dark,
-                  backgroundColor: 'rgba(76, 175, 80, 0.05)'
-              }
-            }}
-          >
               بازگشت
-          </Button>
-          
-          <Button
-            type="submit"
-            variant="contained"
-            size="large"
+            </Button>
+            
+            <Button
+              type="submit"
+              variant="contained"
+              size="large"
               disabled={loading || !hasResume || !selectedPlan}
-            startIcon={loading ? <CircularProgress size={20} color="inherit" /> : <CheckCircleOutlineIcon />}
-            sx={{
-              backgroundColor: JOB_SEEKER_THEME.primary,
-              color: 'white',
-              borderRadius: 2,
-              px: { xs: 4, sm: 6 },
+              startIcon={loading ? <CircularProgress size={20} color="inherit" /> : <CheckCircleOutlineIcon />}
+              sx={{
+                backgroundColor: JOB_SEEKER_THEME.primary,
+                color: 'white',
+                borderRadius: 2,
+                px: { xs: 4, sm: 6 },
                 py: { xs: 1.25, sm: 1.5 },
-              fontSize: { xs: '0.9rem', sm: '1rem' },
-              fontWeight: 600,
-              minWidth: { xs: '100%', sm: 200 },
+                fontSize: { xs: '0.9rem', sm: '1rem' },
+                fontWeight: 600,
+                minWidth: { xs: '100%', sm: 200 },
                 boxShadow: '0 4px 12px rgba(76, 175, 80, 0.3)',
-              '&:hover': {
-                backgroundColor: JOB_SEEKER_THEME.dark,
+                '&:hover': {
+                  backgroundColor: JOB_SEEKER_THEME.dark,
                   boxShadow: '0 6px 16px rgba(76, 175, 80, 0.4)',
-                transform: 'translateY(-1px)'
-              },
-              '&:disabled': {
-                backgroundColor: '#ccc',
-                boxShadow: 'none',
-                transform: 'none'
-              },
-              transition: 'all 0.3s ease'
-            }}
-          >
+                  transform: 'translateY(-1px)'
+                },
+                '&:disabled': {
+                  backgroundColor: '#ccc',
+                  boxShadow: 'none',
+                  transform: 'none'
+                },
+                transition: 'all 0.3s ease'
+              }}
+            >
               {loading ? 'در حال ثبت و هدایت به پرداخت...' : 'ثبت آگهی و پرداخت'}
-          </Button>
-        </Box>
-      </form>
+            </Button>
+          </Box>
+        </form>
       )}
     </Paper>
   );
