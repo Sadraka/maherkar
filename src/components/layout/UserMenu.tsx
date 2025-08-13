@@ -1762,7 +1762,7 @@ export default function UserMenu({ user: propUser, isLoggedIn: propIsLoggedIn }:
                                             textAlign: 'center',
                                             borderRadius: 3,
                                             boxShadow: '0 4px 15px rgba(10,155,84,0.05)',
-                                            height: '100%',
+                                            height: 80,
                                             display: 'flex',
                                             flexDirection: 'column',
                                             alignItems: 'center',
@@ -1776,20 +1776,12 @@ export default function UserMenu({ user: propUser, isLoggedIn: propIsLoggedIn }:
                                             }
                                         }}
                                     >
-                                        <FontAwesomeIcon
-                                            icon={faTachometerAlt}
-                                            style={{
-                                                fontSize: '1.5rem', 
-                                                color: JOB_SEEKER_THEME.primary,
-                                                marginBottom: '8px' 
-                                            }}
-                                        />
                                         <Typography 
                                             variant="subtitle2" 
                                             sx={{ 
-                                                fontSize: '0.85rem',
-                                                color: 'text.primary',
-                                                fontWeight: 400
+                                                fontSize: '1rem',
+                                                color: JOB_SEEKER_THEME.primary,
+                                                fontWeight: 700
                                             }}
                                         >
                                             داشبورد
@@ -1804,7 +1796,7 @@ export default function UserMenu({ user: propUser, isLoggedIn: propIsLoggedIn }:
                                             p: 0,
                                             borderRadius: 3,
                                             overflow: 'hidden',
-                                            height: '100%',
+                                            height: 80,
                                             transition: 'all 0.25s ease',
                                             boxShadow: '0 4px 18px rgba(10,155,84,0.25)',
                                             display: 'flex',
@@ -1910,92 +1902,90 @@ export default function UserMenu({ user: propUser, isLoggedIn: propIsLoggedIn }:
                                                                         sx={{
                                                                             borderRadius: 1,
                                                                             py: 0.8,
-                                                            px: 2,
-                                                            width: '100%',
-                                                            display: 'flex',
-                                                            alignItems: 'center',
-                                                            gap: 2,
-                                                            bgcolor: subActive ? 'rgba(10, 155, 84, 0.06)' : 'transparent',
-                                                            transition: 'all 0.15s ease',
-                                                            '&:hover': {
-                                                                bgcolor: 'rgba(10, 155, 84, 0.04)',
-                                                            }
-                                                        }}
-                                                    >
-                                                        <FontAwesomeIcon
-                                                            icon={subItem.icon}
-                                                            style={{
-                                                                fontSize: '1rem',
-                                                                width: '18px',
-                                                                textAlign: 'center',
-                                                                color: subActive ? '#0a9b54' : theme.palette.text.secondary,
-                                                                transition: 'color 0.2s ease'
-                                                            }}
-                                                        />
-                                                        <Typography 
-                                                            variant="body2" 
-                                                            fontWeight={subActive ? 'bold' : 400} 
-                                                            sx={{ 
-                                                                fontSize: '0.85rem', 
-                                                                color: subActive ? '#0a9b54' : 'text.secondary' 
-                                                            }}
-                                                        >
-                                                            {subItem.title}
-                                                        </Typography>
-                                                    </MenuItem>
-                                                );
-                                            })}
-                                        </Box>
-                                    </Collapse>
-                                )}
-                            </Box>
-                        );
-                    })}
-                </Box>
-            </>
-                                )}
+                                                                            px: 2,
+                                                                            width: '100%',
+                                                                            display: 'flex',
+                                                                            alignItems: 'center',
+                                                                            gap: 2,
+                                                                            bgcolor: subActive ? 'rgba(10, 155, 84, 0.06)' : 'transparent',
+                                                                            transition: 'all 0.15s ease',
+                                                                            '&:hover': {
+                                                                                bgcolor: 'rgba(10, 155, 84, 0.04)',
+                                                                            }
+                                                                        }}
+                                                                    >
+                                                                        <FontAwesomeIcon
+                                                                            icon={subItem.icon}
+                                                                            style={{
+                                                                                fontSize: '1rem',
+                                                                                width: '18px',
+                                                                                textAlign: 'center',
+                                                                                color: subActive ? '#0a9b54' : theme.palette.text.secondary,
+                                                                                transition: 'color 0.2s ease'
+                                                                            }}
+                                                                        />
+                                                                        <Typography 
+                                                                            variant="body2" 
+                                                                            fontWeight={subActive ? 'bold' : 400} 
+                                                                            sx={{ 
+                                                                                fontSize: '0.85rem', 
+                                                                                color: subActive ? '#0a9b54' : 'text.secondary' 
+                                                                            }}
+                                                                        >
+                                                                            {subItem.title}
+                                                                        </Typography>
+                                                                    </MenuItem>
+                                                                );
+                                                            })}
+                                                        </Box>
+                                                    </Collapse>
+                                                )}
+                                            </Box>
+                                        );
+                                    })}
+                                </Box>
 
-                        {/* دکمه خروج برای کارجو - فقط در حالت موبایل */}
-                        {isMobile && (
-                            <Box sx={{ 
-                                px: 1, 
-                                pt: 2, 
-                                pb: 2,
-                                borderTop: '1px solid', 
-                                borderColor: 'divider', 
-                                flexShrink: 0 
-                            }}>
-                                <ListItemButton
-                                    onClick={() => {
-                                        console.log('Logout clicked');
-                                        authLogout();
-                                        handleClose();
-                                    }}
-                                    sx={{
-                                        borderRadius: 2,
-                                        color: 'error.main',
-                                        cursor: 'pointer',
-                                        '&:hover': {
-                                            bgcolor: 'error.light',
-                                            color: 'error.contrastText',
-                                        },
-                                    }}
-                                >
-                                    <ListItemIcon sx={{ minWidth: 36, color: 'inherit' }}>
-                                        <FontAwesomeIcon icon={faSignOutAlt} style={{ fontSize: '1rem' }} />
-                                    </ListItemIcon>
-                                    <ListItemText
-                                        primary="خروج از حساب"
-                                        primaryTypographyProps={{
-                                            fontSize: '0.9rem',
-                                            fontWeight: 'medium',
+                                {/* دکمه خروج برای کارجو - فقط در حالت موبایل */}
+                                <Box sx={{ 
+                                    px: 1, 
+                                    pt: 2, 
+                                    pb: 2,
+                                    borderTop: '1px solid', 
+                                    borderColor: 'divider', 
+                                    flexShrink: 0 
+                                }}>
+                                    <ListItemButton
+                                        onClick={() => {
+                                            console.log('Logout clicked');
+                                            authLogout();
+                                            handleClose();
                                         }}
-                                    />
-                                </ListItemButton>
-                            </Box>
+                                        sx={{
+                                            borderRadius: 2,
+                                            color: 'error.main',
+                                            cursor: 'pointer',
+                                            '&:hover': {
+                                                bgcolor: 'error.light',
+                                                color: 'error.contrastText',
+                                            },
+                                        }}
+                                    >
+                                        <ListItemIcon sx={{ minWidth: 36, color: 'inherit' }}>
+                                            <FontAwesomeIcon icon={faSignOutAlt} style={{ fontSize: '1rem' }} />
+                                        </ListItemIcon>
+                                        <ListItemText
+                                            primary="خروج از حساب"
+                                            primaryTypographyProps={{
+                                                fontSize: '0.9rem',
+                                                fontWeight: 'medium',
+                                            }}
+                                        />
+                                    </ListItemButton>
+                                </Box>
+                            </>
                         )}
 
-                        {/* منوی کامل کارجو - فقط در حالت دسکتاپ */}
+                        {/* منوی کامل - فقط در حالت دسکتاپ */}
                         {!isMobile && (
                             <>
                                 <Box sx={{
@@ -2009,187 +1999,252 @@ export default function UserMenu({ user: propUser, isLoggedIn: propIsLoggedIn }:
                                         transform: 'translateX(-50%)',
                                         width: '60%',
                                         height: '1px',
-                                        background: `linear-gradient(90deg, transparent, #0a9b5430, transparent)`
+                                        background: `linear-gradient(90deg, transparent, ${JOB_SEEKER_THEME.primary}30, transparent)`
                                     }
                                 }} />
                                 
-                                <Typography variant="caption" color="text.secondary" sx={{ px: 2, display: 'block', mb: 0.5, fontWeight: 500 }}>
+                                <Typography variant="caption" color="text.secondary" sx={{ px: 2, display: 'block', mb: 1, fontWeight: 500, fontSize: '0.75rem' }}>
                                     مدیریت
                                 </Typography>
 
-                                <MenuItem component={Link} href="/jobseeker/resume" onClick={handleClose} sx={{
-                                    py: 1.2,
-                                    mx: 0.5,
-                                    borderRadius: '8px',
-                                    cursor: 'pointer',
-                                    transition: 'all 0.2s ease',
-                                    '&:hover': {
-                                        backgroundColor: '#0a9b5410',
-                                        transform: 'translateX(-2px)',
-                                        '& .MuiListItemIcon-root': {
-                                            color: '#0a9b54',
-                                            transform: 'scale(1.1)',
-                                        }
-                                    }
-                                }}>
-                                    <ListItemIcon sx={{
-                                        transition: 'all 0.2s ease',
-                                        minWidth: '50px'
-                                    }}>
-                                        <FontAwesomeIcon icon={faFileAlt} style={{
-                                            fontSize: '1rem',
-                                            color: '#0a9b54'
-                                        }} />
-                                    </ListItemIcon>
-                                    رزومه من
-                                </MenuItem>
+                                <List sx={{ px: 1, width: '100%', pb: 1.5 }}>
+                                    <ListItem sx={{ p: 0.25 }}>
+                                        <ListItemButton 
+                                            component={Link}
+                                            href="/jobseeker/resume"
+                                            onClick={handleClose}
+                                            selected={isActiveMenuItem('/jobseeker/resume')}
+                                            sx={{
+                                                borderRadius: 1,
+                                                py: 0.75,
+                                                width: '100%',
+                                                '&.Mui-selected': {
+                                                    bgcolor: 'rgba(10, 155, 84, 0.08)',
+                                                    '&:hover': {
+                                                        bgcolor: 'rgba(10, 155, 84, 0.12)',
+                                                    },
+                                                    '& .MuiListItemIcon-root': {
+                                                        color: JOB_SEEKER_THEME.primary,
+                                                    },
+                                                    '& .MuiListItemText-primary': {
+                                                        color: JOB_SEEKER_THEME.primary,
+                                                        fontWeight: 'bold'
+                                                    }
+                                                },
+                                                '&:hover': {
+                                                    bgcolor: 'rgba(10, 155, 84, 0.06)',
+                                                },
+                                            }}
+                                        >
+                                            <ListItemIcon sx={{ 
+                                                minWidth: 56,
+                                                color: isActiveMenuItem('/jobseeker/resume') ? JOB_SEEKER_THEME.primary : 'text.secondary',
+                                            }}>
+                                                <FontAwesomeIcon 
+                                                    icon={faFileAlt} 
+                                                    style={{ fontSize: '1.1rem' }} 
+                                                />
+                                            </ListItemIcon>
+                                            <ListItemText 
+                                                primary="اطلاعات شخصی"
+                                                primaryTypographyProps={{
+                                                    fontSize: '0.875rem',
+                                                    fontWeight: isActiveMenuItem('/jobseeker/resume') ? 'bold' : 'normal'
+                                                }}
+                                            />
+                                        </ListItemButton>
+                                    </ListItem>
 
-                                <MenuItem component={Link} href="/jobseeker/applications" onClick={handleClose} sx={{
-                                    py: 1.2,
-                                    mx: 0.5,
-                                    borderRadius: '8px',
-                                    cursor: 'pointer',
-                                    transition: 'all 0.2s ease',
-                                    '&:hover': {
-                                        backgroundColor: '#0a9b5410',
-                                        transform: 'translateX(-2px)',
-                                        '& .MuiListItemIcon-root': {
-                                            color: '#0a9b54',
-                                            transform: 'scale(1.1)',
-                                        }
-                                    }
-                                }}>
-                                    <ListItemIcon sx={{
-                                        transition: 'all 0.2s ease',
-                                        minWidth: '50px'
-                                    }}>
-                                        <FontAwesomeIcon icon={faClipboardList} style={{
-                                            fontSize: '1rem',
-                                            color: '#0a9b54'
-                                        }} />
-                                    </ListItemIcon>
-                                    درخواست‌های ارسالی
-                                </MenuItem>
+                                    <ListItem sx={{ p: 0.25 }}>
+                                        <ListItemButton 
+                                            component={Link}
+                                            href="/jobseeker/resume-ads"
+                                            onClick={handleClose}
+                                            selected={isActiveMenuItem('/jobseeker/resume-ads')}
+                                            sx={{
+                                                borderRadius: 1,
+                                                py: 0.75,
+                                                width: '100%',
+                                                '&.Mui-selected': {
+                                                    bgcolor: 'rgba(10, 155, 84, 0.08)',
+                                                    '&:hover': {
+                                                        bgcolor: 'rgba(10, 155, 84, 0.12)',
+                                                    },
+                                                    '& .MuiListItemIcon-root': {
+                                                        color: JOB_SEEKER_THEME.primary,
+                                                    },
+                                                    '& .MuiListItemText-primary': {
+                                                        color: JOB_SEEKER_THEME.primary,
+                                                        fontWeight: 'bold'
+                                                    }
+                                                },
+                                                '&:hover': {
+                                                    bgcolor: 'rgba(10, 155, 84, 0.06)',
+                                                },
+                                            }}
+                                        >
+                                            <ListItemIcon sx={{ 
+                                                minWidth: 56,
+                                                color: isActiveMenuItem('/jobseeker/resume-ads') ? JOB_SEEKER_THEME.primary : 'text.secondary',
+                                            }}>
+                                                <FontAwesomeIcon 
+                                                    icon={faBullhorn} 
+                                                    style={{ fontSize: '1.1rem' }} 
+                                                />
+                                            </ListItemIcon>
+                                            <ListItemText 
+                                                primary="آگهی‌های رزومه"
+                                                primaryTypographyProps={{
+                                                    fontSize: '0.875rem',
+                                                    fontWeight: isActiveMenuItem('/jobseeker/resume-ads') ? 'bold' : 'normal'
+                                                }}
+                                            />
+                                        </ListItemButton>
+                                    </ListItem>
 
-                                <MenuItem component={Link} href="/jobseeker/resume-ads" onClick={handleClose} sx={{
-                                    py: 1.2,
-                                    mx: 0.5,
-                                    borderRadius: '8px',
-                                    cursor: 'pointer',
-                                    transition: 'all 0.2s ease',
-                                    '&:hover': {
-                                        backgroundColor: '#0a9b5410',
-                                        transform: 'translateX(-2px)',
-                                        '& .MuiListItemIcon-root': {
-                                            color: '#0a9b54',
-                                            transform: 'scale(1.1)',
-                                        }
-                                    }
-                                }}>
-                                    <ListItemIcon sx={{
-                                        transition: 'all 0.2s ease',
-                                        minWidth: '50px'
-                                    }}>
-                                        <FontAwesomeIcon icon={faBullhorn} style={{
-                                            fontSize: '1rem',
-                                            color: '#0a9b54'
-                                        }} />
-                                    </ListItemIcon>
-                                    آگهی‌های رزومه
-                                </MenuItem>
+                                    <ListItem sx={{ p: 0.25 }}>
+                                        <ListItemButton 
+                                            component={Link}
+                                            href="/jobseeker/applications"
+                                            onClick={handleClose}
+                                            selected={isActiveMenuItem('/jobseeker/applications')}
+                                            sx={{
+                                                borderRadius: 1,
+                                                py: 0.75,
+                                                width: '100%',
+                                                '&.Mui-selected': {
+                                                    bgcolor: 'rgba(10, 155, 84, 0.08)',
+                                                    '&:hover': {
+                                                        bgcolor: 'rgba(10, 155, 84, 0.12)',
+                                                    },
+                                                    '& .MuiListItemIcon-root': {
+                                                        color: JOB_SEEKER_THEME.primary,
+                                                    },
+                                                    '& .MuiListItemText-primary': {
+                                                        color: JOB_SEEKER_THEME.primary,
+                                                        fontWeight: 'bold'
+                                                    }
+                                                },
+                                                '&:hover': {
+                                                    bgcolor: 'rgba(10, 155, 84, 0.06)',
+                                                },
+                                            }}
+                                        >
+                                            <ListItemIcon sx={{ 
+                                                minWidth: 56,
+                                                color: isActiveMenuItem('/jobseeker/applications') ? JOB_SEEKER_THEME.primary : 'text.secondary',
+                                            }}>
+                                                <FontAwesomeIcon 
+                                                    icon={faClipboardList} 
+                                                    style={{ fontSize: '1.1rem' }} 
+                                                />
+                                            </ListItemIcon>
+                                            <ListItemText 
+                                                primary="درخواست‌های ارسالی"
+                                                primaryTypographyProps={{
+                                                    fontSize: '0.875rem',
+                                                    fontWeight: isActiveMenuItem('/jobseeker/applications') ? 'bold' : 'normal'
+                                                }}
+                                            />
+                                        </ListItemButton>
+                                    </ListItem>
 
-                                <Box sx={{
-                                    position: 'relative',
-                                    my: 1,
-                                    '&::before': {
-                                        content: '""',
-                                        position: 'absolute',
-                                        left: '50%',
-                                        top: 0,
-                                        transform: 'translateX(-50%)',
-                                        width: '40%',
-                                        height: '1px',
-                                        background: `linear-gradient(90deg, transparent, #0a9b5420, transparent)`
-                                    }
-                                }} />
+                                    <ListItem sx={{ p: 0.25 }}>
+                                        <ListItemButton 
+                                            component={Link}
+                                            href="/jobseeker/profile"
+                                            onClick={handleClose}
+                                            selected={isActiveMenuItem('/jobseeker/profile')}
+                                            sx={{
+                                                borderRadius: 1,
+                                                py: 0.75,
+                                                width: '100%',
+                                                '&.Mui-selected': {
+                                                    bgcolor: 'rgba(10, 155, 84, 0.08)',
+                                                    '&:hover': {
+                                                        bgcolor: 'rgba(10, 155, 84, 0.12)',
+                                                    },
+                                                    '& .MuiListItemIcon-root': {
+                                                        color: JOB_SEEKER_THEME.primary,
+                                                    },
+                                                    '& .MuiListItemText-primary': {
+                                                        color: JOB_SEEKER_THEME.primary,
+                                                        fontWeight: 'bold'
+                                                    }
+                                                },
+                                                '&:hover': {
+                                                    bgcolor: 'rgba(10, 155, 84, 0.06)',
+                                                },
+                                            }}
+                                        >
+                                            <ListItemIcon sx={{ 
+                                                minWidth: 56,
+                                                color: isActiveMenuItem('/jobseeker/profile') ? JOB_SEEKER_THEME.primary : 'text.secondary',
+                                            }}>
+                                                <FontAwesomeIcon 
+                                                    icon={faUser} 
+                                                    style={{ fontSize: '1.1rem' }} 
+                                                />
+                                            </ListItemIcon>
+                                            <ListItemText 
+                                                primary="پروفایل"
+                                                primaryTypographyProps={{
+                                                    fontSize: '0.875rem',
+                                                    fontWeight: isActiveMenuItem('/jobseeker/profile') ? 'bold' : 'normal'
+                                                }}
+                                            />
+                                        </ListItemButton>
+                                    </ListItem>
+                                </List>
+                            </>
+                        )}
 
-                                <MenuItem component={Link} href="/jobseeker/profile" onClick={handleClose} sx={{
-                                    py: 1.2,
-                                    mx: 0.5,
-                                    borderRadius: '8px',
-                                    cursor: 'pointer',
-                                    transition: 'all 0.2s ease',
-                                    '&:hover': {
-                                        backgroundColor: '#0a9b5410',
-                                        transform: 'translateX(-2px)',
-                                        '& .MuiListItemIcon-root': {
-                                            color: '#0a9b54',
-                                            transform: 'scale(1.1)',
-                                        }
-                                    }
-                                }}>
-                                    <ListItemIcon sx={{
-                                        transition: 'all 0.2s ease',
-                                        minWidth: '50px'
-                                    }}>
-                                        <FontAwesomeIcon icon={faUser} style={{
-                                            fontSize: '1rem',
-                                            color: '#0a9b54'
-                                        }} />
-                                    </ListItemIcon>
-                                    پروفایل
-                                </MenuItem>
-
-                                <Box sx={{
-                                    position: 'relative',
-                                    my: 1,
-                                    '&::before': {
-                                        content: '""',
-                                        position: 'absolute',
-                                        left: '50%',
-                                        top: 0,
-                                        transform: 'translateX(-50%)',
-                                        width: '40%',
-                                        height: '1px',
-                                        background: `linear-gradient(90deg, transparent, #0a9b5420, transparent)`
-                                    }
-                                }} />
-
-                                <MenuItem onClick={() => {
-                                    console.log('Logout clicked');
+                        {/* دکمه خروج از حساب کاربری - در هر دو حالت موبایل و دسکتاپ */}
+                        <Box sx={{ 
+                            px: 1, 
+                            pt: 2, 
+                            pb: { xs: 2, md: 1 }, // اضافه کردن padding bottom در موبایل
+                            borderTop: '1px solid', 
+                            borderColor: 'divider', 
+                            flexShrink: 0 
+                        }}>
+                            <ListItemButton
+                                onClick={() => {
+                                    console.log('Logout clicked'); // برای دیباگ
                                     authLogout();
                                     handleClose();
-                                }} sx={{
-                                    py: 1.2,
-                                    mx: 0.5,
-                                    borderRadius: '8px',
+                                }}
+                                sx={{
+                                    borderRadius: 2,
                                     color: 'error.main',
                                     cursor: 'pointer',
-                                    transition: 'all 0.2s ease',
                                     '&:hover': {
-                                        backgroundColor: 'error.light',
+                                        bgcolor: 'error.light',
                                         color: 'error.contrastText',
                                         transform: 'scale(1.02)',
                                         transition: 'all 0.2s ease',
                                     },
-                                }}>
-                                    <ListItemIcon sx={{
-                                        transition: 'all 0.2s ease',
-                                        minWidth: '50px',
-                                        color: 'inherit'
-                                    }}>
-                                        <FontAwesomeIcon
-                                            icon={faSignOutAlt}
-                                            style={{
-                                                fontSize: '1rem',
-                                                color: 'inherit'
-                                            }}
-                                        />
-                                    </ListItemIcon>
-                                    خروج از حساب
-                                </MenuItem>
-                            </>
-                        )}
+                                    transition: 'all 0.2s ease',
+                                }}
+                            >
+                                <ListItemIcon sx={{ minWidth: 40 }}>
+                                    <FontAwesomeIcon
+                                        icon={faSignOutAlt}
+                                        style={{
+                                            fontSize: '1.1rem',
+                                            color: 'inherit'
+                                        }}
+                                    />
+                                </ListItemIcon>
+                                <ListItemText
+                                    primary="خروج از حساب"
+                                    primaryTypographyProps={{
+                                        fontSize: '0.9rem',
+                                        fontWeight: 500
+                                    }}
+                                />
+                            </ListItemButton>
+                        </Box>
                     </Box>
                 )}
 
