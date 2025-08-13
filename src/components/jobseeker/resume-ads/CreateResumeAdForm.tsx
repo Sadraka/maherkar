@@ -40,6 +40,7 @@ import PeopleIcon from '@mui/icons-material/People';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import InfoIcon from '@mui/icons-material/Info';
 import JobSeekerSubscriptionPlanSelector from './JobSeekerSubscriptionPlanSelector';
+import ResumeSummaryCard from './ResumeSummaryCard';
 import { JOB_SEEKER_THEME } from '@/constants/colors';
 import { 
   GENDER_CHOICES,
@@ -97,6 +98,14 @@ type MinimalResume = {
   headline?: string | null;
   industry?: { id: number; name: string } | null;
   location?: { id: number; name: string; province?: { id: number; name: string } } | null;
+  gender?: keyof typeof GENDER_CHOICES | null;
+  degree?: keyof typeof DEGREE_CHOICES | null;
+  expected_salary?: keyof typeof SALARY_CHOICES | null;
+  preferred_job_type?: keyof typeof JOB_TYPE_CHOICES | null;
+  experience_years?: number | null;
+  educations?: any[];
+  experiences?: any[];
+  skills?: any[];
 };
 
 /**
@@ -446,8 +455,11 @@ export default function CreateResumeAdForm({
     const fetchData = async () => {
       setDataLoading(true);
       try {
-        const [resumeResponse, industriesResponse, industryCategoriesResponse, citiesResponse, provincesResponse, plansResponse] = await Promise.all([
+        const [resumeResponse, educationsResponse, experiencesResponse, skillsResponse, industriesResponse, industryCategoriesResponse, citiesResponse, provincesResponse, plansResponse] = await Promise.all([
           apiGet('/resumes/resumes/'),
+          apiGet('/resumes/educations/'),
+          apiGet('/resumes/experiences/'),
+          apiGet('/resumes/skills/'),
           apiGet('/industries/industries/'),
           apiGet('/industries/industry-categories/'),
           apiGet('/locations/cities/'),
@@ -461,11 +473,23 @@ export default function CreateResumeAdForm({
         setHasResume(has);
         if (has) {
           const r = resumeData[0];
+          const educations = (educationsResponse.data as any[]) || [];
+          const experiences = (experiencesResponse.data as any[]) || [];
+          const skills = (skillsResponse.data as any[]) || [];
+          
           setResumeInfo({
             id: r?.id ?? '',
             headline: r?.headline ?? r?.title ?? '',
             industry: r?.industry ?? null,
-            location: r?.location ?? null
+            location: r?.location ?? null,
+            gender: r?.gender ?? null,
+            degree: r?.degree ?? null,
+            expected_salary: r?.expected_salary ?? null,
+            preferred_job_type: r?.preferred_job_type ?? null,
+            experience_years: r?.years_of_experience ?? null,
+            educations: educations,
+            experiences: experiences,
+            skills: skills
           });
         }
         
@@ -987,13 +1011,7 @@ export default function CreateResumeAdForm({
 
               {/* خلاصه رزومه متصل */}
               {resumeInfo && (
-                <Alert severity="info" sx={{ mb: 2 }}>
-                  <Box sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, gap: 1.5, alignItems: { xs: 'flex-start', sm: 'center' } }}>
-                    <Typography variant="body2" sx={{ fontWeight: 600 }}>رزومه انتخاب‌شده:</Typography>
-                    <Typography variant="body2">{resumeInfo.headline || 'بدون عنوان'}</Typography>
-                    <Typography variant="caption" color="text.secondary">(ID: {resumeInfo.id})</Typography>
-                  </Box>
-                </Alert>
+                <ResumeSummaryCard resume={resumeInfo} onEdit={() => router.push('/jobseeker/resume')} />
               )}
               
               {/* عنوان آگهی */}

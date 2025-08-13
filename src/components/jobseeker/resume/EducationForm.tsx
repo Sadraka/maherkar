@@ -1127,7 +1127,7 @@ export default function EducationForm() {
                       color: jobseekerColors.primary,
                       fontSize: '1.1rem'
                     }}>
-                      {education.degree} - {education.field_of_study}
+                      {education.field_of_study}
                     </Typography>
                     <Typography variant="h6" sx={{ 
                       fontWeight: 600, 
@@ -1284,7 +1284,7 @@ export default function EducationForm() {
                     color: jobseekerColors.primary,
                     fontSize: '0.95rem'
                   }}>
-                    {education.degree} - {education.field_of_study}
+                    {education.field_of_study}
                   </Typography>
                   <Typography variant="h6" sx={{ 
                     fontWeight: 600, 
