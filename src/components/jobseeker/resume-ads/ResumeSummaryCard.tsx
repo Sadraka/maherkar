@@ -62,6 +62,16 @@ const toPersianNumbers = (num: number | string): string => {
   return num.toString().replace(/[0-9]/g, (d) => persianNumbers[parseInt(d)]);
 };
 
+// تابع تبدیل وضعیت دسترسی به فارسی
+const getAvailabilityText = (availability: string): string => {
+  const availabilityMap: { [key: string]: string } = {
+    'immediately': 'فوری',
+    'with_notice': 'با اطلاع',
+    'not_available': 'غیرقابل دسترسی'
+  };
+  return availabilityMap[availability] || availability;
+};
+
 // نوع مینیمال رزومه (مثل همان MinimalResume در CreateResumeAdForm)
 export interface ResumeSummary {
   id: string;
@@ -79,6 +89,9 @@ export interface ResumeSummary {
   experiences?: any[];
   skills?: any[];
   bio?: string | null; // Added bio field
+  website?: string | null;
+  linkedin_profile?: string | null;
+  availability?: string | null; // Added availability field
 }
 
 interface ResumeSummaryCardProps {
@@ -172,6 +185,13 @@ export default function ResumeSummaryCard({ resume, onEdit }: ResumeSummaryCardP
             <Chip
               icon={<WorkIcon fontSize="small" />}
               label={`سابقه: ${toPersianNumbers(resume.experience_years)} سال`}
+              size="small"
+            />
+          )}
+          {resume.availability && (
+            <Chip
+              icon={<WorkIcon fontSize="small" />}
+              label={getAvailabilityText(resume.availability)}
               size="small"
             />
           )}

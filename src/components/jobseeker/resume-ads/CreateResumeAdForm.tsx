@@ -107,6 +107,9 @@ type MinimalResume = {
   experiences?: any[];
   skills?: any[];
   bio?: string | null;
+  website?: string | null;
+  linkedin_profile?: string | null;
+  availability?: string | null;
 };
 
 /**
@@ -482,6 +485,8 @@ export default function CreateResumeAdForm({
             id: r?.id ?? '',
             headline: r?.headline ?? r?.title ?? '',
             bio: r?.bio ?? null,
+            website: r?.website ?? null,
+            linkedin_profile: r?.linkedin_profile ?? null,
             industry: r?.industry ?? null,
             location: r?.location ?? null,
             gender: r?.gender ?? null,
@@ -491,7 +496,8 @@ export default function CreateResumeAdForm({
             experience_years: r?.years_of_experience ?? null,
             educations: educations,
             experiences: experiences,
-            skills: skills
+            skills: skills,
+            availability: r?.availability ?? null
           });
         }
         
