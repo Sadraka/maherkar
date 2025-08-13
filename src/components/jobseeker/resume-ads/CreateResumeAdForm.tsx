@@ -106,6 +106,7 @@ type MinimalResume = {
   educations?: any[];
   experiences?: any[];
   skills?: any[];
+  bio?: string | null;
 };
 
 /**
@@ -480,6 +481,7 @@ export default function CreateResumeAdForm({
           setResumeInfo({
             id: r?.id ?? '',
             headline: r?.headline ?? r?.title ?? '',
+            bio: r?.bio ?? null,
             industry: r?.industry ?? null,
             location: r?.location ?? null,
             gender: r?.gender ?? null,

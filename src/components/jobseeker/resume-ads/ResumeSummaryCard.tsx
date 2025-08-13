@@ -19,6 +19,49 @@ import PeopleIcon from '@mui/icons-material/People';
 import { GENDER_CHOICES, DEGREE_CHOICES, JOB_TYPE_CHOICES, SALARY_CHOICES } from '@/types';
 import { JOB_SEEKER_THEME } from '@/constants/colors';
 
+// تابع تبدیل مدرک تحصیلی به فارسی
+const getDegreeText = (degree: string): string => {
+  const degreeMap: { [key: string]: string } = {
+    'Diploma': 'دیپلم',
+    'Associate': 'کاردانی',
+    'Bachelor': 'کارشناسی',
+    'Master': 'کارشناسی ارشد',
+    'Doctorate': 'دکتری'
+  };
+  return degreeMap[degree] || degree;
+};
+
+// تابع تبدیل نوع شغل به فارسی
+const getJobTypeText = (jobType: string): string => {
+  const jobTypeMap: { [key: string]: string } = {
+    'Full-Time': 'تمام وقت',
+    'Part-Time': 'پاره وقت',
+    'Remote': 'دورکاری',
+    'Internship': 'کارآموزی'
+  };
+  return jobTypeMap[jobType] || jobType;
+};
+
+// تابع تبدیل حقوق به فارسی
+const getSalaryText = (salary: string): string => {
+  const salaryMap: { [key: string]: string } = {
+    '5 to 10': '۵ تا ۱۰ میلیون تومان',
+    '10 to 15': '۱۰ تا ۱۵ میلیون تومان',
+    '15 to 20': '۱۵ تا ۲۰ میلیون تومان',
+    '20 to 30': '۲۰ تا ۳۰ میلیون تومان',
+    '30 to 50': '۳۰ تا ۵۰ میلیون تومان',
+    'More than 50': 'بیش از ۵۰ میلیون تومان',
+    'Negotiable': 'توافقی'
+  };
+  return salaryMap[salary] || salary;
+};
+
+// تابع تبدیل اعداد انگلیسی به فارسی
+const toPersianNumbers = (num: number | string): string => {
+  const persianNumbers = ['۰', '۱', '۲', '۳', '۴', '۵', '۶', '۷', '۸', '۹'];
+  return num.toString().replace(/[0-9]/g, (d) => persianNumbers[parseInt(d)]);
+};
+
 // نوع مینیمال رزومه (مثل همان MinimalResume در CreateResumeAdForm)
 export interface ResumeSummary {
   id: string;
@@ -35,6 +78,7 @@ export interface ResumeSummary {
   educations?: any[];
   experiences?: any[];
   skills?: any[];
+  bio?: string | null; // Added bio field
 }
 
 interface ResumeSummaryCardProps {
@@ -68,7 +112,10 @@ export default function ResumeSummaryCard({ resume, onEdit }: ResumeSummaryCardP
             {resume.location && (
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
                 <LocationOnIcon fontSize="small" color="action" />
-                <Typography variant="caption">{resume.location.name}</Typography>
+                <Typography variant="caption">
+                  {resume.location.province?.name && `${resume.location.province.name} - `}
+                  {resume.location.name}
+                </Typography>
               </Box>
             )}
             {resume.industry && (
@@ -81,10 +128,18 @@ export default function ResumeSummaryCard({ resume, onEdit }: ResumeSummaryCardP
         }
       />
 
+      {/* توضیحات رزومه */}
+      {resume.bio && (
+        <Box sx={{ px: 2, pb: 1 }}>
+          <Typography variant="body2" sx={{ color: 'text.secondary', lineHeight: 1.4 }}>
+            {resume.bio}
+          </Typography>
+        </Box>
+      )}
+
       {/* در آینده می‌توان اطلاعات بیشتری اضافه کرد */}
       <CardContent sx={{ pt: 0, pb: 0 }}>
         <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.75, mb: 2 }}>
-          <Chip label={`شناسه رزومه: ${resume.id}`} size="small" />
           {resume.gender && (
             <Chip
               icon={<PeopleIcon fontSize="small" />}
@@ -95,28 +150,28 @@ export default function ResumeSummaryCard({ resume, onEdit }: ResumeSummaryCardP
           {resume.degree && (
             <Chip
               icon={<SchoolIcon fontSize="small" />}
-              label={DEGREE_CHOICES[resume.degree]}
+              label={getDegreeText(resume.degree)}
               size="small"
             />
           )}
           {resume.preferred_job_type && (
             <Chip
               icon={<WorkIcon fontSize="small" />}
-              label={JOB_TYPE_CHOICES[resume.preferred_job_type]}
+              label={getJobTypeText(resume.preferred_job_type)}
               size="small"
             />
           )}
           {resume.expected_salary && (
             <Chip
               icon={<AttachMoneyIcon fontSize="small" />}
-              label={SALARY_CHOICES[resume.expected_salary]}
+              label={getSalaryText(resume.expected_salary)}
               size="small"
             />
           )}
           {typeof resume.experience_years === 'number' && resume.experience_years >=0 && (
             <Chip
               icon={<WorkIcon fontSize="small" />}
-              label={`سابقه: ${resume.experience_years} سال`}
+              label={`سابقه: ${toPersianNumbers(resume.experience_years)} سال`}
               size="small"
             />
           )}
@@ -132,7 +187,7 @@ export default function ResumeSummaryCard({ resume, onEdit }: ResumeSummaryCardP
               {resume.educations.slice(0, 3).map((edu: any, index: number) => (
                 <Chip
                   key={index}
-                  label={`${edu.degree || ''} ${edu.field_of_study || ''}`}
+                  label={`${getDegreeText(edu.degree || '')} ${edu.field_of_study || ''}`}
                   size="small"
                   variant="outlined"
                   sx={{ fontSize: '0.7rem' }}
@@ -140,7 +195,7 @@ export default function ResumeSummaryCard({ resume, onEdit }: ResumeSummaryCardP
               ))}
               {resume.educations.length > 3 && (
                 <Chip
-                  label={`+${resume.educations.length - 3} مورد دیگر`}
+                  label={`+${toPersianNumbers(resume.educations.length - 3)} مورد دیگر`}
                   size="small"
                   variant="outlined"
                   sx={{ fontSize: '0.7rem' }}
@@ -168,7 +223,7 @@ export default function ResumeSummaryCard({ resume, onEdit }: ResumeSummaryCardP
               ))}
               {resume.experiences.length > 3 && (
                 <Chip
-                  label={`+${resume.experiences.length - 3} مورد دیگر`}
+                  label={`+${toPersianNumbers(resume.experiences.length - 3)} مورد دیگر`}
                   size="small"
                   variant="outlined"
                   sx={{ fontSize: '0.7rem' }}
@@ -200,7 +255,7 @@ export default function ResumeSummaryCard({ resume, onEdit }: ResumeSummaryCardP
               ))}
               {resume.skills.length > 6 && (
                 <Chip
-                  label={`+${resume.skills.length - 6} مهارت دیگر`}
+                  label={`+${toPersianNumbers(resume.skills.length - 6)} مهارت دیگر`}
                   size="small"
                   variant="outlined"
                   sx={{ fontSize: '0.7rem' }}
