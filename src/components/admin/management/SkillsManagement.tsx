@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import {
   Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Chip, Button, Box, Typography, TextField, FormControl, InputLabel, Select, MenuItem, Skeleton, Divider, IconButton, useTheme, useMediaQuery, Dialog, DialogTitle, DialogContent, DialogActions
 } from '@mui/material';
@@ -56,6 +56,10 @@ const SkillsManagement: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [filterIndustry, setFilterIndustry] = useState('');
   const [filterCategory, setFilterCategory] = useState('');
+  const [isSearching, setIsSearching] = useState(false);
+
+  const searchQueryRef = useRef(searchQuery);
+  searchQueryRef.current = searchQuery;
 
   // WarningModal state
   const [warningModal, setWarningModal] = useState(false);
@@ -132,6 +136,41 @@ const SkillsManagement: React.FC = () => {
       setLoading(false);
     }
   }, [page, pageSize, searchQuery, filterIndustry, filterCategory]);
+
+  // useCallback برای handleHashChange
+  const handleHashChangeSkills = useCallback(() => {
+    if (typeof window === 'undefined') return;
+    
+    const hash = window.location.hash;
+    if (hash.includes('#skills?search=')) {
+      const urlParams = new URLSearchParams(hash.split('?')[1]);
+      const searchParam = urlParams.get('search');
+      if (searchParam && searchParam !== searchQueryRef.current) {
+        setSearchInput(searchParam);
+        setIsSearching(true);
+        setPage(1);
+        // فراخوانی مستقیم جستجو با تاخیر کوتاه
+        setTimeout(() => {
+          setSearchQuery(searchParam);
+        }, 100);
+      }
+    } else if (hash === '#skills') {
+      if (searchQueryRef.current) {
+        setSearchQuery('');
+        setSearchInput('');
+        setPage(1);
+      }
+    }
+  }, []);
+
+  // useEffect برای بررسی پارامترهای URL
+  useEffect(() => {
+    handleHashChangeSkills();
+    if (typeof window !== 'undefined') {
+      window.addEventListener('hashchange', handleHashChangeSkills);
+      return () => window.removeEventListener('hashchange', handleHashChangeSkills);
+    }
+  }, [handleHashChangeSkills]);
 
   // Load data on component mount
   useEffect(() => {

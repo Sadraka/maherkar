@@ -139,10 +139,13 @@ const UsersManagement: React.FC = () => {
       const urlParams = new URLSearchParams(hash.split('?')[1]);
       const searchParam = urlParams.get('search');
       if (searchParam && searchParam !== searchQueryRef.current) {
-        setSearchQuery(searchParam);
         setSearchInput(searchParam);
         setIsSearching(true);
         setPage(1);
+        // فراخوانی مستقیم جستجو با تاخیر کوتاه
+        setTimeout(() => {
+          setSearchQuery(searchParam);
+        }, 100);
       }
     } else if (hash === '#users') {
       // اگر بدون پارامتر جستجو به users آمده، جستجو را پاک کن

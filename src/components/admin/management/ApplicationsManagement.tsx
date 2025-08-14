@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import {
   Table,
   TableBody,
@@ -75,7 +75,47 @@ const ApplicationsManagement: React.FC = () => {
   const [viewDialog, setViewDialog] = useState(false);
   const [selectedApplication, setSelectedApplication] = useState<JobApplication | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
+  const [searchInput, setSearchInput] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
+  const [isSearching, setIsSearching] = useState(false);
+
+  const searchQueryRef = useRef(searchQuery);
+  searchQueryRef.current = searchQuery;
+
+  // useCallback برای handleHashChange
+  const handleHashChangeApplications = useCallback(() => {
+    if (typeof window === 'undefined') return;
+    
+    const hash = window.location.hash;
+    if (hash.includes('#applications?search=')) {
+      const urlParams = new URLSearchParams(hash.split('?')[1]);
+      const searchParam = urlParams.get('search');
+      if (searchParam && searchParam !== searchQueryRef.current) {
+        setSearchInput(searchParam);
+        setIsSearching(true);
+        setPage(1);
+        // فراخوانی مستقیم جستجو با تاخیر کوتاه
+        setTimeout(() => {
+          setSearchQuery(searchParam);
+        }, 100);
+      }
+    } else if (hash === '#applications') {
+      if (searchQueryRef.current) {
+        setSearchQuery('');
+        setSearchInput('');
+        setPage(1);
+      }
+    }
+  }, []);
+
+  // useEffect برای بررسی پارامترهای URL
+  useEffect(() => {
+    handleHashChangeApplications();
+    if (typeof window !== 'undefined') {
+      window.addEventListener('hashchange', handleHashChangeApplications);
+      return () => window.removeEventListener('hashchange', handleHashChangeApplications);
+    }
+  }, [handleHashChangeApplications]);
 
   useEffect(() => {
     fetchApplications();
@@ -86,8 +126,8 @@ const ApplicationsManagement: React.FC = () => {
       setLoading(true);
       let url = `/ads/applications/?page=${page}`;
       
-      if (searchQuery) {
-        url += `&search=${encodeURIComponent(searchQuery)}`;
+      if (searchQuery.trim()) {
+        url += `&search=${encodeURIComponent(searchQuery.trim())}`;
       }
       if (statusFilter) {
         url += `&status=${statusFilter}`;
@@ -135,8 +175,9 @@ const ApplicationsManagement: React.FC = () => {
   };
 
   const handleSearch = () => {
+    setIsSearching(true);
     setPage(1);
-    fetchApplications();
+    setSearchQuery(searchInput);
   };
 
   const tableHeaders = [
@@ -184,9 +225,13 @@ const ApplicationsManagement: React.FC = () => {
         <Box display="flex" gap={2} alignItems="center">
           <TextField
             placeholder="جستجو بر اساس نام متقاضی یا عنوان شغل..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
+            value={searchInput}
+            onChange={(e) => setSearchInput(e.target.value)}
+            onKeyPress={(e) => {
+              if (e.key === 'Enter') {
+                handleSearch();
+              }
+            }}
             sx={{ flexGrow: 1 }}
             slotProps={{
               input: {

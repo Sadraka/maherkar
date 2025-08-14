@@ -120,10 +120,13 @@ const PaymentsManagement: React.FC = () => {
       const urlParams = new URLSearchParams(hash.split('?')[1]);
       const searchParam = urlParams.get('search');
       if (searchParam && searchParam !== searchQueryRef.current) {
-        setSearchQuery(searchParam);
         setSearchInput(searchParam);
         setIsSearching(true);
         setPage(1);
+        // فراخوانی مستقیم جستجو با تاخیر کوتاه
+        setTimeout(() => {
+          setSearchQuery(searchParam);
+        }, 100);
       }
     } else if (hash === '#payments') {
       // اگر بدون پارامتر جستجو به payments آمده، جستجو را پاک کن
@@ -795,7 +798,6 @@ const PaymentsManagement: React.FC = () => {
                     <TableCell>طرح</TableCell>
                     <TableCell>وضعیت</TableCell>
                     <TableCell>تاریخ</TableCell>
-                    <TableCell>آگهی</TableCell>
                     <TableCell>عملیات</TableCell>
                   </TableRow>
                 </TableHead>
