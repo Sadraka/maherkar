@@ -33,6 +33,14 @@ export default function EmployerAuthRequired({ children, redirectTo = '/login' }
     const { refreshUserData } = useAuthActions();
     const router = useRouter();
     const pathname = usePathname();
+    // مسیرهایی که باید بدون احراز هویت و نقش کاربری اجازه دسترسی داشته باشند
+    // مانند صفحهٔ نتیجهٔ پرداخت که هم کارجو و هم کارفرما پس از بازگشت از درگاه به آن هدایت می‌شوند
+    const PUBLIC_EMPLOYER_PATHS = ['/employer/payment/callback'];
+
+    if (typeof window !== 'undefined' && PUBLIC_EMPLOYER_PATHS.some(p => pathname?.startsWith(p))) {
+        return <>{children}</>;
+    }
+
     const [isCheckingAuth, setIsCheckingAuth] = useState(true);
     const [verificationStatus, setVerificationStatus] = useState<EmployerVerificationStatus | null>(null);
     const [isCheckingVerification, setIsCheckingVerification] = useState(false);
