@@ -59,11 +59,13 @@ interface SubscriptionRecord {
     id?: string;
     full_name: string;
     phone: string;
+    user_type?: string; // نوع کاربر: EM, JS
   };
   plan: {
     id?: string;
     name: string;
     price_per_day?: number;
+    plan_type?: string; // نوع طرح: B, J, R
   };
   subscription_status: string;
   duration: number;
@@ -84,6 +86,7 @@ interface SubscriptionRecord {
     title: string;
   };
   subscription?: string;
+  ad_type?: string; // نوع آگهی: J, R
 }
 
 const SubscriptionsManagement: React.FC = () => {
@@ -100,6 +103,8 @@ const SubscriptionsManagement: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [searchInput, setSearchInput] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
+  const [userTypeFilter, setUserTypeFilter] = useState(''); // فیلتر نوع کاربر
+  const [adTypeFilter, setAdTypeFilter] = useState(''); // فیلتر نوع آگهی
   const [isSearching, setIsSearching] = useState(false);
   const [sortBy, setSortBy] = useState('created_at');
   const [sortOrder, setSortOrder] = useState('desc');
@@ -146,7 +151,7 @@ const SubscriptionsManagement: React.FC = () => {
 
   useEffect(() => {
     fetchSubscriptions();
-  }, [page, pageSize, searchQuery, statusFilter, sortBy, sortOrder]);
+  }, [page, pageSize, searchQuery, statusFilter, userTypeFilter, adTypeFilter, sortBy, sortOrder]);
 
   useEffect(() => {
     const fetchSubscriptionDates = async () => {
@@ -189,6 +194,14 @@ const SubscriptionsManagement: React.FC = () => {
         params.append('payment_status', statusFilter);
       }
       
+      if (userTypeFilter) {
+        params.append('user_type', userTypeFilter);
+      }
+      
+      if (adTypeFilter) {
+        params.append('ad_type', adTypeFilter);
+      }
+      
       if (sortBy) {
         params.append('sort_by', sortBy);
         params.append('sort_order', sortOrder);
@@ -218,12 +231,14 @@ const SubscriptionsManagement: React.FC = () => {
         owner: {
           id: sub.owner?.id,
           full_name: sub.owner?.full_name || 'نامشخص',
-          phone: sub.owner?.phone || 'نامشخص'
+          phone: sub.owner?.phone || 'نامشخص',
+          user_type: sub.owner?.user_type // نوع کاربر
         },
         plan: {
           id: sub.plan?.id,
           name: sub.plan?.name || 'نامشخص',
-          price_per_day: sub.plan?.price_per_day
+          price_per_day: sub.plan?.price_per_day,
+          plan_type: sub.plan?.plan_type // نوع طرح
         },
         subscription_status: sub.payment_status || 'pending', // از payment_status استفاده می‌کنیم
         duration: sub.durations || 0, // از durations استفاده می‌کنیم
@@ -235,17 +250,35 @@ const SubscriptionsManagement: React.FC = () => {
         payment_status: sub.payment_status,
         title: sub.title,
         advertisement: sub.advertisement,
-        subscription: sub.subscription // id اشتراک
+        subscription: sub.subscription, // id اشتراک
+        ad_type: sub.ad_type // نوع آگهی
       }));
 
-      // Frontend فیلترینگ و مرتب‌سازی (اگر backend آن را انجام نداد)
+      // Frontend فیلترینگ (اگر backend آن را انجام نداد)
+      let filteredSubscriptions = formattedSubscriptions;
+      
+      // فیلتر بر اساس نوع کاربر
+      if (userTypeFilter) {
+        filteredSubscriptions = filteredSubscriptions.filter(sub => 
+          sub.owner?.user_type === userTypeFilter
+        );
+      }
+      
+      // فیلتر بر اساس نوع آگهی
+      if (adTypeFilter) {
+        filteredSubscriptions = filteredSubscriptions.filter(sub => 
+          sub.ad_type === adTypeFilter
+        );
+      }
+
+      // Pagination
       const itemsPerPage = pageSize;
       const startIndex = (page - 1) * itemsPerPage;
       const endIndex = startIndex + itemsPerPage;
-      const paginatedData = formattedSubscriptions.slice(startIndex, endIndex);
+      const paginatedData = filteredSubscriptions.slice(startIndex, endIndex);
       
       setSubscriptions(paginatedData);
-      setTotalPages(Math.ceil(formattedSubscriptions.length / itemsPerPage));
+      setTotalPages(Math.ceil(filteredSubscriptions.length / itemsPerPage));
       
     } catch (error: any) {
       console.error('خطا در دریافت اشتراک‌ها:', error);
@@ -286,6 +319,46 @@ const SubscriptionsManagement: React.FC = () => {
       'failed': 'error'
     };
     return colors[subscription_status as keyof typeof colors] || 'default';
+  };
+
+  // تابع تبدیل نوع کاربر به متن فارسی
+  const getUserTypeText = (userType: string) => {
+    const typeMap = {
+      'EM': 'کارفرما',
+      'JS': 'کارجو',
+      'AD': 'ادمین',
+      'SU': 'پشتیبان'
+    };
+    return typeMap[userType as keyof typeof typeMap] || userType;
+  };
+
+  // تابع تبدیل نوع آگهی به متن فارسی
+  const getAdTypeText = (adType: string) => {
+    const typeMap = {
+      'J': 'آگهی شغل',
+      'R': 'آگهی رزومه'
+    };
+    return typeMap[adType as keyof typeof typeMap] || adType;
+  };
+
+  // تابع رنگ برای نوع کاربر
+  const getUserTypeColor = (userType: string) => {
+    const colors = {
+      'EM': 'primary',
+      'JS': 'secondary',
+      'AD': 'error',
+      'SU': 'warning'
+    };
+    return colors[userType as keyof typeof colors] || 'default';
+  };
+
+  // تابع رنگ برای نوع آگهی
+  const getAdTypeColor = (adType: string) => {
+    const colors = {
+      'J': 'info',
+      'R': 'success'
+    };
+    return colors[adType as keyof typeof colors] || 'default';
   };
 
   const formatPrice = (price?: number) => {
@@ -384,7 +457,9 @@ const SubscriptionsManagement: React.FC = () => {
 
   const tableHeaders = [
     'کاربر',
+    'نوع کاربر',
     'نام پلن',
+    'نوع آگهی',
     'مدت',
     'تاریخ شروع',
     'تاریخ پایان',
@@ -580,6 +655,50 @@ const SubscriptionsManagement: React.FC = () => {
             </Box>
 
             <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
+              <Person sx={{ color: ADMIN_THEME.primary, fontSize: '1.1rem' }} />
+              <FormControl fullWidth size="small">
+                <InputLabel>نوع کاربر</InputLabel>
+                <Select
+                  value={userTypeFilter}
+                  onChange={(e) => setUserTypeFilter(e.target.value)}
+                  label="نوع کاربر"
+                  sx={{
+                    borderRadius: 2,
+                    '& .MuiOutlinedInput-notchedOutline': {
+                      borderColor: ADMIN_THEME.bgLight,
+                    }
+                  }}
+                >
+                  <MenuItem value="">همه کاربران</MenuItem>
+                  <MenuItem value="EM">کارفرما</MenuItem>
+                  <MenuItem value="JS">کارجو</MenuItem>
+                </Select>
+              </FormControl>
+            </Box>
+
+            <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
+              <Diamond sx={{ color: ADMIN_THEME.primary, fontSize: '1.1rem' }} />
+              <FormControl fullWidth size="small">
+                <InputLabel>نوع آگهی</InputLabel>
+                <Select
+                  value={adTypeFilter}
+                  onChange={(e) => setAdTypeFilter(e.target.value)}
+                  label="نوع آگهی"
+                  sx={{
+                    borderRadius: 2,
+                    '& .MuiOutlinedInput-notchedOutline': {
+                      borderColor: ADMIN_THEME.bgLight,
+                    }
+                  }}
+                >
+                  <MenuItem value="">همه آگهی‌ها</MenuItem>
+                  <MenuItem value="J">آگهی شغل</MenuItem>
+                  <MenuItem value="R">آگهی رزومه</MenuItem>
+                </Select>
+              </FormControl>
+            </Box>
+
+            <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
               <Sort sx={{ color: ADMIN_THEME.primary, fontSize: '1.1rem' }} />
               <FormControl fullWidth size="small">
                 <InputLabel>مرتب‌سازی بر اساس</InputLabel>
@@ -609,6 +728,8 @@ const SubscriptionsManagement: React.FC = () => {
                   setSearchQuery('');
                   setSearchInput('');
                   setStatusFilter('');
+                  setUserTypeFilter('');
+                  setAdTypeFilter('');
                   setSortBy('created_at');
                   setSortOrder('desc');
                   fetchSubscriptions();
@@ -690,6 +811,64 @@ const SubscriptionsManagement: React.FC = () => {
                 </Select>
               </FormControl>
 
+              <FormControl sx={{ minWidth: 120 }}>
+                <InputLabel>نوع کاربر</InputLabel>
+                <Select
+                  value={userTypeFilter}
+                  onChange={(e) => setUserTypeFilter(e.target.value)}
+                  label="نوع کاربر"
+                  sx={{
+                    borderRadius: 2,
+                    '& .MuiOutlinedInput-notchedOutline': {
+                      borderColor: ADMIN_THEME.bgLight,
+                    },
+                    '&:hover': {
+                      '& .MuiOutlinedInput-notchedOutline': {
+                        borderColor: ADMIN_THEME.primary,
+                      }
+                    },
+                    '&.Mui-focused': {
+                      '& .MuiOutlinedInput-notchedOutline': {
+                        borderColor: ADMIN_THEME.primary,
+                      }
+                    }
+                  }}
+                >
+                  <MenuItem value="">همه کاربران</MenuItem>
+                  <MenuItem value="EM">کارفرما</MenuItem>
+                  <MenuItem value="JS">کارجو</MenuItem>
+                </Select>
+              </FormControl>
+
+              <FormControl sx={{ minWidth: 120 }}>
+                <InputLabel>نوع آگهی</InputLabel>
+                <Select
+                  value={adTypeFilter}
+                  onChange={(e) => setAdTypeFilter(e.target.value)}
+                  label="نوع آگهی"
+                  sx={{
+                    borderRadius: 2,
+                    '& .MuiOutlinedInput-notchedOutline': {
+                      borderColor: ADMIN_THEME.bgLight,
+                    },
+                    '&:hover': {
+                      '& .MuiOutlinedInput-notchedOutline': {
+                        borderColor: ADMIN_THEME.primary,
+                      }
+                    },
+                    '&.Mui-focused': {
+                      '& .MuiOutlinedInput-notchedOutline': {
+                        borderColor: ADMIN_THEME.primary,
+                      }
+                    }
+                  }}
+                >
+                  <MenuItem value="">همه آگهی‌ها</MenuItem>
+                  <MenuItem value="J">آگهی شغل</MenuItem>
+                  <MenuItem value="R">آگهی رزومه</MenuItem>
+                </Select>
+              </FormControl>
+
               <FormControl sx={{ minWidth: 150 }}>
                 <InputLabel>مرتب‌سازی بر اساس</InputLabel>
                 <Select
@@ -726,6 +905,8 @@ const SubscriptionsManagement: React.FC = () => {
                   setSearchQuery('');
                   setSearchInput('');
                   setStatusFilter('');
+                  setUserTypeFilter('');
+                  setAdTypeFilter('');
                   setSortBy('created_at');
                   setSortOrder('desc');
                   fetchSubscriptions();
@@ -794,7 +975,9 @@ const SubscriptionsManagement: React.FC = () => {
                 }}>
                   <TableRow>
                     <TableCell>کاربر</TableCell>
+                    <TableCell>نوع کاربر</TableCell>
                     <TableCell>نام پلن</TableCell>
+                    <TableCell>نوع آگهی</TableCell>
                     <TableCell>مدت</TableCell>
                     <TableCell>تاریخ شروع</TableCell>
                     <TableCell>تاریخ پایان</TableCell>
@@ -875,7 +1058,21 @@ const SubscriptionsManagement: React.FC = () => {
                           {subscription.title}
                         </Typography>
                       )}
-                      <Box sx={{ display: 'flex', gap: 1, mt: 1 }}>
+                      <Box sx={{ display: 'flex', gap: 1, mt: 1, flexWrap: 'wrap' }}>
+                        <Chip 
+                          label={getUserTypeText(subscription.owner?.user_type || '')}
+                          color={getUserTypeColor(subscription.owner?.user_type || '') as any}
+                          size="small"
+                          variant="outlined"
+                          sx={{ fontSize: '0.7rem' }}
+                        />
+                        <Chip 
+                          label={getAdTypeText(subscription.ad_type || '')}
+                          color={getAdTypeColor(subscription.ad_type || '') as any}
+                          size="small"
+                          variant="outlined"
+                          sx={{ fontSize: '0.7rem' }}
+                        />
                         <Chip 
                           label={getStatusText(subscription.subscription_status)}
                           color={getStatusColor(subscription.subscription_status) as any}
@@ -888,6 +1085,23 @@ const SubscriptionsManagement: React.FC = () => {
                           size="small"
                           sx={{ fontSize: '0.7rem' }}
                         />
+                      </Box>
+                      <Box sx={{ display: 'flex', justifyContent: 'center', mt: 1 }}>
+                        <IconButton
+                          size="small"
+                          onClick={() => openViewDialog(subscription)}
+                          sx={{
+                            bgcolor: `${ADMIN_THEME.primary}15`,
+                            color: ADMIN_THEME.primary,
+                            '&:hover': {
+                              bgcolor: `${ADMIN_THEME.primary}25`,
+                              transform: 'scale(1.1)'
+                            },
+                            transition: 'all 0.2s ease'
+                          }}
+                        >
+                          <Visibility fontSize="small" />
+                        </IconButton>
                       </Box>
                     </Box>
                   </Paper>
@@ -905,7 +1119,7 @@ const SubscriptionsManagement: React.FC = () => {
                 boxShadow: '0 2px 8px rgba(0,0,0,0.04)'
               }}
             >
-              <TableContainer>
+              <TableContainer sx={{ maxHeight: '70vh', overflowX: 'auto' }}>
             <Table>
                   <TableHead sx={{
                     bgcolor: ADMIN_THEME.bgLight,
@@ -920,7 +1134,9 @@ const SubscriptionsManagement: React.FC = () => {
                   }}>
                 <TableRow>
                       <TableCell>کاربر</TableCell>
+                      <TableCell>نوع کاربر</TableCell>
                       <TableCell>نام پلن</TableCell>
+                      <TableCell>نوع آگهی</TableCell>
                       <TableCell>مدت</TableCell>
                       <TableCell>تاریخ شروع</TableCell>
                       <TableCell>تاریخ پایان</TableCell>
@@ -952,9 +1168,27 @@ const SubscriptionsManagement: React.FC = () => {
                         </Box>
                       </TableCell>
                       <TableCell>
+                        <Chip 
+                          label={getUserTypeText(subscription.owner?.user_type || '')}
+                          color={getUserTypeColor(subscription.owner?.user_type || '') as any}
+                          size="small"
+                          variant="outlined"
+                          sx={{ fontWeight: 600, fontSize: '0.75rem' }}
+                        />
+                      </TableCell>
+                      <TableCell>
                         <span title={subscription.plan?.name || ''}>
                           {truncateText(subscription.plan?.name || 'نامشخص', 20)}
                         </span>
+                      </TableCell>
+                      <TableCell>
+                        <Chip 
+                          label={getAdTypeText(subscription.ad_type || '')}
+                          color={getAdTypeColor(subscription.ad_type || '') as any}
+                          size="small"
+                          variant="outlined"
+                          sx={{ fontWeight: 600, fontSize: '0.75rem' }}
+                        />
                       </TableCell>
                       <TableCell>
                         <Typography variant="body2" sx={{ fontWeight: 600, color: ADMIN_THEME.dark }}>
@@ -980,28 +1214,25 @@ const SubscriptionsManagement: React.FC = () => {
                           sx={{ fontWeight: 600, fontSize: '0.8rem' }}
                       />
                     </TableCell>
-                      <TableCell sx={{ textAlign: 'center', minWidth: 120, py: 2 }}>
-                        <Button
-                          variant="outlined"
+                      <TableCell sx={{ textAlign: 'center', minWidth: 80, py: 2 }}>
+                        <IconButton
                           size="small"
                           onClick={(e) => {
                             e.stopPropagation();
                             openViewDialog(subscription);
                           }}
                           sx={{
-                            borderColor: ADMIN_THEME.primary,
+                            bgcolor: `${ADMIN_THEME.primary}15`,
                             color: ADMIN_THEME.primary,
-                            fontSize: '0.75rem',
-                            py: 0.5,
-                            px: 2,
                             '&:hover': {
-                              bgcolor: `${ADMIN_THEME.primary}08`,
-                              borderColor: ADMIN_THEME.primary
-                            }
+                              bgcolor: `${ADMIN_THEME.primary}25`,
+                              transform: 'scale(1.05)'
+                            },
+                            transition: 'all 0.2s ease'
                           }}
                         >
-                          مشاهده
-                        </Button>
+                          <Visibility fontSize="small" />
+                        </IconButton>
                     </TableCell>
                   </TableRow>
                 ))}

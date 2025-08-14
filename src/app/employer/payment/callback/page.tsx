@@ -187,13 +187,13 @@ export default function PaymentCallbackPage() {
                 <CheckCircleIcon 
                   sx={{ 
                     fontSize: 80, 
-                    color: '#4caf50', 
+                    color: EMPLOYER_THEME.primary, 
                     mb: 3,
                     display: 'block',
                     mx: 'auto',
                   }} 
                 />
-                <Typography variant="h5" fontWeight="bold" sx={{ color: '#4caf50', mb: 2, textAlign: 'center' }}>
+                <Typography variant="h5" fontWeight="bold" sx={{ color: EMPLOYER_THEME.primary, mb: 2, textAlign: 'center' }}>
                   پرداخت موفق
                 </Typography>
                 <Alert severity="success" sx={{ mb: 3, direction: 'ltr', textAlign: 'left' }}>
@@ -278,13 +278,13 @@ export default function PaymentCallbackPage() {
                 <CancelIcon 
                   sx={{ 
                     fontSize: 80, 
-                    color: '#ff9800', 
+                    color: EMPLOYER_THEME.contrast, 
                     mb: 3,
                     display: 'block',
                     mx: 'auto',
                   }} 
                 />
-                <Typography variant="h5" fontWeight="bold" sx={{ color: '#ff9800', mb: 2, textAlign: 'center' }}>
+                <Typography variant="h5" fontWeight="bold" sx={{ color: EMPLOYER_THEME.contrast, mb: 2, textAlign: 'center' }}>
                   پرداخت لغو شد
                 </Typography>
                 <Alert severity="warning" sx={{ mb: 3, direction: 'ltr', textAlign: 'left' }}>
@@ -331,13 +331,13 @@ export default function PaymentCallbackPage() {
                 <ErrorIcon 
                   sx={{ 
                     fontSize: 80, 
-                    color: '#f44336', 
+                    color: EMPLOYER_THEME.red, 
                     mb: 3,
                     display: 'block',
                     mx: 'auto',
                   }} 
                 />
-                <Typography variant="h5" fontWeight="bold" sx={{ color: '#f44336', mb: 2, textAlign: 'center' }}>
+                <Typography variant="h5" fontWeight="bold" sx={{ color: EMPLOYER_THEME.red, mb: 2, textAlign: 'center' }}>
                   پرداخت ناموفق
                 </Typography>
                 <Alert severity="error" sx={{ mb: 3, direction: 'ltr', textAlign: 'left' }}>

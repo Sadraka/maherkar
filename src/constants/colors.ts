@@ -66,6 +66,15 @@ export const ADMIN_THEME = {
   bgLight: ADMIN_BG_LIGHT,
   bgVeryLight: ADMIN_BG_VERY_LIGHT,
   border: 'rgba(124, 58, 237, 0.2)',
+  // اضافه کردن رنگ‌های مورد نیاز
+  secondary: '#6366f1', // آبی برای secondary
+  success: '#10b981', // سبز برای موفقیت
+  warning: '#f59e0b', // زرد برای هشدار
+  error: '#ef4444', // قرمز برای خطا
+  info: '#3b82f6', // آبی برای اطلاعات
+  text: '#374151', // خاکستری تیره برای متن
+  surface: '#f9fafb', // سفید کمی خاکستری برای پس‌زمینه
+  background: '#ffffff', // سفید خالص
 };
 
 // تعریف تم پشتیبان

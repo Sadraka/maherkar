@@ -32,6 +32,7 @@ interface PaymentRecord {
     id?: string;
     full_name: string;
     phone: string;
+    user_type?: string; // نوع کاربر: EM, JS
   };
   total_price: number;
   payment_status: string;
@@ -44,6 +45,7 @@ interface PaymentRecord {
     id?: string;
     name: string;
     price_per_day?: number;
+    plan_type?: string; // نوع طرح: B, J, R
   };
   advertisement?: {
     id?: string;
@@ -118,6 +120,37 @@ const formatDate = (dateString: string) => {
     hour: '2-digit',
     minute: '2-digit'
   });
+};
+
+// تابع تبدیل نوع کاربر به متن فارسی
+const getUserTypeText = (userType: string) => {
+  const typeMap = {
+    'EM': 'کارفرما',
+    'JS': 'کارجو',
+    'AD': 'ادمین',
+    'SU': 'پشتیبان'
+  };
+  return typeMap[userType as keyof typeof typeMap] || userType;
+};
+
+// تابع رنگ برای نوع کاربر
+const getUserTypeColor = (userType: string) => {
+  const colors = {
+    'EM': '#3B82F6', // آبی برای کارفرما
+    'JS': '#8B5CF6', // بنفش برای کارجو
+    'AD': '#EF4444', // قرمز برای ادمین
+    'SU': '#F59E0B'  // زرد برای پشتیبان
+  };
+  return colors[userType as keyof typeof colors] || '#6B7280';
+};
+
+// تابع رنگ برای نوع آگهی
+const getAdTypeColor = (adType: string) => {
+  const colors = {
+    'J': '#06B6D4', // آبی روشن برای آگهی شغل
+    'R': '#10B981'  // سبز برای آگهی رزومه
+  };
+  return colors[adType as keyof typeof colors] || '#6B7280';
 };
 
 const PaymentAdminDetailsSkeleton: React.FC<{ isMobile: boolean }> = ({ isMobile }) => (
@@ -420,7 +453,7 @@ const PaymentAdminDetails: React.FC<PaymentAdminDetailsProps> = ({ payment, onCl
           <Box sx={{ p: 1.5 }}>
             <Box 
               display="grid" 
-              gridTemplateColumns={{ xs: "1fr 1fr", md: "1fr 1fr 1fr 1fr" }} 
+              gridTemplateColumns={{ xs: "1fr 1fr", md: "1fr 1fr 1fr 1fr 1fr 1fr" }} 
               gap={1}
             >
               {[
@@ -434,6 +467,12 @@ const PaymentAdminDetails: React.FC<PaymentAdminDetailsProps> = ({ payment, onCl
                   linkText: 'مشاهده کاربر'
                 },
                 { 
+                  icon: BusinessIcon, 
+                  label: 'نوع کاربر', 
+                  value: getUserTypeText(payment.owner?.user_type || ''), 
+                  color: getUserTypeColor(payment.owner?.user_type || '')
+                },
+                { 
                   icon: PhoneIcon, 
                   label: 'شماره تماس', 
                   value: payment.owner?.phone, 
@@ -444,7 +483,7 @@ const PaymentAdminDetails: React.FC<PaymentAdminDetailsProps> = ({ payment, onCl
                   icon: WorkIcon, 
                   label: 'نوع آگهی', 
                   value: getAdTypeText(payment.ad_type), 
-                  color: '#8B5CF6',
+                  color: getAdTypeColor(payment.ad_type),
                   isLink: true,
                   onClick: navigateToJobs,
                   linkText: 'مشاهده آگهی'

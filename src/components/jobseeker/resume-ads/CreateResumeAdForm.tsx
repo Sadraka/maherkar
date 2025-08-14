@@ -47,7 +47,10 @@ import {
   SOLDIER_STATUS_CHOICES,
   DEGREE_CHOICES,
   SALARY_CHOICES,
-  JOB_TYPE_CHOICES
+  JOB_TYPE_CHOICES,
+  NewResumeOrderRequest,
+  NewResumeOrderResponse,
+  PaymentRequestResponse
 } from '@/types';
 
 /**
@@ -126,41 +129,7 @@ type SubscriptionPlan = {
   updated_at: string;
 };
 
-/**
- * تایپ درخواست سفارش جدید آگهی رزومه
- */
-interface NewResumeOrderRequest {
-  plan_id: string;
-  duration: string;
-  resume_title: string;
-  resume_description: string;
-  city_id: string;
-  industry_id: string;
-  job_type?: string;
-  salary?: string;
-  gender?: string;
-  degree?: string;
-  soldier_status?: string;
-}
 
-/**
- * تایپ پاسخ ایجاد سفارش جدید
- */
-interface NewResumeOrderResponse {
-  message: string;
-  order_id: string;
-  total_price: number;
-  payment_url: string;
-}
-
-/**
- * تایپ پاسخ درخواست پرداخت
- */
-interface PaymentRequestResponse {
-  status: boolean;
-  url?: string;
-  message?: string;
-}
 
 /**
  * ورودی‌های فرم ثبت آگهی رزومه

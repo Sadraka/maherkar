@@ -311,6 +311,34 @@ export interface NewJobOrderResponse {
 }
 
 /**
+ * درخواست ایجاد سفارش آگهی رزومه جدید (فرآیند پرداخت-اول)
+ */
+export interface NewResumeOrderRequest {
+  plan_id: string;
+  duration: string;
+  // اطلاعات آگهی رزومه که موقتاً ذخیره می‌شود
+  resume_title: string;
+  resume_description?: string;
+  city_id: string;
+  industry_id: string;
+  gender?: string;
+  soldier_status?: string;
+  degree?: string;
+  salary?: string;
+  job_type?: string;
+}
+
+/**
+ * پاسخ ایجاد سفارش آگهی رزومه جدید
+ */
+export interface NewResumeOrderResponse {
+  message: string;
+  order_id: string;
+  total_price: number;
+  payment_url: string;
+}
+
+/**
  * پاسخ درخواست پرداخت از ZarinPal
  */
 export interface PaymentRequestResponse {
@@ -320,4 +348,79 @@ export interface PaymentRequestResponse {
   message?: string;
   code?: string;
   errors?: string[];
+}
+
+/**
+ * اینترفیس آگهی رزومه کارجو (مطابق با بک‌اند ResumeAdvertisement)
+ */
+export interface ResumeAdvertisement {
+  id: string;
+  job_seeker: string;
+  resume: string;
+  industry: string;
+  advertisement: string;
+  location: string;
+  title: string;
+  description?: string;
+  status: 'P' | 'A' | 'R'; // P=در حال بررسی، A=تایید شده، R=رد شده
+  gender?: 'M' | 'F' | 'N'; // M=مرد، F=زن، N=مهم نیست
+  soldier_status?: 'CO' | 'EE' | 'NS'; // CO=پایان خدمت، EE=معافیت تحصیلی، NS=مهم نیست
+  degree?: 'BD' | 'DI' | 'AS' | 'BA' | 'MA' | 'DO'; // BD=زیر دیپلم، DI=دیپلم، AS=فوق دیپلم، BA=لیسانس، MA=فوق لیسانس، DO=دکترا
+  salary?: '5 to 10' | '10 to 15' | '15 to 20' | '20 to 30' | '30 to 50' | 'More than 50' | 'Negotiable';
+  job_type?: 'FT' | 'PT' | 'RE' | 'IN'; // FT=تمام وقت، PT=پاره وقت، RE=دورکاری، IN=کارآموزی
+  created_at: string;
+  updated_at: string;
+  
+  // Related fields for detailed information
+  job_seeker_detail?: {
+    id: string;
+    full_name: string;
+    phone: string;
+    email?: string;
+    user_type: string;
+    username?: string;
+  };
+  location_detail?: {
+    id: number;
+    name: string;
+    province?: {
+      id: number;
+      name: string;
+    };
+  };
+  industry_detail?: {
+    id: number;
+    name: string;
+    category?: {
+      id: number;
+      name: string;
+    };
+  };
+  advertisement_detail?: {
+    id: string;
+    ad_type: 'R';
+    subscription: {
+      id: string;
+      subscription_status: 'default' | 'special';
+      plan: any;
+      duration: number;
+      start_date: string;
+      end_date: string;
+    };
+    created_at: string;
+    updated_at: string;
+  };
+  subscription_detail?: {
+    id: string;
+    subscription_status: 'default' | 'special';
+    plan: any;
+    duration: number;
+    start_date: string;
+    end_date: string;
+    created_at: string;
+  };
+  subscription_orders?: Array<{
+    id: string;
+    payment_status: string;
+  }>;
 } 

@@ -190,8 +190,8 @@ interface ResultViewProps {
 
 const CanceledView: React.FC<ResultViewProps> = ({ message, onBack, onRetry }) => (
   <Box sx={{ textAlign: 'center' }}>
-    <CancelIcon sx={{ fontSize: 80, color: '#ff9800', mb: 3, display: 'block', mx: 'auto' }} />
-    <Typography variant="h5" fontWeight="bold" sx={{ color: '#ff9800', mb: 2 }}>پرداخت لغو شد</Typography>
+    <CancelIcon sx={{ fontSize: 80, color: JOB_SEEKER_THEME.orange, mb: 3, display: 'block', mx: 'auto' }} />
+    <Typography variant="h5" fontWeight="bold" sx={{ color: JOB_SEEKER_THEME.orange, mb: 2 }}>پرداخت لغو شد</Typography>
     <Alert severity="warning" sx={{ mb: 3, direction: 'ltr', textAlign: 'left' }}>{message}</Alert>
     <ResultActions onBack={onBack} onRetry={onRetry} />
   </Box>
@@ -199,8 +199,8 @@ const CanceledView: React.FC<ResultViewProps> = ({ message, onBack, onRetry }) =
 
 const FailedView: React.FC<ResultViewProps> = ({ message, onBack, onRetry }) => (
   <Box sx={{ textAlign: 'center' }}>
-    <ErrorIcon sx={{ fontSize: 80, color: '#f44336', mb: 3, display: 'block', mx: 'auto' }} />
-    <Typography variant="h5" fontWeight="bold" sx={{ color: '#f44336', mb: 2 }}>پرداخت ناموفق</Typography>
+    <ErrorIcon sx={{ fontSize: 80, color: JOB_SEEKER_THEME.red, mb: 3, display: 'block', mx: 'auto' }} />
+    <Typography variant="h5" fontWeight="bold" sx={{ color: JOB_SEEKER_THEME.red, mb: 2 }}>پرداخت ناموفق</Typography>
     <Alert severity="error" sx={{ mb: 3, direction: 'ltr', textAlign: 'left' }}>{message}</Alert>
     <ResultActions onBack={onBack} onRetry={onRetry} />
   </Box>
@@ -214,8 +214,8 @@ interface SuccessViewProps {
 
 const SuccessView: React.FC<SuccessViewProps> = ({ message, details, onContinue }) => (
   <Box sx={{ textAlign: 'center' }}>
-    <CheckCircleIcon sx={{ fontSize: 80, color: '#4caf50', mb: 3, display: 'block', mx: 'auto' }} />
-    <Typography variant="h5" fontWeight="bold" sx={{ color: '#4caf50', mb: 2 }}>پرداخت موفق</Typography>
+    <CheckCircleIcon sx={{ fontSize: 80, color: JOB_SEEKER_THEME.primary, mb: 3, display: 'block', mx: 'auto' }} />
+    <Typography variant="h5" fontWeight="bold" sx={{ color: JOB_SEEKER_THEME.primary, mb: 2 }}>پرداخت موفق</Typography>
     <Alert severity="success" sx={{ mb: 3, direction: 'ltr', textAlign: 'left' }}>{message}</Alert>
 
     {details && <PaymentDetailsView details={details} />}
@@ -251,7 +251,6 @@ const PaymentDetailsView: React.FC<{ details: PaymentDetails }> = ({ details }) 
       {details.ref_id && <DetailRow label="شماره پیگیری" value={details.ref_id} color="#0284c7" bg="#e0f2fe" />}
       {typeof details.amount === 'number' && <DetailRow label="مبلغ (تومان)" value={new Intl.NumberFormat('fa-IR').format(details.amount)} color="#0f5132" bg="#d1e7dd" />}
       {details.card_pan && <DetailRow label="کارت" value={details.card_pan} color="#6c757d" bg="#f8f9fa" />}
-      {details.fee && <DetailRow label="کارمزد" value={details.fee} color="#6c757d" bg="#f8f9fa" />}
     </Paper>
   </Box>
 );

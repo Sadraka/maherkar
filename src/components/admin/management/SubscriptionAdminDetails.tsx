@@ -37,11 +37,13 @@ interface SubscriptionRecord {
     id?: string;
     full_name: string;
     phone: string;
+    user_type?: string; // نوع کاربر: EM, JS
   };
   plan: {
     id?: string;
     name: string;
     price_per_day?: number;
+    plan_type?: string; // نوع طرح: B, J, R
   };
   subscription_status: string;
   duration: number;
@@ -58,6 +60,7 @@ interface SubscriptionRecord {
     title: string;
   };
   subscription?: string;
+  ad_type?: string; // نوع آگهی: J, R
 }
 
 interface SubscriptionPlan {
@@ -67,6 +70,7 @@ interface SubscriptionPlan {
   description?: string;
   active: boolean;
   is_free: boolean;
+  plan_type?: string; // نوع طرح: B, J, R
 }
 
 interface SubscriptionAdminDetailsProps {
@@ -157,6 +161,46 @@ const formatAmount = (amount?: number) => {
   return `${convertToPersianNumbers(amount.toLocaleString())} تومان`;
 };
 
+// تابع تبدیل نوع کاربر به متن فارسی
+const getUserTypeText = (userType: string) => {
+  const typeMap = {
+    'EM': 'کارفرما',
+    'JS': 'کارجو',
+    'AD': 'ادمین',
+    'SU': 'پشتیبان'
+  };
+  return typeMap[userType as keyof typeof typeMap] || userType;
+};
+
+// تابع تبدیل نوع آگهی به متن فارسی
+const getAdTypeText = (adType: string) => {
+  const typeMap = {
+    'J': 'آگهی شغل',
+    'R': 'آگهی رزومه'
+  };
+  return typeMap[adType as keyof typeof typeMap] || adType;
+};
+
+// تابع رنگ برای نوع کاربر
+const getUserTypeColor = (userType: string) => {
+  const colors = {
+    'EM': '#3B82F6', // آبی برای کارفرما
+    'JS': '#8B5CF6', // بنفش برای کارجو
+    'AD': '#EF4444', // قرمز برای ادمین
+    'SU': '#F59E0B'  // زرد برای پشتیبان
+  };
+  return colors[userType as keyof typeof colors] || '#6B7280';
+};
+
+// تابع رنگ برای نوع آگهی
+const getAdTypeColor = (adType: string) => {
+  const colors = {
+    'J': '#06B6D4', // آبی روشن برای آگهی شغل
+    'R': '#10B981'  // سبز برای آگهی رزومه
+  };
+  return colors[adType as keyof typeof colors] || '#6B7280';
+};
+
 const SubscriptionAdminDetailsSkeleton: React.FC<{ isMobile: boolean }> = ({ isMobile }) => (
   <Box sx={{ p: 2 }}>
     <Stack spacing={2}>
@@ -175,6 +219,7 @@ const SubscriptionAdminDetails: React.FC<SubscriptionAdminDetailsProps> = ({ sub
   const [editedSubscription, setEditedSubscription] = useState<SubscriptionRecord>(subscription);
   const [plans, setPlans] = useState<SubscriptionPlan[]>([]);
   const [plansLoading, setPlansLoading] = useState(false);
+  const [filteredPlans, setFilteredPlans] = useState<SubscriptionPlan[]>([]);
 
   // دریافت لیست طرح‌ها
   useEffect(() => {
@@ -192,6 +237,42 @@ const SubscriptionAdminDetails: React.FC<SubscriptionAdminDetailsProps> = ({ sub
 
     fetchPlans();
   }, []);
+
+  // فیلتر کردن طرح‌ها بر اساس نوع کاربر
+  useEffect(() => {
+    if (plans.length === 0) {
+      setFilteredPlans([]);
+      return;
+    }
+
+    const userType = subscription.owner?.user_type;
+    const adType = subscription.ad_type;
+    
+    let filtered = plans.filter(plan => {
+      // اگر طرح برای همه است (B) همیشه نمایش داده شود
+      if (plan.plan_type === 'B') {
+        return true;
+      }
+      
+      // اگر نوع آگهی مشخص است، بر اساس آن فیلتر کن
+      if (adType && plan.plan_type === adType) {
+        return true;
+      }
+      
+      // اگر نوع کاربر مشخص است، بر اساس آن فیلتر کن
+      if (userType === 'EM' && plan.plan_type === 'J') {
+        return true;
+      }
+      
+      if (userType === 'JS' && plan.plan_type === 'R') {
+        return true;
+      }
+      
+      return false;
+    });
+
+    setFilteredPlans(filtered);
+  }, [plans, subscription.owner?.user_type, subscription.ad_type]);
 
   const statusColor = getStatusColor(subscription.payment_status || subscription.subscription_status);
   const StatusIcon = getStatusIcon(subscription.payment_status || subscription.subscription_status);
@@ -435,7 +516,7 @@ const SubscriptionAdminDetails: React.FC<SubscriptionAdminDetailsProps> = ({ sub
           <Box sx={{ p: 1.5 }}>
             <Box 
               display="grid" 
-              gridTemplateColumns={{ xs: "1fr 1fr", md: "1fr 1fr 1fr 1fr 1fr" }} 
+              gridTemplateColumns={{ xs: "1fr 1fr", md: "1fr 1fr 1fr 1fr 1fr 1fr 1fr" }} 
               gap={1}
             >
               {[
@@ -447,6 +528,12 @@ const SubscriptionAdminDetails: React.FC<SubscriptionAdminDetailsProps> = ({ sub
                   isLink: true,
                   onClick: navigateToUsers,
                   linkText: 'مشاهده کاربر'
+                },
+                { 
+                  icon: BusinessIcon, 
+                  label: 'نوع کاربر', 
+                  value: getUserTypeText(subscription.owner?.user_type || ''), 
+                  color: getUserTypeColor(subscription.owner?.user_type || '')
                 },
                 { 
                   icon: PhoneIcon, 
@@ -507,6 +594,12 @@ const SubscriptionAdminDetails: React.FC<SubscriptionAdminDetailsProps> = ({ sub
                   linkText: 'مشاهده آگهی'
                 },
                 { 
+                  icon: CategoryIcon, 
+                  label: 'نوع آگهی', 
+                  value: getAdTypeText(subscription.ad_type || ''), 
+                  color: getAdTypeColor(subscription.ad_type || '')
+                },
+                { 
                   icon: DiamondIcon, 
                   label: 'طرح', 
                   value: isEditing ? (
@@ -514,7 +607,7 @@ const SubscriptionAdminDetails: React.FC<SubscriptionAdminDetailsProps> = ({ sub
                       <Select
                         value={editedSubscription.plan?.id || subscription.plan?.id || ''}
                         onChange={(e) => {
-                          const selectedPlan = plans.find(plan => plan.id === e.target.value);
+                          const selectedPlan = filteredPlans.find(plan => plan.id === e.target.value);
                           handleInputChange('plan', selectedPlan);
                         }}
                         displayEmpty
@@ -537,17 +630,19 @@ const SubscriptionAdminDetails: React.FC<SubscriptionAdminDetailsProps> = ({ sub
                       >
                         {plansLoading ? (
                           <MenuItem disabled>در حال بارگذاری...</MenuItem>
+                        ) : filteredPlans.length === 0 ? (
+                          <MenuItem disabled>هیچ طرحی برای این نوع کاربر وجود ندارد</MenuItem>
                         ) : (
-                          plans.map((plan) => (
+                          filteredPlans.map((plan) => (
                             <MenuItem key={plan.id} value={plan.id} sx={{ fontSize: '0.7rem' }}>
-                              {plan.name}
+                              {plan.name} {plan.plan_type && `(${plan.plan_type === 'B' ? 'همه' : plan.plan_type === 'J' ? 'شغل' : 'رزومه'})`}
                             </MenuItem>
                           ))
                         )}
                       </Select>
                     </FormControl>
                   ) : (
-                    subscription.plan?.name
+                    `${subscription.plan?.name || 'نامشخص'}${subscription.plan?.plan_type ? ` (${subscription.plan.plan_type === 'B' ? 'همه' : subscription.plan.plan_type === 'J' ? 'شغل' : 'رزومه'})` : ''}`
                   ), 
                   color: '#EF4444'
                 },
@@ -736,7 +831,7 @@ const SubscriptionAdminDetails: React.FC<SubscriptionAdminDetailsProps> = ({ sub
       {/* هشدار */}
       <Alert severity="info" sx={{ borderRadius: 2 }}>
         <Typography variant="body2">
-          توجه: تغییرات در این بخش مستقیماً بر روی اشتراک کاربر تأثیر می‌گذارد. لطفاً با دقت عمل کنید.
+          <strong>توجه:</strong> تغییرات در این بخش مستقیماً بر روی اشتراک کاربر تأثیر می‌گذارد. طرح‌های قابل انتخاب بر اساس نوع کاربر ({getUserTypeText(subscription.owner?.user_type || '')}) و نوع آگهی ({getAdTypeText(subscription.ad_type || '')}) فیلتر شده‌اند.
         </Typography>
       </Alert>
 

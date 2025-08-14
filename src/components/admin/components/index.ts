@@ -6,4 +6,6 @@ export { default as JobCard } from './JobCard';
 export { default as JobCardSkeleton } from './JobCardSkeleton';
 export { default as ActionButtons } from './ActionButtons';
 export { default as EmployerVerificationCard } from './EmployerVerificationCard';
-export { default as EmployerVerificationCardSkeleton } from './EmployerVerificationCardSkeleton'; 
+export { default as EmployerVerificationCardSkeleton } from './EmployerVerificationCardSkeleton';
+export { default as ResumeAdCard } from './ResumeAdCard';
+export { default as ResumeAdDetails } from './ResumeAdDetails'; 
