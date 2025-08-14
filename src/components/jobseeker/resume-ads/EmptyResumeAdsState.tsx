@@ -18,7 +18,9 @@ const EmptyResumeAdsState = () => {
         textAlign: 'center',
         borderRadius: 3,
         border: '1px solid #E0E0E0',
-        backgroundColor: '#fafafa'
+        backgroundColor: '#fafafa',
+        maxWidth: { xs: '100%', md: 900 },
+        mx: 'auto'
       }}
     >
       {/* آیکون */}
@@ -77,7 +79,6 @@ const EmptyResumeAdsState = () => {
           <Button
             variant="contained"
             size="large"
-            startIcon={<AddIcon />}
             sx={{
               backgroundColor: JOB_SEEKER_THEME.primary,
               color: 'white',
@@ -105,7 +106,6 @@ const EmptyResumeAdsState = () => {
           <Button
             variant="outlined"
             size="large"
-            startIcon={<SearchIcon />}
             sx={{
               borderColor: JOB_SEEKER_THEME.primary,
               color: JOB_SEEKER_THEME.primary,
@@ -137,7 +137,7 @@ const EmptyResumeAdsState = () => {
             lineHeight: 1.6
           }}
         >
-          💡 <strong>نکته:</strong> قبل از ثبت آگهی رزومه، حتماً رزومه خود را تکمیل کنید تا کارفرماها اطلاعات کاملی از شما داشته باشند.
+           <strong>نکته:</strong> قبل از ثبت آگهی رزومه، حتماً رزومه خود را تکمیل کنید تا کارفرماها اطلاعات کاملی از شما داشته باشند.
         </Typography>
       </Box>
     </Paper>
