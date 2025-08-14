@@ -201,11 +201,40 @@ export default function JobSeekerSubscriptionPlanSelector({
 				})}
 
 				{/* custom duration card */}
-				<Paper elevation={0} sx={{ p:{xs:1,sm:1.5}, textAlign:'center', borderRadius:2, boxShadow:'0 2px 8px rgba(76,175,80,0.05)', cursor:'pointer', position:'relative', border: useCustomDuration?`2px solid ${JOB_SEEKER_THEME.primary}`:'2px solid #e0e0e0', bgcolor:'background.paper', transition:'all 0.25s ease', flex:{ xs:'1 0 calc(100% - 16px)', sm:'1 0 calc(50% - 24px)', md:'1 0 calc(33.333% - 24px)', lg:'1 0 calc(25% - 24px)' }, maxWidth:'340px', height:{ xs:'60px', sm:'70px' }, display:'flex', alignItems:'center', justifyContent:'center', '&:hover':{ boxShadow:'0 4px 12px rgba(76,175,80,0.12)', borderColor:JOB_SEEKER_THEME.primary } }} onClick={()=>setUseCustomDuration(true)}>
+				<Paper
+					elevation={0}
+					sx={{
+						p: { xs: 1, sm: 1.5 },
+						textAlign: 'center',
+						borderRadius: 2,
+						boxShadow: '0 2px 8px rgba(76,175,80,0.05)',
+						cursor: 'pointer',
+						position: 'relative',
+						border: useCustomDuration
+							? `2px solid ${JOB_SEEKER_THEME.primary}`
+							: '2px solid #e0e0e0',
+						bgcolor: 'background.paper',
+						transition: 'all 0.25s ease',
+						minWidth: { xs: '80px', sm: '100px' },
+						maxWidth: { xs: '80px', sm: '100px' },
+						height: { xs: '60px', sm: '70px' },
+						display: 'flex',
+						alignItems: 'center',
+						justifyContent: 'center',
+						'&:hover': {
+							boxShadow: '0 4px 12px rgba(76,175,80,0.12)',
+							borderColor: JOB_SEEKER_THEME.primary
+						}
+					}}
+					onClick={() => setUseCustomDuration(true)}
+				>
 					{!useCustomDuration ? (
 						<Typography variant="h6" fontWeight="bold" sx={{ fontSize: { xs: '0.9rem', sm: '1.1rem' }, color: useCustomDuration ? JOB_SEEKER_THEME.primary : 'text.primary', lineHeight: 1.2 }}>دلخواه</Typography>
 					) : (
-						<TextField size="small" type="text" placeholder="۳" value={customDays} onChange={(e) => { let raw = e.target.value.replace(/[^0-9۰-۹]/g, ''); if (raw.length > 3) raw = raw.slice(0,3); const persianVal = raw.replace(/[0-9]/g, (d)=>'۰۱۲۳۴۵۶۷۸۹'[Number(d)]); setCustomDays(persianVal); const eng = persianVal.replace(/[۰-۹]/g, (d)=>'۰۱۲۳۴۵۶۷۸۹'.indexOf(d).toString()); let days = parseInt(eng)||0; if(days>365){days=365; setCustomDays(persianVal==='')?setCustomDays('۳۶۵'):setCustomDays('۳۶۵');} if(days>=3&&days<=365){onDurationChange(days);} else if(days===0){onDurationChange(0);} }} onBlur={()=>{const eng=customDays.replace(/[۰-۹]/g,(d)=>'۰۱۲۳۴۵۶۷۸۹'.indexOf(d).toString()); let d=parseInt(eng)||0; if(d<3&&customDays!==''){d=3;} if(d>365) d=365; if(d>0){setCustomDays(toPersianDigits(d.toString())); onDurationChange(d); }}} inputProps={{ maxLength:3, style:{textAlign:'center',fontSize:'0.8rem',direction:'rtl'} }} sx={{ '& .MuiOutlinedInput-root':{ borderRadius:1, height:28, width:'100%', '&.Mui-focused .MuiOutlinedInput-notchedOutline':{ borderColor: JOB_SEEKER_THEME.primary } } }} onClick={(e)=>e.stopPropagation()} onFocus={(e)=>e.stopPropagation()} />
+						<TextField size="small" type="text" placeholder="۳" value={customDays} onChange={(e) => { let raw = e.target.value.replace(/[^0-9۰-۹]/g, ''); if (raw.length > 3) raw = raw.slice(0,3); const persianVal = raw.replace(/[0-9]/g, (d)=>'۰۱۲۳۴۵۶۷۸۹'[Number(d)]); setCustomDays(persianVal); const eng = persianVal.replace(/[۰-۹]/g, (d)=>'۰۱۲۳۴۵۶۷۸۹'.indexOf(d).toString()); let days = parseInt(eng)||0; if(days>365){
+      days = 365;
+      setCustomDays(toPersianDigits('365'));
+  } if(days>=3&&days<=365){onDurationChange(days);} else if(days===0){onDurationChange(0);} }} onBlur={()=>{const eng=customDays.replace(/[۰-۹]/g,(d)=>'۰۱۲۳۴۵۶۷۸۹'.indexOf(d).toString()); let d=parseInt(eng)||0; if(d<3&&customDays!==''){d=3;} if(d>365) d=365; if(d>0){setCustomDays(toPersianDigits(d.toString())); onDurationChange(d); }}} inputProps={{ maxLength:3, style:{textAlign:'center',fontSize:'0.8rem',direction:'rtl'} }} sx={{ '& .MuiOutlinedInput-root':{ borderRadius:1, height:28, width:'100%', '&.Mui-focused .MuiOutlinedInput-notchedOutline':{ borderColor: JOB_SEEKER_THEME.primary } } }} onClick={(e)=>e.stopPropagation()} onFocus={(e)=>e.stopPropagation()} />
 					)}
 				</Paper>
 			</Box>
@@ -219,21 +248,21 @@ export default function JobSeekerSubscriptionPlanSelector({
 						const price = calculatePrice(plan, activeDuration);
 						return (
 							<Paper key={plan.id} elevation={0} sx={{ p:{xs:1.5,sm:3}, borderRadius:3, boxShadow:'0 4px 15px rgba(76,175,80,0.05)', cursor:'pointer', border:isSelected?`2px solid ${JOB_SEEKER_THEME.primary}`:'2px solid #e0e0e0', bgcolor:'background.paper', transition:'all 0.25s ease', flex:{ xs:'1 0 calc(100% - 16px)', sm:'1 0 calc(50% - 24px)', md:'1 0 calc(33.333% - 24px)', lg:'1 0 calc(25% - 24px)' }, maxWidth:'340px', position:'relative', overflow:'hidden', display:'flex', flexDirection:'column', justifyContent:'space-between', height:'100%', '&:hover':{ boxShadow:'0 6px 18px rgba(76,175,80,0.12)', borderColor:JOB_SEEKER_THEME.primary } }} onClick={()=>onPlanChange(plan)}>
-								<FormControlLabel 
-                                    value={plan.id} 
+								<FormControlLabel
+                                    value={plan.id}
                                     control={
-                                        <Radio 
-                                            sx={{ 
-                                                color: JOB_SEEKER_THEME.primary, 
+                                        <Radio
+                                            sx={{
+                                                color: JOB_SEEKER_THEME.primary,
                                                 '&.Mui-checked': { color: JOB_SEEKER_THEME.primary },
-                                                position: 'absolute', 
-                                                top: 12, 
-                                                right: 12 
-                                            }} 
+                                                position: 'absolute',
+                                                top: 12,
+                                                right: 12
+                                            }}
                                         />
-                                    } 
-                                    label="" 
-                                    sx={{ m: 0 }} 
+                                    }
+                                    label=""
+                                    sx={{ m: 0 }}
                                 />
 
 								<Box sx={{ textAlign:'center', mb:3 }}>
