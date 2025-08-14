@@ -201,7 +201,7 @@ export default function JobSeekerSubscriptionPlanSelector({
 				})}
 
 				{/* custom duration card */}
-				<Paper elevation={0} sx={{ p: { xs: 1, sm: 1.5 }, textAlign: 'center', borderRadius: 2, boxShadow: '0 2px 8px rgba(76,175,80,0.05)', cursor: 'pointer', position: 'relative', border: useCustomDuration ? `2px solid ${JOB_SEEKER_THEME.primary}` : '2px solid #e0e0e0', bgcolor: 'background.paper', transition: 'all 0.25s ease', flex:{ xs:'1 0 calc(50% - 16px)', sm:'1 0 calc(33.333% - 24px)', lg:'1 0 calc(25% - 24px)' }, maxWidth:'340px', height: { xs: '60px', sm: '70px' }, display: 'flex', alignItems: 'center', justifyContent: 'center', '&:hover': { boxShadow: '0 4px 12px rgba(76,175,80,0.12)', borderColor: JOB_SEEKER_THEME.primary } }} onClick={() => setUseCustomDuration(true)}>
+				<Paper elevation={0} sx={{ p:{xs:1,sm:1.5}, textAlign:'center', borderRadius:2, boxShadow:'0 2px 8px rgba(76,175,80,0.05)', cursor:'pointer', position:'relative', border: useCustomDuration?`2px solid ${JOB_SEEKER_THEME.primary}`:'2px solid #e0e0e0', bgcolor:'background.paper', transition:'all 0.25s ease', flex:{ xs:'1 0 calc(100% - 16px)', sm:'1 0 calc(33.333% - 24px)' }, maxWidth:'340px', height:{ xs:'60px', sm:'70px' }, display:'flex', alignItems:'center', justifyContent:'center', '&:hover':{ boxShadow:'0 4px 12px rgba(76,175,80,0.12)', borderColor:JOB_SEEKER_THEME.primary } }} onClick={()=>setUseCustomDuration(true)}>
 					{!useCustomDuration ? (
 						<Typography variant="h6" fontWeight="bold" sx={{ fontSize: { xs: '0.9rem', sm: '1.1rem' }, color: useCustomDuration ? JOB_SEEKER_THEME.primary : 'text.primary', lineHeight: 1.2 }}>دلخواه</Typography>
 					) : (
@@ -218,7 +218,7 @@ export default function JobSeekerSubscriptionPlanSelector({
 						const planInfo = getPlanInfo(plan);
 						const price = calculatePrice(plan, activeDuration);
 						return (
-							<Paper key={plan.id} elevation={0} sx={{ p:{xs:2,sm:3}, borderRadius:3, boxShadow:'0 4px 15px rgba(76,175,80,0.05)', cursor:'pointer', border:isSelected?`2px solid ${JOB_SEEKER_THEME.primary}`:'2px solid #e0e0e0', bgcolor:'background.paper', transition:'all 0.25s ease', flex:{ xs:'1 0 calc(50% - 16px)', sm:'1 0 calc(33.333% - 24px)', lg:'1 0 calc(25% - 24px)' }, maxWidth:'340px', position:'relative', overflow:'hidden', '&:hover':{ boxShadow:'0 6px 18px rgba(76,175,80,0.12)', borderColor:JOB_SEEKER_THEME.primary } }} onClick={()=>onPlanChange(plan)}>
+							<Paper key={plan.id} elevation={0} sx={{ p:{xs:1.5,sm:3}, borderRadius:3, boxShadow:'0 4px 15px rgba(76,175,80,0.05)', cursor:'pointer', border:isSelected?`2px solid ${JOB_SEEKER_THEME.primary}`:'2px solid #e0e0e0', bgcolor:'background.paper', transition:'all 0.25s ease', flex:{ xs:'1 0 calc(100% - 16px)', sm:'1 0 calc(33.333% - 24px)' }, maxWidth:'340px', position:'relative', overflow:'hidden', display:'flex', flexDirection:'column', justifyContent:'space-between', height:'100%', '&:hover':{ boxShadow:'0 6px 18px rgba(76,175,80,0.12)', borderColor:JOB_SEEKER_THEME.primary } }} onClick={()=>onPlanChange(plan)}>
 								<FormControlLabel value={plan.id} control={<Radio sx={{ color:JOB_SEEKER_THEME.primary, position:'absolute', top:12, right:12 }} />} label="" sx={{ m:0 }} />
 
 								<Box sx={{ textAlign:'center', mb:3 }}>
