@@ -70,7 +70,7 @@ export default function SubscriptionPlanSelector({
     const fetchPlans = async () => {
       try {
         setLoading(true);
-        const response = await apiGet('/subscriptions/plans/');
+        const response = await apiGet('/subscriptions/plans/?ad_type=J');
         const activePlans = (response.data as SubscriptionPlan[]).filter(plan => plan.active);
         setPlans(activePlans);
         

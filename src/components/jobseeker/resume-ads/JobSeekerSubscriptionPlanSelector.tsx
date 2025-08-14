@@ -61,14 +61,14 @@ export default function JobSeekerSubscriptionPlanSelector({
 		const fetchPlans = async () => {
 			try {
 				setLoading(true);
-				const response = await apiGet('/subscriptions/plans/');
-				const activePlans = (response.data as SubscriptionPlan[]).filter(plan => plan.active);
-				setPlans(activePlans);
+				const response = await apiGet('/subscriptions/plans/?ad_type=R');
+				const resumePlans = (response.data as SubscriptionPlan[]).filter(plan => plan.active);
+				setPlans(resumePlans);
 
-				if (activePlans.length > 0 && !autoSelectRef.current) {
+				if (resumePlans.length > 0 && !autoSelectRef.current) {
 					autoSelectRef.current = true;
 					setTimeout(() => {
-						onPlanChange(activePlans[0]);
+						onPlanChange(resumePlans[0]);
 						if (selectedDuration === 0) onDurationChange(15);
 					}, 100);
 				}

@@ -92,7 +92,8 @@ const SubscriptionPlansManagement: React.FC = () => {
     description: '',
     price_per_day: 0,
     active: true,
-    is_free: false
+    is_free: false,
+    plan_type: 'B'
   });
 
   // ref برای نگهداری مقادیر جاری state
@@ -239,7 +240,8 @@ const SubscriptionPlansManagement: React.FC = () => {
       description: '',
       price_per_day: 0,
       active: true,
-      is_free: false
+      is_free: false,
+      plan_type: 'B'
     });
     setDialogOpen(true);
   };
@@ -251,7 +253,8 @@ const SubscriptionPlansManagement: React.FC = () => {
       description: plan.description,
       price_per_day: plan.price_per_day,
       active: plan.active,
-      is_free: plan.is_free
+      is_free: plan.is_free,
+      plan_type: 'B' // Assuming a default value for plan_type
     });
     setDialogOpen(true);
   };

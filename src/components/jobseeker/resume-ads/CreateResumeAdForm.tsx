@@ -1042,7 +1042,6 @@ export default function CreateResumeAdForm({
               {/* عنوان آگهی */}
               <Box>
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
-                  <CampaignIcon sx={{ color: JOB_SEEKER_THEME.primary, fontSize: 20 }} />
                   <Typography variant="body2" fontWeight="medium" sx={{
                     fontSize: { xs: '0.7rem', sm: '0.875rem' },
                     lineHeight: { xs: 1.1, sm: 1.3 },
@@ -1093,7 +1092,6 @@ export default function CreateResumeAdForm({
                 {/* استان */}
                 <Box sx={{ flex: 1 }}>
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
-                    <LocationOnIcon sx={{ color: JOB_SEEKER_THEME.primary, fontSize: 20 }} />
                     <Typography variant="body2" fontWeight="medium" sx={{
                       fontSize: { xs: '0.7rem', sm: '0.875rem' },
                       lineHeight: { xs: 1.1, sm: 1.3 },
@@ -1150,7 +1148,6 @@ export default function CreateResumeAdForm({
                 {/* شهر */}
                 <Box sx={{ flex: 1 }}>
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
-                    <LocationOnIcon sx={{ color: JOB_SEEKER_THEME.primary, fontSize: 20 }} />
                     <Typography variant="body2" fontWeight="medium" sx={{
                       fontSize: { xs: '0.7rem', sm: '0.875rem' },
                       lineHeight: { xs: 1.1, sm: 1.3 },
@@ -1213,7 +1210,6 @@ export default function CreateResumeAdForm({
                 {/* گروه کاری */}
                 <Box sx={{ flex: 1 }}>
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
-                    <CategoryIcon sx={{ color: JOB_SEEKER_THEME.primary, fontSize: 20 }} />
                     <Typography variant="body2" fontWeight="medium" sx={{
                       fontSize: { xs: '0.7rem', sm: '0.875rem' },
                       lineHeight: { xs: 1.1, sm: 1.3 },
@@ -1270,7 +1266,6 @@ export default function CreateResumeAdForm({
                 {/* زیرگروه کاری */}
                 <Box sx={{ flex: 1 }}>
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
-                    <CategoryIcon sx={{ color: JOB_SEEKER_THEME.primary, fontSize: 20 }} />
                     <Typography variant="body2" fontWeight="medium" sx={{
                       fontSize: { xs: '0.7rem', sm: '0.875rem' },
                       lineHeight: { xs: 1.1, sm: 1.3 },
@@ -1335,7 +1330,6 @@ export default function CreateResumeAdForm({
                   {/* جنسیت */}
                   <Box sx={{ flex: 1 }}>
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
-                      <PeopleIcon sx={{ color: JOB_SEEKER_THEME.primary, fontSize: 20 }} />
                       <Typography variant="body2" fontWeight="medium" sx={{ fontSize: { xs: '0.7rem', sm: '0.875rem' }, lineHeight: { xs: 1.1, sm: 1.3 }, mb: { xs: 0.5, sm: 1 }, color: JOB_SEEKER_THEME.primary, fontWeight: 600 }}>
                         جنسیت (اختیاری)
                       </Typography>
@@ -1368,7 +1362,6 @@ export default function CreateResumeAdForm({
                   {/* وضعیت نظام وظیفه */}
                   <Box sx={{ flex: 1 }}>
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
-                      <WorkIcon sx={{ color: JOB_SEEKER_THEME.primary, fontSize: 20 }} />
                       <Typography variant="body2" fontWeight="medium" sx={{ fontSize: { xs: '0.7rem', sm: '0.875rem' }, lineHeight: { xs: 1.1, sm: 1.3 }, mb: { xs: 0.5, sm: 1 }, color: JOB_SEEKER_THEME.primary, fontWeight: 600 }}>
                         وضعیت نظام وظیفه (اختیاری)
                       </Typography>
@@ -1405,7 +1398,6 @@ export default function CreateResumeAdForm({
                   {/* مدرک */}
                   <Box sx={{ flex: 1 }}>
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
-                      <SchoolIcon sx={{ color: JOB_SEEKER_THEME.primary, fontSize: 20 }} />
                       <Typography variant="body2" fontWeight="medium" sx={{ fontSize: { xs: '0.7rem', sm: '0.875rem' }, lineHeight: { xs: 1.1, sm: 1.3 }, mb: { xs: 0.5, sm: 1 }, color: JOB_SEEKER_THEME.primary, fontWeight: 600 }}>
                         حداقل مدرک تحصیلی (اختیاری)
                       </Typography>
@@ -1438,7 +1430,6 @@ export default function CreateResumeAdForm({
                   {/* نوع کار */}
                   <Box sx={{ flex: 1 }}>
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
-                      <WorkIcon sx={{ color: JOB_SEEKER_THEME.primary, fontSize: 20 }} />
                       <Typography variant="body2" fontWeight="medium" sx={{ fontSize: { xs: '0.7rem', sm: '0.875rem' }, lineHeight: { xs: 1.1, sm: 1.3 }, mb: { xs: 0.5, sm: 1 }, color: JOB_SEEKER_THEME.primary, fontWeight: 600 }}>
                         نوع کار (اختیاری)
                       </Typography>
@@ -1471,7 +1462,6 @@ export default function CreateResumeAdForm({
                   {/* محدوده حقوق */}
                   <Box sx={{ flex: 1 }}>
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
-                      <AttachMoneyIcon sx={{ color: JOB_SEEKER_THEME.primary, fontSize: 20 }} />
                       <Typography variant="body2" fontWeight="medium" sx={{ fontSize: { xs: '0.7rem', sm: '0.875rem' }, lineHeight: { xs: 1.1, sm: 1.3 }, mb: { xs: 0.5, sm: 1 }, color: JOB_SEEKER_THEME.primary, fontWeight: 600 }}>
                         محدوده حقوق (اختیاری)
                       </Typography>
@@ -1507,30 +1497,17 @@ export default function CreateResumeAdForm({
               <Box sx={{ display: 'flex', gap: 2, justifyContent: 'center', flexDirection: { xs: 'column', sm: 'row' }, mt: 4 }}>
                 <Button
                   variant="contained"
+                  color="secondary"
                   size="large"
                   onClick={handleNextStep}
                   disabled={loading}
                   sx={{ 
-                    backgroundColor: JOB_SEEKER_THEME.primary,
-                    color: 'white',
-                    borderRadius: 2,
                     px: { xs: 4, sm: 6 },
                     py: { xs: 1.25, sm: 1.5 },
                     fontSize: { xs: '0.9rem', sm: '1rem' },
                     fontWeight: 600,
                     minWidth: { xs: '100%', sm: 200 },
-                    boxShadow: '0 4px 12px rgba(76, 175, 80, 0.3)',
-                    '&:hover': {
-                      backgroundColor: JOB_SEEKER_THEME.dark,
-                      boxShadow: '0 6px 16px rgba(76, 175, 80, 0.4)',
-                      transform: 'translateY(-1px)'
-                    },
-                    '&:disabled': {
-                      backgroundColor: '#ccc',
-                      boxShadow: 'none',
-                      transform: 'none'
-                    },
-                    transition: 'all 0.3s ease'
+                    borderRadius: 2
                   }}
                 >
                   ادامه - انتخاب اشتراک
@@ -1558,8 +1535,8 @@ export default function CreateResumeAdForm({
               onClick={handleBackStep}
               disabled={loading}
               sx={{
-                borderColor: JOB_SEEKER_THEME.primary,
-                color: JOB_SEEKER_THEME.primary,
+                borderColor: jobSeekerColors.primary,
+                color: jobSeekerColors.primary,
                 borderRadius: 2,
                 px: { xs: 3, sm: 4 },
                 py: { xs: 1.25, sm: 1.5 },
@@ -1567,9 +1544,9 @@ export default function CreateResumeAdForm({
                 fontWeight: 600,
                 minWidth: { xs: '100%', sm: 150 },
                 '&:hover': {
-                  borderColor: JOB_SEEKER_THEME.dark,
-                  color: JOB_SEEKER_THEME.dark,
-                  backgroundColor: 'rgba(76, 175, 80, 0.05)'
+                  borderColor: jobSeekerColors.dark,
+                  color: jobSeekerColors.dark,
+                  backgroundColor: `${jobSeekerColors.primary}0D`
                 }
               }}
             >
@@ -1579,30 +1556,17 @@ export default function CreateResumeAdForm({
             <Button
               type="submit"
               variant="contained"
+              color="secondary"
               size="large"
               disabled={loading || !hasResume || !selectedPlan}
               startIcon={loading ? <CircularProgress size={20} color="inherit" /> : <CheckCircleOutlineIcon />}
               sx={{
-                backgroundColor: JOB_SEEKER_THEME.primary,
-                color: 'white',
-                borderRadius: 2,
                 px: { xs: 4, sm: 6 },
                 py: { xs: 1.25, sm: 1.5 },
                 fontSize: { xs: '0.9rem', sm: '1rem' },
                 fontWeight: 600,
                 minWidth: { xs: '100%', sm: 200 },
-                boxShadow: '0 4px 12px rgba(76, 175, 80, 0.3)',
-                '&:hover': {
-                  backgroundColor: JOB_SEEKER_THEME.dark,
-                  boxShadow: '0 6px 16px rgba(76, 175, 80, 0.4)',
-                  transform: 'translateY(-1px)'
-                },
-                '&:disabled': {
-                  backgroundColor: '#ccc',
-                  boxShadow: 'none',
-                  transform: 'none'
-                },
-                transition: 'all 0.3s ease'
+                borderRadius: 2
               }}
             >
               {loading ? 'در حال ثبت و هدایت به پرداخت...' : 'ثبت آگهی و پرداخت'}
