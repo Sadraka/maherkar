@@ -72,9 +72,6 @@ export default function EditResumeAdPage() {
             mb: 2
           }} 
         />
-        <Typography color="text.secondary">
-          در حال بارگذاری اطلاعات آگهی رزومه...
-        </Typography>
       </Box>
     );
   }

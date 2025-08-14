@@ -758,9 +758,6 @@ export default function CreateResumeAdForm({
             mb: 2
           }} 
         />
-        <Typography color="text.secondary">
-          در حال بارگذاری اطلاعات...
-        </Typography>
       </Box>
     );
   }

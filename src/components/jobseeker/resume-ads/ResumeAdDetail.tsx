@@ -199,9 +199,6 @@ export default function ResumeAdDetail({ adId }: ResumeAdDetailProps) {
             mb: 2
           }} 
         />
-        <Typography color="text.secondary">
-          در حال بارگذاری جزئیات آگهی رزومه...
-        </Typography>
       </Box>
     );
   }

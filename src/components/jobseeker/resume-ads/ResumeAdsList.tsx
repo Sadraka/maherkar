@@ -128,9 +128,6 @@ export default function ResumeAdsList() {
               mb: 2
             }} 
           />
-          <Typography color="text.secondary">
-            در حال بارگذاری آگهی‌های رزومه...
-          </Typography>
         </Box>
       );
     }

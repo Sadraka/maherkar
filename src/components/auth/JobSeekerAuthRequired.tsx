@@ -4,6 +4,7 @@ import React, { useEffect, useState, ReactNode } from 'react';
 import { useAuth, useAuthStore, useAuthActions } from '@/store/authStore';
 import { useRouter } from 'next/navigation';
 import { Box, CircularProgress, Typography } from '@mui/material';
+import { JOB_SEEKER_THEME } from '@/constants/colors';
 import authService from '@/lib/authService';
 import cookieService, { COOKIE_NAMES } from '@/lib/cookieService';
 
@@ -85,8 +86,7 @@ export default function JobSeekerAuthRequired({ children, redirectTo = '/login' 
                     gap: 2
                 }}
             >
-                <CircularProgress size={40} />
-                <Typography>در حال بررسی وضعیت دسترسی...</Typography>
+                <CircularProgress size={40} sx={{ color: JOB_SEEKER_THEME.primary }} />
             </Box>
         );
     }

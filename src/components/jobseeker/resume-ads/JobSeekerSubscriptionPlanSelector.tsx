@@ -11,7 +11,8 @@ import {
 	Radio,
 	RadioGroup,
 	FormControlLabel,
-	Chip
+	Chip,
+	CircularProgress
 } from '@mui/material';
 import { apiGet } from '@/lib/axios';
 import { JOB_SEEKER_THEME } from '@/constants/colors';
@@ -170,7 +171,7 @@ export default function JobSeekerSubscriptionPlanSelector({
 	if (loading) {
 		return (
 			<Box sx={{ display: 'flex', justifyContent: 'center', py: 4 }}>
-				<Typography>در حال بارگذاری...</Typography>
+				<CircularProgress size={40} sx={{ color: JOB_SEEKER_THEME.primary }} />
 			</Box>
 		);
 	}
