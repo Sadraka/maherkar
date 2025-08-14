@@ -92,7 +92,15 @@ export default function JobSeekerLayout({ children }: { children: React.ReactNod
     // بررسی برای زیرصفحات (فقط برای آیتم‌هایی که زیرمنو ندارند)
     if (path === '/jobseeker/applications' && pathname?.startsWith('/jobseeker/applications/')) return true;
     if (path === '/jobseeker/job-ads' && pathname?.startsWith('/jobseeker/job-ads/')) return true;
-    if (path === '/jobseeker/resume-ads' && pathname?.startsWith('/jobseeker/resume-ads/')) return true;
+    // برای جلوگیری از انتخاب هم‌زمان "ایجاد آگهی رزومه" و "آگهی‌های رزومه"
+    // زمانی که آدرس در حالت ایجاد است (create) فقط آیتم ایجاد انتخاب شود
+    if (
+      path === '/jobseeker/resume-ads' &&
+      pathname?.startsWith('/jobseeker/resume-ads/') &&
+      !pathname?.startsWith('/jobseeker/resume-ads/create')
+    ) {
+      return true;
+    }
     if (path === '/jobseeker/profile' && pathname?.startsWith('/jobseeker/profile/')) return true;
     
     return false;
