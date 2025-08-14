@@ -146,7 +146,7 @@ export default function JobSeekerSubscriptionPlanSelector({
 		};
 	};
 
-	const activeDuration = useCustomDuration ? parseInt(customDays) || 0 : selectedDuration;
+	const activeDuration = useCustomDuration ? (parseInt(customDays.replace(/[۰-۹]/g, (d) => '۰۱۲۳۴۵۶۷۸۹'.indexOf(d).toString())) || 0) : selectedDuration;
 
 	if (loading) {
 		return (
@@ -184,69 +184,71 @@ export default function JobSeekerSubscriptionPlanSelector({
 			<Typography variant="subtitle1" fontWeight="bold" sx={{ mb: 2, color: JOB_SEEKER_THEME.primary, fontSize: { xs: '1rem', sm: '1.1rem' } }}>
 				مدت زمان نمایش
 			</Typography>
-			<Box sx={{ display: 'grid', gridTemplateColumns: { xs: 'repeat(2, 1fr)', sm: 'repeat(2, 1fr)', md: 'repeat(4, 1fr)' }, gap: { xs: 1.5, sm: 2 }, mb: 4 }}>
+			<Box sx={{ display: 'flex', gap: { xs: 0.5, sm: 1 }, mb: 3, flexWrap: 'wrap', justifyContent: 'center' }}>
 				{durationOptions.map((option) => {
 					const isSelected = !useCustomDuration && selectedDuration === option.days;
 					return (
 						<Paper
 							key={option.days}
 							elevation={0}
-							sx={{ p: { xs: 1.5, sm: 2 }, textAlign: 'center', borderRadius: 3, boxShadow: '0 4px 15px rgba(76,175,80,0.05)', cursor: 'pointer', position: 'relative', border: isSelected ? `2px solid ${JOB_SEEKER_THEME.primary}` : `2px solid transparent`, bgcolor: isSelected ? 'rgba(76,175,80,0.05)' : 'background.paper', transition: 'all 0.25s ease', '&:hover': { boxShadow: '0 6px 18px rgba(76,175,80,0.12)', transform: 'translateY(-2px)', borderColor: JOB_SEEKER_THEME.primary } }}
+							sx={{ p: { xs: 1, sm: 1.5 }, textAlign: 'center', borderRadius: 2, boxShadow: '0 2px 8px rgba(76,175,80,0.05)', cursor: 'pointer', position: 'relative', border: isSelected ? `2px solid ${JOB_SEEKER_THEME.primary}` : '2px solid #e0e0e0', bgcolor: 'background.paper', transition: 'all 0.25s ease', minWidth: { xs: '80px', sm: '100px' }, maxWidth: { xs: '80px', sm: '100px' }, height: { xs: '60px', sm: '70px' }, display: 'flex', alignItems: 'center', justifyContent: 'center', '&:hover': { boxShadow: '0 4px 12px rgba(76,175,80,0.12)', borderColor: JOB_SEEKER_THEME.primary } }}
 							onClick={() => { setUseCustomDuration(false); setCustomDays(''); onDurationChange(option.days); }}
 						>
-							{option.popular && (
-								<Box sx={{ position: 'absolute', top: -8, left: '50%', transform: 'translateX(-50%)', bgcolor: '#ff4081', color: 'white', px: 1.5, py: 0.3, borderRadius: 10, fontSize: '0.7rem', fontWeight: 'bold', zIndex: 1 }}>محبوب</Box>
-							)}
-							<AccessTimeIcon sx={{ fontSize: { xs: 24, sm: 28 }, color: isSelected ? JOB_SEEKER_THEME.primary : 'text.secondary', mb: { xs: 0.5, sm: 1 } }} />
-							<Typography variant="h6" fontWeight="bold" sx={{ mb: 0.5, fontSize: { xs: '0.9rem', sm: '1.25rem' }, color: isSelected ? JOB_SEEKER_THEME.primary : 'text.primary' }}>{option.label}</Typography>
+							{option.popular && <Box sx={{ position: 'absolute', top: -8, left: '50%', transform: 'translateX(-50%)', bgcolor: '#ff4081', color: 'white', px: 1, py: 0.2, borderRadius: 10, fontSize: '0.6rem', fontWeight: 'bold', zIndex: 1 }}>محبوب</Box>}
+							<Typography variant="h6" fontWeight="bold" sx={{ fontSize: { xs: '0.9rem', sm: '1.1rem' }, color: isSelected ? JOB_SEEKER_THEME.primary : 'text.primary', lineHeight: 1.2 }}>{option.label}</Typography>
 						</Paper>
 					);
 				})}
-			</Box>
 
-			<Paper elevation={0} sx={{ p: { xs: 2, sm: 3 }, borderRadius: 3, border: useCustomDuration ? `2px solid ${JOB_SEEKER_THEME.primary}` : '2px solid #e0e0e0', mb: 4, transition: 'all 0.25s ease', '&:hover': { borderColor: JOB_SEEKER_THEME.primary } }}>
-				<Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}>
-					<Radio checked={useCustomDuration} onChange={() => setUseCustomDuration(true)} sx={{ color: JOB_SEEKER_THEME.primary }} />
-					<Typography variant="subtitle1" fontWeight="bold">انتخاب روز دلخواه</Typography>
-				</Box>
-				<TextField fullWidth type="number" label="تعداد روز (۱ تا ۳۶۵)" value={customDays} onChange={(e) => { setCustomDays(e.target.value); setUseCustomDuration(true); const days = parseInt(e.target.value) || 0; if (days >= 1 && days <= 365) { onDurationChange(days); } }} inputProps={{ min: 1, max: 365 }} sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2, '&.Mui-focused .MuiOutlinedInput-notchedOutline': { borderColor: JOB_SEEKER_THEME.primary } } }} />
-			</Paper>
+				{/* custom duration card */}
+				<Paper elevation={0} sx={{ p: { xs: 1, sm: 1.5 }, textAlign: 'center', borderRadius: 2, boxShadow: '0 2px 8px rgba(76,175,80,0.05)', cursor: 'pointer', position: 'relative', border: useCustomDuration ? `2px solid ${JOB_SEEKER_THEME.primary}` : '2px solid #e0e0e0', bgcolor: 'background.paper', transition: 'all 0.25s ease', flex:{ xs:'1 0 calc(50% - 16px)', sm:'1 0 calc(33.333% - 24px)', lg:'1 0 calc(25% - 24px)' }, maxWidth:'340px', height: { xs: '60px', sm: '70px' }, display: 'flex', alignItems: 'center', justifyContent: 'center', '&:hover': { boxShadow: '0 4px 12px rgba(76,175,80,0.12)', borderColor: JOB_SEEKER_THEME.primary } }} onClick={() => setUseCustomDuration(true)}>
+					{!useCustomDuration ? (
+						<Typography variant="h6" fontWeight="bold" sx={{ fontSize: { xs: '0.9rem', sm: '1.1rem' }, color: useCustomDuration ? JOB_SEEKER_THEME.primary : 'text.primary', lineHeight: 1.2 }}>دلخواه</Typography>
+					) : (
+						<TextField size="small" type="text" placeholder="۳" value={customDays} onChange={(e) => { let raw = e.target.value.replace(/[^0-9۰-۹]/g, ''); if (raw.length > 3) raw = raw.slice(0,3); const persianVal = raw.replace(/[0-9]/g, (d)=>'۰۱۲۳۴۵۶۷۸۹'[Number(d)]); setCustomDays(persianVal); const eng = persianVal.replace(/[۰-۹]/g, (d)=>'۰۱۲۳۴۵۶۷۸۹'.indexOf(d).toString()); let days = parseInt(eng)||0; if(days>365){days=365; setCustomDays(persianVal==='')?setCustomDays('۳۶۵'):setCustomDays('۳۶۵');} if(days>=3&&days<=365){onDurationChange(days);} else if(days===0){onDurationChange(0);} }} onBlur={()=>{const eng=customDays.replace(/[۰-۹]/g,(d)=>'۰۱۲۳۴۵۶۷۸۹'.indexOf(d).toString()); let d=parseInt(eng)||0; if(d<3&&customDays!==''){d=3;} if(d>365) d=365; if(d>0){setCustomDays(toPersianDigits(d.toString())); onDurationChange(d); }}} inputProps={{ maxLength:3, style:{textAlign:'center',fontSize:'0.8rem',direction:'rtl'} }} sx={{ '& .MuiOutlinedInput-root':{ borderRadius:1, height:28, width:'100%', '&.Mui-focused .MuiOutlinedInput-notchedOutline':{ borderColor: JOB_SEEKER_THEME.primary } } }} onClick={(e)=>e.stopPropagation()} onFocus={(e)=>e.stopPropagation()} />
+					)}
+				</Paper>
+			</Box>
 
 			<Typography variant="subtitle1" fontWeight="bold" sx={{ mb: 3, color: JOB_SEEKER_THEME.primary, fontSize: { xs: '1rem', sm: '1.1rem' } }}>انتخاب طرح اشتراک</Typography>
 			<RadioGroup value={selectedPlan?.id || ''} onChange={(e) => { const plan = plans.find(p => p.id === e.target.value); if (plan) onPlanChange(plan); }}>
-				<Box sx={{ display: 'flex', flexDirection: 'column', gap: { xs: 2, sm: 3 } }}>
+				<Box sx={{ display: 'flex', flexWrap: 'wrap', gap: { xs: 2, sm: 3 }, justifyContent: 'center' }}>
 					{plans.map((plan) => {
 						const isSelected = selectedPlan?.id === plan.id;
 						const planInfo = getPlanInfo(plan);
 						const price = calculatePrice(plan, activeDuration);
 						return (
-							<Paper key={plan.id} elevation={0} sx={{ p: { xs: 2, sm: 3 }, borderRadius: 3, boxShadow: '0 4px 15px rgba(76,175,80,0.05)', cursor: 'pointer', border: isSelected ? `2px solid ${JOB_SEEKER_THEME.primary}` : '2px solid #e0e0e0', bgcolor: isSelected ? 'rgba(76,175,80,0.05)' : 'background.paper', transition: 'all 0.25s ease', '&:hover': { boxShadow: '0 6px 18px rgba(76,175,80,0.12)', transform: 'translateY(-2px)', borderColor: JOB_SEEKER_THEME.primary } }} onClick={() => onPlanChange(plan)}>
-							<Box sx={{ display: 'flex', alignItems: { xs: 'flex-start', sm: 'center' }, justifyContent: 'space-between', flexDirection: { xs: 'column', sm: 'row' }, gap: { xs: 1.5, sm: 2 } }}>
-								<Box sx={{ display: 'flex', alignItems: { xs: 'flex-start', sm: 'center' }, gap: { xs: 1.5, sm: 2 }, flex: 1, width: '100%' }}>
-									<FormControlLabel value={plan.id} control={<Radio sx={{ color: JOB_SEEKER_THEME.primary, alignSelf: { xs: 'flex-start', sm: 'center' }, mt: { xs: 0.5, sm: 0 } }} />} label="" sx={{ m: 0, alignSelf: { xs: 'flex-start', sm: 'center' } }} />
-									<Box sx={{ p: { xs: 1, sm: 1.5 }, borderRadius: 2, bgcolor: planInfo.color, color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>{planInfo.icon}</Box>
-									<Box sx={{ flex: 1, minWidth: 0 }}>
-										<Box sx={{ display: 'flex', alignItems: { xs: 'flex-start', sm: 'center' }, gap: 1, mb: 0.5, flexDirection: { xs: 'column', sm: 'row' }, flexWrap: 'wrap' }}>
-											<Typography variant="h6" fontWeight="bold" sx={{ fontSize: { xs: '1rem', sm: '1.25rem' }, lineHeight: { xs: 1.2, sm: 1.3 } }}>{plan.name}</Typography>
-											<Chip label={planInfo.badge} size="small" sx={{ bgcolor: planInfo.color, color: 'white', fontWeight: 'bold', fontSize: { xs: '0.7rem', sm: '0.75rem' }, height: { xs: 20, sm: 24 } }} />
-										</Box>
-										<Typography variant="body2" color="text.secondary" sx={{ fontSize: { xs: '0.8rem', sm: '0.875rem' }, lineHeight: { xs: 1.3, sm: 1.4 } }}>{planInfo.description}</Typography>
-									</Box>
+							<Paper key={plan.id} elevation={0} sx={{ p:{xs:2,sm:3}, borderRadius:3, boxShadow:'0 4px 15px rgba(76,175,80,0.05)', cursor:'pointer', border:isSelected?`2px solid ${JOB_SEEKER_THEME.primary}`:'2px solid #e0e0e0', bgcolor:'background.paper', transition:'all 0.25s ease', flex:{ xs:'1 0 calc(50% - 16px)', sm:'1 0 calc(33.333% - 24px)', lg:'1 0 calc(25% - 24px)' }, maxWidth:'340px', position:'relative', overflow:'hidden', '&:hover':{ boxShadow:'0 6px 18px rgba(76,175,80,0.12)', borderColor:JOB_SEEKER_THEME.primary } }} onClick={()=>onPlanChange(plan)}>
+								<FormControlLabel value={plan.id} control={<Radio sx={{ color:JOB_SEEKER_THEME.primary, position:'absolute', top:12, right:12 }} />} label="" sx={{ m:0 }} />
+
+								<Box sx={{ textAlign:'center', mb:3 }}>
+									<Chip label={plan.name} size="medium" sx={{ bgcolor:planInfo.color, color:'white', fontWeight:'bold', fontSize:'1rem', height:32, px:2 }} />
 								</Box>
-								<Box sx={{ textAlign: { xs: 'center', sm: 'left' }, mt: { xs: 2, sm: 0 }, alignSelf: { xs: 'stretch', sm: 'center' }, minWidth: { xs: 'auto', sm: '120px' }, width: { xs: '100%', sm: 'auto' } }}>
+
+								<Box sx={{ textAlign:'center', mb:3 }}>
 									{plan.is_free ? (
-										<Typography variant="h5" fontWeight="bold" color="success.main" sx={{ fontSize: { xs: '1.2rem', sm: '1.5rem' }, lineHeight: 1.2 }}>رایگان</Typography>
+										<Typography variant="h5" fontWeight="bold" color="success.main" sx={{ fontSize:{xs:'1.3rem', sm:'1.5rem'}, mb:1 }}>رایگان</Typography>
 									) : (
-										<Box sx={{ display: 'flex', flexDirection: 'column', alignItems: { xs: 'center', sm: 'flex-end' } }}>
-											<Typography variant="h5" fontWeight="bold" color="primary" sx={{ fontSize: { xs: '1.1rem', sm: '1.5rem' }, lineHeight: 1.2, textAlign: { xs: 'center', sm: 'right' } }}>{toPersianDigits(price.toLocaleString())} تومان</Typography>
-											<Typography variant="caption" color="text.secondary" sx={{ fontSize: { xs: '0.7rem', sm: '0.75rem' }, textAlign: { xs: 'center', sm: 'right' }, mt: 0.5 }}>برای {toPersianDigits(activeDuration)} روز</Typography>
-										</Box>
+										<>
+											<Typography variant="h5" fontWeight="bold" sx={{ fontSize:{xs:'1.2rem', sm:'1.4rem'}, mb:0.5, color: JOB_SEEKER_THEME.primary }}>{toPersianDigits(price.toLocaleString())} تومان</Typography>
+											<Typography variant="caption" color="text.secondary" sx={{ fontSize:'0.75rem' }}>برای {toPersianDigits(activeDuration)} روز</Typography>
+										</>
 									)}
 								</Box>
-							</Box>
-						</Paper>
-					);
-				})}
+
+								<Box sx={{ mb:3 }}>
+									{(plan.description||'').split('\n').filter(Boolean).slice(0,3).map((f,i)=>(
+										<Box key={i} sx={{ display:'flex', alignItems:'center', gap:1, mb:1, fontSize:'0.85rem' }}>
+											<Box sx={{ width:6, height:6, borderRadius:'50%', bgcolor:JOB_SEEKER_THEME.primary, flexShrink:0 }} />
+											<Typography variant="body2" sx={{ fontSize:'inherit' }}>{f}</Typography>
+										</Box>
+									))}
+								</Box>
+
+								<Button variant={isSelected?'contained':'outlined'} fullWidth sx={{ borderRadius:2, fontWeight:'bold', textTransform:'none', py:1, ...(isSelected?{ bgcolor:JOB_SEEKER_THEME.primary, color:'white', '&:hover':{ bgcolor:JOB_SEEKER_THEME.dark }}:{ borderColor:JOB_SEEKER_THEME.primary, color:JOB_SEEKER_THEME.primary, '&:hover':{ borderColor:JOB_SEEKER_THEME.dark, color:JOB_SEEKER_THEME.dark }}) }}>{isSelected?'انتخاب شده':'انتخاب این طرح'}</Button>
+							</Paper>
+						);
+					})}
 				</Box>
 			</RadioGroup>
 
@@ -280,7 +282,7 @@ export default function JobSeekerSubscriptionPlanSelector({
 								<Box sx={{ borderTop: '2px solid rgba(76,175,80,0.2)', pt: 2, mt: 1 }}>
 									<Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: { xs: 'flex-start', sm: 'center' }, flexDirection: { xs: 'column', sm: 'row' }, gap: { xs: 1, sm: 0 } }}>
 										<Typography variant="h6" fontWeight="bold" sx={{ fontSize: { xs: '1.1rem', sm: '1.25rem' } }}>مجموع قابل پرداخت:</Typography>
-										<Typography variant="h5" fontWeight="bold" color="primary" sx={{ fontSize: { xs: '1.3rem', sm: '1.5rem' }, textAlign: { xs: 'left', sm: 'right' } }}>{toPersianDigits(calculatePrice(selectedPlan, activeDuration).toLocaleString())} تومان</Typography>
+										<Typography variant="h5" fontWeight="bold" sx={{ fontSize: { xs: '1.3rem', sm: '1.5rem' }, textAlign: { xs: 'left', sm: 'right' }, color: JOB_SEEKER_THEME.primary }}>{toPersianDigits(calculatePrice(selectedPlan, activeDuration).toLocaleString())} تومان</Typography>
 									</Box>
 								</Box>
 							</>
