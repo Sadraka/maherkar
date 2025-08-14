@@ -25,8 +25,8 @@ const ResumeAdsHeader = ({ showCreateButton = true }: ResumeAdsHeaderProps) => {
       justifyContent: 'flex-start',
       alignItems: { xs: 'stretch', sm: 'center' },
       gap: 2,
-      textAlign: 'right',
-      direction: 'rtl'
+      textAlign: 'left',
+      direction: 'ltr'
     }}>
       {/* عنوان و توضیح */}
       <Box>
