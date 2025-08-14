@@ -221,10 +221,13 @@ const PaymentAdminDetails: React.FC<PaymentAdminDetailsProps> = ({ payment, onCl
 
   const navigateToJobs = () => {
     if (typeof window !== 'undefined') {
+      // تعیین نوع آگهی بر اساس ad_type
+      const adTypeParam = payment.ad_type === 'R' ? 'resume' : 'job';
+      
       if (payment.id) {
-        window.location.hash = `#jobs?search=${payment.id}`;
+        window.location.hash = `#jobs?search=${payment.id}&type=${adTypeParam}`;
       } else {
-        window.location.hash = '#jobs';
+        window.location.hash = `#jobs?type=${adTypeParam}`;
       }
     }
   };

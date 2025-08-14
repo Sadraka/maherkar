@@ -297,15 +297,18 @@ const SubscriptionAdminDetails: React.FC<SubscriptionAdminDetailsProps> = ({ sub
 
   const navigateToJobs = () => {
     if (typeof window !== 'undefined') {
+      // تعیین نوع آگهی بر اساس ad_type یا user_type
+      const adTypeParam = subscription.ad_type === 'R' ? 'resume' : 'job';
+      
       // جستجو بر اساس شناسه اشتراک یا عنوان آگهی
       if (subscription.advertisement?.id) {
-        window.location.hash = `#jobs?search=${subscription.advertisement.id}`;
+        window.location.hash = `#jobs?search=${subscription.advertisement.id}&type=${adTypeParam}`;
       } else if (subscription.advertisement?.title) {
-        window.location.hash = `#jobs?search=${encodeURIComponent(subscription.advertisement.title)}`;
+        window.location.hash = `#jobs?search=${encodeURIComponent(subscription.advertisement.title)}&type=${adTypeParam}`;
       } else if (subscription.id) {
-        window.location.hash = `#jobs?search=${subscription.id}`;
+        window.location.hash = `#jobs?search=${subscription.id}&type=${adTypeParam}`;
       } else {
-        window.location.hash = '#jobs';
+        window.location.hash = `#jobs?type=${adTypeParam}`;
       }
     }
   };

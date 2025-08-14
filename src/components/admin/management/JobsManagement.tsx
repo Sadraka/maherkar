@@ -284,13 +284,6 @@ const JobsManagement: React.FC = () => {
     }
   }, [page, pageSize, debouncedSearchQuery, statusFilter, sortBy, sortOrder]);
 
-  // useEffect برای fetchResumeAds
-  useEffect(() => {
-    if (adType === 'resume') {
-      fetchResumeAds();
-    }
-  }, [fetchResumeAds, adType]);
-
   // useCallback برای handleHashChange
   const handleHashChange = useCallback(() => {
     if (typeof window === 'undefined') return;
@@ -300,15 +293,25 @@ const JobsManagement: React.FC = () => {
     if (hash.includes('#jobs?search=')) {
       const urlParams = new URLSearchParams(hash.split('?')[1]);
       const searchParam = urlParams.get('search');
+      const typeParam = urlParams.get('type'); // برای تشخیص نوع آگهی
       
       if (searchParam && searchParam !== searchQueryRef.current) {
         setSearchInput(searchParam);
         setIsSearching(true);
         setPage(1);
-        // فراخوانی مستقیم جستجو با تاخیر کوتاه
+        
+        // تنظیم نوع آگهی بر اساس URL parameter
+        if (typeParam === 'resume') {
+          setAdType('resume');
+        } else if (typeParam === 'job') {
+          setAdType('job');
+        }
+        // اگر type مشخص نباشد، adType فعلی حفظ می‌شود
+        
+        // فراخوانی مستقیم جستجو با تاخیر بیشتر (برای اطمینان از update شدن adType)
         setTimeout(() => {
           setSearchQuery(searchParam);
-        }, 100);
+        }, 200);
       }
     } else if (hash === '#jobs') {
       // اگر بدون پارامتر جستجو به jobs آمده، جستجو را پاک کن
@@ -333,14 +336,14 @@ const JobsManagement: React.FC = () => {
     }
   }, [handleHashChange]);
 
-  // Debounced search effect
+  // Main fetch effect
   useEffect(() => {
     if (adType === 'job') {
       fetchJobs();
     } else {
       fetchResumeAds();
     }
-  }, [adType, fetchJobs, fetchResumeAds]);
+  }, [adType, fetchJobs, fetchResumeAds, page, pageSize, debouncedSearchQuery, statusFilter, sortBy, sortOrder]);
 
   // Reset page when changing ad type
   useEffect(() => {
