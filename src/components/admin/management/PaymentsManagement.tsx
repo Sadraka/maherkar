@@ -342,7 +342,6 @@ const PaymentsManagement: React.FC = () => {
     'طرح',
     'وضعیت',
     'تاریخ',
-    'آگهی',
     'عملیات'
   ];
 
@@ -951,7 +950,7 @@ const PaymentsManagement: React.FC = () => {
                 boxShadow: '0 2px 8px rgba(0,0,0,0.04)'
               }}
             >
-              <TableContainer sx={{ maxHeight: '70vh', overflowX: 'auto' }}>
+              <TableContainer sx={{ overflowX: 'auto' }}>
             <Table>
                   <TableHead sx={{
                     bgcolor: ADMIN_THEME.bgLight,
@@ -972,7 +971,6 @@ const PaymentsManagement: React.FC = () => {
                       <TableCell>طرح</TableCell>
                   <TableCell>وضعیت</TableCell>
                   <TableCell>تاریخ</TableCell>
-                      <TableCell>آگهی</TableCell>
                       <TableCell sx={{ textAlign: 'center', minWidth: 120, py: 2 }}>
                         <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 0.5 }}>
                           <Typography variant="body2" sx={{ fontWeight: 600, color: ADMIN_THEME.primary }}>
@@ -1034,11 +1032,6 @@ const PaymentsManagement: React.FC = () => {
                     </TableCell>
                     <TableCell>
                       {new Date(payment.created_at).toLocaleDateString('fa-IR')}
-                    </TableCell>
-                    <TableCell>
-                          <Typography variant="body2" sx={{ color: ADMIN_THEME.dark, whiteSpace: 'normal', wordBreak: 'break-word', lineHeight: 1.3, maxWidth: 180 }}>
-                            {payment.title || 'آگهی ایجاد نشده'}
-                      </Typography>
                     </TableCell>
                         <TableCell sx={{ textAlign: 'center', minWidth: 80, py: 2 }}>
                           <IconButton

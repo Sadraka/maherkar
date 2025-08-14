@@ -1119,7 +1119,7 @@ const SubscriptionsManagement: React.FC = () => {
                 boxShadow: '0 2px 8px rgba(0,0,0,0.04)'
               }}
             >
-              <TableContainer sx={{ maxHeight: '70vh', overflowX: 'auto' }}>
+              <TableContainer sx={{ overflowX: 'auto' }}>
             <Table>
                   <TableHead sx={{
                     bgcolor: ADMIN_THEME.bgLight,
