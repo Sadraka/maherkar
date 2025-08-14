@@ -891,8 +891,13 @@ export default function ResumeAdDetails({ resumeAd, onClose, onApprove, onReject
                         '&:hover': { color: ADMIN_THEME.primary }
                       }}
                       onClick={() => {
-                        if (typeof window !== 'undefined' && resumeAd.job_seeker_detail?.full_name) {
-                          window.location.hash = `#users?search=${encodeURIComponent(resumeAd.job_seeker_detail.full_name)}`;
+                        if (typeof window !== 'undefined') {
+                          if (resumeAd.job_seeker_detail?.phone) {
+                            // جستجو بر اساس شماره تلفن (یونیک‌ترین گزینه)
+                            window.location.hash = `#users?search=${resumeAd.job_seeker_detail.phone}`;
+                          } else if (resumeAd.job_seeker_detail?.full_name) {
+                            window.location.hash = `#users?search=${encodeURIComponent(resumeAd.job_seeker_detail.full_name)}`;
+                          }
                         }
                       }}
                     >

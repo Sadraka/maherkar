@@ -882,8 +882,13 @@ const JobAdminDetails: React.FC<JobAdminDetailsProps> = ({ job, onApprove, onRej
                         '&:hover': { color: ADMIN_THEME.primary }
                       }}
                       onClick={() => {
-                        if (typeof window !== 'undefined' && job.employer_detail?.full_name) {
-                          window.location.hash = `#users?search=${encodeURIComponent(job.employer_detail.full_name)}`;
+                        if (typeof window !== 'undefined') {
+                          if (job.employer_detail?.phone) {
+                            // جستجو بر اساس شماره تلفن (یونیک‌ترین گزینه)
+                            window.location.hash = `#users?search=${job.employer_detail.phone}`;
+                          } else if (job.employer_detail?.full_name) {
+                            window.location.hash = `#users?search=${encodeURIComponent(job.employer_detail.full_name)}`;
+                          }
                         }
                       }}
                     >

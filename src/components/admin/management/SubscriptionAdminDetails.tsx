@@ -282,7 +282,10 @@ const SubscriptionAdminDetails: React.FC<SubscriptionAdminDetailsProps> = ({ sub
 
   const navigateToUsers = () => {
     if (typeof window !== 'undefined') {
-      if (subscription.owner?.id) {
+      if (subscription.owner?.phone) {
+        // جستجو بر اساس شماره تلفن (یونیک‌ترین گزینه)
+        window.location.hash = `#users?search=${subscription.owner.phone}`;
+      } else if (subscription.owner?.id) {
         window.location.hash = `#users?search=${subscription.owner.id}`;
       } else if (subscription.owner?.full_name) {
         window.location.hash = `#users?search=${encodeURIComponent(subscription.owner.full_name)}`;
@@ -294,8 +297,12 @@ const SubscriptionAdminDetails: React.FC<SubscriptionAdminDetailsProps> = ({ sub
 
   const navigateToJobs = () => {
     if (typeof window !== 'undefined') {
-      // همیشه با شناسه پرداخت جستجو کن
-      if (subscription.id) {
+      // جستجو بر اساس شناسه اشتراک یا عنوان آگهی
+      if (subscription.advertisement?.id) {
+        window.location.hash = `#jobs?search=${subscription.advertisement.id}`;
+      } else if (subscription.advertisement?.title) {
+        window.location.hash = `#jobs?search=${encodeURIComponent(subscription.advertisement.title)}`;
+      } else if (subscription.id) {
         window.location.hash = `#jobs?search=${subscription.id}`;
       } else {
         window.location.hash = '#jobs';

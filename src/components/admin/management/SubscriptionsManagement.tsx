@@ -783,6 +783,22 @@ const SubscriptionsManagement: React.FC = () => {
               }
             }}
           />
+          
+          <Button
+            variant="outlined"
+            onClick={handleSearch}
+            startIcon={<Search />}
+            sx={{
+              borderColor: ADMIN_THEME.primary,
+              color: ADMIN_THEME.primary,
+              '&:hover': {
+                borderColor: ADMIN_THEME.dark,
+                bgcolor: ADMIN_THEME.bgLight
+              }
+            }}
+          >
+            جستجو
+          </Button>
               
           <FormControl sx={{ minWidth: 150 }}>
                 <InputLabel>وضعیت پرداخت</InputLabel>

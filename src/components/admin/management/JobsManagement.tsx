@@ -284,6 +284,13 @@ const JobsManagement: React.FC = () => {
     }
   }, [page, pageSize, debouncedSearchQuery, statusFilter, sortBy, sortOrder]);
 
+  // useEffect برای fetchResumeAds
+  useEffect(() => {
+    if (adType === 'resume') {
+      fetchResumeAds();
+    }
+  }, [fetchResumeAds, adType]);
+
   // useCallback برای handleHashChange
   const handleHashChange = useCallback(() => {
     if (typeof window === 'undefined') return;
