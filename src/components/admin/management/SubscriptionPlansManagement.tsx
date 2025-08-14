@@ -302,6 +302,7 @@ const SubscriptionPlansManagement: React.FC = () => {
     'قیمت روزانه',
     'وضعیت',
     'نوع',
+    'مخاطب',
     'تاریخ ایجاد',
     'عملیات'
   ];
@@ -746,6 +747,7 @@ const SubscriptionPlansManagement: React.FC = () => {
                     <TableCell>قیمت روزانه</TableCell>
                     <TableCell>وضعیت</TableCell>
                     <TableCell>نوع</TableCell>
+                    <TableCell>مخاطب</TableCell>
                     <TableCell>تاریخ ایجاد</TableCell>
                     <TableCell>عملیات</TableCell>
                   </TableRow>
@@ -933,6 +935,7 @@ const SubscriptionPlansManagement: React.FC = () => {
                       <TableCell>قیمت روزانه</TableCell>
                       <TableCell>وضعیت</TableCell>
                       <TableCell>نوع</TableCell>
+                      <TableCell>مخاطب</TableCell>
                       <TableCell>تاریخ ایجاد</TableCell>
                       <TableCell sx={{ textAlign: 'center', minWidth: 120, py: 2 }}>
                         <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 0.5 }}>
@@ -978,6 +981,15 @@ const SubscriptionPlansManagement: React.FC = () => {
                           <Chip 
                             label={plan.is_free ? 'رایگان' : 'پولی'}
                             color={plan.is_free ? 'info' : 'primary'}
+                            size="small"
+                            variant="outlined"
+                            sx={{ fontWeight: 600, fontSize: '0.8rem' }}
+                          />
+                        </TableCell>
+                        <TableCell>
+                          <Chip
+                            label={plan.plan_type === 'J' ? 'شغل' : plan.plan_type === 'R' ? 'رزومه' : 'همه'}
+                            color="secondary"
                             size="small"
                             variant="outlined"
                             sx={{ fontWeight: 600, fontSize: '0.8rem' }}
@@ -1241,6 +1253,32 @@ const SubscriptionPlansManagement: React.FC = () => {
                   }
                 />
               </Box>
+            </Box>
+
+            {/* Plan Type Selection */}
+            <Box sx={{ 
+              p: 2, 
+              borderRadius: 2, 
+              background: 'white',
+              border: '1px solid rgba(124, 58, 237, 0.1)',
+              boxShadow: '0 2px 8px rgba(0, 0, 0, 0.05)'
+            }}>
+              <Typography variant="subtitle2" sx={{ color: ADMIN_THEME.primary, fontWeight: 600, mb: 2 }}>
+                نوع طرح
+              </Typography>
+              <FormControl fullWidth>
+                <InputLabel id="plan-type-label">نوع طرح</InputLabel>
+                <Select
+                  labelId="plan-type-label"
+                  value={formData.plan_type}
+                  label="نوع طرح"
+                  onChange={(e) => setFormData({ ...formData, plan_type: e.target.value as any })}
+                >
+                  <MenuItem value="B">همه</MenuItem>
+                  <MenuItem value="J">آگهی شغل (کارفرما)</MenuItem>
+                  <MenuItem value="R">آگهی رزومه (کارجو)</MenuItem>
+                </Select>
+              </FormControl>
             </Box>
           </Box>
         </DialogContent>
