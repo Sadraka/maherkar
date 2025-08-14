@@ -219,7 +219,22 @@ export default function JobSeekerSubscriptionPlanSelector({
 						const price = calculatePrice(plan, activeDuration);
 						return (
 							<Paper key={plan.id} elevation={0} sx={{ p:{xs:1.5,sm:3}, borderRadius:3, boxShadow:'0 4px 15px rgba(76,175,80,0.05)', cursor:'pointer', border:isSelected?`2px solid ${JOB_SEEKER_THEME.primary}`:'2px solid #e0e0e0', bgcolor:'background.paper', transition:'all 0.25s ease', flex:{ xs:'1 0 calc(100% - 16px)', sm:'1 0 calc(50% - 24px)', md:'1 0 calc(33.333% - 24px)', lg:'1 0 calc(25% - 24px)' }, maxWidth:'340px', position:'relative', overflow:'hidden', display:'flex', flexDirection:'column', justifyContent:'space-between', height:'100%', '&:hover':{ boxShadow:'0 6px 18px rgba(76,175,80,0.12)', borderColor:JOB_SEEKER_THEME.primary } }} onClick={()=>onPlanChange(plan)}>
-								<FormControlLabel value={plan.id} control={<Radio sx={{ color:JOB_SEEKER_THEME.primary, position:'absolute', top:12, right:12 }} />} label="" sx={{ m:0 }} />
+								<FormControlLabel 
+                                    value={plan.id} 
+                                    control={
+                                        <Radio 
+                                            sx={{ 
+                                                color: JOB_SEEKER_THEME.primary, 
+                                                '&.Mui-checked': { color: JOB_SEEKER_THEME.primary },
+                                                position: 'absolute', 
+                                                top: 12, 
+                                                right: 12 
+                                            }} 
+                                        />
+                                    } 
+                                    label="" 
+                                    sx={{ m: 0 }} 
+                                />
 
 								<Box sx={{ textAlign:'center', mb:3 }}>
 									<Chip label={plan.name} size="medium" sx={{ bgcolor:planInfo.color, color:'white', fontWeight:'bold', fontSize:'1rem', height:32, px:2 }} />
@@ -245,7 +260,38 @@ export default function JobSeekerSubscriptionPlanSelector({
 									))}
 								</Box>
 
-								<Button variant={isSelected?'contained':'outlined'} fullWidth sx={{ borderRadius:2, fontWeight:'bold', textTransform:'none', py:1, ...(isSelected?{ bgcolor:JOB_SEEKER_THEME.primary, color:'white', '&:hover':{ bgcolor:JOB_SEEKER_THEME.dark }}:{ borderColor:JOB_SEEKER_THEME.primary, color:JOB_SEEKER_THEME.primary, '&:hover':{ borderColor:JOB_SEEKER_THEME.dark, color:JOB_SEEKER_THEME.dark }}) }}>{isSelected?'انتخاب شده':'انتخاب این طرح'}</Button>
+                                <Button
+                                    variant={isSelected ? 'contained' : 'outlined'}
+                                    fullWidth
+                                    sx={{
+                                        borderRadius: 2,
+                                        fontWeight: 'bold',
+                                        textTransform: 'none',
+                                        py: 1,
+                                        ...(isSelected
+                                            ? {
+                                                  bgcolor: JOB_SEEKER_THEME.primary,
+                                                  backgroundColor: JOB_SEEKER_THEME.primary,
+                                                  backgroundImage: 'none',
+                                                  color: 'white',
+                                                  '&:hover': {
+                                                      bgcolor: JOB_SEEKER_THEME.dark,
+                                                      backgroundColor: JOB_SEEKER_THEME.dark,
+                                                      backgroundImage: 'none'
+                                                  }
+                                              }
+                                            : {
+                                                  borderColor: JOB_SEEKER_THEME.primary,
+                                                  color: JOB_SEEKER_THEME.primary,
+                                                  '&:hover': {
+                                                      borderColor: JOB_SEEKER_THEME.dark,
+                                                      color: JOB_SEEKER_THEME.dark
+                                                  }
+                                              })
+                                    }}
+                                >
+                                    {isSelected ? 'انتخاب شده' : 'انتخاب این طرح'}
+                                </Button>
 							</Paper>
 						);
 					})}

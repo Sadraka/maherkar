@@ -442,6 +442,7 @@ export default function SubscriptionPlanSelector({
                   value={plan.id}
                   control={<Radio sx={{ 
                     color: EMPLOYER_THEME.primary,
+                    '&.Mui-checked': { color: EMPLOYER_THEME.primary },
                     position: 'absolute',
                     top: 12,
                     right: 12,
