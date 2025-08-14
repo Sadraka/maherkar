@@ -80,7 +80,8 @@ const EmptyResumeAdsState = () => {
             variant="contained"
             size="large"
             sx={{
-              backgroundColor: JOB_SEEKER_THEME.primary,
+              background: JOB_SEEKER_THEME.primary,
+              backgroundImage: 'none',
               color: 'white',
               borderRadius: 2,
               px: { xs: 3, sm: 4 },
@@ -90,7 +91,8 @@ const EmptyResumeAdsState = () => {
               minWidth: { xs: '100%', sm: 200 },
               boxShadow: `0 4px 12px ${JOB_SEEKER_THEME.primary}40`,
               '&:hover': {
-                backgroundColor: JOB_SEEKER_THEME.dark,
+                background: JOB_SEEKER_THEME.dark,
+                backgroundImage: 'none',
                 boxShadow: `0 6px 16px ${JOB_SEEKER_THEME.primary}60`,
                 transform: 'translateY(-2px)'
               },
