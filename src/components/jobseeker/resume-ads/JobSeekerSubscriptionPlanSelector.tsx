@@ -240,14 +240,59 @@ export default function JobSeekerSubscriptionPlanSelector({
 			</Box>
 
 			<Typography variant="subtitle1" fontWeight="bold" sx={{ mb: 3, color: JOB_SEEKER_THEME.primary, fontSize: { xs: '1rem', sm: '1.1rem' } }}>انتخاب طرح اشتراک</Typography>
-			<RadioGroup value={selectedPlan?.id || ''} onChange={(e) => { const plan = plans.find(p => p.id === e.target.value); if (plan) onPlanChange(plan); }}>
-				<Box sx={{ display: 'flex', flexWrap: 'wrap', gap: { xs: 2, sm: 3 }, justifyContent: 'center' }}>
+			<RadioGroup
+                value={selectedPlan?.id || ''}
+                onChange={(e) => {
+                    const plan = plans.find((p) => p.id === e.target.value);
+                    if (plan) onPlanChange(plan);
+                }}
+            >
+                <Box
+                    sx={{
+                        display: 'flex',
+                        flexWrap: 'wrap',
+                        gap: { xs: 1, sm: 2 },
+                        justifyContent: 'center'
+                    }}
+                >
 					{plans.map((plan) => {
 						const isSelected = selectedPlan?.id === plan.id;
 						const planInfo = getPlanInfo(plan);
 						const price = calculatePrice(plan, activeDuration);
 						return (
-							<Paper key={plan.id} elevation={0} sx={{ p:{xs:1.5,sm:3}, borderRadius:3, boxShadow:'0 4px 15px rgba(76,175,80,0.05)', cursor:'pointer', border:isSelected?`2px solid ${JOB_SEEKER_THEME.primary}`:'2px solid #e0e0e0', bgcolor:'background.paper', transition:'all 0.25s ease', flex:{ xs:'1 0 calc(100% - 16px)', sm:'1 0 calc(50% - 24px)', md:'1 0 calc(33.333% - 24px)', lg:'1 0 calc(25% - 24px)' }, maxWidth:'340px', position:'relative', overflow:'hidden', display:'flex', flexDirection:'column', justifyContent:'space-between', height:'100%', '&:hover':{ boxShadow:'0 6px 18px rgba(76,175,80,0.12)', borderColor:JOB_SEEKER_THEME.primary } }} onClick={()=>onPlanChange(plan)}>
+							<Paper
+								key={plan.id}
+								elevation={0}
+								sx={{
+									p: { xs: 1.5, sm: 3 },
+									borderRadius: 3,
+									boxShadow: '0 4px 15px rgba(76,175,80,0.05)',
+									cursor: 'pointer',
+									border: isSelected
+										? `2px solid ${JOB_SEEKER_THEME.primary}`
+										: '2px solid #e0e0e0',
+									bgcolor: 'background.paper',
+									transition: 'all 0.25s ease',
+									flex: {
+										xs: '1 0 calc(100% - 12px)',
+										sm: '1 0 calc(50% - 16px)',
+										md: '1 0 calc(40% - 16px)',
+										lg: '1 0 calc(30% - 16px)'
+									},
+									maxWidth: '420px',
+									position: 'relative',
+									overflow: 'hidden',
+									display: 'flex',
+									flexDirection: 'column',
+									justifyContent: 'space-between',
+									height: '100%',
+									'&:hover': {
+										boxShadow: '0 6px 18px rgba(76,175,80,0.12)',
+										borderColor: JOB_SEEKER_THEME.primary
+									}
+								}}
+								onClick={() => onPlanChange(plan)}
+							>
 								<FormControlLabel
                                     value={plan.id}
                                     control={
