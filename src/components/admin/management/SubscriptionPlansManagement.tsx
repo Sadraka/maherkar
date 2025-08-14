@@ -837,6 +837,13 @@ const SubscriptionPlansManagement: React.FC = () => {
                           variant="outlined"
                           sx={{ fontSize: '0.75rem' }}
                         />
+                        <Chip
+                          label={plan.plan_type === 'J' ? 'کارفرما' : plan.plan_type === 'R' ? 'کارجو' : 'همه'}
+                          color="secondary"
+                          size="small"
+                          variant="outlined"
+                          sx={{ fontSize: '0.75rem' }}
+                        />
                       </Box>
                       <Typography variant="caption" sx={{ color: ADMIN_THEME.dark, opacity: 0.7 }}>
                         {formatDate(plan.created_at)}
@@ -987,7 +994,7 @@ const SubscriptionPlansManagement: React.FC = () => {
                         </TableCell>
                         <TableCell>
                           <Chip
-                            label={plan.plan_type === 'J' ? 'شغل' : plan.plan_type === 'R' ? 'رزومه' : 'همه'}
+                            label={plan.plan_type === 'J' ? 'کارفرما' : plan.plan_type === 'R' ? 'کارجو' : 'همه'}
                             color="secondary"
                             size="small"
                             variant="outlined"
