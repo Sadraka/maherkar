@@ -4,6 +4,7 @@
 export const JOB_SEEKER_GREEN = '#0a9b54'; // سبز روشن‌تر و شادتر
 export const JOB_SEEKER_LIGHT_GREEN = '#23b76b'; // سبز خیلی روشن
 export const JOB_SEEKER_DARK_GREEN = '#007a40'; // سبز تیره
+export const JOB_SEEKER_ORANGE = '#ffb300'; // طلایی پررنگ برای برچسب فوری
 export const JOB_SEEKER_BG_LIGHT = 'rgba(10, 155, 84, 0.15)'; // سبز با شفافیت کم برای پس‌زمینه
 export const JOB_SEEKER_BG_VERY_LIGHT = 'rgba(10, 155, 84, 0.08)'; // سبز با شفافیت خیلی کم
 export const JOB_SEEKER_CONTRAST = 'rgb(255, 140, 0)'; // نارنجی متضاد با سبز
@@ -28,7 +29,8 @@ export const JOB_SEEKER_THEME = {
   bgLight: JOB_SEEKER_BG_LIGHT,
   bgVeryLight: JOB_SEEKER_BG_VERY_LIGHT,
   contrast: JOB_SEEKER_CONTRAST,
-  red: RED
+  red: RED,
+  orange: JOB_SEEKER_ORANGE
 };
 
 // تعریف تم کارفرما در یک آبجکت برای استفاده آسان‌تر

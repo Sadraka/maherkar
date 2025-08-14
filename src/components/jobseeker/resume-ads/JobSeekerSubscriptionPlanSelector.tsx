@@ -124,6 +124,14 @@ export default function JobSeekerSubscriptionPlanSelector({
 		}
 
 		const planName = plan.name.toLowerCase();
+		if (planName.includes('فوری') || planName.includes('urgent')) {
+			return {
+				icon: <LocalFireDepartmentIcon sx={{ fontSize: 24 }} />,
+				color: JOB_SEEKER_THEME.orange,
+				badge: plan.name,
+				description: plan.description || 'نمایش با برچسب فوری'
+			};
+		}
 		if (planName.includes('نردبان') || planName.includes('ladder')) {
 			return {
 				icon: <LocalFireDepartmentIcon sx={{ fontSize: 24 }} />,
