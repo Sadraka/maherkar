@@ -62,7 +62,18 @@ export default function JobSeekerSubscriptionPlanSelector({
 			try {
 				setLoading(true);
 				const response = await apiGet('/subscriptions/plans/?ad_type=R');
-				const resumePlans = (response.data as SubscriptionPlan[]).filter(plan => plan.active);
+				let resumePlans = (response.data as SubscriptionPlan[]).filter(plan => plan.active);
+
+				// ترتیب دلخواه: پایه » فوری » نردبان » سایر
+				const getPriority = (plan: SubscriptionPlan) => {
+					const lower = plan.name.toLowerCase();
+					if (lower.includes('پایه') || lower.includes('basic')) return 0;
+					if (lower.includes('فوری') || lower.includes('urgent')) return 1;
+					if (lower.includes('نردبان') || lower.includes('ladder')) return 2;
+					return 3;
+				};
+				resumePlans = resumePlans.sort((a, b) => getPriority(a) - getPriority(b));
+
 				setPlans(resumePlans);
 
 				if (resumePlans.length > 0 && !autoSelectRef.current) {
@@ -252,7 +263,8 @@ export default function JobSeekerSubscriptionPlanSelector({
                         display: 'flex',
                         flexWrap: 'wrap',
                         gap: { xs: 1, sm: 2 },
-                        justifyContent: 'center'
+                        justifyContent: 'center',
+                        alignItems: 'stretch'
                     }}
                 >
 					{plans.map((plan) => {
@@ -275,17 +287,18 @@ export default function JobSeekerSubscriptionPlanSelector({
 									transition: 'all 0.25s ease',
 									flex: {
 										xs: '1 0 calc(100% - 12px)',
-										sm: '1 0 calc(50% - 16px)',
-										md: '1 0 calc(40% - 16px)',
-										lg: '1 0 calc(30% - 16px)'
+										sm: '1 0 calc(60% - 16px)',
+										md: '1 0 calc(45% - 16px)',
+										lg: '1 0 calc(32% - 16px)'
 									},
-									maxWidth: '420px',
+									maxWidth: '460px',
 									position: 'relative',
 									overflow: 'hidden',
 									display: 'flex',
 									flexDirection: 'column',
 									justifyContent: 'space-between',
 									height: '100%',
+									minHeight: { xs: 300, sm: 340 },
 									'&:hover': {
 										boxShadow: '0 6px 18px rgba(76,175,80,0.12)',
 										borderColor: JOB_SEEKER_THEME.primary
@@ -325,14 +338,38 @@ export default function JobSeekerSubscriptionPlanSelector({
 									)}
 								</Box>
 
-								<Box sx={{ mb:3 }}>
-									{(plan.description||'').split('\n').filter(Boolean).slice(0,3).map((f,i)=>(
-										<Box key={i} sx={{ display:'flex', alignItems:'center', gap:1, mb:1, fontSize:'0.85rem' }}>
-											<Box sx={{ width:6, height:6, borderRadius:'50%', bgcolor:JOB_SEEKER_THEME.primary, flexShrink:0 }} />
-											<Typography variant="body2" sx={{ fontSize:'inherit' }}>{f}</Typography>
-										</Box>
-									))}
-								</Box>
+								<Box sx={{ mb: 3, textAlign: 'center' }}>
+                                    {(plan.description || '')
+                                        .split('\n')
+                                        .filter(Boolean)
+                                        .slice(0, 3)
+                                        .map((f, i) => (
+                                            <Box
+                                                key={i}
+                                                sx={{
+                                                    display: 'flex',
+                                                    alignItems: 'center',
+                                                    justifyContent: 'center',
+                                                    gap: 1,
+                                                    mb: 1,
+                                                    fontSize: '0.85rem'
+                                                }}
+                                            >
+                                                <Box
+                                                    sx={{
+                                                        width: 6,
+                                                        height: 6,
+                                                        borderRadius: '50%',
+                                                        bgcolor: JOB_SEEKER_THEME.primary,
+                                                        flexShrink: 0
+                                                    }}
+                                                />
+                                                <Typography variant="body2" sx={{ fontSize: 'inherit' }}>
+                                                    {f}
+                                                </Typography>
+                                            </Box>
+                                        ))}
+                                </Box>
 
                                 <Button
                                     variant={isSelected ? 'contained' : 'outlined'}
