@@ -269,21 +269,10 @@ export default function EmployerLayout({ children }: { children: React.ReactNode
                   ml: { md: 3 },
                   display: 'flex',
                   flexDirection: 'column',
-                  gap: 2
+                  gap: 0
                 }}
               >
-                {/* کامپوننت محتوا که به صورت پویا تغییر می‌کند */}
-                <Box
-                  sx={{
-                    bgcolor: 'background.paper',
-                    borderRadius: '8px',
-                    boxShadow: '0 1px 3px rgba(0,0,0,0.05)',
-                    overflow: 'hidden',
-                    transition: 'all 0.3s ease',
-                  }}
-                >
-                  {children}
-                </Box>
+                {children}
               </Box>
             </Box>
           </Container>

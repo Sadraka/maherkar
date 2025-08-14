@@ -420,7 +420,7 @@ export default function SubscriptionPlanSelector({
                 key={plan.id}
                 elevation={0}
                 sx={{
-                  p: { xs: 3, sm: 4 },
+                  p: { xs: 1.5, sm: 3 },
                   borderRadius: 3,
                   boxShadow: '0 4px 15px rgba(66,133,244,0.05)',
                   cursor: 'pointer',
@@ -431,8 +431,9 @@ export default function SubscriptionPlanSelector({
                   transition: 'all 0.25s ease',
                   position: 'relative',
                   overflow: 'hidden',
-                  minWidth: { xs: '240px', sm: '280px' },
-                  maxWidth: { xs: '280px', sm: '320px' }
+                  flex: { xs: '1 0 calc(100% - 16px)', sm: '1 0 calc(50% - 24px)', md: '1 0 calc(33.333% - 24px)', lg: '1 0 calc(25% - 24px)' },
+                  maxWidth: '340px',
+                  display:'flex', flexDirection:'column', justifyContent:'space-between', height:'100%'
                 }}
                 onClick={() => onPlanChange(plan)}
               >
