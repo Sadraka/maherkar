@@ -29,7 +29,8 @@ import {
   DialogActions,
   Tooltip,
   Switch,
-  FormControlLabel
+  FormControlLabel,
+  Stack
 } from '@mui/material';
 import {
   Search,
@@ -254,7 +255,7 @@ const SubscriptionPlansManagement: React.FC = () => {
       price_per_day: plan.price_per_day,
       active: plan.active,
       is_free: plan.is_free,
-      plan_type: 'B' // Assuming a default value for plan_type
+      plan_type: plan.plan_type || 'B'
     });
     setDialogOpen(true);
   };
@@ -398,7 +399,6 @@ const SubscriptionPlansManagement: React.FC = () => {
         >
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
-              <Diamond sx={{ color: ADMIN_THEME.primary, fontSize: '1.2rem' }} />
               <Typography variant="subtitle2" sx={{ color: ADMIN_THEME.primary, fontWeight: 600 }}>
                 جستجو، فیلتر و مرتب‌سازی طرح‌های اشتراک
               </Typography>
@@ -525,7 +525,6 @@ const SubscriptionPlansManagement: React.FC = () => {
         >
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
-              <Diamond sx={{ color: ADMIN_THEME.primary, fontSize: '1.2rem' }} />
               <Typography variant="subtitle1" sx={{ color: ADMIN_THEME.primary, fontWeight: 600 }}>
                 جستجو، فیلتر و مرتب‌سازی طرح‌های اشتراک
               </Typography>
@@ -1069,217 +1068,89 @@ const SubscriptionPlansManagement: React.FC = () => {
       <Dialog 
         open={dialogOpen} 
         onClose={() => setDialogOpen(false)}
-        maxWidth="md"
+        maxWidth="sm"
         fullWidth
         PaperProps={{
-          sx: {
-            borderRadius: 3,
-            maxHeight: '90vh',
-            background: 'linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%)',
-            border: '1px solid rgba(124, 58, 237, 0.1)',
-            boxShadow: '0 20px 40px rgba(0, 0, 0, 0.1)'
-          }
+          sx:{ borderRadius:3, overflow:'hidden', boxShadow:'0 6px 24px rgba(124,58,237,0.25)'}
         }}
       >
-        <DialogTitle sx={{ 
-          pb: 1,
-          background: 'linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%)',
-          color: 'white',
-          borderRadius: '12px 12px 0 0',
-          textAlign: 'center',
-          position: 'relative',
-          '&::after': {
-            content: '""',
-            position: 'absolute',
-            bottom: 0,
-            left: '50%',
-            transform: 'translateX(-50%)',
-            width: '60px',
-            height: '3px',
-            background: 'rgba(255, 255, 255, 0.3)',
-            borderRadius: '2px'
-          }
-        }}>
-          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 1 }}>
-            <Diamond sx={{ fontSize: '1.5rem' }} />
-            <Typography variant="h6" fontWeight="600">
+        <DialogTitle sx={{ p:0 }}>
+          <Box sx={{
+            background:`linear-gradient(135deg, ${ADMIN_THEME.primary} 0%, ${ADMIN_THEME.dark} 100%)`,
+            py:3,
+            px:2,
+            display:'flex',
+            alignItems:'center',
+            justifyContent:'center',
+            gap:1,
+            color:'#fff'
+          }}>
+            <Typography variant="h6" fontWeight="700">
               {editingPlan ? 'ویرایش طرح اشتراک' : 'ایجاد طرح اشتراک جدید'}
             </Typography>
           </Box>
         </DialogTitle>
-        <DialogContent sx={{ pt: 3, pb: 2 }}>
-          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
-            <Box sx={{ 
-              p: 2, 
-              borderRadius: 2, 
-              background: 'white',
-              border: '1px solid rgba(124, 58, 237, 0.1)',
-              boxShadow: '0 2px 8px rgba(0, 0, 0, 0.05)'
-            }}>
-              <Typography variant="subtitle2" sx={{ color: ADMIN_THEME.primary, fontWeight: 600, mb: 1 }}>
-                اطلاعات اصلی طرح
-              </Typography>
-              <TextField
-                label="نام طرح"
-                value={formData.name}
-                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                fullWidth
-                required
-                sx={{
-                  '& .MuiOutlinedInput-root': {
-                    borderRadius: 2,
-                    '&:hover': {
-                      '& .MuiOutlinedInput-notchedOutline': {
-                        borderColor: ADMIN_THEME.primary,
-                      }
-                    },
-                    '&.Mui-focused': {
-                      '& .MuiOutlinedInput-notchedOutline': {
-                        borderColor: ADMIN_THEME.primary,
-                        borderWidth: 2
-                      }
-                    }
-                  }
-                }}
-              />
-              <TextField
-                label="توضیحات"
-                value={formData.description}
-                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                fullWidth
-                multiline
-                rows={3}
-                sx={{ 
-                  mt: 2,
-                  '& .MuiOutlinedInput-root': {
-                    borderRadius: 2,
-                    '&:hover': {
-                      '& .MuiOutlinedInput-notchedOutline': {
-                        borderColor: ADMIN_THEME.primary,
-                      }
-                    },
-                    '&.Mui-focused': {
-                      '& .MuiOutlinedInput-notchedOutline': {
-                        borderColor: ADMIN_THEME.primary,
-                        borderWidth: 2
-                      }
-                    }
-                  }
-                }}
-              />
-            </Box>
+        <DialogContent sx={{ p: 0 }}>
+          <Box sx={{ p:3, background:'#faf9ff' }}>
+            <Stack spacing={3}>
+              {/* نام و توضیحات */}
+              <Paper elevation={0} sx={{ p:2, borderRadius:2, border:`1px solid ${ADMIN_THEME.bgLight}` }}>
+                <Stack spacing={2}>
+                  <TextField
+                    label="نام طرح"
+                    fullWidth
+                    required
+                    value={formData.name}
+                    onChange={(e)=>setFormData({...formData,name:e.target.value})}
+                    sx={{ '& .MuiOutlinedInput-root':{ borderRadius:2 }, '& .Mui-focused .MuiOutlinedInput-notchedOutline':{ borderColor:ADMIN_THEME.primary } }}
+                  />
+                  <TextField
+                    label="توضیحات"
+                    fullWidth
+                    multiline
+                    rows={3}
+                    value={formData.description}
+                    onChange={(e)=>setFormData({...formData,description:e.target.value})}
+                    sx={{ '& .MuiOutlinedInput-root':{ borderRadius:2 }, '& .Mui-focused .MuiOutlinedInput-notchedOutline':{ borderColor:ADMIN_THEME.primary } }}
+                  />
+                </Stack>
+              </Paper>
 
-            <Box sx={{ 
-              p: 2, 
-              borderRadius: 2, 
-              background: 'white',
-              border: '1px solid rgba(124, 58, 237, 0.1)',
-              boxShadow: '0 2px 8px rgba(0, 0, 0, 0.05)'
-            }}>
-              <Typography variant="subtitle2" sx={{ color: ADMIN_THEME.primary, fontWeight: 600, mb: 2 }}>
-                تنظیمات قیمت و وضعیت
-              </Typography>
-              <TextField
-                label="قیمت روزانه (تومان)"
-                type="number"
-                value={formData.price_per_day}
-                onChange={(e) => setFormData({ ...formData, price_per_day: parseInt(e.target.value) || 0 })}
-                fullWidth
-                disabled={formData.is_free}
-                sx={{
-                  '& .MuiOutlinedInput-root': {
-                    borderRadius: 2,
-                    '&:hover': {
-                      '& .MuiOutlinedInput-notchedOutline': {
-                        borderColor: ADMIN_THEME.primary,
-                      }
-                    },
-                    '&.Mui-focused': {
-                      '& .MuiOutlinedInput-notchedOutline': {
-                        borderColor: ADMIN_THEME.primary,
-                        borderWidth: 2
-                      }
-                    }
-                  }
-                }}
-              />
-              <Box sx={{ display: 'flex', gap: 3, mt: 2 }}>
-                <FormControlLabel
-                  control={
-                    <Switch
-                      checked={formData.is_free}
-                      onChange={(e) => setFormData({ ...formData, is_free: e.target.checked })}
-                      sx={{
-                        '& .MuiSwitch-switchBase.Mui-checked': {
-                          color: ADMIN_THEME.primary,
-                          '&:hover': {
-                            backgroundColor: 'rgba(124, 58, 237, 0.08)',
-                          },
-                        },
-                        '& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track': {
-                          backgroundColor: ADMIN_THEME.primary,
-                        },
-                      }}
-                    />
-                  }
-                  label={
-                    <Typography variant="body2" sx={{ fontWeight: 500 }}>
-                      طرح رایگان
-                    </Typography>
-                  }
-                />
-                <FormControlLabel
-                  control={
-                    <Switch
-                      checked={formData.active}
-                      onChange={(e) => setFormData({ ...formData, active: e.target.checked })}
-                      sx={{
-                        '& .MuiSwitch-switchBase.Mui-checked': {
-                          color: '#10b981',
-                          '&:hover': {
-                            backgroundColor: 'rgba(16, 185, 129, 0.08)',
-                          },
-                        },
-                        '& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track': {
-                          backgroundColor: '#10b981',
-                        },
-                      }}
-                    />
-                  }
-                  label={
-                    <Typography variant="body2" sx={{ fontWeight: 500 }}>
-                      فعال
-                    </Typography>
-                  }
-                />
-              </Box>
-            </Box>
+              {/* قیمت و مخاطب */}
+              <Paper elevation={0} sx={{ p:2, borderRadius:2, border:`1px solid ${ADMIN_THEME.bgLight}` }}>
+                <Stack spacing={3}>
+                  <TextField
+                    label="قیمت روزانه (تومان)"
+                    type="number"
+                    fullWidth
+                    disabled={formData.is_free}
+                    value={formData.price_per_day}
+                    onChange={(e)=>setFormData({...formData,price_per_day:parseInt(e.target.value)||0})}
+                    sx={{ '& .MuiOutlinedInput-root':{ borderRadius:2 }, '& .Mui-focused .MuiOutlinedInput-notchedOutline':{ borderColor:ADMIN_THEME.primary } }}
+                  />
 
-            {/* Plan Type Selection */}
-            <Box sx={{ 
-              p: 2, 
-              borderRadius: 2, 
-              background: 'white',
-              border: '1px solid rgba(124, 58, 237, 0.1)',
-              boxShadow: '0 2px 8px rgba(0, 0, 0, 0.05)'
-            }}>
-              <Typography variant="subtitle2" sx={{ color: ADMIN_THEME.primary, fontWeight: 600, mb: 2 }}>
-                نوع طرح
-              </Typography>
-              <FormControl fullWidth>
-                <InputLabel id="plan-type-label">نوع طرح</InputLabel>
-                <Select
-                  labelId="plan-type-label"
-                  value={formData.plan_type}
-                  label="نوع طرح"
-                  onChange={(e) => setFormData({ ...formData, plan_type: e.target.value as any })}
-                >
-                  <MenuItem value="B">همه</MenuItem>
-                  <MenuItem value="J">آگهی شغل (کارفرما)</MenuItem>
-                  <MenuItem value="R">آگهی رزومه (کارجو)</MenuItem>
-                </Select>
-              </FormControl>
-            </Box>
+                  <FormControl fullWidth>
+                    <InputLabel id="plan-type">مخاطب</InputLabel>
+                    <Select
+                      labelId="plan-type"
+                      value={formData.plan_type}
+                      label="مخاطب"
+                      onChange={(e)=>setFormData({...formData,plan_type:e.target.value as any})}
+                      sx={{ borderRadius:2 }}
+                    >
+                      <MenuItem value="B">همه</MenuItem>
+                      <MenuItem value="J">آگهی شغل (کارفرما)</MenuItem>
+                      <MenuItem value="R">آگهی رزومه (کارجو)</MenuItem>
+                    </Select>
+                  </FormControl>
+
+                  <Stack direction="row" spacing={4} justifyContent="center">
+                    <FormControlLabel control={<Switch checked={formData.is_free} color="secondary" onChange={(e)=>setFormData({...formData,is_free:e.target.checked})} />} label="طرح رایگان" />
+                    <FormControlLabel control={<Switch checked={formData.active} color="success" onChange={(e)=>setFormData({...formData,active:e.target.checked})} />} label="فعال" />
+                  </Stack>
+                </Stack>
+              </Paper>
+            </Stack>
           </Box>
         </DialogContent>
         <DialogActions sx={{ 
