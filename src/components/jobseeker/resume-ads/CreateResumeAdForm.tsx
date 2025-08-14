@@ -1030,7 +1030,7 @@ export default function CreateResumeAdForm({
                   <Box >
                     <Typography variant="body2" sx={{ color: 'text.secondary', lineHeight: 1.6 }}>
                       اطلاعات شخصی شما شامل مهارت‌ها، تجربیات و تحصیلات به‌طور خودکار در آگهی شما نمایش داده خواهد شد.
-                      برای ویرایش اطلاعات شخصی، به بخش رزومه مراجعه کنید.
+                      برای ویرایش اطلاعات شخصی، به بخش "اطلاعات شخصی" مراجعه کنید.
                     </Typography>
                   </Box>
                 </Alert>
