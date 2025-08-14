@@ -40,7 +40,7 @@ import PeopleIcon from '@mui/icons-material/People';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import InfoIcon from '@mui/icons-material/Info';
 import JobSeekerSubscriptionPlanSelector from './JobSeekerSubscriptionPlanSelector';
-import ResumeSummaryCard from './ResumeSummaryCard';
+
 import { JOB_SEEKER_THEME } from '@/constants/colors';
 import { 
   GENDER_CHOICES,
@@ -1017,9 +1017,26 @@ export default function CreateResumeAdForm({
               pointerEvents: !hasResume ? 'none' : 'auto'
             }}>
 
-              {/* خلاصه رزومه متصل */}
+              {/* توضیحات آگهی رزومه */}
               {resumeInfo && (
-                <ResumeSummaryCard resume={resumeInfo} onEdit={() => router.push('/jobseeker/resume')} />
+                <Alert 
+                  severity="success" 
+                  icon={false}
+                  sx={{ 
+                    mb: 2,
+                    '& .MuiAlert-message': {
+                      width: '100%',
+                      padding: '12px 16px'
+                    }
+                  }}
+                >
+                  <Box >
+                    <Typography variant="body2" sx={{ color: 'text.secondary', lineHeight: 1.6 }}>
+                      اطلاعات شخصی شما شامل مهارت‌ها، تجربیات و تحصیلات به‌طور خودکار در آگهی شما نمایش داده خواهد شد.
+                      برای ویرایش اطلاعات شخصی، به بخش رزومه مراجعه کنید.
+                    </Typography>
+                  </Box>
+                </Alert>
               )}
               
               {/* عنوان آگهی */}
