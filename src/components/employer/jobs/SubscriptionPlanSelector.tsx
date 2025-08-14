@@ -246,6 +246,11 @@ export default function SubscriptionPlanSelector({
                 bgcolor: 'background.paper',
                 transition: 'all 0.25s ease',
                 minWidth: { xs: '80px', sm: '100px' },
+                maxWidth: { xs: '80px', sm: '100px' },
+                height: { xs: '60px', sm: '70px' },
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
                 '&:hover': {
                   boxShadow: '0 4px 12px rgba(66,133,244,0.12)',
                   borderColor: EMPLOYER_THEME.primary
@@ -304,7 +309,10 @@ export default function SubscriptionPlanSelector({
             transition: 'all 0.25s ease',
             minWidth: { xs: '80px', sm: '100px' },
             maxWidth: { xs: '80px', sm: '100px' },
-            height: 'fit-content',
+            height: { xs: '60px', sm: '70px' },
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
             '&:hover': {
               boxShadow: '0 4px 12px rgba(66,133,244,0.12)',
               borderColor: EMPLOYER_THEME.primary
@@ -327,18 +335,31 @@ export default function SubscriptionPlanSelector({
               placeholder="۳"
               value={customDays}
               onChange={(e) => {
-                const persianValue = e.target.value.replace(/[^۰-۹]/g, '');
+                let raw = e.target.value.replace(/[^0-9۰-۹]/g, ''); // فقط ارقام فارسی/انگلیسی
+                // محدودیت طول سه رقم
+                if (raw.length > 3) raw = raw.slice(0, 3);
+                const persianValue = raw.replace(/[0-9]/g, (d) => '۰۱۲۳۴۵۶۷۸۹'[Number(d)]);
                 setCustomDays(persianValue);
                 const englishValue = persianValue.replace(/[۰-۹]/g, (d) => '۰۱۲۳۴۵۶۷۸۹'.indexOf(d).toString());
-                const days = parseInt(englishValue) || 0;
+                let days = parseInt(englishValue) || 0;
+                if (days > 365) {
+                  days = 365;
+                  setCustomDays(toPersianDigits('365'));
+                }
                 if (days >= 3 && days <= 365) {
                   onDurationChange(days);
-                } else if (days > 0 && days < 3) {
-                  // نمایش پیام خطا یا هشدار
-                  console.log('حداقل ۳ روز باید انتخاب شود');
                 } else if (days === 0) {
-                  // اگر خالی باشد، duration را reset نکن
                   onDurationChange(0);
+                }
+              }}
+              onBlur={() => {
+                const englishValue = customDays.replace(/[۰-۹]/g, (d) => '۰۱۲۳۴۵۶۷۸۹'.indexOf(d).toString());
+                let days = parseInt(englishValue) || 0;
+                if (days < 3 && customDays !== '') days = 3;
+                if (days > 365) days = 365;
+                if (days > 0) {
+                  setCustomDays(toPersianDigits(days.toString()));
+                  onDurationChange(days);
                 }
               }}
               inputProps={{
@@ -346,7 +367,8 @@ export default function SubscriptionPlanSelector({
                   textAlign: 'center', 
                   fontSize: '0.8rem',
                   direction: 'rtl'
-                }
+                },
+                maxLength: 3
               }}
               sx={{
                 '& .MuiOutlinedInput-root': {
