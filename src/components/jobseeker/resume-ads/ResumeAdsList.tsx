@@ -150,7 +150,13 @@ export default function ResumeAdsList() {
     }
 
     if (!resumeAdsData.length) {
-      return <EmptyResumeAdsState />;
+      // در حالت خالی: فقط کارت خالی را نشان بده و دکمه ایجاد را از هدر حذف کن
+      return (
+        <>
+          <ResumeAdsHeader showCreateButton={false} />
+          <EmptyResumeAdsState />
+        </>
+      );
     }
 
     const currentAds = getCurrentPageAds();
@@ -206,7 +212,6 @@ export default function ResumeAdsList() {
 
   return (
     <Container maxWidth="lg" sx={{ py: 4 }}>
-      <ResumeAdsHeader />
       {renderContent()}
     </Container>
   );
