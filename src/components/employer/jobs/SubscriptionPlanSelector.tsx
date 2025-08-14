@@ -71,7 +71,9 @@ export default function SubscriptionPlanSelector({
       try {
         setLoading(true);
         const response = await apiGet('/subscriptions/plans/?ad_type=J');
-        const activePlans = (response.data as SubscriptionPlan[]).filter(plan => plan.active);
+        let activePlans = (response.data as SubscriptionPlan[]).filter(plan => plan.active);
+        // فقط پلن‌های کارفرما یا عمومی (B/J) نمایش داده شود
+        activePlans = activePlans.filter(p => p.plan_type !== 'R');
         setPlans(activePlans);
         
         // انتخاب خودکار فقط یک بار
@@ -163,8 +165,8 @@ export default function SubscriptionPlanSelector({
     };
   };
 
-  // مدت زمان فعال
-  const activeDuration = useCustomDuration ? parseInt(customDays) || 0 : selectedDuration;
+  // محاسبه مدت زمان فعال
+  const activeDuration = useCustomDuration ? (parseInt(customDays.replace(/[۰-۹]/g, (d) => '۰۱۲۳۴۵۶۷۸۹'.indexOf(d).toString())) || 0) : selectedDuration;
 
   if (loading) {
     return (
@@ -218,10 +220,11 @@ export default function SubscriptionPlanSelector({
       
       {/* گزینه‌های پیش‌فرض - استایل مشابه کارت‌های داشبورد */}
       <Box sx={{ 
-        display: 'grid', 
-        gridTemplateColumns: { xs: 'repeat(2, 1fr)', sm: 'repeat(2, 1fr)', md: 'repeat(4, 1fr)' }, 
-        gap: { xs: 1.5, sm: 2 }, 
-        mb: 4
+        display: 'flex', 
+        gap: { xs: 0.5, sm: 1 }, 
+        mb: 3,
+        flexWrap: 'wrap',
+        justifyContent: 'center'
       }}>
         {durationOptions.map((option) => {
           const isSelected = !useCustomDuration && selectedDuration === option.days;
@@ -231,20 +234,20 @@ export default function SubscriptionPlanSelector({
               key={option.days}
               elevation={0}
               sx={{
-                p: { xs: 1.5, sm: 2 },
+                p: { xs: 1, sm: 1.5 },
                 textAlign: 'center',
-                borderRadius: 3,
-                boxShadow: '0 4px 15px rgba(66,133,244,0.05)',
+                borderRadius: 2,
+                boxShadow: '0 2px 8px rgba(66,133,244,0.05)',
                 cursor: 'pointer',
                 position: 'relative',
                 border: isSelected 
                   ? `2px solid ${EMPLOYER_THEME.primary}` 
-                  : `2px solid transparent`,
-                bgcolor: isSelected ? 'rgba(66,133,244,0.02)' : 'background.paper',
+                  : '2px solid #e0e0e0',
+                bgcolor: 'background.paper',
                 transition: 'all 0.25s ease',
+                minWidth: { xs: '80px', sm: '100px' },
                 '&:hover': {
-                  boxShadow: '0 6px 18px rgba(66,133,244,0.12)',
-                  transform: 'translateY(-2px)',
+                  boxShadow: '0 4px 12px rgba(66,133,244,0.12)',
                   borderColor: EMPLOYER_THEME.primary
                 }
               }}
@@ -262,10 +265,10 @@ export default function SubscriptionPlanSelector({
                   transform: 'translateX(-50%)',
                   bgcolor: '#ff4081',
                   color: 'white',
-                  px: 1.5,
-                  py: 0.3,
+                  px: 1,
+                  py: 0.2,
                   borderRadius: 10,
-                  fontSize: '0.7rem',
+                  fontSize: '0.6rem',
                   fontWeight: 'bold',
                   zIndex: 1
                 }}>
@@ -273,77 +276,94 @@ export default function SubscriptionPlanSelector({
                 </Box>
               )}
               
-              <AccessTimeIcon sx={{ 
-                fontSize: { xs: 24, sm: 28 }, 
-                color: isSelected ? EMPLOYER_THEME.primary : 'text.secondary', 
-                mb: { xs: 0.5, sm: 1 }
-              }} />
               <Typography variant="h6" fontWeight="bold" sx={{ 
-                mb: 0.5,
-                fontSize: { xs: '0.9rem', sm: '1.25rem' },
-                color: isSelected ? EMPLOYER_THEME.primary : 'text.primary'
-                  }}>
-                    {option.label}
-                  </Typography>
+                fontSize: { xs: '0.9rem', sm: '1.1rem' },
+                color: isSelected ? EMPLOYER_THEME.primary : 'text.primary',
+                lineHeight: 1.2
+              }}>
+                {option.label}
+              </Typography>
             </Paper>
           );
         })}
-      </Box>
 
-      {/* انتخاب روز دلخواه */}
-      <Paper
-        elevation={0}
-        sx={{
-          p: { xs: 2, sm: 3 },
-          borderRadius: 3,
-          border: useCustomDuration 
-            ? `2px solid ${EMPLOYER_THEME.primary}` 
-            : '2px solid #e0e0e0',
-          mb: 4,
-          transition: 'all 0.25s ease',
-          '&:hover': {
-            borderColor: EMPLOYER_THEME.primary
-          }
-        }}
-      >
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}>
-          <Radio
-            checked={useCustomDuration}
-            onChange={() => setUseCustomDuration(true)}
-            sx={{ color: EMPLOYER_THEME.primary }}
-          />
-          <Typography variant="subtitle1" fontWeight="bold">
-            انتخاب روز دلخواه
-        </Typography>
-        </Box>
-        
-        <TextField
-          fullWidth
-          type="number"
-          label="تعداد روز (۱ تا ۳۶۵)"
-          value={customDays}
-          onChange={(e) => {
-            setCustomDays(e.target.value);
-              setUseCustomDuration(true);
-            const days = parseInt(e.target.value) || 0;
-            if (days >= 1 && days <= 365) {
-              onDurationChange(days);
-            }
-          }}
-          inputProps={{
-            min: 1,
-            max: 365
-          }}
+        {/* انتخاب روز دلخواه */}
+        <Paper
+          elevation={0}
           sx={{
-            '& .MuiOutlinedInput-root': {
-              borderRadius: 2,
-              '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-                borderColor: EMPLOYER_THEME.primary
-              }
+            p: { xs: 1, sm: 1.5 },
+            textAlign: 'center',
+            borderRadius: 2,
+            boxShadow: '0 2px 8px rgba(66,133,244,0.05)',
+            cursor: 'pointer',
+            position: 'relative',
+            border: useCustomDuration 
+              ? `2px solid ${EMPLOYER_THEME.primary}` 
+              : '2px solid #e0e0e0',
+            bgcolor: 'background.paper',
+            transition: 'all 0.25s ease',
+            minWidth: { xs: '80px', sm: '100px' },
+            maxWidth: { xs: '80px', sm: '100px' },
+            height: 'fit-content',
+            '&:hover': {
+              boxShadow: '0 4px 12px rgba(66,133,244,0.12)',
+              borderColor: EMPLOYER_THEME.primary
             }
           }}
-        />
-      </Paper>
+          onClick={() => setUseCustomDuration(true)}
+        >
+          {!useCustomDuration ? (
+            <Typography variant="h6" fontWeight="bold" sx={{ 
+              fontSize: { xs: '0.9rem', sm: '1.1rem' },
+              color: useCustomDuration ? EMPLOYER_THEME.primary : 'text.primary',
+              lineHeight: 1.2
+            }}>
+              دلخواه
+            </Typography>
+          ) : (
+            <TextField
+              size="small"
+              type="text"
+              placeholder="۳"
+              value={customDays}
+              onChange={(e) => {
+                const persianValue = e.target.value.replace(/[^۰-۹]/g, '');
+                setCustomDays(persianValue);
+                const englishValue = persianValue.replace(/[۰-۹]/g, (d) => '۰۱۲۳۴۵۶۷۸۹'.indexOf(d).toString());
+                const days = parseInt(englishValue) || 0;
+                if (days >= 3 && days <= 365) {
+                  onDurationChange(days);
+                } else if (days > 0 && days < 3) {
+                  // نمایش پیام خطا یا هشدار
+                  console.log('حداقل ۳ روز باید انتخاب شود');
+                } else if (days === 0) {
+                  // اگر خالی باشد، duration را reset نکن
+                  onDurationChange(0);
+                }
+              }}
+              inputProps={{
+                style: { 
+                  textAlign: 'center', 
+                  fontSize: '0.8rem',
+                  direction: 'rtl'
+                }
+              }}
+              sx={{
+                '& .MuiOutlinedInput-root': {
+                  borderRadius: 1,
+                  height: 28,
+                  width: '100%',
+                  '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                    borderColor: EMPLOYER_THEME.primary
+                  }
+                }
+              }}
+              onClick={(e) => e.stopPropagation()}
+              onFocus={(e) => e.stopPropagation()}
+            />
+          )}
+        </Paper>
+      </Box>
 
       {/* کارت‌های طرح - استایل مشابه کارت‌های داشبورد */}
       <Typography variant="subtitle1" fontWeight="bold" sx={{ 
@@ -361,7 +381,13 @@ export default function SubscriptionPlanSelector({
           if (plan) onPlanChange(plan);
         }}
       >
-        <Box sx={{ display: 'flex', flexDirection: 'column', gap: { xs: 2, sm: 3 } }}>
+        <Box sx={{ 
+          display: 'flex', 
+          justifyContent: 'center',
+          gap: { xs: 2, sm: 3 }, 
+          mb: 4,
+          flexWrap: 'wrap'
+        }}>
           {plans.map((plan) => {
             const isSelected = selectedPlan?.id === plan.id;
             const planInfo = getPlanInfo(plan);
@@ -372,7 +398,7 @@ export default function SubscriptionPlanSelector({
                 key={plan.id}
                 elevation={0}
                 sx={{
-                  p: { xs: 2, sm: 3 },
+                  p: { xs: 3, sm: 4 },
                   borderRadius: 3,
                   boxShadow: '0 4px 15px rgba(66,133,244,0.05)',
                   cursor: 'pointer',
@@ -381,128 +407,123 @@ export default function SubscriptionPlanSelector({
                     : '2px solid #e0e0e0',
                   bgcolor: isSelected ? 'rgba(66,133,244,0.02)' : 'background.paper',
                   transition: 'all 0.25s ease',
-                  '&:hover': {
-                    boxShadow: '0 6px 18px rgba(66,133,244,0.12)',
-                    transform: 'translateY(-2px)',
-                    borderColor: EMPLOYER_THEME.primary
-                  }
+                  position: 'relative',
+                  overflow: 'hidden',
+                  minWidth: { xs: '240px', sm: '280px' },
+                  maxWidth: { xs: '280px', sm: '320px' }
                 }}
                 onClick={() => onPlanChange(plan)}
               >
-                  <Box sx={{ 
-                    display: 'flex', 
-                    alignItems: { xs: 'flex-start', sm: 'center' },
-                    justifyContent: 'space-between',
-                    flexDirection: { xs: 'column', sm: 'row' },
-                  gap: { xs: 1.5, sm: 2 }
-                  }}>
-                    {/* راست - اطلاعات */}
-                  <Box sx={{ 
-                    display: 'flex', 
-                    alignItems: { xs: 'flex-start', sm: 'center' }, 
-                    gap: { xs: 1.5, sm: 2 }, 
-                    flex: 1,
-                    width: '100%'
-                  }}>
-                      <FormControlLabel
-                        value={plan.id}
-                      control={<Radio sx={{ 
-                        color: EMPLOYER_THEME.primary,
-                        alignSelf: { xs: 'flex-start', sm: 'center' },
-                        mt: { xs: 0.5, sm: 0 }
-                        }} />}
-                        label=""
-                      sx={{ m: 0, alignSelf: { xs: 'flex-start', sm: 'center' } }}
-                      />
-                      
-                        <Box sx={{ 
-                      p: { xs: 1, sm: 1.5 }, 
-                      borderRadius: 2, 
-                      bgcolor: planInfo.color, 
-                      color: 'white',
-                          display: 'flex', 
-                          alignItems: 'center', 
-                      justifyContent: 'center',
-                      flexShrink: 0
-                    }}>
-                      {planInfo.icon}
-                    </Box>
-                    
-                    <Box sx={{ flex: 1, minWidth: 0 }}>
-                      <Box sx={{ 
-                        display: 'flex', 
-                        alignItems: { xs: 'flex-start', sm: 'center' }, 
-                        gap: 1, 
-                        mb: 0.5, 
-                        flexDirection: { xs: 'column', sm: 'row' },
-                          flexWrap: 'wrap' 
-                        }}>
-                        <Typography variant="h6" fontWeight="bold" sx={{ 
-                          fontSize: { xs: '1rem', sm: '1.25rem' },
-                          lineHeight: { xs: 1.2, sm: 1.3 }
-                          }}>
-                            {plan.name}
-                          </Typography>
-                        <Chip
-                          label={planInfo.badge}
-                          size="small"
-                            sx={{
-                              bgcolor: planInfo.color,
-                              color: 'white',
-                            fontWeight: 'bold',
-                            fontSize: { xs: '0.7rem', sm: '0.75rem' },
-                            height: { xs: 20, sm: 24 }
-                            }}
-                        />
-                        </Box>
-                        <Typography variant="body2" color="text.secondary" sx={{ 
-                        fontSize: { xs: '0.8rem', sm: '0.875rem' },
-                        lineHeight: { xs: 1.3, sm: 1.4 }
-                        }}>
-                        {planInfo.description}
-                        </Typography>
-                    </Box>
-                      </Box>
+                {/* نشانگر انتخاب */}
+                <FormControlLabel
+                  value={plan.id}
+                  control={<Radio sx={{ 
+                    color: EMPLOYER_THEME.primary,
+                    position: 'absolute',
+                    top: 12,
+                    right: 12,
+                    zIndex: 2
+                  }} />}
+                  label=""
+                  sx={{ m: 0 }}
+                />
 
-                  {/* چپ - قیمت */}
-                      <Box sx={{ 
-                    textAlign: { xs: 'center', sm: 'left' }, 
-                    mt: { xs: 2, sm: 0 },
-                    alignSelf: { xs: 'stretch', sm: 'center' },
-                    minWidth: { xs: 'auto', sm: '120px' },
-                    width: { xs: '100%', sm: 'auto' }
+                {/* آیکون و عنوان */}
+                <Box sx={{ 
+                  textAlign: 'center', 
+                  mb: 3
+                }}>
+                  <Chip
+                    label={plan.name}
+                    size="medium"
+                    sx={{
+                      bgcolor: planInfo.color,
+                      color: 'white',
+                      fontWeight: 'bold',
+                      fontSize: '1rem',
+                      height: 32,
+                      px: 2
+                    }}
+                  />
+                </Box>
+
+                {/* قیمت */}
+                <Box sx={{ textAlign: 'center', mb: 3 }}>
+                  {plan.is_free ? (
+                    <Typography variant="h5" fontWeight="bold" color="success.main" sx={{ 
+                      fontSize: { xs: '1.3rem', sm: '1.5rem' },
+                      mb: 1
+                    }}>
+                      رایگان
+                    </Typography>
+                  ) : (
+                    <Box>
+                      <Typography variant="h5" fontWeight="bold" color="primary" sx={{ 
+                        fontSize: { xs: '1.2rem', sm: '1.4rem' },
+                        mb: 0.5
                       }}>
-                        {plan.is_free ? (
-                      <Typography variant="h5" fontWeight="bold" color="success.main" sx={{ 
-                        fontSize: { xs: '1.2rem', sm: '1.5rem' },
-                        lineHeight: 1.2
-                          }}>
-                            رایگان
-                          </Typography>
-                        ) : (
-                      <Box sx={{ 
-                        display: 'flex', 
-                        flexDirection: 'column',
-                        alignItems: { xs: 'center', sm: 'flex-end' }
+                        {toPersianDigits(price.toLocaleString())} تومان
+                      </Typography>
+                      <Typography variant="caption" color="text.secondary" sx={{
+                        fontSize: '0.75rem'
                       }}>
-                        <Typography variant="h5" fontWeight="bold" color="primary" sx={{ 
-                          fontSize: { xs: '1.1rem', sm: '1.5rem' },
-                          lineHeight: 1.2,
-                          textAlign: { xs: 'center', sm: 'right' }
-                        }}>
-                          {toPersianDigits(price.toLocaleString())} تومان
-                            </Typography>
-                            <Typography variant="caption" color="text.secondary" sx={{
-                          fontSize: { xs: '0.7rem', sm: '0.75rem' },
-                          textAlign: { xs: 'center', sm: 'right' },
-                          mt: 0.5
-                            }}>
-                          برای {toPersianDigits(activeDuration)} روز
-                                </Typography>
-                          </Box>
-                        )}
-                      </Box>
+                        برای {toPersianDigits(activeDuration)} روز
+                      </Typography>
                     </Box>
+                  )}
+                </Box>
+
+                {/* ویژگی‌ها */}
+                <Box sx={{ mb: 3 }}>
+                  {(plan.description || '').split('\n').filter(Boolean).slice(0, 3).map((feature, index) => (
+                    <Box key={index} sx={{ 
+                      display: 'flex', 
+                      alignItems: 'center', 
+                      gap: 1, 
+                      mb: 1,
+                      fontSize: '0.85rem'
+                    }}>
+                      <Box sx={{ 
+                        width: 6, 
+                        height: 6, 
+                        borderRadius: '50%', 
+                        bgcolor: EMPLOYER_THEME.primary,
+                        flexShrink: 0
+                      }} />
+                      <Typography variant="body2" sx={{ fontSize: 'inherit' }}>
+                        {feature}
+                      </Typography>
+                    </Box>
+                  ))}
+                </Box>
+
+                {/* دکمه انتخاب */}
+                <Button
+                  variant={isSelected ? "contained" : "outlined"}
+                  fullWidth
+                  sx={{
+                    borderRadius: 2,
+                    fontWeight: 'bold',
+                    textTransform: 'none',
+                    py: 1,
+                    ...(isSelected ? {
+                      bgcolor: EMPLOYER_THEME.primary,
+                      color: 'white',
+                      '&:hover': {
+                        bgcolor: EMPLOYER_THEME.dark
+                      }
+                    } : {
+                      borderColor: EMPLOYER_THEME.primary,
+                      color: EMPLOYER_THEME.primary,
+                      '&:hover': {
+                        borderColor: EMPLOYER_THEME.dark,
+                        color: EMPLOYER_THEME.dark
+                      }
+                    })
+                  }}
+                >
+                  {isSelected ? 'انتخاب شده' : 'انتخاب این طرح'}
+                </Button>
               </Paper>
             );
           })}

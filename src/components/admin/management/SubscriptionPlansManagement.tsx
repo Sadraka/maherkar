@@ -61,6 +61,7 @@ interface SubscriptionPlan {
   price_per_day: number;
   active: boolean;
   is_free: boolean;
+  plan_type: 'B' | 'J' | 'R';
   created_at: string;
   updated_at: string;
 }
@@ -148,7 +149,7 @@ const SubscriptionPlansManagement: React.FC = () => {
       }
       
       if (statusFilter) {
-        params.append('active', statusFilter);
+        params.append('ad_type', statusFilter);
       }
       
       if (sortBy) {
@@ -169,6 +170,11 @@ const SubscriptionPlansManagement: React.FC = () => {
         allPlans = data;
       } else {
         allPlans = [];
+      }
+
+      // اگر فیلتر مخاطب مشخص شده، فقط همان‌ها را نشان بده
+      if (statusFilter) {
+        allPlans = allPlans.filter((p:any)=>p.plan_type===statusFilter);
       }
 
       const itemsPerPage = pageSize;
@@ -447,11 +453,11 @@ const SubscriptionPlansManagement: React.FC = () => {
             <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
               <FilterList sx={{ color: ADMIN_THEME.primary, fontSize: '1.1rem' }} />
               <FormControl fullWidth size="small">
-                <InputLabel>وضعیت</InputLabel>
+                <InputLabel>مخاطب</InputLabel>
                 <Select
                   value={statusFilter}
                   onChange={(e) => setStatusFilter(e.target.value)}
-                  label="وضعیت"
+                  label="مخاطب"
                   sx={{
                     borderRadius: 2,
                     '& .MuiOutlinedInput-notchedOutline': {
@@ -459,9 +465,9 @@ const SubscriptionPlansManagement: React.FC = () => {
                     }
                   }}
                 >
-                  <MenuItem value="">همه وضعیت‌ها</MenuItem>
-                  <MenuItem value="true">فعال</MenuItem>
-                  <MenuItem value="false">غیرفعال</MenuItem>
+                  <MenuItem value="">همه</MenuItem>
+                  <MenuItem value="J">کارفرما</MenuItem>
+                  <MenuItem value="R">کارجو</MenuItem>
                 </Select>
               </FormControl>
             </Box>
@@ -581,11 +587,11 @@ const SubscriptionPlansManagement: React.FC = () => {
               </Button>
               
               <FormControl size="small" sx={{ minWidth: 150, maxWidth: 200 }}>
-                <InputLabel>وضعیت</InputLabel>
+                <InputLabel>مخاطب</InputLabel>
                 <Select
                   value={statusFilter}
                   onChange={(e) => setStatusFilter(e.target.value)}
-                  label="وضعیت"
+                  label="مخاطب"
                   sx={{
                     borderRadius: 2,
                     '& .MuiOutlinedInput-notchedOutline': {
@@ -603,9 +609,9 @@ const SubscriptionPlansManagement: React.FC = () => {
                     }
                   }}
                 >
-                  <MenuItem value="">همه وضعیت‌ها</MenuItem>
-                  <MenuItem value="true">فعال</MenuItem>
-                  <MenuItem value="false">غیرفعال</MenuItem>
+                  <MenuItem value="">همه</MenuItem>
+                  <MenuItem value="J">کارفرما</MenuItem>
+                  <MenuItem value="R">کارجو</MenuItem>
                 </Select>
               </FormControl>
 

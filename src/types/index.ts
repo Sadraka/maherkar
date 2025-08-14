@@ -43,6 +43,7 @@ export interface SubscriptionPlan {
   price_per_day: number;
   active: boolean;
   is_free: boolean;
+  plan_type: 'B' | 'J' | 'R';
   created_at: string;
   updated_at: string;
 }
