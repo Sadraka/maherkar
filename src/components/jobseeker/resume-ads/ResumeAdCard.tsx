@@ -15,7 +15,9 @@ import {
   DialogContent,
   DialogActions,
   useTheme,
-  useMediaQuery
+  useMediaQuery,
+  Avatar,
+  Stack
 } from '@mui/material';
 import LocationOnOutlinedIcon from '@mui/icons-material/LocationOnOutlined';
 import AccessTimeOutlinedIcon from '@mui/icons-material/AccessTimeOutlined';
@@ -26,7 +28,9 @@ import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
 import AccountBalanceWalletIcon from '@mui/icons-material/AccountBalanceWallet';
 import BusinessIcon from '@mui/icons-material/Business';
+import HistoryIcon from '@mui/icons-material/History';
 import { JOB_SEEKER_THEME } from '@/constants/colors';
+import { useJobSeekerTheme } from '@/contexts/JobSeekerThemeContext';
 import { useRouter } from 'next/navigation';
 import { apiDelete } from '@/lib/axios';
 import { useState } from 'react';
@@ -36,6 +40,11 @@ export type ResumeAdType = {
   id: string;
   title: string;
   status: 'P' | 'A' | 'R';
+  // اطلاعات شخصی کاربر
+  user?: {
+    full_name: string;
+    profile_picture?: string;
+  };
   location?: {
     id: number;
     name: string;
@@ -54,6 +63,10 @@ export type ResumeAdType = {
   gender?: string;
   soldier_status?: string;
   description?: string;
+  // مهارت‌ها
+  skills?: string[];
+  // سابقه کاری (سال)
+  experience_years?: number;
   created_at: string;
   updated_at: string;
 };
@@ -67,6 +80,12 @@ interface ResumeAdCardProps {
 const convertToFarsiNumber = (num: string): string => {
   const farsiDigits = ['۰', '۱', '۲', '۳', '۴', '۵', '۶', '۷', '۸', '۹'];
   return num.toString().replace(/\d/g, (x) => farsiDigits[parseInt(x)]);
+};
+
+// تابع تبدیل اعداد انگلیسی به فارسی (مثل ExpertCard)
+const convertToPersianNumber = (num: number): string => {
+  const persianDigits = ['۰', '۱', '۲', '۳', '۴', '۵', '۶', '۷', '۸', '۹'];
+  return num.toString().replace(/\d/g, (match) => persianDigits[parseInt(match)]);
 };
 
 // تابع کمکی برای تبدیل وضعیت‌ها به متن فارسی
@@ -92,12 +111,12 @@ const getSalaryText = (salary?: string): string => {
   if (!salary) return 'توافقی';
   
   switch (salary) {
-    case '5 to 10': return convertToFarsiNumber('5') + ' تا ' + convertToFarsiNumber('10') + ' میلیون تومان';
-    case '10 to 15': return convertToFarsiNumber('10') + ' تا ' + convertToFarsiNumber('15') + ' میلیون تومان';
-    case '15 to 20': return convertToFarsiNumber('15') + ' تا ' + convertToFarsiNumber('20') + ' میلیون تومان';
-    case '20 to 30': return convertToFarsiNumber('20') + ' تا ' + convertToFarsiNumber('30') + ' میلیون تومان';
-    case '30 to 50': return convertToFarsiNumber('30') + ' تا ' + convertToFarsiNumber('50') + ' میلیون تومان';
-    case 'More than 50': return 'بیش از ' + convertToFarsiNumber('50') + ' میلیون تومان';
+    case '5 to 10': return convertToPersianNumber(5) + ' تا ' + convertToPersianNumber(10) + ' میلیون تومان';
+    case '10 to 15': return convertToPersianNumber(10) + ' تا ' + convertToPersianNumber(15) + ' میلیون تومان';
+    case '15 to 20': return convertToPersianNumber(15) + ' تا ' + convertToPersianNumber(20) + ' میلیون تومان';
+    case '20 to 30': return convertToPersianNumber(20) + ' تا ' + convertToPersianNumber(30) + ' میلیون تومان';
+    case '30 to 50': return convertToPersianNumber(30) + ' تا ' + convertToPersianNumber(50) + ' میلیون تومان';
+    case 'More than 50': return 'بیش از ' + convertToPersianNumber(50) + ' میلیون تومان';
     case 'Negotiable':
     default: return 'توافقی';
   }
@@ -122,16 +141,16 @@ const getTimePosted = (createdAt: string): string => {
   const diffInHours = Math.floor((now.getTime() - created.getTime()) / (1000 * 60 * 60));
   
   if (diffInHours < 1) return 'کمتر از ۱ ساعت پیش';
-  if (diffInHours < 24) return `${convertToFarsiNumber(diffInHours.toString())} ساعت پیش`;
+  if (diffInHours < 24) return `${convertToPersianNumber(diffInHours)} ساعت پیش`;
   
   const diffInDays = Math.floor(diffInHours / 24);
-  if (diffInDays < 7) return `${convertToFarsiNumber(diffInDays.toString())} روز پیش`;
+  if (diffInDays < 7) return `${convertToPersianNumber(diffInDays)} روز پیش`;
   
   const diffInWeeks = Math.floor(diffInDays / 7);
-  if (diffInWeeks < 4) return `${convertToFarsiNumber(diffInWeeks.toString())} هفته پیش`;
+  if (diffInWeeks < 4) return `${convertToPersianNumber(diffInWeeks)} هفته پیش`;
   
   const diffInMonths = Math.floor(diffInDays / 30);
-  return `${convertToFarsiNumber(diffInMonths.toString())} ماه پیش`;
+  return `${convertToPersianNumber(diffInMonths)} ماه پیش`;
 };
 
 // تابع کمکی برای تعیین اندازه فونت بر اساس طول عنوان
@@ -158,12 +177,16 @@ const getTitleFontSize = (title: string, isMobile: boolean, isTablet: boolean) =
 
 export default function ResumeAdCard({ resumeAd, onUpdate }: ResumeAdCardProps) {
   const theme = useTheme();
+  const jobSeekerColors = useJobSeekerTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   const isTablet = useMediaQuery(theme.breakpoints.between('sm', 'md'));
   const router = useRouter();
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [deleting, setDeleting] = useState(false);
+
+  // نمایش فقط 3 مهارت اول
+  const topSkills = resumeAd.skills?.slice(0, 3) || [];
 
   const handleMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget);
@@ -205,66 +228,79 @@ export default function ResumeAdCard({ resumeAd, onUpdate }: ResumeAdCardProps) 
     <>
       <Card
         sx={{
-          height: '100%',
-          minHeight: { xs: '260px', sm: '280px', md: '300px' },
           display: 'flex',
           flexDirection: 'column',
-          borderRadius: { xs: 2, sm: 2.5, md: 3 },
-          border: `1px solid #E0E0E0`,
-          boxShadow: '0 2px 8px rgba(0,0,0,0.05)',
+          borderRadius: { xs: 1.5, sm: 2 },
+          border: `1px solid ${jobSeekerColors.bgLight}`,
+          boxShadow: '0 3px 8px rgba(0,0,0,0.05)',
           overflow: 'hidden',
           position: 'relative',
           backgroundColor: theme.palette.background.paper,
-          transition: 'all 0.25s ease-in-out',
-          p: 0,
-          width: '100%',
+          transition: 'transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out',
+          width: { xs: '100%', sm: '100%', md: '100%' },
           mx: 'auto',
-          direction: 'ltr',
+          height: '100%', // مثل ExpertCard
           '&:hover': {
             transform: 'translateY(-4px)',
-            boxShadow: '0 6px 15px rgba(0,0,0,0.1)',
+            boxShadow: '0 6px 16px rgba(0,0,0,0.1)',
           }
         }}
       >
-        <CardContent sx={{ p: 0, pb: "0px !important", height: '100%', display: 'flex', flexDirection: 'column' }}>
-          {/* هدر کارت با نمایش عنوان و برچسب وضعیت */}
-          <Box
-            sx={{
-              p: 1,
-              pb: 0.5,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              borderBottom: `1px solid ${theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.05)'}`,
-              height: { xs: 36, sm: 40, md: 45 },
-              px: { xs: 0.8, sm: 1, md: 1.2 },
-            }}
-          >
-            <Typography
-              variant="subtitle1"
-              component="h3"
-              sx={{
-                fontWeight: 700,
-                fontSize: getTitleFontSize(resumeAd.title, isMobile, isTablet),
-                color: JOB_SEEKER_THEME.primary,
-                lineHeight: 1.4,
-                overflow: 'hidden',
-                textOverflow: 'ellipsis',
-                display: 'flex',
-                WebkitLineClamp: 2,
-                WebkitBoxOrient: 'vertical',
-                textAlign: 'left',
-                wordBreak: 'break-word',
-                width: '100%',
-                height: '100%',
-                alignItems: 'center',
-                justifyContent: 'flex-start',
-                flex: 1,
-                mr: 1,
-              }}
-            >
-              {resumeAd.title}
-            </Typography>
+        <CardContent sx={{
+          p: { xs: 1.5, sm: 2 },
+          pb: { xs: "6px !important", sm: "8px !important" },
+          display: 'flex',
+          flexDirection: 'column',
+          height: '100%'
+        }}>
+          {/* هدر کارت - آواتار و نام */}
+          <Box sx={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            mb: { xs: 1, sm: 1.5 },
+            minHeight: { xs: 40, sm: 45, md: 50 },
+            py: { xs: 0.5, sm: 0.8 },
+            pb: 0
+          }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', flex: 1 }}>
+              <Box sx={{ position: 'relative', mr: { xs: 1, sm: 1.5 } }}>
+                <Avatar
+                  src={resumeAd.user?.profile_picture}
+                  alt={resumeAd.user?.full_name || 'کاربر'}
+                  sx={{
+                    width: { xs: 45, sm: 55 },
+                    height: { xs: 45, sm: 55 },
+                    border: 'none',
+                  }}
+                >
+                  {resumeAd.user?.full_name?.charAt(0) || 'ک'}
+                </Avatar>
+              </Box>
+              <Box sx={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', flex: 1 }}>
+                <Typography variant="h6" sx={{
+                  fontWeight: 'bold',
+                  fontSize: { xs: '0.95rem', sm: '1.05rem' },
+                  mb: { xs: 0.3, sm: 0.4 },
+                  lineHeight: 1.3,
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                  whiteSpace: 'nowrap'
+                }}>
+                  {resumeAd.user?.full_name || 'کاربر ماهرکار'}
+                </Typography>
+                <Typography variant="body2" color="text.secondary" sx={{
+                  fontSize: { xs: '0.8rem', sm: '0.85rem' },
+                  lineHeight: 1.3,
+                  mt: { xs: 0.1, sm: 0.2 },
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                  whiteSpace: 'nowrap'
+                }}>
+                  {resumeAd.title}
+                </Typography>
+              </Box>
+            </Box>
 
             {/* منوی عملیات */}
             <IconButton
@@ -272,8 +308,9 @@ export default function ResumeAdCard({ resumeAd, onUpdate }: ResumeAdCardProps) 
               onClick={handleMenuOpen}
               sx={{
                 color: 'text.secondary',
+                ml: 1,
                 '&:hover': {
-                  backgroundColor: JOB_SEEKER_THEME.primary + '10'
+                  backgroundColor: jobSeekerColors.primary + '10'
                 }
               }}
             >
@@ -281,229 +318,217 @@ export default function ResumeAdCard({ resumeAd, onUpdate }: ResumeAdCardProps) 
             </IconButton>
           </Box>
 
-          {/* بدنه کارت - اطلاعات شغلی */}
-          <Box sx={{ px: { xs: 0.8, sm: 1, md: 1.2 }, py: { xs: 0.6, sm: 0.8, md: 1 }, flex: 1, display: 'flex', flexDirection: 'column', flexGrow: 1 }}>
-            <Box sx={{ display: 'grid', gap: { xs: 0.8, sm: 1, md: 1.2 } }}>
-              
-              {/* محل کار و وضعیت بررسی */}
-              <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                <Box sx={{ display: 'flex', alignItems: 'center', flex: 1 }}>
-                  <Box
-                    sx={{
-                      backgroundColor: `${JOB_SEEKER_THEME.primary}08`,
-                      color: JOB_SEEKER_THEME.primary,
-                      width: { xs: 24, sm: 28, md: 32 },
-                      height: { xs: 24, sm: 28, md: 32 },
-                      borderRadius: '50%',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      ml: 0.5,
-                      mr: { xs: 0.8, sm: 1 },
-                    }}
-                  >
-                    <LocationOnOutlinedIcon sx={{ fontSize: { xs: '1rem', sm: '1.1rem' } }} />
-                  </Box>
-                  <Typography
-                    variant="body2"
-                    sx={{
-                      color: 'text.primary',
-                      fontSize: { xs: '0.85rem', sm: '0.9rem' },
-                      display: 'flex',
-                      alignItems: 'center',
-                      overflow: 'hidden',
-                      textOverflow: 'ellipsis',
-                      whiteSpace: 'nowrap',
-                      maxWidth: '100%',
-                      textAlign: 'left',
-                      flex: 1
-                    }}
-                  >
-                    {resumeAd.location?.name || 'موقعیت نامشخص'}
-                  </Typography>
-                </Box>
-                
-                {/* نمایش برچسب وضعیت بررسی */}
-                <Chip
-                  label={getStatusText(resumeAd.status)}
-                  size="small"
-                  sx={{
-                    backgroundColor: `${getStatusColor(resumeAd.status)}15`,
-                    color: getStatusColor(resumeAd.status),
-                    fontWeight: 600,
-                    fontSize: '0.75rem',
-                    height: 24,
-                    border: `1px solid ${getStatusColor(resumeAd.status)}30`,
-                    ml: 1
-                  }}
-                />
-              </Box>
+          {/* خط سرتاسری زیر هدر */}
+          <Box sx={{
+            position: 'relative',
+            mt: { xs: 0.2, sm: 0.4 },
+            mb: { xs: 0.8, sm: 1 },
+            mx: { xs: -1.5, sm: -2 },
+            height: 1
+          }}>
+            <Box sx={{
+              position: 'absolute',
+              left: 0,
+              right: 0,
+              height: '1px',
+              bgcolor: jobSeekerColors.bgLight
+            }} />
+          </Box>
 
-              {/* زمان انتشار */}
-              <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                <Box
-                  sx={{
-                    backgroundColor: `${JOB_SEEKER_THEME.primary}08`,
-                    color: JOB_SEEKER_THEME.primary,
-                    width: { xs: 28, sm: 32 },
-                    height: { xs: 28, sm: 32 },
-                    borderRadius: '50%',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    ml: 0.5,
-                    mr: { xs: 0.8, sm: 1 },
-                  }}
-                >
-                  <AccessTimeOutlinedIcon sx={{ fontSize: { xs: '1rem', sm: '1.1rem' } }} />
-                </Box>
-                <Typography
-                  variant="body2"
-                  sx={{
-                    color: 'text.secondary',
-                    fontSize: { xs: '0.85rem', sm: '0.9rem' },
-                    overflow: 'hidden',
-                    textOverflow: 'ellipsis',
-                    whiteSpace: 'nowrap',
-                    maxWidth: '100%',
-                    textAlign: 'left'
-                  }}
-                >
-                  {getTimePosted(resumeAd.created_at)}
-                </Typography>
+          {/* اطلاعات اصلی */}
+          <Box sx={{
+            mb: { xs: 0.8, sm: 1 },
+            p: 0,
+            pb: { xs: 0.8, sm: 1 },
+            bgcolor: theme.palette.background.paper,
+            border: 'none',
+            borderRadius: 1.5,
+            fontSize: { xs: '0.75rem', sm: '0.8rem' }
+          }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', mb: { xs: 0.4, sm: 0.5 } }}>
+              <Box sx={{
+                width: { xs: 22, sm: 24 },
+                height: { xs: 22, sm: 24 },
+                borderRadius: '50%',
+                backgroundColor: `rgba(0, 112, 60, 0.1)`,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                ml: 0
+              }}>
+                <LocationOnOutlinedIcon fontSize="small" sx={{
+                  color: jobSeekerColors.primary,
+                  fontSize: { xs: '0.8rem', sm: '0.9rem' }
+                }} />
               </Box>
-
-              {/* صنعت */}
-              {resumeAd.industry && (
-                <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                  <Box
-                    sx={{
-                      backgroundColor: `${JOB_SEEKER_THEME.primary}08`,
-                      color: JOB_SEEKER_THEME.primary,
-                      width: { xs: 28, sm: 32 },
-                      height: { xs: 28, sm: 32 },
-                      borderRadius: '50%',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      ml: 0.5,
-                      mr: { xs: 0.8, sm: 1 },
-                    }}
-                  >
-                    <BusinessIcon sx={{ fontSize: { xs: '1rem', sm: '1.1rem' } }} />
-                  </Box>
-                  <Typography
-                    variant="body2"
-                    sx={{
-                      color: 'text.secondary',
-                      fontSize: { xs: '0.85rem', sm: '0.9rem' },
-                      overflow: 'hidden',
-                      textOverflow: 'ellipsis',
-                      whiteSpace: 'nowrap',
-                      maxWidth: '100%',
-                      textAlign: 'left'
-                    }}
-                  >
-                    {resumeAd.industry.name}
-                  </Typography>
-                </Box>
-              )}
-
-              {/* نوع کار */}
-              <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                <Box
-                  sx={{
-                    backgroundColor: `${JOB_SEEKER_THEME.primary}08`,
-                    color: JOB_SEEKER_THEME.primary,
-                    width: { xs: 28, sm: 32 },
-                    height: { xs: 28, sm: 32 },
-                    borderRadius: '50%',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    ml: 0.5,
-                    mr: { xs: 0.8, sm: 1 },
-                  }}
-                >
-                  <WorkOutlineIcon sx={{ fontSize: { xs: '1rem', sm: '1.1rem' } }} />
-                </Box>
-                <Typography
-                  variant="body2"
-                  sx={{
-                    color: 'text.secondary',
-                    fontSize: { xs: '0.85rem', sm: '0.9rem' },
-                    overflow: 'hidden',
-                    textOverflow: 'ellipsis',
-                    whiteSpace: 'nowrap',
-                    maxWidth: '100%',
-                    textAlign: 'left'
-                  }}
-                >
-                  {getJobTypeText(resumeAd.job_type)}
-                </Typography>
-              </Box>
-
-              {/* حقوق */}
-              <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                <Box
-                  sx={{
-                    backgroundColor: `${JOB_SEEKER_THEME.primary}08`,
-                    color: JOB_SEEKER_THEME.primary,
-                    width: { xs: 28, sm: 32 },
-                    height: { xs: 28, sm: 32 },
-                    borderRadius: '50%',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    ml: 0.5,
-                    mr: { xs: 0.8, sm: 1 },
-                  }}
-                >
-                  <AccountBalanceWalletIcon sx={{ fontSize: { xs: '1rem', sm: '1.1rem' } }} />
-                </Box>
-                <Typography
-                  variant="body2"
-                  sx={{
-                    color: JOB_SEEKER_THEME.primary,
-                    fontSize: { xs: '0.85rem', sm: '0.9rem' },
-                    fontWeight: 600,
-                    overflow: 'hidden',
-                    textOverflow: 'ellipsis',
-                    whiteSpace: 'nowrap',
-                    maxWidth: '100%',
-                    textAlign: 'right'
-                  }}
-                >
-                  {getSalaryText(resumeAd.salary)}
-                </Typography>
-              </Box>
+              <Typography variant="body2" color="text.secondary" sx={{
+                fontSize: { xs: '0.8rem', sm: '0.85rem' },
+                mr: 0,
+                ml: { xs: 1.2, sm: 1.5 }
+              }}>
+                {resumeAd.location?.name || 'موقعیت نامشخص'}
+              </Typography>
             </Box>
 
-            {/* دکمه مشاهده جزئیات */}
-            <Box sx={{ mt: { xs: 1.5, sm: 2 } }}>
-              <Button
-                fullWidth
-                variant="contained"
-                disableElevation
-                startIcon={<VisibilityOutlinedIcon fontSize="small" />}
-                onClick={handleView}
-                sx={{
-                  py: { xs: 0.8, sm: 1 },
-                  fontWeight: 'bold',
-                  borderRadius: 1.5,
-                  fontSize: { xs: '0.85rem', sm: '0.9rem' },
-                  backgroundColor: JOB_SEEKER_THEME.primary,
-                  color: '#fff',
-                  transition: 'all 0.2s ease',
-                  '&:hover': {
-                    backgroundColor: JOB_SEEKER_THEME.dark,
-                    boxShadow: `0 4px 8px ${JOB_SEEKER_THEME.primary}40`,
-                  }
-                }}
-              >
-                مشاهده جزئیات
-              </Button>
+            <Box sx={{ display: 'flex', alignItems: 'center', mb: { xs: 0.4, sm: 0.5 } }}>
+              <Box sx={{
+                width: { xs: 22, sm: 24 },
+                height: { xs: 22, sm: 24 },
+                borderRadius: '50%',
+                backgroundColor: `rgba(0, 112, 60, 0.1)`,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                ml: 0
+              }}>
+                <WorkOutlineIcon fontSize="small" sx={{
+                  color: jobSeekerColors.primary,
+                  fontSize: { xs: '0.8rem', sm: '0.9rem' }
+                }} />
+              </Box>
+              <Typography variant="body2" color="text.secondary" sx={{
+                fontSize: { xs: '0.8rem', sm: '0.85rem' },
+                mr: 0,
+                ml: { xs: 1.2, sm: 1.5 }
+              }}>
+                {getJobTypeText(resumeAd.job_type)}
+              </Typography>
             </Box>
+
+            {resumeAd.experience_years && (
+              <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                <Box sx={{
+                  width: { xs: 22, sm: 24 },
+                  height: { xs: 22, sm: 24 },
+                  borderRadius: '50%',
+                  backgroundColor: `rgba(0, 112, 60, 0.1)`,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  ml: 0
+                }}>
+                  <HistoryIcon fontSize="small" sx={{
+                    color: jobSeekerColors.primary,
+                    fontSize: { xs: '0.8rem', sm: '0.9rem' }
+                  }} />
+                </Box>
+                <Typography variant="body2" color="text.secondary" sx={{
+                  fontSize: { xs: '0.8rem', sm: '0.85rem' },
+                  mr: 0,
+                  ml: { xs: 1.2, sm: 1.5 }
+                }}>
+                  {convertToPersianNumber(resumeAd.experience_years)} سال سابقه
+                </Typography>
+              </Box>
+            )}
+          </Box>
+
+          {/* مهارت‌ها */}
+          {topSkills.length > 0 && (
+            <Box sx={{ mb: { xs: 0.8, sm: 1.2 } }}>
+              <Typography variant="body2" sx={{
+                mb: { xs: 0.2, sm: 0.3 },
+                fontWeight: 600,
+                color: theme.palette.text.secondary,
+                fontSize: { xs: '0.8rem', sm: '0.85rem' }
+              }}>
+                مهارت‌های کلیدی:
+              </Typography>
+              <Stack direction="row" spacing={0} flexWrap="wrap" gap={0.2}>
+                {topSkills.map((skill, index) => (
+                  <Chip
+                    key={index}
+                    label={skill}
+                    size="small"
+                    sx={{
+                      bgcolor: `rgba(0, 112, 60, 0.08)`,
+                      border: 'none',
+                      fontWeight: 500,
+                      fontSize: { xs: '0.7rem', sm: '0.75rem' },
+                      borderRadius: 1,
+                      color: jobSeekerColors.primary,
+                      py: 0,
+                      px: 0,
+                      m: 0.1,
+                      height: { xs: '16px', sm: '18px' },
+                      '& .MuiChip-label': {
+                        px: { xs: 0.6, sm: 0.8 }
+                      }
+                    }}
+                  />
+                ))}
+                {resumeAd.skills && resumeAd.skills.length > 3 && (
+                  <Typography variant="body2" sx={{
+                    fontSize: { xs: '0.7rem', sm: '0.75rem' },
+                    color: theme.palette.text.secondary,
+                    mt: 0.2
+                  }}>
+                    +{convertToPersianNumber(resumeAd.skills.length - 3)} مهارت دیگر
+                  </Typography>
+                )}
+              </Stack>
+            </Box>
+          )}
+
+          {/* اطلاعات تکمیلی */}
+          <Box sx={{
+            p: { xs: 0.8, sm: 1 },
+            bgcolor: `rgba(0, 112, 60, 0.04)`,
+            borderRadius: 1.5,
+            border: 'none',
+            mb: { xs: 0.8, sm: 1 },
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between'
+          }}>
+            <Typography variant="body2" sx={{
+              fontSize: { xs: '0.75rem', sm: '0.8rem' },
+              color: jobSeekerColors.primary,
+              fontWeight: 500
+            }}>
+              <Box component="span" sx={{ fontWeight: 600 }}>حقوق درخواستی:</Box> {getSalaryText(resumeAd.salary)}
+            </Typography>
+            
+            {/* برچسب وضعیت */}
+            <Chip
+              label={getStatusText(resumeAd.status)}
+              size="small"
+              sx={{
+                backgroundColor: `${getStatusColor(resumeAd.status)}15`,
+                color: getStatusColor(resumeAd.status),
+                fontWeight: 600,
+                fontSize: '0.7rem',
+                height: 20,
+                border: `1px solid ${getStatusColor(resumeAd.status)}30`,
+              }}
+            />
+          </Box>
+
+          {/* فضای خالی بین محتوا و دکمه */}
+          <Box sx={{ flexGrow: 1 }} />
+
+          {/* دکمه مشاهده جزئیات */}
+          <Box sx={{ pt: { xs: 0.3, sm: 0.5 }, pb: { xs: 1, sm: 1.2, md: 1.5 } }}>
+            <Button
+              variant="contained"
+              color="success"
+              fullWidth
+              onClick={handleView}
+              sx={{
+                py: { xs: 0.6, sm: 0.8, md: 1 },
+                fontWeight: 'bold',
+                borderRadius: 1.5,
+                fontSize: { xs: '0.9rem', sm: '0.95rem', md: '1rem' },
+                background: `linear-gradient(135deg, ${jobSeekerColors.light} 0%, ${jobSeekerColors.primary} 100%)`,
+                boxShadow: `0 3px 6px rgba(0, 112, 60, 0.2)`,
+                '&:hover': {
+                  background: `linear-gradient(135deg, ${jobSeekerColors.primary} 0%, ${jobSeekerColors.dark} 100%)`,
+                  boxShadow: `0 3px 8px rgba(0, 112, 60, 0.3)`,
+                }
+              }}
+            >
+              مشاهده جزئیات
+            </Button>
           </Box>
         </CardContent>
       </Card>
