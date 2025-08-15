@@ -28,11 +28,16 @@ const convertToPersianNumber = (num: number): string => {
   return num.toString().replace(/\d/g, (match) => persianDigits[parseInt(match)]);
 };
 
-// تابع برای تبدیل اعداد حقوق به فارسی
+// تابع برای تبدیل اعداد حقوق به فارسی و اصلاح فرمت
 const convertSalaryToPersian = (salary: string): string => {
-  return salary.replace(/\d+/g, (match) => {
-    return match.replace(/\d/g, (digit) => ['۰', '۱', '۲', '۳', '۴', '۵', '۶', '۷', '۸', '۹'][parseInt(digit)]);
-  });
+  if (!salary) return '';
+  
+  // تبدیل "30 to 50" به "۳۰ تا ۵۰"
+  return salary
+    .replace(/\s+to\s+/g, ' تا ')
+    .replace(/\d+/g, (match) => {
+      return match.replace(/\d/g, (digit) => ['۰', '۱', '۲', '۳', '۴', '۵', '۶', '۷', '۸', '۹'][parseInt(digit)]);
+    });
 };
 
 export type ExpertType = {
@@ -45,6 +50,7 @@ export type ExpertType = {
 
   // اطلاعات پروفایل
   jobTitle: string; // از profile.headline یا job_seeker_profile.headline
+  title?: string; // عنوان آگهی رزومه
   avatar: string; // از profile.profile_picture
   bio?: string; // از profile.bio
 
@@ -169,7 +175,7 @@ export default function ExpertCard({ expert }: ExpertCardProps) {
                 lineHeight: 1.3,
                 mt: { xs: 0.1, sm: 0.2 }
               }}>
-                {expert.jobTitle}
+                {expert.title || expert.jobTitle}
               </Typography>
             </Box>
           </Box>
@@ -338,7 +344,7 @@ export default function ExpertCard({ expert }: ExpertCardProps) {
                 color: jobSeekerColors.primary,
                 fontWeight: 500
               }}>
-                <Box component="span" sx={{ fontWeight: 600 }}>حقوق درخواستی:</Box> {convertSalaryToPersian(expert.expectedSalary)}
+                <Box component="span" sx={{ fontWeight: 600 }}>حقوق درخواستی:</Box> {convertSalaryToPersian(expert.expectedSalary)} تومان
               </Typography>
             )}
           </Box>
