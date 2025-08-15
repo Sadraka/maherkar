@@ -166,17 +166,14 @@ export default function ExpertCard({ expert }: ExpertCardProps) {
                 expert.subscription_type === 'فوری' ? '#FF9800' : // رنگ فوری
                 '#4CAF50', // رنگ پیش‌فرض
               color: 'white',
-              fontSize: '0.7rem',
+              fontSize: '0.75rem',
               fontWeight: 'bold',
-              px: 1,
-              py: 0.3,
+              px: 1.5,
+              py: 0.5,
               borderRadius: '0 0 0 8px',
               zIndex: 2,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              minWidth: '60px',
-              boxShadow: '0 2px 4px rgba(0,0,0,0.2)'
+              minWidth: '45px',
+              boxShadow: '0 2px 4px rgba(0,0,0,0.15)'
             }}>
               {expert.subscription_type}
             </Box>
