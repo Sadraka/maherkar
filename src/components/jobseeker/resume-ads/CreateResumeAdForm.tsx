@@ -644,7 +644,7 @@ export default function CreateResumeAdForm({
   };
 
   // عناوین مراحل
-  const stepLabels = ['اطلاعات آگهی رزومه', 'بررسی اطلاعات رزومه', 'انتخاب اشتراک', 'پرداخت'];
+  const stepLabels = ['اطلاعات آگهی رزومه', 'بررسی اطلاعات شخصی', 'انتخاب اشتراک', 'پرداخت'];
 
   // تابع validation برای فیلدهای ضروری
   const validateRequiredFields = (): boolean => {
@@ -1496,7 +1496,7 @@ export default function CreateResumeAdForm({
                     borderRadius: 2
                   }}
                 >
-                  ادامه - بررسی اطلاعات رزومه
+                  ادامه - بررسی اطلاعات شخصی
                 </Button>
               </Box>
             </Box>

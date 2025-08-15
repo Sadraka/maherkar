@@ -135,7 +135,7 @@ export default function ResumePreviewStep({ resumeInfo }: ResumePreviewStepProps
     return (
       <Alert severity="warning" sx={{ mb: 3 }}>
         <Typography variant="body2">
-          اطلاعات رزومه یافت نشد. لطفاً ابتدا رزومه خود را تکمیل کنید.
+          اطلاعات شخصی یافت نشد. لطفاً ابتدا رزومه خود را تکمیل کنید.
         </Typography>
       </Alert>
     );
@@ -156,7 +156,7 @@ export default function ResumePreviewStep({ resumeInfo }: ResumePreviewStepProps
         }}
       >
         <Typography variant="body2" sx={{ lineHeight: 1.6 }}>
-          در ادامه، اطلاعات رزومه شما که در آگهی نمایش داده خواهد شد را مشاهده می‌کنید. 
+          در ادامه، اطلاعات شخصی شما که در آگهی نمایش داده خواهد شد را مشاهده می‌کنید. 
           برای ویرایش هر بخش، روی دکمه "ویرایش" کلیک کنید.
         </Typography>
       </Alert>
