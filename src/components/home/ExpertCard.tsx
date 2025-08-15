@@ -42,6 +42,7 @@ const convertSalaryToPersian = (salary: string): string => {
 
 export type ExpertType = {
   id: number;
+  resumeId?: number; // شناسه رزومه برای لینک مشاهده رزومه
   // اطلاعات پایه کاربر
   name: string; // از user.full_name
   username: string; // از user.username
@@ -101,7 +102,9 @@ export default function ExpertCard({ expert }: ExpertCardProps) {
   const handleViewResume = () => {
     if (isAuthenticated) {
       // اگر کاربر وارد شده باشد، به صفحه رزومه برو
-      router.push(`/resume/${expert.id}`);
+      // استفاده از resumeId اگر موجود باشد، در غیر این صورت از id استفاده کن
+      const resumeIdToUse = expert.resumeId || expert.id;
+      router.push(`/resume/${resumeIdToUse}`);
     } else {
       // اگر کاربر وارد نشده باشد، مدال لاگین را نمایش بده
       setLoginModalOpen(true);
@@ -388,7 +391,7 @@ export default function ExpertCard({ expert }: ExpertCardProps) {
                 color: jobSeekerColors.primary,
                 fontWeight: 500
               }}>
-                <Box component="span" sx={{ fontWeight: 600 }}>حقوق درخواستی:</Box> {convertSalaryToPersian(expert.expectedSalary)}
+                <Box component="span" sx={{ fontWeight: 600 }}>حقوق درخواستی:</Box> {convertSalaryToPersian(expert.expectedSalary)} تومان
               </Typography>
             )}
           </Box>
@@ -426,7 +429,7 @@ export default function ExpertCard({ expert }: ExpertCardProps) {
       <AuthRequiredModal
         open={loginModalOpen}
         onClose={handleCloseModal}
-        redirectUrl={`/expert-profile/${expert.id}`}
+        redirectUrl={`/resume/${expert.resumeId || expert.id}`}
         title="نیاز به ورود به حساب کاربری"
         message="برای مشاهده رزومه کامل این متخصص، لازم است وارد حساب کاربری خود شوید."
         submessage="پس از ورود، می‌توانید به تمامی جزئیات رزومه دسترسی داشته باشید."

@@ -139,6 +139,7 @@ const convertSkillsToStringArray = (skills: SkillType[], availableSkills: any[] 
 const convertResumeAdToExpert = (resumeAd: ResumeAdType, skills: string[], resume?: ResumeType): ExpertType => {
   return {
     id: parseInt(resumeAd.id) || 0,
+    resumeId: resumeAd.resume || 0, // استفاده از شناسه رزومه برای لینک مشاهده رزومه
     name: resumeAd.job_seeker_detail?.full_name || 'کاربر ماهرکار',
     username: resumeAd.job_seeker_detail?.full_name?.replace(/\s+/g, '_').toLowerCase() || 'user',
     phone: resumeAd.job_seeker_detail?.phone,
