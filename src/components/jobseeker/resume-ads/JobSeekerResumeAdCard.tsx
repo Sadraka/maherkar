@@ -339,24 +339,7 @@ export default function JobSeekerResumeAdCard({ resumeAd, onUpdate }: JobSeekerR
                 {resumeAd.job_seeker_detail?.full_name ? resumeAd.job_seeker_detail.full_name.charAt(0).toUpperCase() : ''}
               </Avatar>
               
-              {/* نمایش وضعیت آگهی (فقط اگر در انتظار تایید یا رد شده باشد) */}
-              {resumeAd.status !== 'A' && (
-                <Box
-                  sx={{
-                    position: 'absolute',
-                    bottom: -2,
-                    right: -2,
-                    borderRadius: '50%',
-                    width: 16,
-                    height: 16,
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    bgcolor: resumeAd.status === 'P' ? 'warning.main' : 'error.main',
-                    border: '1px solid white',
-                  }}
-                />
-              )}
+              {/* نشان وضعیت آگهی روی آواتار حذف شد */}
             </Box>
             
             <Box sx={{ display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
@@ -382,25 +365,7 @@ export default function JobSeekerResumeAdCard({ resumeAd, onUpdate }: JobSeekerR
               </Typography>
             </Box>
           </Box>
-          {/* برچسب وضعیت آگهی (در انتظار تایید / رد شده) */}
-          {resumeAd.status !== 'A' && (
-            <Box sx={{ mb: { xs: 0.4, sm: 0.6 } }}>
-              <Chip
-                label={resumeAd.status === 'P' ? 'در انتظار تایید' : 'رد شده'}
-                size="small"
-                sx={{
-                  bgcolor: resumeAd.status === 'P' ? 'warning.main' : 'error.main',
-                  color: 'white',
-                  fontWeight: 'bold',
-                  fontSize: { xs: '0.7rem', sm: '0.75rem' },
-                  borderRadius: 1,
-                  px: 1.2,
-                  py: 0.25,
-                  alignSelf: 'flex-start',
-                }}
-              />
-            </Box>
-          )}
+          {/* برچسب وضعیت آگهی اکنون در گوشه چپ کارت نمایش داده می‌شود */}
 
           {/* خط سرتاسری زیر هدر */}
           <Box sx={{
@@ -684,6 +649,31 @@ export default function JobSeekerResumeAdCard({ resumeAd, onUpdate }: JobSeekerR
               </Box>
             ) : null;
           })()}
+
+          {/* نمایش وضعیت آگهی در گوشه چپ کارت */}
+          {resumeAd.status !== 'A' && (
+            <Box sx={{
+              position: 'absolute',
+              top: 8,
+              left: 8,
+              bgcolor: resumeAd.status === 'P' ? 'warning.main' : 'error.main',
+              color: 'white',
+              fontSize: '0.75rem',
+              fontWeight: 'bold',
+              px: 1.5,
+              py: 0.5,
+              borderRadius: 0.5,
+              zIndex: 10,
+              minWidth: '65px',
+              boxShadow: '0 2px 4px rgba(0,0,0,0.15)',
+              textAlign: 'center',
+              pointerEvents: 'none',
+              transform: 'none !important',
+              transition: 'none !important'
+            }}>
+              {resumeAd.status === 'P' ? 'در انتظار تایید' : 'رد شده'}
+            </Box>
+          )}
 
         </CardContent>
       </Card>
