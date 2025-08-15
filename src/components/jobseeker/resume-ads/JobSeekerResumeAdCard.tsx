@@ -507,7 +507,7 @@ export default function JobSeekerResumeAdCard({ resumeAd, onUpdate }: JobSeekerR
           </Box>
 
           {/* مهارت‌ها */}
-          <Box sx={{ mb: { xs: 0.8, sm: 1.2 } }}>
+          <Box sx={{ mb: { xs: 0.8, sm: 1.2 }, height: '60px' }}>
             <Typography variant="body2" sx={{
               mb: { xs: 0.2, sm: 0.3 },
               fontWeight: 600,
@@ -516,7 +516,7 @@ export default function JobSeekerResumeAdCard({ resumeAd, onUpdate }: JobSeekerR
             }}>
               مهارت‌های کلیدی:
             </Typography>
-            <Stack direction="row" spacing={0} flexWrap="wrap" gap={0.2}>
+            <Stack direction="row" spacing={0} flexWrap="wrap" gap={0.2} sx={{ minHeight: '24px' }}>
               {topSkills.map((skill, index) => (
                 <Chip
                   key={index}
