@@ -43,7 +43,7 @@ export default function Experts() {
       industry: 'فناوری اطلاعات',
       experienceYears: 8,
       preferredJobType: 'تمام وقت',
-      expectedSalary: '20 تا 30 میلیون تومان',
+      expectedSalary: '20 تا 30 میلیون',
       degree: 'کارشناسی ارشد مهندسی نرم‌افزار',
       gender: 'مرد',
       soldierStatus: 'پایان خدمت',

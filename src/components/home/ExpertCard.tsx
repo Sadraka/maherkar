@@ -159,8 +159,14 @@ export default function ExpertCard({ expert }: ExpertCardProps) {
                   width: { xs: 45, sm: 55 },
                   height: { xs: 45, sm: 55 },
                   border: 'none',
+                  bgcolor: jobSeekerColors.primary, // رنگ پس‌زمینه برای آواتارهای بدون عکس
+                  color: 'white', // رنگ متن برای آواتارهای بدون عکس
+                  fontSize: { xs: '1.2rem', sm: '1.5rem' },
+                  fontWeight: 'bold',
                 }}
-              />
+              >
+                {expert.name ? expert.name.charAt(0).toUpperCase() : ''}
+              </Avatar>
               {/* نمایش وضعیت آگهی (فقط اگر در انتظار تایید یا رد شده باشد) */}
               {expert.status && expert.status !== 'A' && (
                 <Box
@@ -382,7 +388,7 @@ export default function ExpertCard({ expert }: ExpertCardProps) {
                 color: jobSeekerColors.primary,
                 fontWeight: 500
               }}>
-                <Box component="span" sx={{ fontWeight: 600 }}>حقوق درخواستی:</Box> {convertSalaryToPersian(expert.expectedSalary)} تومان
+                <Box component="span" sx={{ fontWeight: 600 }}>حقوق درخواستی:</Box> {convertSalaryToPersian(expert.expectedSalary)}
               </Typography>
             )}
           </Box>

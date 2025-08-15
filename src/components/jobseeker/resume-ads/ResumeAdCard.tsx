@@ -211,8 +211,14 @@ export default function ResumeAdCard({ resumeAd, onUpdate }: ResumeAdCardProps) 
   const expertData = convertResumeAdToExpert(resumeAd, skills, resume);
   
   // چاپ اطلاعات مربوط به عکس پروفایل برای دیباگ
-  console.log('Profile Picture URL:', resumeAd.job_seeker_detail?.profile_picture);
-  console.log('Avatar in expertData:', expertData.avatar);
+  console.log('Profile Picture URL (original):', resumeAd.job_seeker_detail?.profile_picture);
+  console.log('Avatar in expertData (processed):', expertData.avatar);
+  
+  // اطمینان از اینکه آواتار مقدار معتبری دارد
+  if (expertData.avatar && typeof expertData.avatar !== 'string') {
+    console.error('Avatar is not a string:', expertData.avatar);
+    expertData.avatar = ''; // تنظیم به رشته خالی در صورت نامعتبر بودن
+  }
 
   // در حالت لودینگ، اسکلتون نمایش بده
   if (loading) {
