@@ -29,7 +29,7 @@ export default function Experts() {
   // اضافه کردن state برای بارگذاری
   const [loading, setLoading] = useState(true);
 
-  // داده‌های فیک برای کارت‌های آگهی رزومه
+  // داده‌های کاملا فیک برای کارت‌های آگهی رزومه
   const resumeAdsData: ResumeAdType[] = [
     {
       id: "1",
@@ -65,7 +65,17 @@ export default function Experts() {
       job_seeker: 101,
       resume: 1001,
       industry: 1,
-      advertisement: 'premium',
+      advertisement: {
+        id: 'ad1',
+        subscription: {
+          id: 'sub1',
+          plan: {
+            name: 'premium',
+            price: 1000000
+          },
+          subscription_status: 'active'
+        }
+      },
       location: 1,
       created_at: '2023-10-15',
       updated_at: '2024-05-20'
@@ -103,7 +113,17 @@ export default function Experts() {
       job_seeker: 102,
       resume: 1002,
       industry: 2,
-      advertisement: 'basic',
+      advertisement: {
+        id: 'ad2',
+        subscription: {
+          id: 'sub2',
+          plan: {
+            name: 'basic',
+            price: 500000
+          },
+          subscription_status: 'active'
+        }
+      },
       location: 2,
       created_at: '2023-09-10',
       updated_at: '2024-06-01'
@@ -142,7 +162,17 @@ export default function Experts() {
       job_seeker: 103,
       resume: 1003,
       industry: 1,
-      advertisement: 'basic',
+      advertisement: {
+        id: 'ad3',
+        subscription: {
+          id: 'sub3',
+          plan: {
+            name: 'basic',
+            price: 500000
+          },
+          subscription_status: 'active'
+        }
+      },
       location: 3,
       created_at: '2024-01-05',
       updated_at: '2024-05-10'
@@ -180,7 +210,17 @@ export default function Experts() {
       job_seeker: 104,
       resume: 1004,
       industry: 3,
-      advertisement: 'premium',
+      advertisement: {
+        id: 'ad4',
+        subscription: {
+          id: 'sub4',
+          plan: {
+            name: 'premium',
+            price: 1000000
+          },
+          subscription_status: 'active'
+        }
+      },
       location: 4,
       created_at: '2023-12-15',
       updated_at: '2024-06-12'
@@ -219,7 +259,17 @@ export default function Experts() {
       job_seeker: 105,
       resume: 1005,
       industry: 1,
-      advertisement: 'premium',
+      advertisement: {
+        id: 'ad5',
+        subscription: {
+          id: 'sub5',
+          plan: {
+            name: 'ladder',
+            price: 1500000
+          },
+          subscription_status: 'special'
+        }
+      },
       location: 5,
       created_at: '2023-08-20',
       updated_at: '2024-04-12'
@@ -257,7 +307,17 @@ export default function Experts() {
       job_seeker: 106,
       resume: 1006,
       industry: 2,
-      advertisement: 'basic',
+      advertisement: {
+        id: 'ad6',
+        subscription: {
+          id: 'sub6',
+          plan: {
+            name: 'basic',
+            price: 500000
+          },
+          subscription_status: 'active'
+        }
+      },
       location: 1,
       created_at: '2024-02-10',
       updated_at: '2024-05-28'
@@ -296,7 +356,17 @@ export default function Experts() {
       job_seeker: 107,
       resume: 1007,
       industry: 1,
-      advertisement: 'premium',
+      advertisement: {
+        id: 'ad7',
+        subscription: {
+          id: 'sub7',
+          plan: {
+            name: 'ladder',
+            price: 1500000
+          },
+          subscription_status: 'special'
+        }
+      },
       location: 5,
       created_at: '2023-11-18',
       updated_at: '2024-06-05'

@@ -101,7 +101,17 @@ export type ResumeAdType = {
   job_seeker: number;
   resume: number;
   industry: number;
-  advertisement: string;
+  advertisement: string | {
+    id: string;
+    subscription?: {
+      id: string;
+      plan?: {
+        name: string;
+        price: number;
+      };
+      subscription_status?: string;
+    };
+  };
   location: number;
 
   // تاریخ‌ها
@@ -191,10 +201,25 @@ export default function JobSeekerResumeAdCard({ resumeAd, onUpdate }: JobSeekerR
   // دریافت مهارت‌ها و رزومه کاربر از API
   useEffect(() => {
     // اگر در صفحه اصلی هستیم (صفحه هوم)، نیازی به دریافت اطلاعات API نیست
-    // تشخیص صفحه اصلی با وجود resumeAd.advertisement
-    if (resumeAd.advertisement && typeof resumeAd.advertisement !== 'string') {
-      // احتمالا در حالت نمایش در صفحه اصلی هستیم - بدون درخواست API
+    // تشخیص صفحه اصلی با وجود resumeAd.advertisement به صورت آبجکت
+    if (resumeAd.advertisement && typeof resumeAd.advertisement === 'object') {
+      // در حالت نمایش در صفحه اصلی هستیم - بدون درخواست API
       setLoading(false);
+      // مهارت‌های فیک برای صفحه اصلی - بر اساس صنعت و عنوان شغلی
+      if (resumeAd.industry_detail?.name === 'طراحی و هنر') {
+        setSkills(['Photoshop', 'Illustrator', 'UI/UX', 'Figma', 'Adobe XD']);
+      } else if (resumeAd.industry_detail?.name === 'تبلیغات و بازاریابی') {
+        setSkills(['SEO', 'Google Ads', 'Content Marketing', 'Social Media', 'Analytics']);
+      } else if (resumeAd.title?.includes('بک‌اند')) {
+        setSkills(['Node.js', 'Express', 'MongoDB', 'SQL', 'REST API']);
+      } else if (resumeAd.title?.includes('DevOps')) {
+        setSkills(['Docker', 'Kubernetes', 'AWS', 'CI/CD', 'Linux']);
+      } else if (resumeAd.title?.includes('محصول')) {
+        setSkills(['Agile', 'Scrum', 'Product Strategy', 'User Research', 'Roadmap']);
+      } else {
+        // پیش‌فرض برای توسعه‌دهنده فرانت‌اند
+        setSkills(['React', 'Next.js', 'TypeScript', 'JavaScript', 'Material UI']);
+      }
       return;
     }
 
@@ -250,7 +275,7 @@ export default function JobSeekerResumeAdCard({ resumeAd, onUpdate }: JobSeekerR
   const topSkills = skills.slice(0, 3);
 
   // فقط وقتی اسکلتون را نمایش بده که در صفحه اصلی نباشیم (به عنوان کارت معمولی)
-  if (loading && typeof resumeAd.advertisement === 'string') {
+  if (loading && typeof resumeAd.advertisement !== 'object') {
     return <ResumeAdCardSkeleton />;
   }
 
