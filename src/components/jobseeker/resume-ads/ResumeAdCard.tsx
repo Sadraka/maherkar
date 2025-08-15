@@ -55,6 +55,9 @@ type ResumeType = {
   expected_salary?: string;
   preferred_job_type?: string;
   availability?: string;
+  degree?: string;
+  gender?: string;
+  soldier_status?: string;
 };
 
 // تعریف تایپ آگهی رزومه بر اساس API
@@ -183,10 +186,10 @@ const convertResumeAdToExpert = (resumeAd: ResumeAdType, skills: string[], resum
     name: resumeAd.job_seeker_detail?.full_name || 'کاربر ماهرکار',
     username: resumeAd.job_seeker_detail?.full_name?.replace(/\s+/g, '_').toLowerCase() || 'user',
     phone: resumeAd.job_seeker_detail?.phone,
-    jobTitle: resume?.headline || '',
+    jobTitle: resumeAd.title || resume?.headline || '',
     title: resumeAd.title,
     avatar: processProfilePicture(resumeAd.job_seeker_detail?.profile_picture),
-    bio: resume?.bio || resumeAd.description,
+    bio: resumeAd.description || resume?.bio,
     status: resumeAd.status,
     subscription_type: subscription_type, // اضافه کردن نوع اشتراک
     location: resumeAd.location_detail?.name || 'موقعیت نامشخص',
@@ -194,11 +197,11 @@ const convertResumeAdToExpert = (resumeAd: ResumeAdType, skills: string[], resum
     isVerified: true, // فرض می‌کنیم کاربران آگهی‌دهنده تایید شده‌اند
     industry: resumeAd.industry_detail?.name,
     experienceYears: resume?.years_of_experience, // سال‌های تجربه واقعی از رزومه
-    preferredJobType: resume?.preferred_job_type || resumeAd.job_type,
-    expectedSalary: resume?.expected_salary || resumeAd.salary,
-    degree: resumeAd.degree,
-    gender: resumeAd.gender,
-    soldierStatus: resumeAd.soldier_status,
+    preferredJobType: resumeAd.job_type || resume?.preferred_job_type,
+    expectedSalary: resumeAd.salary || resume?.expected_salary,
+    degree: resumeAd.degree || resume?.degree,
+    gender: resumeAd.gender || resume?.gender,
+    soldierStatus: resumeAd.soldier_status || resume?.soldier_status,
     website: resume?.website,
     linkedinProfile: resume?.linkedin_profile,
     availability: resume?.availability,

@@ -50,6 +50,9 @@ type ResumeType = {
   expected_salary?: string;
   preferred_job_type?: string;
   availability?: string;
+  degree?: string;
+  gender?: string;
+  soldier_status?: string;
 };
 
 // تعریف تایپ آگهی رزومه بر اساس API
