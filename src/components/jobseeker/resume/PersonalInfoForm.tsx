@@ -1085,7 +1085,7 @@ export default function PersonalInfoForm() {
           </Box>
         </Box>
 
-        {/* وضعیت سربازی و سال سابقه کاری (عدد) - کنار هم */}
+        {/* وضعیت سربازی و مدرک تحصیلی - کنار هم */}
         <Box sx={{ display: 'flex', flexDirection: { xs: 'column', md: 'row' }, gap: { xs: 1.5, md: 3 }, mb: { xs: 2, md: 4 } }}>
           {/* وضعیت سربازی */}
           <Box sx={{ flex: 1 }}>
@@ -1143,7 +1143,65 @@ export default function PersonalInfoForm() {
           />
           </Box>
 
-          {/* سال سابقه کاری (عددی) */}
+          {/* مدرک تحصیلی */}
+          <Box sx={{ flex: 1 }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
+              <SchoolIcon sx={{ color: jobseekerColors.primary, fontSize: 20 }} />
+              <Typography variant="body2" fontWeight="medium" sx={{
+                fontSize: { xs: '0.7rem', sm: '0.875rem' },
+                lineHeight: { xs: 1.1, sm: 1.3 },
+                color: jobseekerColors.primary,
+                fontWeight: 600
+              }}>
+                مدرک تحصیلی
+              </Typography>
+            </Box>
+            <Controller
+              name="degree"
+              control={control}
+              render={({ field }) => (
+                <FormControl fullWidth error={Boolean(formErrors.degree)}>
+                  <Select
+                    {...field}
+                    displayEmpty
+                    input={<OutlinedInput sx={selectStyles} />}
+                    renderValue={() => {
+                      const selectedOption = degreeOptions.find(opt => opt.value === field.value);
+                      return (
+                        <Box component="div" sx={{ display: 'flex', justifyContent: 'center', width: '100%' }}>
+                          {selectedOption ? selectedOption.label : 'انتخاب مدرک تحصیلی'}
+                        </Box>
+                      );
+                    }}
+                    MenuProps={menuPropsRTL}
+                    startAdornment={
+                      <InputAdornment position="start" sx={{ position: 'absolute', right: '10px' }}>
+                        <SchoolIcon fontSize="small" sx={{ color: jobseekerColors.primary }} />
+                      </InputAdornment>
+                    }
+                    IconComponent={(props: any) => (
+                      <KeyboardArrowDownIcon {...props} sx={{ color: jobseekerColors.primary }} />
+                    )}
+                  >
+                    <MenuItem value="" disabled>انتخاب مدرک تحصیلی</MenuItem>
+                    {degreeOptions.map((option) => (
+                      <MenuItem key={option.value} value={option.value}>
+                        {option.label}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                  {formErrors.degree && (
+                    <FormHelperText>{formErrors.degree.message}</FormHelperText>
+                  )}
+                </FormControl>
+              )}
+            />
+          </Box>
+        </Box>
+
+        {/* سابقه کاری و سال سابقه کاری (عدد) - کنار هم */}
+        <Box sx={{ display: 'flex', flexDirection: { xs: 'column', md: 'row' }, gap: { xs: 1.5, md: 3 }, mb: { xs: 2, md: 4 } }}>
+          {/* سابقه کاری */}
           <Box sx={{ flex: 1 }}>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
             <WorkIcon sx={{ color: jobseekerColors.primary, fontSize: 20 }} />
@@ -1153,62 +1211,117 @@ export default function PersonalInfoForm() {
               color: jobseekerColors.primary,
               fontWeight: 600
             }}>
-              سال سابقه کاری (عدد)
+              سابقه کاری
             </Typography>
           </Box>
           <Controller
-            name="years_of_experience_numeric"
+            name="experience"
             control={control}
-            rules={{
-              min: { value: 0, message: 'حداقل ۰' },
-              max: { value: 99, message: 'حداکثر ۹۹' },
-              required: selectedExperience === 'Six or More' ? 'لطفاً تعداد سال‌های سابقه کاری را وارد کنید' : false
-            }}
             render={({ field }) => (
-              <TextField
-                {...field}
-                fullWidth
-                type="text"
-                placeholder="مثال: ۵"
-                error={Boolean(formErrors.years_of_experience_numeric)}
-                helperText={selectedExperience === 'Six or More' ? 
-                  formErrors.years_of_experience_numeric?.message : 
-                  'این فیلد فقط برای سابقه کاری بیشتر از 6 سال فعال است'}
-                variant="outlined"
-                disabled={selectedExperience !== 'Six or More'}
-                inputProps={{ inputMode: 'numeric', pattern: '[0-9۰-۹]*', maxLength: 2 }}
-                sx={{ 
-                  '& .MuiOutlinedInput-root': { 
-                    borderRadius: '6px',
-                    '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-                      borderColor: jobseekerColors.primary,
-                      borderWidth: '2px'
-                    }
-                  },
-                  '& .MuiInputLabel-root.Mui-focused': {
-                    color: jobseekerColors.primary
+              <FormControl fullWidth error={Boolean(formErrors.experience)}>
+                <Select
+                  {...field}
+                  displayEmpty
+                  input={<OutlinedInput sx={selectStyles} />}
+                  renderValue={() => {
+                    const selectedOption = experienceOptions.find(opt => opt.value === field.value);
+                    return (
+                      <Box component="div" sx={{ display: 'flex', justifyContent: 'center', width: '100%' }}>
+                        {selectedOption ? selectedOption.label : 'انتخاب سابقه کاری'}
+                      </Box>
+                    );
+                  }}
+                  MenuProps={menuPropsRTL}
+                  startAdornment={
+                    <InputAdornment position="start" sx={{ position: 'absolute', right: '10px' }}>
+                      <WorkIcon fontSize="small" sx={{ color: jobseekerColors.primary }} />
+                    </InputAdornment>
                   }
-                }}
-                // حذف آیکن داخلی طبق درخواست
-                value={field.value === '' ? '' : convertToPersianNumbers(Number(field.value))}
-                onChange={(e) => {
-                  const persianToEnglish = (s: string) => s.replace(/[۰-۹]/g, (d) => String('0123456789'['۰۱۲۳۴۵۶۷۸۹'.indexOf(d)]));
-                  const raw = e.target.value;
-                  const normalized = persianToEnglish(raw).replace(/[^0-9]/g, '');
-                  if (normalized === '') { field.onChange(''); return; }
-                  let n = Number(normalized);
-                  if (Number.isNaN(n)) { field.onChange(''); return; }
-                  if (n < 0) n = 0;
-                  if (n > 99) n = 99;
-                  field.onChange(n);
-                }}
-              />
+                  IconComponent={(props: any) => (
+                    <KeyboardArrowDownIcon {...props} sx={{ color: jobseekerColors.primary }} />
+                  )}
+                >
+                  <MenuItem value="" disabled>انتخاب سابقه کاری</MenuItem>
+                  {experienceOptions.map((option) => (
+                    <MenuItem key={option.value} value={option.value}>
+                      {option.label}
+                    </MenuItem>
+                  ))}
+                </Select>
+                {formErrors.experience && (
+                  <FormHelperText>{formErrors.experience.message}</FormHelperText>
+                )}
+              </FormControl>
             )}
           />
           </Box>
+
+          {/* سال سابقه کاری (عدد) */}
+          <Box sx={{ flex: 1 }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
+              <WorkIcon sx={{ color: jobseekerColors.primary, fontSize: 20 }} />
+              <Typography variant="body2" fontWeight="medium" sx={{
+                fontSize: { xs: '0.7rem', sm: '0.875rem' },
+                lineHeight: { xs: 1.1, sm: 1.3 },
+                color: jobseekerColors.primary,
+                fontWeight: 600
+              }}>
+                سال سابقه کاری (عدد)
+              </Typography>
+            </Box>
+            <Controller
+              name="years_of_experience_numeric"
+              control={control}
+              rules={{
+                min: { value: 0, message: 'حداقل ۰' },
+                max: { value: 99, message: 'حداکثر ۹۹' },
+                required: selectedExperience === 'Six or More' ? 'لطفاً تعداد سال‌های سابقه کاری را وارد کنید' : false
+              }}
+              render={({ field }) => (
+                <TextField
+                  {...field}
+                  fullWidth
+                  type="text"
+                  placeholder="مثال: ۵"
+                  error={Boolean(formErrors.years_of_experience_numeric)}
+                  helperText={selectedExperience === 'Six or More' ? 
+                    formErrors.years_of_experience_numeric?.message : 
+                    'این فیلد فقط برای سابقه کاری بیشتر از 6 سال فعال است'}
+                  variant="outlined"
+                  disabled={selectedExperience !== 'Six or More'}
+                  inputProps={{ inputMode: 'numeric', pattern: '[0-9۰-۹]*', maxLength: 2 }}
+                  sx={{ 
+                    '& .MuiOutlinedInput-root': { 
+                      borderRadius: '6px',
+                      '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                        borderColor: jobseekerColors.primary,
+                        borderWidth: '2px'
+                      }
+                    },
+                    '& .MuiInputLabel-root.Mui-focused': {
+                      color: jobseekerColors.primary
+                    }
+                  }}
+                  // حذف آیکن داخلی طبق درخواست
+                  value={field.value === '' ? '' : convertToPersianNumbers(Number(field.value))}
+                  onChange={(e) => {
+                    const persianToEnglish = (s: string) => s.replace(/[۰-۹]/g, (d) => String('0123456789'['۰۱۲۳۴۵۶۷۸۹'.indexOf(d)]));
+                    const raw = e.target.value;
+                    const normalized = persianToEnglish(raw).replace(/[^0-9]/g, '');
+                    if (normalized === '') { field.onChange(''); return; }
+                    let n = Number(normalized);
+                    if (Number.isNaN(n)) { field.onChange(''); return; }
+                    if (n < 0) n = 0;
+                    if (n > 99) n = 99;
+                    field.onChange(n);
+                  }}
+                />
+              )}
+            />
+          </Box>
         </Box>
 
-        {/* فیلدهای اضافی رزومه */}
+        {/* فیلدهای اضافی رزومه - حقوق و نوع شغل */}
         <AdditionalResumeFields 
           control={control}
           formErrors={formErrors}
