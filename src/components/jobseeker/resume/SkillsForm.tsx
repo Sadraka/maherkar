@@ -200,40 +200,29 @@ export default function SkillsForm() {
       
     } catch (err: any) {
       console.error('خطا در ثبت مهارت:', err);
+      const messages: string[] = [];
       
-      let newErrors: string[] = [];
-      
-      if (err?.response?.data) {
-        if (typeof err.response.data === 'object' && err.response.data !== null) {
-          for (const [field, fieldErrors] of Object.entries(err.response.data)) {
-            if (Array.isArray(fieldErrors)) {
-              fieldErrors.forEach((msg: string) => {
-                if (newErrors && typeof newErrors.push === 'function') {
-                  newErrors.push(`${field}: ${msg}`);
-                }
-              });
-            } else if (typeof fieldErrors === 'string') {
-              if (newErrors && typeof newErrors.push === 'function') {
-                newErrors.push(`${field}: ${fieldErrors}`);
-              }
-            }
+      const errorData = err?.response?.data;
+
+      if (typeof errorData === 'string') {
+        messages.push(errorData);
+      } else if (typeof errorData === 'object' && errorData !== null) {
+        Object.values(errorData).forEach(value => {
+          if (Array.isArray(value)) {
+            messages.push(...value.map(String));
+          } else if (typeof value === 'string') {
+            messages.push(value);
           }
-        } else if (typeof err.response.data === 'string') {
-          if (newErrors && typeof newErrors.push === 'function') {
-            newErrors.push(err.response.data);
-          }
-        }
+        });
       } else if (err?.message) {
-        if (newErrors && typeof newErrors.push === 'function') {
-          newErrors.push(`خطا: ${err.message}`);
-        }
+        messages.push(err.message);
+      }
+
+      if (messages.length === 0) {
+        messages.push('خطا در ارتباط با سرور. لطفاً دوباره تلاش کنید.');
       }
       
-      if (!newErrors || newErrors.length === 0) {
-        newErrors = ['خطا در ارتباط با سرور. لطفاً دوباره تلاش کنید.'];
-      }
-      
-      setErrors(newErrors || []);
+      setErrors(messages);
     } finally {
       setLoading(false);
     }
@@ -595,24 +584,7 @@ export default function SkillsForm() {
         </Alert>
       )}
 
-      {/* فرم افزودن/ویرایش مهارت - بالای صفحه */}
-      {showAddForm && (
-        <Box sx={{ mb: 4 }}>
-          <Divider sx={{ mb: 3 }} />
-          
-          <Typography variant="h6" sx={{ 
-            mb: 3, 
-            color: jobseekerColors.primary,
-            fontWeight: 'bold'
-          }}>
-            {editingId ? 'ویرایش مهارت' : 'افزودن مهارت جدید'}
-          </Typography>
-          
-          {/* فرم موجود بدون تغییر */}
-        </Box>
-      )}
-
-             {/* فرم افزودن/ویرایش مهارت */}
+      {/* فرم افزودن/ویرایش مهارت */}
        {showAddForm && (
          <Box sx={{ mb: 4 }}>
            <Divider sx={{ mb: 3 }} />
@@ -659,39 +631,21 @@ export default function SkillsForm() {
                           placeholder="جستجو و انتخاب مهارت..."
                           error={Boolean(formErrors.skill_id)}
                           helperText={formErrors.skill_id?.message}
-                          sx={{
-                            ...selectStyles,
-                            '& .MuiOutlinedInput-root': {
-                              ...selectStyles['& .MuiOutlinedInput-root'],
-                              '& .MuiAutocomplete-input': {
-                                textAlign: 'center',
-                                '&::placeholder': {
-                                  textAlign: 'center',
-                                  opacity: 1
-                                }
-                              }
-                            }
-                          }}
                         />
                       )}
                       renderOption={(props, option) => (
-                        <Box component="li" {...props} sx={{ 
-                          display: 'flex', 
-                          alignItems: 'center', 
-                          gap: 1,
-                          justifyContent: 'center',
-                          textAlign: 'center'
-                        }}>
-                          <Typography>{option.name}</Typography>
+                        <Box component="li" {...props} sx={{ justifyContent: 'center' }}>
+                          <Typography align="center">{option.name}</Typography>
                         </Box>
                       )}
                       noOptionsText="مهارتی یافت نشد"
                       sx={{
-                        '& .MuiAutocomplete-popupIndicator': {
-                          color: jobseekerColors.primary
+                        '& .MuiInputBase-root': {
+                          display: 'flex',
+                          justifyContent: 'center'
                         },
-                        '& .MuiAutocomplete-clearIndicator': {
-                          color: jobseekerColors.primary
+                        '& .MuiOutlinedInput-input': {
+                          textAlign: 'center'
                         }
                       }}
                     />
@@ -721,24 +675,57 @@ export default function SkillsForm() {
                       <Select
                         {...field}
                         displayEmpty
-                        input={<OutlinedInput sx={selectStyles} />}
-                        renderValue={() => {
-                          const selectedLevel = skillLevelOptions.find(l => l.value === field.value);
+                        sx={{
+                          textAlign: 'center',
+                          '& .MuiSelect-select': {
+                            display: 'flex',
+                            justifyContent: 'center',
+                            alignItems: 'center',
+                            padding: '10px 14px'
+                          }
+                        }}
+                        renderValue={(selected) => {
+                          if (!selected) {
+                            return "انتخاب سطح تسلط";
+                          }
+                          const selectedLevel = skillLevelOptions.find(l => l.value === selected);
+                          if (!selectedLevel) return 'انتخاب سطح تسلط';
+                          
                           return (
-                            <Box component="div" sx={{ display: 'flex', justifyContent: 'center', width: '100%' }}>
-                              {selectedLevel ? selectedLevel.label : 'انتخاب سطح تسلط'}
+                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, justifyContent: 'center', width: '100%' }}>
+                              <Chip 
+                                label={selectedLevel.label}
+                                size="small"
+                                sx={{ 
+                                  backgroundColor: selectedLevel.color,
+                                  color: 'white',
+                                  fontWeight: 'bold'
+                                }}
+                              />
+                              <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                                {Array.from({ length: 4 }, (_, i) => (
+                                  <StarIcon 
+                                    key={i}
+                                    fontSize="small"
+                                    sx={{ 
+                                      color: i < getStarsCount(selectedLevel.value) ? selectedLevel.color : '#e0e0e0',
+                                      fontSize: '14px'
+                                    }}
+                                  />
+                                ))}
+                              </Box>
                             </Box>
                           );
                         }}
-                        MenuProps={menuPropsRTL}
-                        IconComponent={(props: any) => (
-                          <KeyboardArrowDownIcon {...props} sx={{ color: jobseekerColors.primary }} />
-                        )}
                       >
-                        <MenuItem value="" disabled>انتخاب سطح تسلط</MenuItem>
+                        <MenuItem value="" disabled>
+                          <Box sx={{ width: '100%', textAlign: 'center' }}>
+                            انتخاب سطح تسلط
+                          </Box>
+                        </MenuItem>
                         {skillLevelOptions.map((option) => (
-                          <MenuItem key={option.value} value={option.value}>
-                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                          <MenuItem key={option.value} value={option.value} sx={{ justifyContent: 'center' }}>
+                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, justifyContent: 'center' }}>
                               <Chip 
                                 label={option.label}
                                 size="small"
