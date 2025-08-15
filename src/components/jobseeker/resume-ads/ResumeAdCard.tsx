@@ -3,6 +3,30 @@
 import { useState, useEffect } from 'react';
 import { apiGet } from '@/lib/axios';
 import ExpertCard, { ExpertType } from '@/components/home/ExpertCard';
+import ResumeAdCardSkeleton from './ResumeAdCardSkeleton';
+
+// تابع پردازش URL تصویر پروفایل
+const processProfilePicture = (profilePicture?: string): string => {
+  if (!profilePicture) {
+    // اگر تصویر پروفایل وجود نداشت، تصویر پیش‌فرض را برگردان
+    return ''; // آواتار MUI به صورت خودکار حرف اول نام کاربر را نمایش می‌دهد
+  }
+
+  // اگر URL کامل باشد (با http یا https شروع شود)، همان را برگردان
+  if (profilePicture.startsWith('http://') || profilePicture.startsWith('https://')) {
+    return profilePicture;
+  }
+
+  // اگر URL نسبی باشد، آن را به URL کامل تبدیل کن
+  // فرض می‌کنیم که تصاویر در دامنه اصلی سایت ذخیره شده‌اند
+  if (profilePicture.startsWith('/')) {
+    // اگر با / شروع شود، آن را به URL کامل تبدیل کن
+    return `${process.env.NEXT_PUBLIC_API_URL || ''}${profilePicture}`;
+  }
+
+  // در غیر این صورت، فرض می‌کنیم که مسیر نسبی به دایرکتوری media است
+  return `${process.env.NEXT_PUBLIC_API_URL || ''}/media/${profilePicture}`;
+};
 
 // تایپ مهارت از بک‌اند
 type SkillType = {
@@ -120,8 +144,9 @@ const convertResumeAdToExpert = (resumeAd: ResumeAdType, skills: string[], resum
     phone: resumeAd.job_seeker_detail?.phone,
     jobTitle: resume?.headline || '',
     title: resumeAd.title,
-    avatar: resumeAd.job_seeker_detail?.profile_picture || '',
+    avatar: processProfilePicture(resumeAd.job_seeker_detail?.profile_picture),
     bio: resume?.bio || resumeAd.description,
+    status: resumeAd.status,
     location: resumeAd.location_detail?.name || 'موقعیت نامشخص',
     skills: skills, // مهارت‌های واقعی از API
     isVerified: true, // فرض می‌کنیم کاربران آگهی‌دهنده تایید شده‌اند
@@ -184,10 +209,14 @@ export default function ResumeAdCard({ resumeAd, onUpdate }: ResumeAdCardProps) 
 
   // تبدیل ResumeAdType به ExpertType با اطلاعات واقعی
   const expertData = convertResumeAdToExpert(resumeAd, skills, resume);
+  
+  // چاپ اطلاعات مربوط به عکس پروفایل برای دیباگ
+  console.log('Profile Picture URL:', resumeAd.job_seeker_detail?.profile_picture);
+  console.log('Avatar in expertData:', expertData.avatar);
 
-  // در حالت لودینگ، کارت با اطلاعات محدود نمایش بده
+  // در حالت لودینگ، اسکلتون نمایش بده
   if (loading) {
-    return <ExpertCard expert={convertResumeAdToExpert(resumeAd, [], undefined)} />;
+    return <ResumeAdCardSkeleton />;
   }
 
   return (

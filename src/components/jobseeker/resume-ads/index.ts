@@ -1,4 +1,5 @@
 export { default as ResumeAdCard } from './ResumeAdCard';
+export { default as ResumeAdCardSkeleton } from './ResumeAdCardSkeleton';
 export { default as EmptyResumeAdsState } from './EmptyResumeAdsState';
 export { default as ResumeAdsHeader } from './ResumeAdsHeader';
 export { default as ResumeAdsSearchAndSort } from './ResumeAdsSearchAndSort';

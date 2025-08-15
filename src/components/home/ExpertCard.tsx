@@ -53,6 +53,7 @@ export type ExpertType = {
   title?: string; // عنوان آگهی رزومه
   avatar: string; // از profile.profile_picture
   bio?: string; // از profile.bio
+  status?: 'P' | 'A' | 'R'; // وضعیت آگهی (P: در انتظار، A: تایید شده، R: رد شده)
 
   // اطلاعات مکان
   location: string; // از profile.location (City)
@@ -160,16 +161,53 @@ export default function ExpertCard({ expert }: ExpertCardProps) {
                   border: 'none',
                 }}
               />
+              {/* نمایش وضعیت آگهی (فقط اگر در انتظار تایید یا رد شده باشد) */}
+              {expert.status && expert.status !== 'A' && (
+                <Box
+                  sx={{
+                    position: 'absolute',
+                    bottom: -2,
+                    right: -2,
+                    borderRadius: '50%',
+                    width: 16,
+                    height: 16,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    bgcolor: expert.status === 'P' ? 'warning.main' : 'error.main',
+                    border: '1px solid white',
+                  }}
+                />
+              )}
             </Box>
             <Box sx={{ display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
-              <Typography variant="h6" sx={{
-                fontWeight: 'bold',
-                fontSize: { xs: '0.95rem', sm: '1.05rem' },
-                mb: { xs: 0.3, sm: 0.4 },
-                lineHeight: 1.3
-              }}>
-                {expert.name}
-              </Typography>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                <Typography variant="h6" sx={{
+                  fontWeight: 'bold',
+                  fontSize: { xs: '0.95rem', sm: '1.05rem' },
+                  mb: { xs: 0.3, sm: 0.4 },
+                  lineHeight: 1.3
+                }}>
+                  {expert.name}
+                </Typography>
+                {/* نمایش وضعیت آگهی با متن (فقط اگر در انتظار تایید یا رد شده باشد) */}
+                {expert.status && expert.status !== 'A' && (
+                  <Typography
+                    variant="caption"
+                    sx={{
+                      fontSize: '0.65rem',
+                      fontWeight: 'bold',
+                      color: 'white',
+                      bgcolor: expert.status === 'P' ? 'warning.main' : 'error.main',
+                      borderRadius: 1,
+                      px: 0.5,
+                      py: 0.1,
+                    }}
+                  >
+                    {expert.status === 'P' ? 'در انتظار تایید' : 'رد شده'}
+                  </Typography>
+                )}
+              </Box>
               <Typography variant="body2" color="text.secondary" sx={{
                 fontSize: { xs: '0.8rem', sm: '0.85rem' },
                 lineHeight: 1.3,
