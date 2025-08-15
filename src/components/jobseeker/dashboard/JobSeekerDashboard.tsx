@@ -28,6 +28,7 @@ import {
   faUser,
   faBullhorn
 } from '@fortawesome/free-solid-svg-icons';
+import { JobSeekerResumeAdCard } from '@/components/jobseeker/resume-ads';
 
 // تعریف interface برای رزومه
 interface Resume {
@@ -94,40 +95,41 @@ export default function JobSeekerDashboard() {
     resumeAds: null
   });
 
+  // تابع بارگذاری داده‌ها
+  const fetchDashboardData = async () => {
+    try {
+      const [profileResponse, resumesResponse, applicationsResponse, resumeAdsResponse] = await Promise.all([
+        apiGet('/profiles/job-seekers/'),
+        apiGet('/resumes/resumes/'),
+        apiGet('/ads/applications/'),
+        apiGet('/ads/resume/my-resumes/')
+      ]);
+
+      setProfileData(profileResponse.data);
+      setResumesData(resumesResponse.data);
+      setApplicationsData(applicationsResponse.data);
+      // API my-resumes یک آبجکت با ساختار {count, results} برمی‌گرداند
+      setResumeAdsData((resumeAdsResponse.data as any)?.results || resumeAdsResponse.data || []);
+    } catch (err) {
+      console.error('خطا در دریافت اطلاعات داشبورد:', err);
+      setError({
+        profile: 'خطا در بارگذاری اطلاعات پروفایل',
+        resumes: 'خطا در بارگذاری رزومه',
+        applications: 'خطا در بارگذاری درخواست‌ها',
+        resumeAds: 'خطا در بارگذاری آگهی‌های رزومه'
+      });
+    } finally {
+      setLoading({
+        profile: false,
+        resumes: false,
+        applications: false,
+        resumeAds: false
+      });
+    }
+  };
+
   // بارگذاری داده‌ها به صورت موازی
   useEffect(() => {
-    const fetchDashboardData = async () => {
-      try {
-        const [profileResponse, resumesResponse, applicationsResponse, resumeAdsResponse] = await Promise.all([
-          apiGet('/profiles/job-seekers/'),
-          apiGet('/resumes/resumes/'),
-          apiGet('/ads/applications/'),
-          apiGet('/ads/resume/my-resumes/')
-        ]);
-
-        setProfileData(profileResponse.data);
-        setResumesData(resumesResponse.data);
-        setApplicationsData(applicationsResponse.data);
-        // API my-resumes یک آبجکت با ساختار {count, results} برمی‌گرداند
-        setResumeAdsData((resumeAdsResponse.data as any)?.results || resumeAdsResponse.data || []);
-      } catch (err) {
-        console.error('خطا در دریافت اطلاعات داشبورد:', err);
-        setError({
-          profile: 'خطا در بارگذاری اطلاعات پروفایل',
-          resumes: 'خطا در بارگذاری رزومه',
-          applications: 'خطا در بارگذاری درخواست‌ها',
-          resumeAds: 'خطا در بارگذاری آگهی‌های رزومه'
-        });
-      } finally {
-        setLoading({
-          profile: false,
-          resumes: false,
-          applications: false,
-          resumeAds: false
-        });
-      }
-    };
-
     fetchDashboardData();
   }, []);
 
@@ -389,68 +391,22 @@ export default function JobSeekerDashboard() {
                 {error.resumeAds}
               </Paper>
             ) : resumeAdsData && resumeAdsData.length > 0 ? (
-              // نمایش آگهی‌های رزومه
-              resumeAdsData.slice(0, 6).map((resumeAd: ResumeAd, index: number) => (
-                <Paper 
-                  key={resumeAd.id || index}
-                  elevation={0} 
-                  sx={{ 
-                    borderRadius: 3,
-                    boxShadow: '0 3px 10px rgba(0,0,0,0.03)',
-                    border: '1px solid #f1f1f1',
-                    overflow: 'hidden',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    transition: 'all 0.3s ease',
-                    '&:hover': {
-                      boxShadow: '0 6px 15px rgba(0,0,0,0.05)',
-                      borderColor: '#e6e6e6'
-                    }
-                  }}
-                >
-                  <Box sx={{ p: 3, borderBottom: '1px solid #f5f5f5', flexGrow: 1 }}>
-                    <Typography fontWeight="bold" sx={{ textAlign: 'left', fontSize: '1rem', mb: 1 }}>
-                      {resumeAd.title || 'عنوان آگهی'}
-                    </Typography>
-                    <Typography variant="body2" color="text.secondary" sx={{ textAlign: 'left', mb: 1 }}>
-                      {resumeAd.industry?.name || 'صنعت'}
-                    </Typography>
-                    <Typography variant="body2" color="text.secondary" sx={{ textAlign: 'left', mb: 1 }}>
-                      {resumeAd.location?.name || 'مکان'}
-                    </Typography>
-                    <Chip 
-                      label={resumeAd.status === 'A' ? 'تایید شده' : 
-                             resumeAd.status === 'P' ? 'در حال بررسی' : 'رد شده'}
-                      size="small"
-                      sx={{ 
-                        bgcolor: resumeAd.status === 'A' ? JOB_SEEKER_THEME.primary : 
-                                resumeAd.status === 'R' ? 'error.main' : 'warning.main',
-                        color: 'white',
-                        fontSize: '0.7rem'
+              // نمایش آگهی‌های رزومه فعال و تایید شده
+              resumeAdsData
+                .filter((resumeAd: ResumeAd) => resumeAd.status === 'A') // فقط آگهی‌های تایید شده
+                .slice(0, 6)
+                .map((resumeAd: ResumeAd, index: number) => (
+                  <Box key={resumeAd.id || index} sx={{ height: '100%' }}>
+                    <JobSeekerResumeAdCard 
+                      resumeAd={resumeAd} 
+                      onUpdate={() => {
+                        // بروزرسانی لیست آگهی‌ها
+                        fetchDashboardData();
                       }}
+                      hideTimeDisplay={true} // مخفی کردن نمایش زمان در داشبورد
                     />
                   </Box>
-                  <Box sx={{ p: 2, textAlign: 'center', bgcolor: '#f9f9f9', borderTop: '1px solid #f5f5f5' }}>
-                    <Link href={`/jobseeker/resume-ads/${resumeAd.id}`} style={{ textDecoration: 'none' }}>
-                      <Button 
-                        fullWidth 
-                        variant="text" 
-                        size="small" 
-                        sx={{ 
-                          color: JOB_SEEKER_THEME.primary,
-                          fontSize: '0.9rem',
-                          fontWeight: 500,
-                          '&:hover': {
-                            bgcolor: 'rgba(10, 155, 84, 0.05)'
-                          }
-                        }}
-                      >
-                        مشاهده جزئیات
-                      </Button>
-                    </Link>
-                  </Box>
-                </Paper>
-              ))
+                ))
             ) : (
               // نمایش حالت خالی
               <Paper 

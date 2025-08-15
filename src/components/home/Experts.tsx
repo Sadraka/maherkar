@@ -631,7 +631,11 @@ export default function Experts() {
                   .slice(0, visibleExperts)
                   .map((resumeAd) => (
                     <Box key={resumeAd.id} sx={{ height: '100%', overflow: 'visible', position: 'relative' }}>
-                      <JobSeekerResumeAdCard resumeAd={resumeAd} onUpdate={() => console.log('بروزرسانی کارت')} />
+                      <JobSeekerResumeAdCard 
+                        resumeAd={resumeAd} 
+                        onUpdate={() => console.log('بروزرسانی کارت')}
+                        hideTimeDisplay={true} // مخفی کردن نمایش زمان در صفحه اصلی
+                      />
                     </Box>
                 ))}
 

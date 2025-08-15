@@ -16,6 +16,7 @@ import {
 import LocationOnOutlinedIcon from '@mui/icons-material/LocationOnOutlined';
 import WorkOutlineIcon from '@mui/icons-material/WorkOutline';
 import HistoryIcon from '@mui/icons-material/History';
+import PersonIcon from '@mui/icons-material/Person';
 import { useJobSeekerTheme } from '@/contexts/JobSeekerThemeContext';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
@@ -100,13 +101,11 @@ export default function ExpertCard({ expert }: ExpertCardProps) {
   // نمایش فقط 3 مهارت اول
   const topSkills = expert.skills.slice(0, 3);
   
-  // تابع کلیک بر روی دکمه مشاهده رزومه
-  const handleViewResume = () => {
+  // تابع کلیک بر روی دکمه مشاهده آگهی
+  const handleViewAd = () => {
     if (isAuthenticated) {
-      // اگر کاربر وارد شده باشد، به صفحه رزومه برو
-      // استفاده از resumeId اگر موجود باشد، در غیر این صورت از id استفاده کن
-      const resumeIdToUse = expert.resumeId || expert.id;
-      router.push(`/resume/${resumeIdToUse}`);
+      // اگر کاربر وارد شده باشد، به صفحه جزئیات آگهی برو
+      router.push(`/jobseeker/resume-ads/${expert.id}`);
     } else {
       // اگر کاربر وارد نشده باشد، مدال لاگین را نمایش بده
       setLoginModalOpen(true);
@@ -170,7 +169,10 @@ export default function ExpertCard({ expert }: ExpertCardProps) {
                   fontWeight: 'bold',
                 }}
               >
-                {expert.name ? expert.name.charAt(0).toUpperCase() : ''}
+                {expert.avatar ? 
+                  (expert.name ? expert.name.charAt(0).toUpperCase() : '') :
+                  <PersonIcon sx={{ fontSize: { xs: '1.2rem', sm: '1.5rem' } }} />
+                }
               </Avatar>
               {/* نمایش وضعیت آگهی (فقط اگر در انتظار تایید یا رد شده باشد) */}
               {expert.status && expert.status !== 'A' && (
@@ -403,13 +405,13 @@ export default function ExpertCard({ expert }: ExpertCardProps) {
           {/* فضای خالی بین محتوا و دکمه */}
           <Box sx={{ flexGrow: 1 }} />
 
-          {/* دکمه مشاهده رزومه */}
+          {/* دکمه مشاهده آگهی */}
           <Box sx={{ pt: { xs: 0.3, sm: 0.5 }, pb: { xs: 1, sm: 1.2, md: 1.5 } }}>
             <Button
               variant="contained"
               color="success"
               fullWidth
-              onClick={handleViewResume}
+              onClick={handleViewAd}
               sx={{
                 py: { xs: 0.6, sm: 0.8, md: 1 },
                 fontWeight: 'bold',
@@ -423,7 +425,7 @@ export default function ExpertCard({ expert }: ExpertCardProps) {
                 }
               }}
             >
-              مشاهده رزومه
+              مشاهده آگهی
             </Button>
           </Box>
           {/* نمایش نوع اشتراک - داخل کارت */}
@@ -463,10 +465,10 @@ export default function ExpertCard({ expert }: ExpertCardProps) {
       <AuthRequiredModal
         open={loginModalOpen}
         onClose={handleCloseModal}
-        redirectUrl={`/resume/${expert.resumeId || expert.id}`}
+        redirectUrl={`/jobseeker/resume-ads/${expert.id}`}
         title="نیاز به ورود به حساب کاربری"
-        message="برای مشاهده رزومه کامل این متخصص، لازم است وارد حساب کاربری خود شوید."
-        submessage="پس از ورود، می‌توانید به تمامی جزئیات رزومه دسترسی داشته باشید."
+        message="برای مشاهده جزئیات این آگهی رزومه، لازم است وارد حساب کاربری خود شوید."
+        submessage="پس از ورود، می‌توانید به تمامی جزئیات آگهی دسترسی داشته باشید."
         themeType="jobSeeker"
       />
     </>

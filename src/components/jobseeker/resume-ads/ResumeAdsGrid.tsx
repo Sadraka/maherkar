@@ -184,12 +184,8 @@ const ResumeAdsGrid: React.FC<ResumeAdsGridProps> = ({
 
   // تابع تبدیل نوع اشتراک به متن فارسی
   const getSubscriptionText = (subscription: string) => {
-    switch (subscription) {
-      case 'ladder': return 'نردبان';
-      case 'basic': return 'پایه';
-      case 'special': return 'فوری';
-      default: return subscription;
-    }
+    // اگر نام اشتراک از بک‌اند آمده، همان را برگردان
+    return subscription;
   };
   
   const theme = useTheme();

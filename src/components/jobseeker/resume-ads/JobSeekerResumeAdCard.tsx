@@ -20,6 +20,7 @@ import {
 import LocationOnOutlinedIcon from '@mui/icons-material/LocationOnOutlined';
 import WorkOutlineIcon from '@mui/icons-material/WorkOutline';
 import HistoryIcon from '@mui/icons-material/History';
+import PersonIcon from '@mui/icons-material/Person';
 import AuthRequiredModal from '@/components/common/AuthRequiredModal';
 import ResumeAdCardSkeleton from './ResumeAdCardSkeleton';
 import { getJobTypeText, getSalaryText, getDegreeText, getGenderText, getSoldierStatusText } from '@/lib/jobUtils';
@@ -127,6 +128,7 @@ export type ResumeAdType = {
 interface JobSeekerResumeAdCardProps {
   resumeAd: ResumeAdType;
   onUpdate: () => void;
+  hideTimeDisplay?: boolean; // برای مخفی کردن نمایش زمان در داشبورد
 }
 
 // تابع پردازش URL تصویر پروفایل
@@ -196,7 +198,7 @@ const convertSkillsToStringArray = (skills: SkillType[], availableSkills: any[] 
   });
 };
 
-export default function JobSeekerResumeAdCard({ resumeAd, onUpdate }: JobSeekerResumeAdCardProps) {
+export default function JobSeekerResumeAdCard({ resumeAd, onUpdate, hideTimeDisplay = false }: JobSeekerResumeAdCardProps) {
   const theme = useTheme();
   const jobSeekerColors = useJobSeekerTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
@@ -267,11 +269,11 @@ export default function JobSeekerResumeAdCard({ resumeAd, onUpdate }: JobSeekerR
     fetchData();
   }, [resumeAd.advertisement]);
 
-  // تابع کلیک بر روی دکمه مشاهده رزومه
-  const handleViewResume = () => {
+  // تابع کلیک بر روی دکمه مشاهده آگهی
+  const handleViewAd = () => {
     if (isAuthenticated) {
-      // اگر کاربر وارد شده باشد، به صفحه رزومه برو
-      router.push(`/resume/${resumeAd.resume}`);
+      // اگر کاربر وارد شده باشد، به صفحه جزئیات آگهی برو
+      router.push(`/jobseeker/resume-ads/${resumeAd.id}`);
     } else {
       // اگر کاربر وارد نشده باشد، مدال لاگین را نمایش بده
       setLoginModalOpen(true);
@@ -343,7 +345,10 @@ export default function JobSeekerResumeAdCard({ resumeAd, onUpdate }: JobSeekerR
                   fontWeight: 'bold',
                 }}
               >
-                {resumeAd.job_seeker_detail?.full_name ? resumeAd.job_seeker_detail.full_name.charAt(0).toUpperCase() : ''}
+                {resumeAd.job_seeker_detail?.profile_picture ? 
+                  (resumeAd.job_seeker_detail.full_name ? resumeAd.job_seeker_detail.full_name.charAt(0).toUpperCase() : '') :
+                  <PersonIcon sx={{ fontSize: { xs: '1.2rem', sm: '1.5rem' } }} />
+                }
               </Avatar>
               
               {/* نشان وضعیت آگهی روی آواتار حذف شد */}
@@ -502,65 +507,67 @@ export default function JobSeekerResumeAdCard({ resumeAd, onUpdate }: JobSeekerR
                </Typography>
              </Box>
 
-             {/* مدت زمان باقی‌مانده - برای آگهی‌های تایید شده */}
-             {resumeAd.status === 'A' && getRemainingDaysText(resumeAd) ? (
-               <Box sx={{ display: 'flex', alignItems: 'center', mt: { xs: 0.2, sm: 0.3 } }}>
-                 <Box sx={{
-                   width: { xs: 22, sm: 24 },
-                   height: { xs: 22, sm: 24 },
-                   borderRadius: '50%',
-                   backgroundColor: 'rgba(76, 175, 80, 0.1)',
-                   display: 'flex',
-                   alignItems: 'center',
-                   justifyContent: 'center',
-                   ml: 0
-                 }}>
-                   <TimerIcon fontSize="small" sx={{
-                     color: getRemainingDays(resumeAd) === 0 ? '#F44336' : '#4CAF50',
-                     fontSize: { xs: '0.8rem', sm: '0.9rem' }
-                   }} />
-                 </Box>
-                 <Typography variant="body2" sx={{
-                   color: getRemainingDays(resumeAd) === 0 ? '#F44336' : '#4CAF50',
-                   fontSize: { xs: '0.8rem', sm: '0.85rem' },
-                   mr: 0,
-                   ml: { xs: 1.2, sm: 1.5 },
-                   fontWeight: getRemainingDays(resumeAd) === 0 ? 600 : 400,
-                 }}>
-                   {getRemainingDaysText(resumeAd)}
-                 </Typography>
-               </Box>
-             ) : (
-               // پیام برای کارت‌های تایید نشده
-               <Box sx={{ display: 'flex', alignItems: 'center', mt: { xs: 0.2, sm: 0.3 } }}>
-                 <Box sx={{
-                   width: { xs: 22, sm: 24 },
-                   height: { xs: 22, sm: 24 },
-                   borderRadius: '50%',
-                   backgroundColor: 'rgba(158, 158, 158, 0.1)',
-                   display: 'flex',
-                   alignItems: 'center',
-                   justifyContent: 'center',
-                   ml: 0
-                 }}>
-                   <TimerIcon fontSize="small" sx={{
-                     color: '#9E9E9E',
-                     fontSize: { xs: '0.8rem', sm: '0.9rem' }
-                   }} />
-                 </Box>
-                 <Typography variant="body2" sx={{
-                   color: '#9E9E9E',
-                   fontSize: { xs: '0.8rem', sm: '0.85rem' },
-                   mr: 0,
-                   ml: { xs: 1.2, sm: 1.5 },
-                   whiteSpace: 'nowrap',
-                   overflow: 'hidden',
-                   textOverflow: 'ellipsis'
-                 }}>
-                   بعد از تایید محاسبه می‌شود
-                 </Typography>
-               </Box>
-             )}
+                           {/* مدت زمان باقی‌مانده - برای آگهی‌های تایید شده */}
+              {!hideTimeDisplay && (
+                resumeAd.status === 'A' && getRemainingDaysText(resumeAd) ? (
+                  <Box sx={{ display: 'flex', alignItems: 'center', mt: { xs: 0.2, sm: 0.3 } }}>
+                    <Box sx={{
+                      width: { xs: 22, sm: 24 },
+                      height: { xs: 22, sm: 24 },
+                      borderRadius: '50%',
+                      backgroundColor: 'rgba(76, 175, 80, 0.1)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      ml: 0
+                    }}>
+                      <TimerIcon fontSize="small" sx={{
+                        color: getRemainingDays(resumeAd) === 0 ? '#F44336' : '#4CAF50',
+                        fontSize: { xs: '0.8rem', sm: '0.9rem' }
+                      }} />
+                    </Box>
+                    <Typography variant="body2" sx={{
+                      color: getRemainingDays(resumeAd) === 0 ? '#F44336' : '#4CAF50',
+                      fontSize: { xs: '0.8rem', sm: '0.85rem' },
+                      mr: 0,
+                      ml: { xs: 1.2, sm: 1.5 },
+                      fontWeight: getRemainingDays(resumeAd) === 0 ? 600 : 400,
+                    }}>
+                      {getRemainingDaysText(resumeAd)}
+                    </Typography>
+                  </Box>
+                ) : (
+                  // پیام برای کارت‌های تایید نشده
+                  <Box sx={{ display: 'flex', alignItems: 'center', mt: { xs: 0.2, sm: 0.3 } }}>
+                    <Box sx={{
+                      width: { xs: 22, sm: 24 },
+                      height: { xs: 22, sm: 24 },
+                      borderRadius: '50%',
+                      backgroundColor: 'rgba(158, 158, 158, 0.1)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      ml: 0
+                    }}>
+                      <TimerIcon fontSize="small" sx={{
+                        color: '#9E9E9E',
+                        fontSize: { xs: '0.8rem', sm: '0.9rem' }
+                      }} />
+                    </Box>
+                    <Typography variant="body2" sx={{
+                      color: '#9E9E9E',
+                      fontSize: { xs: '0.8rem', sm: '0.85rem' },
+                      mr: 0,
+                      ml: { xs: 1.2, sm: 1.5 },
+                      whiteSpace: 'nowrap',
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis'
+                    }}>
+                      بعد از تایید محاسبه می‌شود
+                    </Typography>
+                  </Box>
+                )
+              )}
           </Box>
 
           {/* مهارت‌ها */}
@@ -644,13 +651,13 @@ export default function JobSeekerResumeAdCard({ resumeAd, onUpdate }: JobSeekerR
           {/* فضای خالی بین محتوا و دکمه */}
           <Box sx={{ flexGrow: 1 }} />
 
-          {/* دکمه مشاهده رزومه */}
+          {/* دکمه مشاهده آگهی */}
           <Box sx={{ pt: { xs: 0.3, sm: 0.5 }, pb: { xs: 1, sm: 1.2, md: 1.5 } }}>
             <Button
               variant="contained"
               color="success"
               fullWidth
-              onClick={handleViewResume}
+              onClick={handleViewAd}
               sx={{
                 py: { xs: 0.6, sm: 0.8, md: 1 },
                 fontWeight: 'bold',
@@ -664,7 +671,7 @@ export default function JobSeekerResumeAdCard({ resumeAd, onUpdate }: JobSeekerR
                 }
               }}
             >
-              مشاهده رزومه
+              مشاهده آگهی
             </Button>
           </Box>
           {/* نمایش نوع اشتراک */}
@@ -740,10 +747,10 @@ export default function JobSeekerResumeAdCard({ resumeAd, onUpdate }: JobSeekerR
       <AuthRequiredModal
         open={loginModalOpen}
         onClose={handleCloseModal}
-        redirectUrl={`/resume/${resumeAd.resume}`}
+        redirectUrl={`/jobseeker/resume-ads/${resumeAd.id}`}
         title="نیاز به ورود به حساب کاربری"
-        message="برای مشاهده رزومه کامل این متخصص، لازم است وارد حساب کاربری خود شوید."
-        submessage="پس از ورود، می‌توانید به تمامی جزئیات رزومه دسترسی داشته باشید."
+        message="برای مشاهده جزئیات این آگهی رزومه، لازم است وارد حساب کاربری خود شوید."
+        submessage="پس از ورود، می‌توانید به تمامی جزئیات آگهی دسترسی داشته باشید."
         themeType="jobSeeker"
       />
     </>

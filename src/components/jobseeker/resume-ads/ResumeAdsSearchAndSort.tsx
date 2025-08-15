@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import {
   Box,
   TextField,
@@ -23,6 +23,20 @@ import FilterListIcon from '@mui/icons-material/FilterList';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import ExpandLessIcon from '@mui/icons-material/ExpandLess';
 import { JOB_SEEKER_THEME } from '@/constants/colors';
+import { apiGet } from '@/lib/axios';
+
+// تایپ طرح اشتراک
+interface SubscriptionPlan {
+  id: string;
+  name: string;
+  description: string;
+  price_per_day: number;
+  active: boolean;
+  is_free: boolean;
+  plan_type: 'B' | 'J' | 'R';
+  created_at: string;
+  updated_at: string;
+}
 
 export interface ResumeAdData {
   id: string;
@@ -72,6 +86,28 @@ const ResumeAdsSearchAndSort: React.FC<ResumeAdsSearchAndSortProps> = ({
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [subscriptionFilter, setSubscriptionFilter] = useState<string>('all');
   const [showFilters, setShowFilters] = useState(false);
+  
+  // State برای طرح‌های اشتراک
+  const [subscriptionPlans, setSubscriptionPlans] = useState<SubscriptionPlan[]>([]);
+  const [plansLoading, setPlansLoading] = useState(false);
+
+  // دریافت طرح‌های اشتراک از بک‌اند
+  useEffect(() => {
+    const fetchSubscriptionPlans = async () => {
+      try {
+        setPlansLoading(true);
+        const response = await apiGet('/subscriptions/plans/?ad_type=R');
+        const plans = (response.data as SubscriptionPlan[]).filter(plan => plan.active);
+        setSubscriptionPlans(plans);
+      } catch (error) {
+        console.error('خطا در دریافت طرح‌های اشتراک:', error);
+      } finally {
+        setPlansLoading(false);
+      }
+    };
+
+    fetchSubscriptionPlans();
+  }, []);
 
   // تابع بررسی نوع اشتراک - بهبود یافته
   const isSpecialSubscription = (resumeAd: any): boolean => {
@@ -145,17 +181,11 @@ const ResumeAdsSearchAndSort: React.FC<ResumeAdsSearchAndSortProps> = ({
     if (subscriptionFilter !== 'all') {
       filtered = filtered.filter(resumeAd => {
         // بررسی subscription_detail (API واقعی)
-        const planName = resumeAd.subscription_detail?.plan?.name?.toLowerCase() || 
-                        resumeAd.advertisement?.subscription?.plan?.name?.toLowerCase() || '';
+        const planName = resumeAd.subscription_detail?.plan?.name || 
+                        resumeAd.advertisement?.subscription?.plan?.name || '';
         
-        if (subscriptionFilter === 'basic') {
-          return planName.includes('پایه') || planName.includes('basic') || planName === '';
-        } else if (subscriptionFilter === 'special') {
-          return planName.includes('فوری') || planName.includes('urgent');
-        } else if (subscriptionFilter === 'ladder') {
-          return planName.includes('نردبان') || planName.includes('ladder');
-        }
-        return true;
+        // فیلتر بر اساس نام دقیق طرح
+        return planName === subscriptionFilter;
       });
     }
 
@@ -356,47 +386,50 @@ const ResumeAdsSearchAndSort: React.FC<ResumeAdsSearchAndSortProps> = ({
                 </Select>
               </FormControl>
 
-              {/* فیلتر نوع اشتراک */}
-              <FormControl
-                size="medium"
-                sx={{
-                  minWidth: { xs: '100%', sm: 150, md: 170 },
-                  '& .MuiOutlinedInput-root': {
-                    borderRadius: 2,
-                    backgroundColor: '#fff',
-                    '& fieldset': {
-                      borderColor: '#E0E0E0',
-                      borderWidth: 1
-                    },
-                    '&:hover fieldset': {
-                      borderColor: JOB_SEEKER_THEME.primary,
-                      borderWidth: 1
-                    },
-                    '&.Mui-focused fieldset': {
-                      borderColor: JOB_SEEKER_THEME.primary,
-                      borderWidth: 2
-                    }
-                  },
-                  '& .MuiInputLabel-root': {
-                    color: 'text.secondary',
-                    '&.Mui-focused': {
-                      color: JOB_SEEKER_THEME.primary
-                    }
-                  }
-                }}
-              >
-                <InputLabel>نوع اشتراک</InputLabel>
-                <Select
-                  value={subscriptionFilter}
-                  onChange={(e) => setSubscriptionFilter(e.target.value)}
-                  label="نوع اشتراک"
-                >
-                  <MenuItem value="all">همه</MenuItem>
-                  <MenuItem value="basic">پایه</MenuItem>
-                  <MenuItem value="special">ویژه</MenuItem>
-                  <MenuItem value="ladder">نردبان</MenuItem>
-                </Select>
-              </FormControl>
+                             {/* فیلتر نوع اشتراک */}
+               <FormControl
+                 size="medium"
+                 sx={{
+                   minWidth: { xs: '100%', sm: 150, md: 170 },
+                   '& .MuiOutlinedInput-root': {
+                     borderRadius: 2,
+                     backgroundColor: '#fff',
+                     '& fieldset': {
+                       borderColor: '#E0E0E0',
+                       borderWidth: 1
+                     },
+                     '&:hover fieldset': {
+                       borderColor: JOB_SEEKER_THEME.primary,
+                       borderWidth: 1
+                     },
+                     '&.Mui-focused fieldset': {
+                       borderColor: JOB_SEEKER_THEME.primary,
+                       borderWidth: 2
+                     }
+                   },
+                   '& .MuiInputLabel-root': {
+                     color: 'text.secondary',
+                     '&.Mui-focused': {
+                       color: JOB_SEEKER_THEME.primary
+                     }
+                   }
+                 }}
+               >
+                 <InputLabel>نوع اشتراک</InputLabel>
+                 <Select
+                   value={subscriptionFilter}
+                   onChange={(e) => setSubscriptionFilter(e.target.value)}
+                   label="نوع اشتراک"
+                   disabled={plansLoading}
+                 >
+                   <MenuItem value="all">همه</MenuItem>
+                   {subscriptionPlans.map((plan) => (
+                     <MenuItem key={plan.id} value={plan.name}>
+                       {plan.name}
+                     </MenuItem>
+                   ))}
+                 </Select>
+               </FormControl>
             </Box>
           </Box>
 
@@ -461,26 +494,23 @@ const ResumeAdsSearchAndSort: React.FC<ResumeAdsSearchAndSortProps> = ({
                 />
               )}
               
-              {subscriptionFilter !== 'all' && (
-                <Chip
-                  label={`اشتراک: ${
-                    subscriptionFilter === 'basic' ? 'پایه' : 
-                    subscriptionFilter === 'special' ? 'ویژه' : 'نردبان'
-                  }`}
-                  onDelete={() => setSubscriptionFilter('all')}
-                  size="small"
-                  sx={{
-                    backgroundColor: JOB_SEEKER_THEME.primary,
-                    color: 'white',
-                    '& .MuiChip-deleteIcon': {
-                      color: 'rgba(255, 255, 255, 0.8)',
-                      '&:hover': {
-                        color: 'white'
-                      }
-                    }
-                  }}
-                />
-              )}
+                             {subscriptionFilter !== 'all' && (
+                 <Chip
+                   label={`اشتراک: ${subscriptionFilter}`}
+                   onDelete={() => setSubscriptionFilter('all')}
+                   size="small"
+                   sx={{
+                     backgroundColor: JOB_SEEKER_THEME.primary,
+                     color: 'white',
+                     '& .MuiChip-deleteIcon': {
+                       color: 'rgba(255, 255, 255, 0.8)',
+                       '&:hover': {
+                         color: 'white'
+                       }
+                     }
+                   }}
+                 />
+               )}
             </Box>
           )}
 
