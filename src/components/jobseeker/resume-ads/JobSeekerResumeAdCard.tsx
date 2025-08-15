@@ -23,6 +23,7 @@ import HistoryIcon from '@mui/icons-material/History';
 import AuthRequiredModal from '@/components/common/AuthRequiredModal';
 import ResumeAdCardSkeleton from './ResumeAdCardSkeleton';
 import { getJobTypeText, getSalaryText, getDegreeText, getGenderText, getSoldierStatusText } from '@/lib/jobUtils';
+import TimerIcon from '@mui/icons-material/Timer';
 
 // تایپ مهارت از بک‌اند
 type SkillType = {
@@ -150,12 +151,35 @@ const processProfilePicture = (profilePicture?: string): string => {
   return `${process.env.NEXT_PUBLIC_API_URL || ''}/media/${profilePicture}`;
 };
 
-// تابع تبدیل اعداد انگلیسی به فارسی
-const convertToPersianNumber = (num: number): string => {
+// تابع کمکی برای تبدیل اعداد انگلیسی به فارسی
+const convertToFarsiNumber = (num: number): string => {
   const persianDigits = ['۰', '۱', '۲', '۳', '۴', '۵', '۶', '۷', '۸', '۹'];
   return num.toString().replace(/\d/g, (match) => persianDigits[parseInt(match)]);
 };
 
+// تابع کمکی برای محاسبه روزهای باقی‌مانده
+const getRemainingDays = (resumeAd: any): number | null => {
+  if (resumeAd.status !== 'A') return null; // فقط برای آگهی‌های تایید شده
+  
+  const endDate = resumeAd.subscription_detail?.end_date;
+  if (!endDate) return null;
+  
+  const now = new Date();
+  const end = new Date(endDate);
+  const diffTime = end.getTime() - now.getTime();
+  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+  
+  return diffDays > 0 ? diffDays : 0;
+};
+
+// تابع کمکی برای نمایش مدت زمان باقی‌مانده
+const getRemainingDaysText = (resumeAd: any): string => {
+  const remainingDays = getRemainingDays(resumeAd);
+  if (remainingDays === null) return '';
+  if (remainingDays === 0) return 'امروز پایان می‌یابد';
+  if (remainingDays === 1) return 'فردا پایان می‌یابد';
+  return `${convertToFarsiNumber(remainingDays)} روز باقی‌مانده`;
+};
 
 
 // تابع تبدیل مهارت‌های API به آرایه رشته
@@ -448,35 +472,65 @@ export default function JobSeekerResumeAdCard({ resumeAd, onUpdate }: JobSeekerR
                </Typography>
             </Box>
 
-            <Box sx={{ display: 'flex', alignItems: 'center' }}>
-              <Box sx={{
-                width: { xs: 22, sm: 24 },
-                height: { xs: 22, sm: 24 },
-                borderRadius: '50%',
-                backgroundColor: `rgba(0, 112, 60, 0.1)`,
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                ml: 0
-              }}>
-                <HistoryIcon fontSize="small" sx={{
-                  color: jobSeekerColors.primary,
-                  fontSize: { xs: '0.8rem', sm: '0.9rem' }
-                }} />
-              </Box>
-              <Typography variant="body2" color="text.secondary" sx={{
-                fontSize: { xs: '0.8rem', sm: '0.85rem' },
-                mr: 0,
-                ml: { xs: 1.2, sm: 1.5 }
-              }}>
-                {typeof resumeAd.advertisement === 'object' 
-                  ? `${convertToPersianNumber(5)} سال سابقه` 
-                  : resume?.years_of_experience 
-                    ? `${convertToPersianNumber(resume.years_of_experience)} سال سابقه`
-                    : `${convertToPersianNumber(3)} سال سابقه`
-                }
-              </Typography>
-            </Box>
+                         <Box sx={{ display: 'flex', alignItems: 'center' }}>
+               <Box sx={{
+                 width: { xs: 22, sm: 24 },
+                 height: { xs: 22, sm: 24 },
+                 borderRadius: '50%',
+                 backgroundColor: `rgba(0, 112, 60, 0.1)`,
+                 display: 'flex',
+                 alignItems: 'center',
+                 justifyContent: 'center',
+                 ml: 0
+               }}>
+                 <HistoryIcon fontSize="small" sx={{
+                   color: jobSeekerColors.primary,
+                   fontSize: { xs: '0.8rem', sm: '0.9rem' }
+                 }} />
+               </Box>
+               <Typography variant="body2" color="text.secondary" sx={{
+                 fontSize: { xs: '0.8rem', sm: '0.85rem' },
+                 mr: 0,
+                 ml: { xs: 1.2, sm: 1.5 }
+               }}>
+                 {typeof resumeAd.advertisement === 'object' 
+                   ? `${convertToFarsiNumber(5)} سال سابقه` 
+                   : resume?.years_of_experience 
+                     ? `${convertToFarsiNumber(resume.years_of_experience)} سال سابقه`
+                     : `${convertToFarsiNumber(3)} سال سابقه`
+                 }
+               </Typography>
+             </Box>
+
+             {/* مدت زمان باقی‌مانده - برای آگهی‌های تایید شده */}
+             {resumeAd.status === 'A' && getRemainingDaysText(resumeAd) && (
+               <Box sx={{ display: 'flex', alignItems: 'center', mt: { xs: 0.2, sm: 0.3 } }}>
+                 <Box sx={{
+                   width: { xs: 22, sm: 24 },
+                   height: { xs: 22, sm: 24 },
+                   borderRadius: '50%',
+                   backgroundColor: 'rgba(76, 175, 80, 0.1)',
+                   display: 'flex',
+                   alignItems: 'center',
+                   justifyContent: 'center',
+                   ml: 0
+                 }}>
+                   <TimerIcon fontSize="small" sx={{
+                     color: getRemainingDays(resumeAd) === 0 ? '#F44336' : '#4CAF50',
+                     fontSize: { xs: '0.8rem', sm: '0.9rem' }
+                   }} />
+                 </Box>
+                 <Typography variant="body2" sx={{
+                   color: getRemainingDays(resumeAd) === 0 ? '#F44336' : '#4CAF50',
+                   fontSize: { xs: '0.8rem', sm: '0.85rem' },
+                   mr: 0,
+                   ml: { xs: 1.2, sm: 1.5 },
+                   fontWeight: getRemainingDays(resumeAd) === 0 ? 600 : 400,
+                 }}>
+                   {getRemainingDaysText(resumeAd)}
+                 </Typography>
+               </Box>
+             )}
           </Box>
 
           {/* مهارت‌ها */}
@@ -514,7 +568,7 @@ export default function JobSeekerResumeAdCard({ resumeAd, onUpdate }: JobSeekerR
               ))}
               {skills.length > 3 && (
                 <Chip
-                  label={`+${convertToPersianNumber(skills.length - 3)}`}
+                  label={`+${convertToFarsiNumber(skills.length - 3)}`}
                   size="small"
                   sx={{
                     bgcolor: `rgba(0, 112, 60, 0.08)`,
@@ -647,7 +701,7 @@ export default function JobSeekerResumeAdCard({ resumeAd, onUpdate }: JobSeekerR
             ) : null;
           })()}
 
-
+          
 
         </CardContent>
       </Card>

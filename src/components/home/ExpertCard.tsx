@@ -23,11 +23,12 @@ import { useAuth } from '@/contexts/AuthContext';
 import AuthRequiredModal from '../common/AuthRequiredModal';
 import { getSalaryText, getJobTypeText } from '@/lib/jobUtils';
 
-// تابع تبدیل اعداد انگلیسی به فارسی
+// تابع کمکی برای تبدیل اعداد انگلیسی به فارسی
 const convertToPersianNumber = (num: number): string => {
   const persianDigits = ['۰', '۱', '۲', '۳', '۴', '۵', '۶', '۷', '۸', '۹'];
   return num.toString().replace(/\d/g, (match) => persianDigits[parseInt(match)]);
 };
+
 
 
 
@@ -47,6 +48,15 @@ export type ExpertType = {
   bio?: string; // از profile.bio
   status?: 'P' | 'A' | 'R'; // وضعیت آگهی (P: در انتظار، A: تایید شده، R: رد شده)
   subscription_type?: string; // نوع اشتراک (نردبان، فوری، پایه)
+  subscription_detail?: {
+    id: string;
+    subscription_status: 'default' | 'special';
+    plan: any;
+    duration: number;
+    start_date: string;
+    end_date: string;
+    created_at: string;
+  };
 
   // اطلاعات مکان
   location: string; // از profile.location (City)
@@ -308,6 +318,8 @@ export default function ExpertCard({ expert }: ExpertCardProps) {
                 </Typography>
               </Box>
             )}
+
+
           </Box>
 
           {/* مهارت‌ها */}
@@ -441,6 +453,8 @@ export default function ExpertCard({ expert }: ExpertCardProps) {
               {expert.subscription_type}
             </Box>
           )}
+
+
 
         </CardContent>
       </Card>

@@ -193,6 +193,7 @@ const convertResumeAdToExpert = (resumeAd: ResumeAdType, skills: string[], resum
     bio: resumeAd.description || resume?.bio,
     status: resumeAd.status,
     subscription_type: subscription_type, // اضافه کردن نوع اشتراک
+    subscription_detail: (resumeAd as any).subscription_detail, // اضافه کردن جزئیات اشتراک
     location: resumeAd.location_detail?.name || 'موقعیت نامشخص',
     skills: skills, // مهارت‌های واقعی از API
     isVerified: true, // فرض می‌کنیم کاربران آگهی‌دهنده تایید شده‌اند
