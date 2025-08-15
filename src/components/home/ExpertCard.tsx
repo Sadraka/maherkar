@@ -288,7 +288,7 @@ export default function ExpertCard({ expert }: ExpertCardProps) {
               </Typography>
             </Box>
 
-            <Box sx={{ display: 'flex', alignItems: 'center', mb: { xs: 0.4, sm: 0.5 } }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', mb: { xs: 0.2, sm: 0.3 } }}>
               <Box sx={{
                 width: { xs: 22, sm: 24 },
                 height: { xs: 22, sm: 24 },
