@@ -374,14 +374,25 @@ export default function ExpertCard({ expert }: ExpertCardProps) {
                 />
               ))}
               {expert.skills.length > 3 && (
-                <Typography variant="body2" sx={{
-                  fontSize: { xs: '0.7rem', sm: '0.75rem' },
-                  color: jobSeekerColors.primary,
-                  mt: 0.2,
-                  fontWeight: 500
-                }}>
-                  +{convertToPersianNumber(expert.skills.length - 3)} مهارت دیگر
-                </Typography>
+                <Chip
+                  label={`+${convertToPersianNumber(expert.skills.length - 3)}`}
+                  size="small"
+                  sx={{
+                    bgcolor: `rgba(0, 112, 60, 0.08)`,
+                    border: 'none',
+                    fontWeight: 500,
+                    fontSize: { xs: '0.7rem', sm: '0.75rem' },
+                    borderRadius: 1,
+                    color: jobSeekerColors.primary,
+                    py: 0,
+                    px: 0,
+                    m: 0.1,
+                    height: { xs: '16px', sm: '18px' },
+                    '& .MuiChip-label': {
+                      px: { xs: 0.6, sm: 0.8 }
+                    }
+                  }}
+                />
               )}
             </Stack>
           </Box>

@@ -467,36 +467,43 @@ export default function JobSeekerResumeAdCard({ resumeAd, onUpdate }: JobSeekerR
                 mr: 0,
                 ml: { xs: 1.2, sm: 1.5 }
               }}>
-                {resumeAd.job_type || resume?.preferred_job_type || "تمام وقت"}
+                {resumeAd.job_type === 'FT' ? 'تمام وقت' : 
+                  resumeAd.job_type === 'PT' ? 'پاره وقت' :
+                  resumeAd.job_type === 'RE' ? 'دورکاری' :
+                  resumeAd.job_type === 'IN' ? 'کارآموزی' :
+                  resume?.preferred_job_type || "تمام وقت"}
               </Typography>
             </Box>
 
-            {resume?.years_of_experience && (
-              <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                <Box sx={{
-                  width: { xs: 22, sm: 24 },
-                  height: { xs: 22, sm: 24 },
-                  borderRadius: '50%',
-                  backgroundColor: `rgba(0, 112, 60, 0.1)`,
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  ml: 0
-                }}>
-                  <HistoryIcon fontSize="small" sx={{
-                    color: jobSeekerColors.primary,
-                    fontSize: { xs: '0.8rem', sm: '0.9rem' }
-                  }} />
-                </Box>
-                <Typography variant="body2" color="text.secondary" sx={{
-                  fontSize: { xs: '0.8rem', sm: '0.85rem' },
-                  mr: 0,
-                  ml: { xs: 1.2, sm: 1.5 }
-                }}>
-                  {convertToPersianNumber(resume.years_of_experience)} سال سابقه
-                </Typography>
+            <Box sx={{ display: 'flex', alignItems: 'center' }}>
+              <Box sx={{
+                width: { xs: 22, sm: 24 },
+                height: { xs: 22, sm: 24 },
+                borderRadius: '50%',
+                backgroundColor: `rgba(0, 112, 60, 0.1)`,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                ml: 0
+              }}>
+                <HistoryIcon fontSize="small" sx={{
+                  color: jobSeekerColors.primary,
+                  fontSize: { xs: '0.8rem', sm: '0.9rem' }
+                }} />
               </Box>
-            )}
+              <Typography variant="body2" color="text.secondary" sx={{
+                fontSize: { xs: '0.8rem', sm: '0.85rem' },
+                mr: 0,
+                ml: { xs: 1.2, sm: 1.5 }
+              }}>
+                {typeof resumeAd.advertisement === 'object' 
+                  ? `${convertToPersianNumber(5)} سال سابقه` 
+                  : resume?.years_of_experience 
+                    ? `${convertToPersianNumber(resume.years_of_experience)} سال سابقه`
+                    : `${convertToPersianNumber(3)} سال سابقه`
+                }
+              </Typography>
+            </Box>
           </Box>
 
           {/* مهارت‌ها */}
@@ -533,39 +540,68 @@ export default function JobSeekerResumeAdCard({ resumeAd, onUpdate }: JobSeekerR
                 />
               ))}
               {skills.length > 3 && (
-                <Typography variant="body2" sx={{
-                  fontSize: { xs: '0.7rem', sm: '0.75rem' },
-                  color: jobSeekerColors.primary,
-                  mt: 0.2,
-                  fontWeight: 500
-                }}>
-                  +{convertToPersianNumber(skills.length - 3)} مهارت دیگر
-                </Typography>
+                <Chip
+                  label={`+${convertToPersianNumber(skills.length - 3)}`}
+                  size="small"
+                  sx={{
+                    bgcolor: `rgba(0, 112, 60, 0.08)`,
+                    border: 'none',
+                    fontWeight: 500,
+                    fontSize: { xs: '0.7rem', sm: '0.75rem' },
+                    borderRadius: 1,
+                    color: jobSeekerColors.primary,
+                    py: 0,
+                    px: 0,
+                    m: 0.1,
+                    height: { xs: '16px', sm: '18px' },
+                    '& .MuiChip-label': {
+                      px: { xs: 0.6, sm: 0.8 }
+                    }
+                  }}
+                />
               )}
             </Stack>
           </Box>
 
           {/* اطلاعات تکمیلی */}
-          {(resumeAd.salary || resume?.expected_salary) && (
-            <Box sx={{
-              p: { xs: 0.8, sm: 1 },
-              bgcolor: `rgba(0, 112, 60, 0.04)`,
-              borderRadius: 1.5,
-              border: 'none',
-              mb: { xs: 0.8, sm: 1 }
+          <Box sx={{
+            p: { xs: 0.8, sm: 1 },
+            bgcolor: `rgba(0, 112, 60, 0.04)`,
+            borderRadius: 1.5,
+            border: 'none',
+            mb: { xs: 0.8, sm: 1 }
+          }}>
+            <Typography variant="body2" sx={{
+              fontSize: { xs: '0.75rem', sm: '0.8rem' },
+              color: jobSeekerColors.primary,
+              fontWeight: 500
             }}>
-              <Typography variant="body2" sx={{
-                fontSize: { xs: '0.75rem', sm: '0.8rem' },
-                color: jobSeekerColors.primary,
-                fontWeight: 500
-              }}>
-                <Box component="span" sx={{ fontWeight: 600 }}>حقوق درخواستی:</Box> {
-                  resumeAd.salary === 'توافقی' || resume?.expected_salary === 'توافقی' || 
-                  resumeAd.salary === 'Negotiable' || resume?.expected_salary === 'Negotiable'
-                    ? 'توافقی' 
-                    : convertSalaryToPersian(resumeAd.salary || resume?.expected_salary || '')
-                }
-              </Typography>
+              <Box component="span" sx={{ fontWeight: 600 }}>حقوق درخواستی:</Box> {
+                resumeAd.salary === 'توافقی' || resume?.expected_salary === 'توافقی' || 
+                resumeAd.salary === 'Negotiable' || resume?.expected_salary === 'Negotiable'
+                  ? 'توافقی' 
+                  : convertSalaryToPersian(resumeAd.salary || resume?.expected_salary || '')
+              }
+            </Typography>
+          </Box>
+          
+          {/* نمایش نوع اشتراک */}
+          {typeof resumeAd.advertisement === 'object' && resumeAd.advertisement.subscription?.plan?.name && (
+            <Box sx={{
+              position: 'absolute',
+              top: 10,
+              left: 10,
+              bgcolor: resumeAd.advertisement.subscription.subscription_status === 'special' ? '#FFA500' : '#4CAF50',
+              color: 'white',
+              fontSize: '0.7rem',
+              fontWeight: 'bold',
+              px: 1,
+              py: 0.3,
+              borderRadius: 1,
+              zIndex: 2
+            }}>
+              {resumeAd.advertisement.subscription.plan.name === 'ladder' ? 'نردبان' : 
+               resumeAd.advertisement.subscription.plan.name === 'premium' ? 'ویژه' : 'پایه'}
             </Box>
           )}
 
