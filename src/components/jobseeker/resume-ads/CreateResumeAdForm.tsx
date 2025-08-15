@@ -1043,7 +1043,8 @@ export default function CreateResumeAdForm({
                   control={control}
                   rules={{ 
                     required: 'عنوان آگهی رزومه الزامی است', 
-                    minLength: { value: 3, message: 'عنوان باید حداقل 3 حرف باشد' } 
+                    minLength: { value: 3, message: 'عنوان باید حداقل 3 حرف باشد' },
+                    maxLength: { value: 255, message: 'عنوان نباید بیش از 255 کاراکتر باشد' }
                   }}
                   render={({ field }) => (
                     <TextField
@@ -1051,7 +1052,7 @@ export default function CreateResumeAdForm({
                       fullWidth
                       placeholder="مثال: برنامه‌نویس React با ۳ سال تجربه"
                       error={Boolean(formErrors.title)}
-                      helperText={formErrors.title?.message}
+                      helperText={formErrors.title?.message || `${(field.value?.length || 0).toString().replace(/\d/g, (d) => '۰۱۲۳۴۵۶۷۸۹'[Number(d)])} / ۲۵۵ کاراکتر`}
                       variant="outlined"
                       sx={{ 
                         '& .MuiOutlinedInput-root': { 
@@ -1100,7 +1101,7 @@ export default function CreateResumeAdForm({
                       rows={4}
                       placeholder="توضیحات تکمیلی درباره آگهی رزومه خود، مهارت‌های خاص، تجربیات مهم یا انتظارات خود را بنویسید..."
                       error={Boolean(formErrors.description)}
-                      helperText={formErrors.description?.message || `${field.value?.length || 0} / 1000 کاراکتر`}
+                      helperText={formErrors.description?.message || `${(field.value?.length || 0).toString().replace(/\d/g, (d) => '۰۱۲۳۴۵۶۷۸۹'[Number(d)])} / ۱۰۰۰ کاراکتر`}
                       variant="outlined"
                       sx={{ 
                         '& .MuiOutlinedInput-root': { 
