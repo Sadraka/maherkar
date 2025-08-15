@@ -158,9 +158,9 @@ export default function ExpertCard({ expert }: ExpertCardProps) {
           <Box sx={{
             display: 'flex',
             alignItems: 'center',
-            mb: { xs: 1, sm: 1.5 },
-            minHeight: { xs: 40, sm: 45, md: 50 },  // همانند JobCard
-            py: { xs: 0.5, sm: 0.8 }, // اضافه کردن پدینگ بالا و پایین یکسان
+            mb: { xs: 0.5, sm: 0.8 },
+            minHeight: { xs: 40, sm: 45, md: 50 },
+            py: { xs: 0.3, sm: 0.5 },
             pb: 0
           }}>
             <Box sx={{ position: 'relative', mr: { xs: 1, sm: 1.5 } }}>
@@ -239,8 +239,8 @@ export default function ExpertCard({ expert }: ExpertCardProps) {
           {/* خط سرتاسری زیر هدر */}
           <Box sx={{
             position: 'relative',
-            mt: { xs: 0.2, sm: 0.4 },
-            mb: { xs: 0.8, sm: 1 },
+            mt: { xs: 0.1, sm: 0.2 },
+            mb: { xs: 0.5, sm: 0.6 },
             mx: { xs: -1.5, sm: -2 },
             height: 1
           }}>
@@ -255,15 +255,15 @@ export default function ExpertCard({ expert }: ExpertCardProps) {
 
           {/* اطلاعات اصلی */}
           <Box sx={{
-            mb: { xs: 0.8, sm: 1 },
+            mb: { xs: 0.5, sm: 0.8 },
             p: 0,
-            pb: { xs: 0.8, sm: 1 },
-            bgcolor: theme.palette.background.paper, // پس‌زمینه سفید
-            border: 'none', // حذف بوردر
+            pb: { xs: 0.5, sm: 0.8 },
+            bgcolor: theme.palette.background.paper,
+            border: 'none',
             borderRadius: 1.5,
             fontSize: { xs: '0.75rem', sm: '0.8rem' }
           }}>
-            <Box sx={{ display: 'flex', alignItems: 'center', mb: { xs: 0.4, sm: 0.5 } }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', mb: { xs: 0.2, sm: 0.3 } }}>
               <Box sx={{
                 width: { xs: 22, sm: 24 },
                 height: { xs: 22, sm: 24 },

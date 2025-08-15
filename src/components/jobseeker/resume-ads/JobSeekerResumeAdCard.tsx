@@ -313,9 +313,9 @@ export default function JobSeekerResumeAdCard({ resumeAd, onUpdate }: JobSeekerR
           <Box sx={{
             display: 'flex',
             alignItems: 'center',
-            mb: { xs: 1, sm: 1.5 },
+            mb: { xs: 0.5, sm: 0.8 },
             minHeight: { xs: 40, sm: 45, md: 50 },
-            py: { xs: 0.5, sm: 0.8 },
+            py: { xs: 0.3, sm: 0.5 },
             pb: 0
           }}>
             <Box sx={{ position: 'relative', mr: { xs: 1, sm: 1.5 } }}>
@@ -398,8 +398,8 @@ export default function JobSeekerResumeAdCard({ resumeAd, onUpdate }: JobSeekerR
           {/* خط سرتاسری زیر هدر */}
           <Box sx={{
             position: 'relative',
-            mt: { xs: 0.2, sm: 0.4 },
-            mb: { xs: 0.8, sm: 1 },
+            mt: { xs: 0.1, sm: 0.2 },
+            mb: { xs: 0.5, sm: 0.6 },
             mx: { xs: -1.5, sm: -2 },
             height: 1
           }}>
@@ -414,15 +414,15 @@ export default function JobSeekerResumeAdCard({ resumeAd, onUpdate }: JobSeekerR
 
           {/* اطلاعات اصلی */}
           <Box sx={{
-            mb: { xs: 0.8, sm: 1 },
+            mb: { xs: 0.5, sm: 0.8 },
             p: 0,
-            pb: { xs: 0.8, sm: 1 },
+            pb: { xs: 0.5, sm: 0.8 },
             bgcolor: theme.palette.background.paper,
             border: 'none',
             borderRadius: 1.5,
             fontSize: { xs: '0.75rem', sm: '0.8rem' }
           }}>
-            <Box sx={{ display: 'flex', alignItems: 'center', mb: { xs: 0.4, sm: 0.5 } }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', mb: { xs: 0.2, sm: 0.3 } }}>
               <Box sx={{
                 width: { xs: 22, sm: 24 },
                 height: { xs: 22, sm: 24 },
@@ -587,25 +587,21 @@ export default function JobSeekerResumeAdCard({ resumeAd, onUpdate }: JobSeekerR
           </Box>
           
           {/* نمایش نوع اشتراک */}
-          {typeof resumeAd.advertisement === 'object' && resumeAd.advertisement.subscription?.plan?.name && 
-          resumeAd.advertisement.subscription.plan.name !== 'basic' && (
+          {typeof resumeAd.advertisement === 'object' && resumeAd.advertisement.subscription?.plan?.name === 'ladder' && (
             <Box sx={{
               position: 'absolute',
-              top: 10,
-              left: 10,
-              bgcolor: resumeAd.advertisement.subscription.plan.name === 'ladder' ? '#E53935' : // رنگ نردبان
-                       resumeAd.advertisement.subscription.plan.name === 'premium' ? '#FF9800' : // رنگ ویژه
-                       '#4CAF50', // رنگ پیش‌فرض
+              top: 0,
+              right: 0,
+              bgcolor: '#E53935', // رنگ نردبان
               color: 'white',
               fontSize: '0.7rem',
               fontWeight: 'bold',
               px: 1,
               py: 0.3,
-              borderRadius: 1,
+              borderRadius: '0 0 0 8px',
               zIndex: 2
             }}>
-              {resumeAd.advertisement.subscription.plan.name === 'ladder' ? 'نردبان' : 
-               resumeAd.advertisement.subscription.plan.name === 'premium' ? 'ویژه' : ''}
+              نردبان
             </Box>
           )}
 
