@@ -211,7 +211,7 @@ export default function ResumeAdsList() {
   };
 
   return (
-    <Container maxWidth="lg" sx={{ py: 4 }}>
+    <Container maxWidth="lg" sx={{ py: 4, direction: 'rtl' }} dir="rtl">
       {renderContent()}
     </Container>
   );
