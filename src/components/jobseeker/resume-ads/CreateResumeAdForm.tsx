@@ -106,6 +106,7 @@ type MinimalResume = {
   degree?: keyof typeof DEGREE_CHOICES | null;
   expected_salary?: keyof typeof SALARY_CHOICES | null;
   preferred_job_type?: keyof typeof JOB_TYPE_CHOICES | null;
+  soldier_status?: keyof typeof SOLDIER_STATUS_CHOICES | null;
   experience_years?: number | null;
   educations?: any[];
   experiences?: any[];
@@ -127,6 +128,7 @@ type SubscriptionPlan = {
   price_per_day: number;
   active: boolean;
   is_free: boolean;
+  plan_type: 'B' | 'J' | 'R'; // اضافه کردن فیلد plan_type
   created_at: string;
   updated_at: string;
 };
@@ -465,6 +467,7 @@ export default function CreateResumeAdForm({
             degree: r?.degree ?? null,
             expected_salary: r?.expected_salary ?? null,
             preferred_job_type: r?.preferred_job_type ?? null,
+            soldier_status: r?.soldier_status ?? null,
             experience_years: r?.years_of_experience ?? null,
             educations: educations,
             experiences: experiences,
@@ -508,6 +511,126 @@ export default function CreateResumeAdForm({
       });
     }
   }, [initialData, isEditMode, reset]);
+  
+  // پر کردن فیلدهای اختیاری با اطلاعات شخصی کاربر
+  useEffect(() => {
+    // فقط اگر رزومه وجود داشته باشد و در حالت ویرایش نباشیم
+    if (resumeInfo && !isEditMode && !initialData) {
+      try {
+      
+      // تبدیل مقادیر از فرمت بک‌اند به فرمت فرانت‌اند
+      
+      // نوع کار - تبدیل مقادیر بک‌اند به فرانت‌اند
+      const jobTypeMapping: Record<string, string> = {
+        'Full-Time': 'FT',
+        'Part-Time': 'PT',
+        'Remote': 'RE',
+        'Internship': 'IN',
+        // اضافه کردن مقادیر احتمالی دیگر
+        'FT': 'FT',
+        'PT': 'PT',
+        'RE': 'RE',
+        'IN': 'IN'
+      };
+      
+      if (resumeInfo.preferred_job_type) {
+        const preferredJobType = String(resumeInfo.preferred_job_type);
+        const frontendJobType = jobTypeMapping[preferredJobType];
+        if (frontendJobType) {
+          setValue('job_type', frontendJobType);
+
+        }
+      }
+      
+      // حقوق مورد انتظار - این مقدار نیاز به تبدیل ندارد چون فرمت یکسان است
+      if (resumeInfo.expected_salary) {
+        setValue('salary', String(resumeInfo.expected_salary));
+        
+      }
+      
+      // جنسیت - تبدیل مقادیر بک‌اند به فرانت‌اند
+      const genderMapping: Record<string, string> = {
+        'Male': 'M',
+        'Female': 'F',
+        // اضافه کردن مقادیر احتمالی دیگر
+        'M': 'M',
+        'F': 'F'
+      };
+      
+      if (resumeInfo.gender) {
+        const gender = String(resumeInfo.gender);
+        const frontendGender = genderMapping[gender];
+        if (frontendGender) {
+          setValue('gender', frontendGender);
+
+          
+          // اگر زن است، وضعیت سربازی "مهم نیست"
+          if (frontendGender === 'F') {
+            setValue('soldier_status', 'NS');
+
+          }
+        }
+      }
+      
+      // مدرک تحصیلی - تبدیل مقادیر بک‌اند به فرانت‌اند
+      const degreeMapping: Record<string, string> = {
+        'Below Diploma': 'BD',
+        'Diploma': 'DI',
+        'Associate': 'AS',
+        'Bachelor': 'BA',
+        'Master': 'MA',
+        'Doctorate': 'DO',
+        // اضافه کردن مقادیر احتمالی دیگر
+        'BD': 'BD',
+        'DI': 'DI',
+        'AS': 'AS',
+        'BA': 'BA',
+        'MA': 'MA',
+        'DO': 'DO'
+      };
+      
+      if (resumeInfo.degree) {
+        const degree = String(resumeInfo.degree);
+        const frontendDegree = degreeMapping[degree];
+        if (frontendDegree) {
+          setValue('degree', frontendDegree);
+
+        }
+      }
+      
+      // وضعیت سربازی - تبدیل مقادیر بک‌اند به فرانت‌اند
+      const soldierStatusMapping: Record<string, string> = {
+        'Completed': 'CO',
+        'Permanent Exemption': 'PE',
+        'Educational Exemption': 'EE',
+        'Not Completed': 'NC',
+        // اضافه کردن مقادیر احتمالی دیگر
+        'CO': 'CO',
+        'PE': 'PE',
+        'EE': 'EE',
+        'NC': 'NC',
+        'NS': 'NS'
+      };
+      
+      // فقط اگر جنسیت زن نباشد، وضعیت سربازی را تنظیم کن
+      const genderValue = resumeInfo.gender ? String(resumeInfo.gender) : '';
+      if (resumeInfo.soldier_status && 
+          genderValue !== 'Female' && 
+          genderValue !== 'F') {
+        const soldierStatus = String(resumeInfo.soldier_status);
+        const frontendSoldierStatus = soldierStatusMapping[soldierStatus];
+        if (frontendSoldierStatus) {
+          setValue('soldier_status', frontendSoldierStatus);
+
+        }
+      }
+      
+      // اطلاعات شخصی کاربر به عنوان پیش‌فرض تنظیم شد
+      } catch (error) {
+        // در صورت بروز خطا، هیچ پیامی به کاربر نشان نمی‌دهیم
+      }
+    }
+  }, [resumeInfo, isEditMode, initialData, setValue]);
 
   const onSubmit: SubmitHandler<ResumeAdFormInputs> = async (data) => {
     setLoading(true);
@@ -1322,6 +1445,24 @@ export default function CreateResumeAdForm({
 
               {/* فیلدهای اختیاری */}
               <Box sx={{ mt: 3, display: 'flex', flexDirection: 'column', gap: { xs: 1.5, sm: 3 } }}>
+                {/* پیام اطلاع‌رسانی برای فیلدهای پر شده از اطلاعات شخصی */}
+                {resumeInfo && (
+                  <Alert 
+                    severity="info" 
+                    icon={<InfoIcon />}
+                    sx={{ 
+                      mb: 2,
+                      '& .MuiAlert-message': {
+                        width: '100%'
+                      }
+                    }}
+                  >
+                    <Typography variant="body2" sx={{ color: 'text.secondary', lineHeight: 1.6 }}>
+                      برخی از فیلدهای اختیاری با اطلاعات شخصی شما از بخش "اطلاعات شخصی" پر شده‌اند. در صورت نیاز می‌توانید آن‌ها را تغییر دهید.
+                    </Typography>
+                  </Alert>
+                )}
+                
                 {/* ردیف اول: جنسیت و نظام وظیفه */}
                 <Box sx={{ display: 'flex', flexDirection: { xs: 'column', md: 'row' }, gap: { xs: 1.5, sm: 3 } }}>
                   {/* جنسیت */}
