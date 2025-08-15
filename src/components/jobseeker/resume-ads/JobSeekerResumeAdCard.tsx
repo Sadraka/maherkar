@@ -370,23 +370,7 @@ export default function JobSeekerResumeAdCard({ resumeAd, onUpdate }: JobSeekerR
                   {resumeAd.job_seeker_detail?.full_name || 'کاربر ماهرکار'}
                 </Typography>
                 
-                {/* نمایش وضعیت آگهی با متن (فقط اگر در انتظار تایید یا رد شده باشد) */}
-                {resumeAd.status !== 'A' && (
-                  <Typography
-                    variant="caption"
-                    sx={{
-                      fontSize: '0.65rem',
-                      fontWeight: 'bold',
-                      color: 'white',
-                      bgcolor: resumeAd.status === 'P' ? 'warning.main' : 'error.main',
-                      borderRadius: 1,
-                      px: 0.5,
-                      py: 0.1,
-                    }}
-                  >
-                    {resumeAd.status === 'P' ? 'در انتظار تایید' : 'رد شده'}
-                  </Typography>
-                )}
+                {/* وضعیت آگهی از این پس در بخش جداگانه زیر هدر نمایش داده می‌شود */}
               </Box>
               
               <Typography variant="body2" color="text.secondary" sx={{
@@ -398,6 +382,25 @@ export default function JobSeekerResumeAdCard({ resumeAd, onUpdate }: JobSeekerR
               </Typography>
             </Box>
           </Box>
+          {/* برچسب وضعیت آگهی (در انتظار تایید / رد شده) */}
+          {resumeAd.status !== 'A' && (
+            <Box sx={{ mb: { xs: 0.4, sm: 0.6 } }}>
+              <Chip
+                label={resumeAd.status === 'P' ? 'در انتظار تایید' : 'رد شده'}
+                size="small"
+                sx={{
+                  bgcolor: resumeAd.status === 'P' ? 'warning.main' : 'error.main',
+                  color: 'white',
+                  fontWeight: 'bold',
+                  fontSize: { xs: '0.7rem', sm: '0.75rem' },
+                  borderRadius: 1,
+                  px: 1.2,
+                  py: 0.25,
+                  alignSelf: 'flex-start',
+                }}
+              />
+            </Box>
+          )}
 
           {/* خط سرتاسری زیر هدر */}
           <Box sx={{
