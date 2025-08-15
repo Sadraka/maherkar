@@ -4,10 +4,14 @@ import Link from 'next/link';
 import CampaignIcon from '@mui/icons-material/Campaign';
 import { JOB_SEEKER_THEME } from '@/constants/colors';
 
+interface ResumeAdsHeaderProps {
+  showCreateButton?: boolean;
+}
+
 /**
  * کامپوننت هدر صفحه آگهی‌های رزومه
  */
-const ResumeAdsHeader = () => {
+const ResumeAdsHeader = ({ showCreateButton = true }: ResumeAdsHeaderProps) => {
   return (
     <Box sx={{ 
       mb: 4, 
@@ -19,37 +23,39 @@ const ResumeAdsHeader = () => {
       direction: 'rtl'
     }}>
       {/* دکمه ثبت آگهی رزومه جدید - سمت چپ */}
-      <Box sx={{ flexShrink: 0 }}>
-        <Link href="/jobseeker/resume-ads/create" style={{ textDecoration: 'none' }}>
-          <Button
-            variant="contained"
-            color="secondary"
-            size="large"
-            sx={{
-              backgroundColor: `${JOB_SEEKER_THEME.primary} !important`,
-              background: `${JOB_SEEKER_THEME.primary} !important`,
-              color: 'white',
-              borderRadius: 2,
-              px: { xs: 2, md: 3 },
-              py: { xs: 1, md: 1.2 },
-              fontSize: { xs: '0.9rem', md: '1rem' },
-              fontWeight: 600,
-              boxShadow: `0 4px 12px ${JOB_SEEKER_THEME.primary}40`,
-              '&:hover': {
-                backgroundColor: `${JOB_SEEKER_THEME.dark} !important`,
-                background: `${JOB_SEEKER_THEME.dark} !important`,
-                boxShadow: `0 6px 16px ${JOB_SEEKER_THEME.primary}60`,
-                transform: 'translateY(-1px)'
-              },
-              transition: 'all 0.3s ease',
-              width: { xs: '100%', sm: 'auto' },
-              minWidth: { sm: 200 }
-            }}
-          >
-            ثبت آگهی رزومه جدید
-          </Button>
-        </Link>
-      </Box>
+      {showCreateButton && (
+        <Box sx={{ flexShrink: 0 }}>
+          <Link href="/jobseeker/resume-ads/create" style={{ textDecoration: 'none' }}>
+            <Button
+              variant="contained"
+              color="secondary"
+              size="large"
+              sx={{
+                backgroundColor: `${JOB_SEEKER_THEME.primary} !important`,
+                background: `${JOB_SEEKER_THEME.primary} !important`,
+                color: 'white',
+                borderRadius: 2,
+                px: { xs: 2, md: 3 },
+                py: { xs: 1, md: 1.2 },
+                fontSize: { xs: '0.9rem', md: '1rem' },
+                fontWeight: 600,
+                boxShadow: `0 4px 12px ${JOB_SEEKER_THEME.primary}40`,
+                '&:hover': {
+                  backgroundColor: `${JOB_SEEKER_THEME.dark} !important`,
+                  background: `${JOB_SEEKER_THEME.dark} !important`,
+                  boxShadow: `0 6px 16px ${JOB_SEEKER_THEME.primary}60`,
+                  transform: 'translateY(-1px)'
+                },
+                transition: 'all 0.3s ease',
+                width: { xs: '100%', sm: 'auto' },
+                minWidth: { sm: 200 }
+              }}
+            >
+              ثبت آگهی رزومه جدید
+            </Button>
+          </Link>
+        </Box>
+      )}
 
       {/* عنوان و توضیح - سمت راست */}
       <Box sx={{ 

@@ -52,6 +52,11 @@ export interface ResumeAdData {
   industry_detail?: {
     name: string;
   };
+  subscription_detail?: {
+    plan?: {
+      name: string;
+    };
+  };
   advertisement?: {
     subscription?: {
       subscription_status: 'default' | 'special';

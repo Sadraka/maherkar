@@ -33,7 +33,8 @@ export default function ResumeAdsList() {
     try {
       setLoading(true);
       const response = await apiGet('/ads/resume/my-resumes/');
-      const data = response.data?.results || response.data || [];
+      const responseData = response.data as any;
+      const data = responseData?.results || responseData || [];
       setResumeAdsData(data);
       setError(null);
     } catch (err: any) {
@@ -164,15 +165,10 @@ export default function ResumeAdsList() {
     return (
       <>
         <ResumeAdsSearchAndSort
-          searchQuery={searchQuery}
-          onSearchChange={setSearchQuery}
-          statusFilter={statusFilter}
-          onStatusChange={setStatusFilter}
-          sortBy={sortBy}
-          onSortByChange={setSortBy}
-          sortOrder={sortOrder}
-          onSortOrderChange={setSortOrder}
-          totalCount={filteredAds.length}
+          resumeAds={resumeAdsData}
+          onFilteredResumeAdsChange={setFilteredAds}
+          onSearchStateChange={(query, hasResults) => setSearchQuery(query)}
+          onFiltersChange={(status, subscription) => setStatusFilter(status)}
         />
 
         <Box
@@ -198,12 +194,15 @@ export default function ResumeAdsList() {
 
         {totalPages > 1 && (
           <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
-            <CustomPagination
-              currentPage={page}
-              totalPages={totalPages}
-              onPageChange={setPage}
-              color={JOB_SEEKER_THEME.primary}
-            />
+                      <CustomPagination
+            page={page}
+            totalPages={totalPages}
+            pageSize={pageSize}
+            onPageChange={setPage}
+            onPageSizeChange={() => {}}
+            theme={JOB_SEEKER_THEME}
+            showPageSizeSelector={false}
+          />
           </Box>
         )}
       </>
