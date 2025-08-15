@@ -208,23 +208,7 @@ export default function ExpertCard({ expert }: ExpertCardProps) {
                 }}>
                   {expert.name}
                 </Typography>
-                {/* نمایش وضعیت آگهی با متن (فقط اگر در انتظار تایید یا رد شده باشد) */}
-                {expert.status && expert.status !== 'A' && (
-                  <Typography
-                    variant="caption"
-                    sx={{
-                      fontSize: '0.65rem',
-                      fontWeight: 'bold',
-                      color: 'white',
-                      bgcolor: expert.status === 'P' ? 'warning.main' : 'error.main',
-                      borderRadius: 1,
-                      px: 0.5,
-                      py: 0.1,
-                    }}
-                  >
-                    {expert.status === 'P' ? 'در انتظار تایید' : 'رد شده'}
-                  </Typography>
-                )}
+
               </Box>
               <Typography variant="body2" color="text.secondary" sx={{
                 fontSize: { xs: '0.8rem', sm: '0.85rem' },
@@ -235,6 +219,8 @@ export default function ExpertCard({ expert }: ExpertCardProps) {
               </Typography>
             </Box>
           </Box>
+
+
 
           {/* خط سرتاسری زیر هدر */}
           <Box sx={{

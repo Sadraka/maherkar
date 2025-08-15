@@ -365,7 +365,8 @@ export default function JobSeekerResumeAdCard({ resumeAd, onUpdate }: JobSeekerR
               </Typography>
             </Box>
           </Box>
-          {/* برچسب وضعیت آگهی اکنون در گوشه چپ کارت نمایش داده می‌شود */}
+
+
 
           {/* خط سرتاسری زیر هدر */}
           <Box sx={{
@@ -394,29 +395,49 @@ export default function JobSeekerResumeAdCard({ resumeAd, onUpdate }: JobSeekerR
             borderRadius: 1.5,
             fontSize: { xs: '0.75rem', sm: '0.8rem' }
           }}>
-            <Box sx={{ display: 'flex', alignItems: 'center', mb: { xs: 0.2, sm: 0.3 } }}>
-              <Box sx={{
-                width: { xs: 22, sm: 24 },
-                height: { xs: 22, sm: 24 },
-                borderRadius: '50%',
-                backgroundColor: `rgba(0, 112, 60, 0.1)`,
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                ml: 0
-              }}>
-                <LocationOnOutlinedIcon fontSize="small" sx={{
-                  color: jobSeekerColors.primary,
-                  fontSize: { xs: '0.8rem', sm: '0.9rem' }
-                }} />
+            <Box sx={{ display: 'flex', alignItems: 'center', mb: { xs: 0.2, sm: 0.3 }, justifyContent: 'space-between' }}>
+              <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                <Box sx={{
+                  width: { xs: 22, sm: 24 },
+                  height: { xs: 22, sm: 24 },
+                  borderRadius: '50%',
+                  backgroundColor: `rgba(0, 112, 60, 0.1)`,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  ml: 0
+                }}>
+                  <LocationOnOutlinedIcon fontSize="small" sx={{
+                    color: jobSeekerColors.primary,
+                    fontSize: { xs: '0.8rem', sm: '0.9rem' }
+                  }} />
+                </Box>
+                <Typography variant="body2" color="text.secondary" sx={{
+                  fontSize: { xs: '0.8rem', sm: '0.85rem' },
+                  mr: 0,
+                  ml: { xs: 1.2, sm: 1.5 }
+                }}>
+                  {resumeAd.location_detail?.name || 'موقعیت نامشخص'}
+                </Typography>
               </Box>
-              <Typography variant="body2" color="text.secondary" sx={{
-                fontSize: { xs: '0.8rem', sm: '0.85rem' },
-                mr: 0,
-                ml: { xs: 1.2, sm: 1.5 }
-              }}>
-                {resumeAd.location_detail?.name || 'موقعیت نامشخص'}
-              </Typography>
+              
+              {/* نمایش وضعیت آگهی در کنار فیلد شهر */}
+              {resumeAd.status !== 'A' && (
+                <Chip
+                  label={resumeAd.status === 'P' ? 'در انتظار تایید' : 'رد شده'}
+                  size="small"
+                  sx={{
+                    bgcolor: resumeAd.status === 'P' ? 'warning.main' : 'error.main',
+                    color: 'white',
+                    fontWeight: 'bold',
+                    fontSize: { xs: '0.65rem', sm: '0.7rem' },
+                    height: { xs: 20, sm: 22 },
+                    '& .MuiChip-label': {
+                      px: { xs: 0.8, sm: 1 }
+                    }
+                  }}
+                />
+              )}
             </Box>
 
             <Box sx={{ display: 'flex', alignItems: 'center', mb: { xs: 0.4, sm: 0.5 } }}>
@@ -650,30 +671,7 @@ export default function JobSeekerResumeAdCard({ resumeAd, onUpdate }: JobSeekerR
             ) : null;
           })()}
 
-          {/* نمایش وضعیت آگهی در گوشه چپ کارت */}
-          {resumeAd.status !== 'A' && (
-            <Box sx={{
-              position: 'absolute',
-              top: 8,
-              left: 8,
-              bgcolor: resumeAd.status === 'P' ? 'warning.main' : 'error.main',
-              color: 'white',
-              fontSize: '0.75rem',
-              fontWeight: 'bold',
-              px: 1.5,
-              py: 0.5,
-              borderRadius: 0.5,
-              zIndex: 10,
-              minWidth: '65px',
-              boxShadow: '0 2px 4px rgba(0,0,0,0.15)',
-              textAlign: 'center',
-              pointerEvents: 'none',
-              transform: 'none !important',
-              transition: 'none !important'
-            }}>
-              {resumeAd.status === 'P' ? 'در انتظار تایید' : 'رد شده'}
-            </Box>
-          )}
+
 
         </CardContent>
       </Card>
