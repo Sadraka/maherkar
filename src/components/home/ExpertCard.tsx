@@ -21,7 +21,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 import AuthRequiredModal from '../common/AuthRequiredModal';
-import { getSalaryText } from '@/lib/jobUtils';
+import { getSalaryText, getJobTypeText } from '@/lib/jobUtils';
 
 // تابع تبدیل اعداد انگلیسی به فارسی
 const convertToPersianNumber = (num: number): string => {

@@ -439,13 +439,13 @@ export default function JobSeekerResumeAdCard({ resumeAd, onUpdate }: JobSeekerR
                   fontSize: { xs: '0.8rem', sm: '0.9rem' }
                 }} />
               </Box>
-              <Typography variant="body2" color="text.secondary" sx={{
-                fontSize: { xs: '0.8rem', sm: '0.85rem' },
-                mr: 0,
-                ml: { xs: 1.2, sm: 1.5 }
-              }}>
-                {getJobTypeText(resumeAd.job_type) || resume?.preferred_job_type || "تمام وقت"}
-              </Typography>
+                             <Typography variant="body2" color="text.secondary" sx={{
+                 fontSize: { xs: '0.8rem', sm: '0.85rem' },
+                 mr: 0,
+                 ml: { xs: 1.2, sm: 1.5 }
+               }}>
+                 {getJobTypeText(resumeAd.job_type) || getJobTypeText(resume?.preferred_job_type) || "تمام وقت"}
+               </Typography>
             </Box>
 
             <Box sx={{ display: 'flex', alignItems: 'center' }}>

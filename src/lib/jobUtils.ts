@@ -13,7 +13,7 @@ export const getJobTypeText = (jobType?: string) => {
     'Remote': 'دورکاری',
     'Internship': 'کارآموزی'
   };
-  return jobType ? typeMap[jobType] || jobType : 'نامشخص';
+  return jobType ? typeMap[jobType] || jobType : '';
 };
 
 export const getSalaryText = (salary?: string) => {
@@ -81,7 +81,7 @@ export const getDegreeText = (degree?: string) => {
     'Master': 'فوق لیسانس',
     'Doctorate': 'دکترا'
   };
-  return degree ? degreeMap[degree] || degree : 'نامشخص';
+  return degree ? degreeMap[degree] || degree : '';
 };
 
 export const getGenderText = (gender?: string) => {
@@ -94,7 +94,7 @@ export const getGenderText = (gender?: string) => {
     'Male': 'آقا',
     'Female': 'خانم'
   };
-  return gender ? genderMap[gender] || gender : 'نامشخص';
+  return gender ? genderMap[gender] || gender : '';
 };
 
 export const getSoldierStatusText = (status?: string) => {
@@ -109,7 +109,7 @@ export const getSoldierStatusText = (status?: string) => {
     'Educational Exemption': 'معافیت تحصیلی',
     'Not Completed': 'نااتمام'
   };
-  return status ? statusMap[status] || status : 'نامشخص';
+  return status ? statusMap[status] || status : '';
 };
 
 export const getStatusLabel = (status: string) => {
