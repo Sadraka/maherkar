@@ -286,7 +286,7 @@ export default function JobSeekerResumeAdCard({ resumeAd, onUpdate }: JobSeekerR
           borderRadius: { xs: 1.5, sm: 2 },
           border: `1px solid ${jobSeekerColors.bgLight}`,
           boxShadow: '0 3px 8px rgba(0,0,0,0.05)',
-          overflow: 'visible',
+          overflow: 'hidden',
           position: 'relative',
           backgroundColor: theme.palette.background.paper,
           transition: 'transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out',
@@ -613,14 +613,14 @@ export default function JobSeekerResumeAdCard({ resumeAd, onUpdate }: JobSeekerR
               مشاهده رزومه
             </Button>
           </Box>
-          {/* نمایش نوع اشتراک - درون کارت */}
+          {/* نمایش نوع اشتراک - داخل کارت */}
           {typeof resumeAd.advertisement === 'object' && 
            resumeAd.advertisement.subscription?.plan?.name && 
            resumeAd.advertisement.subscription.plan.name !== 'basic' && (
             <Box sx={{
               position: 'absolute',
-              top: 0,
-              right: 0,
+              top: 8,
+              right: 8,
               bgcolor: 
                 resumeAd.advertisement.subscription.plan.name === 'ladder' ? '#E53935' : // رنگ نردبان
                 resumeAd.advertisement.subscription.plan.name === 'urgent' ? '#FF9800' : // رنگ فوری
@@ -630,14 +630,14 @@ export default function JobSeekerResumeAdCard({ resumeAd, onUpdate }: JobSeekerR
               fontWeight: 'bold',
               px: 1.5,
               py: 0.5,
-              borderTopRightRadius: 8,
-              borderBottomLeftRadius: 8,
-              borderTopLeftRadius: 0,
-              borderBottomRightRadius: 0,
-              zIndex: 1,
+              borderRadius: 1.5,
+              zIndex: 10,
               minWidth: '45px',
               boxShadow: '0 2px 4px rgba(0,0,0,0.15)',
-              textAlign: 'center'
+              textAlign: 'center',
+              pointerEvents: 'none', // جلوگیری از واکنش به hover
+              transform: 'none !important', // جلوگیری از تغییر موقعیت
+              transition: 'none !important' // جلوگیری از انیمیشن
             }}>
               {resumeAd.advertisement.subscription.plan.name === 'ladder' ? 'نردبان' : 
                resumeAd.advertisement.subscription.plan.name === 'urgent' ? 'فوری' : ''}

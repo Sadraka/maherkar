@@ -150,10 +150,20 @@ const convertResumeAdToExpert = (resumeAd: ResumeAdType, skills: string[], resum
   // تعیین نوع اشتراک بر اساس اطلاعات آگهی
   let subscription_type = undefined;
   
-  if (resumeAd.advertisement && typeof resumeAd.advertisement === 'string') {
-    // اگر اطلاعات اشتراک موجود نیست، مقدار پیش‌فرض را استفاده می‌کنیم
-    subscription_type = 'پایه';
-  } else if (resumeAd.advertisement && typeof resumeAd.advertisement === 'object') {
+  // بررسی اطلاعات اشتراک از subscription_detail (API واقعی)
+  if ((resumeAd as any).subscription_detail?.plan?.name) {
+    const planName = (resumeAd as any).subscription_detail.plan.name;
+    console.log('Plan name from API:', planName); // برای دیباگ
+    if (planName === 'ladder') {
+      subscription_type = 'نردبان';
+    } else if (planName === 'urgent') {
+      subscription_type = 'فوری';
+    } else if (planName === 'basic') {
+      subscription_type = 'پایه';
+    }
+  }
+  // برای داده‌های فیک صفحه اصلی
+  else if (resumeAd.advertisement && typeof resumeAd.advertisement === 'object') {
     // تعیین نوع اشتراک بر اساس نام طرح
     if (resumeAd.advertisement.subscription?.plan?.name === 'ladder') {
       subscription_type = 'نردبان';
@@ -162,6 +172,10 @@ const convertResumeAdToExpert = (resumeAd: ResumeAdType, skills: string[], resum
     } else if (resumeAd.advertisement.subscription?.plan?.name === 'basic') {
       subscription_type = 'پایه';
     }
+  }
+  // در صورت عدم وجود اطلاعات اشتراک، پایه در نظر بگیریم
+  else {
+    subscription_type = 'پایه';
   }
   
   return {
