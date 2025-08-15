@@ -144,7 +144,7 @@ export default function ResumePreviewStep({ resumeInfo }: ResumePreviewStepProps
   const { experiences = [], educations = [], skills = [], cv } = resumeInfo;
 
   return (
-    <Box dir="rtl">
+    <Box dir="rtl" sx={{ px: { xs: 0, sm: 1 } }}>
       <Alert 
         severity="info" 
         icon={<InfoIcon />}
@@ -155,13 +155,20 @@ export default function ResumePreviewStep({ resumeInfo }: ResumePreviewStepProps
           }
         }}
       >
-        <Typography variant="body2" sx={{ lineHeight: 1.6 }}>
+        <Typography variant="body2" sx={{ 
+          lineHeight: 1.6,
+          fontSize: { xs: '0.8rem', sm: '0.875rem' }
+        }}>
           در ادامه، اطلاعات شخصی شما که در آگهی نمایش داده خواهد شد را مشاهده می‌کنید. 
           برای ویرایش هر بخش، روی دکمه "ویرایش" کلیک کنید.
         </Typography>
       </Alert>
 
-      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+      <Box sx={{ 
+        display: 'flex', 
+        flexDirection: 'column', 
+        gap: { xs: 2, sm: 3 } 
+      }}>
         
         {/* بخش تجربیات کاری */}
         <Paper 
