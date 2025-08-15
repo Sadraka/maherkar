@@ -460,6 +460,7 @@ const ResumeAdsSearchAndSort: React.FC<ResumeAdsSearchAndSortProps> = ({
           )}
 
           {/* نمایش تعداد نتایج */}
+          {filteredResumeAds.length === 0 && 
           <Box sx={{ 
             display: 'flex', 
             justifyContent: 'center', 
@@ -477,10 +478,11 @@ const ResumeAdsSearchAndSort: React.FC<ResumeAdsSearchAndSortProps> = ({
                 fontWeight: 500
               }}
             >
-              {filteredResumeAds.length === 0 &&  'هیچ آگهی رزومه‌ای یافت نشد'
-              }
+               هیچ آگهی رزومه‌ای یافت نشد
+              
             </Typography>
           </Box>
+          }
         </Box>
       </Collapse>
     </Box>
