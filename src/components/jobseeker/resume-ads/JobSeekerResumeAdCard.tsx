@@ -557,7 +557,7 @@ export default function JobSeekerResumeAdCard({ resumeAd, onUpdate }: JobSeekerR
                    overflow: 'hidden',
                    textOverflow: 'ellipsis'
                  }}>
-                   بعد از تایید زمان محاسبه می‌شود
+                   بعد از تایید محاسبه می‌شود
                  </Typography>
                </Box>
              )}
