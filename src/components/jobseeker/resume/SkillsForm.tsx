@@ -139,7 +139,8 @@ export default function SkillsForm() {
         }
       } catch (err) {
         console.error('خطا در دریافت اطلاعات:', err);
-        setErrors(['خطا در دریافت اطلاعات مورد نیاز. لطفاً دوباره تلاش کنید.']);
+        const errorMessages = ['خطا در دریافت اطلاعات مورد نیاز. لطفاً دوباره تلاش کنید.'];
+        setErrors(errorMessages);
       } finally {
         setDataLoading(false);
       }
@@ -157,7 +158,8 @@ export default function SkillsForm() {
       // بررسی وجود رزومه
       if (!resumeId) {
         setLoading(false);
-        setErrors(['ابتدا رزومه خود را ایجاد کنید (شناسه رزومه یافت نشد).']);
+        const errorMessages = ['ابتدا رزومه خود را ایجاد کنید (شناسه رزومه یافت نشد).'];
+        setErrors(errorMessages);
         return;
       }
 
@@ -170,7 +172,8 @@ export default function SkillsForm() {
         
         if (isDuplicate) {
           setLoading(false);
-          setErrors(['این مهارت قبلاً در لیست مهارت‌های شما ثبت شده است.']);
+          const errorMessages = ['این مهارت قبلاً در لیست مهارت‌های شما ثبت شده است.'];
+          setErrors(errorMessages);
           return;
         }
       }
@@ -198,31 +201,39 @@ export default function SkillsForm() {
     } catch (err: any) {
       console.error('خطا در ثبت مهارت:', err);
       
-      const newErrors: string[] = [];
+      let newErrors: string[] = [];
       
-      if (err.response?.data) {
-        if (typeof err.response.data === 'object') {
-          for (const [field, errors] of Object.entries(err.response.data)) {
-            if (Array.isArray(errors)) {
-              errors.forEach((msg: string) => {
-                newErrors.push(`${field}: ${msg}`);
+      if (err?.response?.data) {
+        if (typeof err.response.data === 'object' && err.response.data !== null) {
+          for (const [field, fieldErrors] of Object.entries(err.response.data)) {
+            if (Array.isArray(fieldErrors)) {
+              fieldErrors.forEach((msg: string) => {
+                if (newErrors && typeof newErrors.push === 'function') {
+                  newErrors.push(`${field}: ${msg}`);
+                }
               });
-            } else if (typeof errors === 'string') {
-              newErrors.push(`${field}: ${errors}`);
+            } else if (typeof fieldErrors === 'string') {
+              if (newErrors && typeof newErrors.push === 'function') {
+                newErrors.push(`${field}: ${fieldErrors}`);
+              }
             }
           }
         } else if (typeof err.response.data === 'string') {
-          newErrors.push(err.response.data);
+          if (newErrors && typeof newErrors.push === 'function') {
+            newErrors.push(err.response.data);
+          }
         }
-      } else if (err.message) {
-        newErrors.push(`خطا: ${err.message}`);
+      } else if (err?.message) {
+        if (newErrors && typeof newErrors.push === 'function') {
+          newErrors.push(`خطا: ${err.message}`);
+        }
       }
       
-      if (newErrors.length === 0) {
-        newErrors.push('خطا در ارتباط با سرور. لطفاً دوباره تلاش کنید.');
+      if (!newErrors || newErrors.length === 0) {
+        newErrors = ['خطا در ارتباط با سرور. لطفاً دوباره تلاش کنید.'];
       }
       
-      setErrors(newErrors);
+      setErrors(newErrors || []);
     } finally {
       setLoading(false);
     }
@@ -238,7 +249,8 @@ export default function SkillsForm() {
       setSuccess(true);
     } catch (err) {
       console.error('خطا در حذف مهارت:', err);
-      setErrors(['خطا در حذف مهارت. لطفاً دوباره تلاش کنید.']);
+      const errorMessages = ['خطا در حذف مهارت. لطفاً دوباره تلاش کنید.'];
+      setErrors(errorMessages);
     }
   };
 
@@ -248,7 +260,8 @@ export default function SkillsForm() {
       typeof skill.skill === 'object' ? skill.skill?.id : (skill.skill ?? 0);
 
     if (!selectedSkillId) {
-      setErrors(['این مهارت قابل ویرایش نیست. لطفاً دوباره تلاش کنید.']);
+      const errorMessages = ['این مهارت قابل ویرایش نیست. لطفاً دوباره تلاش کنید.'];
+      setErrors(errorMessages);
       return;
     }
 
