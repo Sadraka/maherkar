@@ -40,6 +40,7 @@ import PeopleIcon from '@mui/icons-material/People';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import InfoIcon from '@mui/icons-material/Info';
 import JobSeekerSubscriptionPlanSelector from './JobSeekerSubscriptionPlanSelector';
+import ResumePreviewStep from './ResumePreviewStep';
 
 import { JOB_SEEKER_THEME } from '@/constants/colors';
 import { 
@@ -153,8 +154,9 @@ interface ResumeAdFormInputs {
  */
 enum FormStep {
   RESUME_DETAILS = 0,
-  SUBSCRIPTION = 1,
-  PAYMENT = 2
+  RESUME_PREVIEW = 1,
+  SUBSCRIPTION = 2,
+  PAYMENT = 3
 }
 
 /**
@@ -640,7 +642,7 @@ export default function CreateResumeAdForm({
   };
 
   // عناوین مراحل
-  const stepLabels = ['اطلاعات آگهی رزومه', 'انتخاب اشتراک', 'پرداخت'];
+  const stepLabels = ['اطلاعات آگهی رزومه', 'بررسی اطلاعات رزومه', 'انتخاب اشتراک', 'پرداخت'];
 
   // تابع validation برای فیلدهای ضروری
   const validateRequiredFields = (): boolean => {
@@ -686,7 +688,7 @@ export default function CreateResumeAdForm({
   const handleNextStep = () => {
     if (currentStep === FormStep.RESUME_DETAILS) {
       if (validateRequiredFields()) {
-        setCurrentStep(FormStep.SUBSCRIPTION);
+        setCurrentStep(FormStep.RESUME_PREVIEW);
         // اسکرول به بالای صفحه
         setTimeout(() => {
           if (containerRef.current) {
@@ -694,12 +696,28 @@ export default function CreateResumeAdForm({
           }
         }, 100);
       }
+    } else if (currentStep === FormStep.RESUME_PREVIEW) {
+      setCurrentStep(FormStep.SUBSCRIPTION);
+      // اسکرول به بالای صفحه
+      setTimeout(() => {
+        if (containerRef.current) {
+          containerRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      }, 100);
     }
   };
 
   // تابع برگشت به مرحله قبل
   const handleBackStep = () => {
     if (currentStep === FormStep.SUBSCRIPTION) {
+      setCurrentStep(FormStep.RESUME_PREVIEW);
+      // اسکرول به بالای صفحه
+      setTimeout(() => {
+        if (containerRef.current) {
+          containerRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      }, 100);
+    } else if (currentStep === FormStep.RESUME_PREVIEW) {
       setCurrentStep(FormStep.RESUME_DETAILS);
       // اسکرول به بالای صفحه
       setTimeout(() => {
@@ -1476,10 +1494,60 @@ export default function CreateResumeAdForm({
                     borderRadius: 2
                   }}
                 >
-                  ادامه - انتخاب اشتراک
+                  ادامه - بررسی اطلاعات رزومه
                 </Button>
               </Box>
             </Box>
+          </Box>
+        </Box>
+      )}
+
+      {currentStep === FormStep.RESUME_PREVIEW && (
+        <Box>
+          <ResumePreviewStep resumeInfo={resumeInfo} />
+          
+          <Box sx={{ display: 'flex', gap: 2, justifyContent: 'center', flexDirection: { xs: 'column', sm: 'row' }, mt: 4 }}>
+            <Button
+              variant="outlined"
+              size="large"
+              onClick={handleBackStep}
+              disabled={loading}
+              sx={{
+                borderColor: jobSeekerColors.primary,
+                color: jobSeekerColors.primary,
+                borderRadius: 2,
+                px: { xs: 3, sm: 4 },
+                py: { xs: 1.25, sm: 1.5 },
+                fontSize: { xs: '0.9rem', sm: '1rem' },
+                fontWeight: 600,
+                minWidth: { xs: '100%', sm: 150 },
+                '&:hover': {
+                  borderColor: jobSeekerColors.dark,
+                  color: jobSeekerColors.dark,
+                  backgroundColor: `${jobSeekerColors.primary}0D`
+                }
+              }}
+            >
+              بازگشت
+            </Button>
+            
+            <Button
+              variant="contained"
+              color="secondary"
+              size="large"
+              onClick={handleNextStep}
+              disabled={loading}
+              sx={{ 
+                px: { xs: 4, sm: 6 },
+                py: { xs: 1.25, sm: 1.5 },
+                fontSize: { xs: '0.9rem', sm: '1rem' },
+                fontWeight: 600,
+                minWidth: { xs: '100%', sm: 200 },
+                borderRadius: 2
+              }}
+            >
+              ادامه - انتخاب اشتراک
+            </Button>
           </Box>
         </Box>
       )}

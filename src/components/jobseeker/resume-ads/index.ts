@@ -5,3 +5,5 @@ export { default as ResumeAdsSearchAndSort } from './ResumeAdsSearchAndSort';
 export { default as CreateResumeAdForm } from './CreateResumeAdForm';
 export { default as ResumeAdsList } from './ResumeAdsList';
 export { default as ResumeAdDetail } from './ResumeAdDetail';
+export { default as ResumePreviewStep } from './ResumePreviewStep';
+export { default as JobSeekerSubscriptionPlanSelector } from './JobSeekerSubscriptionPlanSelector';
