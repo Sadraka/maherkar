@@ -477,9 +477,7 @@ const ResumeAdsSearchAndSort: React.FC<ResumeAdsSearchAndSortProps> = ({
                 fontWeight: 500
               }}
             >
-              {filteredResumeAds.length > 0 
-                ? `${convertToPersianNumbers(filteredResumeAds.length)} آگهی رزومه یافت شد`
-                : 'هیچ آگهی رزومه‌ای یافت نشد'
+              {filteredResumeAds.length === 0 &&  'هیچ آگهی رزومه‌ای یافت نشد'
               }
             </Typography>
           </Box>
