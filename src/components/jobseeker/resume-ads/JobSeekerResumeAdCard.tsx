@@ -295,6 +295,7 @@ export default function JobSeekerResumeAdCard({ resumeAd, onUpdate }: JobSeekerR
           height: '100%',
           display: 'flex',
           flexDirection: 'column',
+          zIndex: 0,
           '&:hover': {
             transform: 'translateY(-4px)',
             boxShadow: '0 6px 16px rgba(0,0,0,0.1)',
@@ -307,7 +308,9 @@ export default function JobSeekerResumeAdCard({ resumeAd, onUpdate }: JobSeekerR
           display: 'flex',
           flexDirection: 'column',
           height: '100%',
-          flexGrow: 1
+          flexGrow: 1,
+          position: 'relative',
+          zIndex: 1
         }}>
           {/* هدر کارت - آواتار و نام */}
           <Box sx={{

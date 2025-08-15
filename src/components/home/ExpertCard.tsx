@@ -141,6 +141,7 @@ export default function ExpertCard({ expert }: ExpertCardProps) {
           height: '100%', // مثل JobCard
           display: 'flex',
           flexDirection: 'column',
+          zIndex: 0,
           '&:hover': {
             transform: 'translateY(-4px)',
             boxShadow: '0 6px 16px rgba(0,0,0,0.1)',
@@ -153,7 +154,9 @@ export default function ExpertCard({ expert }: ExpertCardProps) {
           display: 'flex',
           flexDirection: 'column',
           height: '100%',
-          flexGrow: 1
+          flexGrow: 1,
+          position: 'relative',
+          zIndex: 1
         }}>
           {/* نمایش نوع اشتراک - فقط برای نردبان و فوری */}
           {expert.subscription_type && expert.subscription_type !== 'پایه' && (
