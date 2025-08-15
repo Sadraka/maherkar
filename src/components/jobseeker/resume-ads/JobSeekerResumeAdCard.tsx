@@ -503,7 +503,7 @@ export default function JobSeekerResumeAdCard({ resumeAd, onUpdate }: JobSeekerR
              </Box>
 
              {/* مدت زمان باقی‌مانده - برای آگهی‌های تایید شده */}
-             {resumeAd.status === 'A' && getRemainingDaysText(resumeAd) && (
+             {resumeAd.status === 'A' && getRemainingDaysText(resumeAd) ? (
                <Box sx={{ display: 'flex', alignItems: 'center', mt: { xs: 0.2, sm: 0.3 } }}>
                  <Box sx={{
                    width: { xs: 22, sm: 24 },
@@ -528,6 +528,36 @@ export default function JobSeekerResumeAdCard({ resumeAd, onUpdate }: JobSeekerR
                    fontWeight: getRemainingDays(resumeAd) === 0 ? 600 : 400,
                  }}>
                    {getRemainingDaysText(resumeAd)}
+                 </Typography>
+               </Box>
+             ) : (
+               // پیام برای کارت‌های تایید نشده
+               <Box sx={{ display: 'flex', alignItems: 'center', mt: { xs: 0.2, sm: 0.3 } }}>
+                 <Box sx={{
+                   width: { xs: 22, sm: 24 },
+                   height: { xs: 22, sm: 24 },
+                   borderRadius: '50%',
+                   backgroundColor: 'rgba(158, 158, 158, 0.1)',
+                   display: 'flex',
+                   alignItems: 'center',
+                   justifyContent: 'center',
+                   ml: 0
+                 }}>
+                   <TimerIcon fontSize="small" sx={{
+                     color: '#9E9E9E',
+                     fontSize: { xs: '0.8rem', sm: '0.9rem' }
+                   }} />
+                 </Box>
+                 <Typography variant="body2" sx={{
+                   color: '#9E9E9E',
+                   fontSize: { xs: '0.8rem', sm: '0.85rem' },
+                   mr: 0,
+                   ml: { xs: 1.2, sm: 1.5 },
+                   whiteSpace: 'nowrap',
+                   overflow: 'hidden',
+                   textOverflow: 'ellipsis'
+                 }}>
+                   بعد از تایید زمان محاسبه می‌شود
                  </Typography>
                </Box>
              )}
