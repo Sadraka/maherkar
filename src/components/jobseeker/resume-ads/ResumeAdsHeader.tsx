@@ -18,39 +18,7 @@ const ResumeAdsHeader = () => {
       gap: 2,
       direction: 'rtl'
     }}>
-      {/* عنوان و توضیح */}
-      <Box sx={{ flex: 1 }}>
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 1 }}>
-          <CampaignIcon sx={{ 
-            fontSize: { xs: 32, md: 42 }, 
-            color: JOB_SEEKER_THEME.primary,
-            transform: 'translateY(-2px)'
-          }} />
-          <Typography 
-            variant="h4" 
-            component="h1" 
-            fontWeight="bold" 
-            sx={{ 
-              fontSize: { xs: '1.5rem', md: '2rem' },
-              color: JOB_SEEKER_THEME.primary
-            }}
-          >
-            آگهی‌های رزومه من
-          </Typography>
-        </Box>
-        <Typography 
-          variant="body1" 
-          color="text.secondary" 
-          sx={{ 
-            fontSize: { xs: '0.9rem', md: '1rem' },
-            maxWidth: { xs: '100%', sm: '400px' }
-          }}
-        >
-          مدیریت و بررسی آگهی‌های رزومه خود و مشاهده وضعیت آن‌ها
-        </Typography>
-      </Box>
-
-      {/* دکمه ثبت آگهی رزومه جدید */}
+      {/* دکمه ثبت آگهی رزومه جدید - سمت چپ */}
       <Box sx={{ flexShrink: 0 }}>
         <Link href="/jobseeker/resume-ads/create" style={{ textDecoration: 'none' }}>
           <Button
@@ -81,6 +49,44 @@ const ResumeAdsHeader = () => {
             ثبت آگهی رزومه جدید
           </Button>
         </Link>
+      </Box>
+
+      {/* عنوان و توضیح - سمت راست */}
+      <Box sx={{ 
+        flex: 1,
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: { xs: 'flex-start', sm: 'flex-end' },
+        textAlign: { xs: 'left', sm: 'right' }
+      }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 1 }}>
+          <CampaignIcon sx={{ 
+            fontSize: { xs: 32, md: 42 }, 
+            color: JOB_SEEKER_THEME.primary,
+            transform: 'translateY(-2px)'
+          }} />
+          <Typography 
+            variant="h4" 
+            component="h1" 
+            fontWeight="bold" 
+            sx={{ 
+              fontSize: { xs: '1.5rem', md: '2rem' },
+              color: JOB_SEEKER_THEME.primary
+            }}
+          >
+            آگهی‌های رزومه من
+          </Typography>
+        </Box>
+        <Typography 
+          variant="body1" 
+          color="text.secondary" 
+          sx={{ 
+            fontSize: { xs: '0.9rem', md: '1rem' },
+            maxWidth: { xs: '100%', sm: '400px' }
+          }}
+        >
+          مدیریت و بررسی آگهی‌های رزومه خود و مشاهده وضعیت آن‌ها
+        </Typography>
       </Box>
     </Box>
   );
