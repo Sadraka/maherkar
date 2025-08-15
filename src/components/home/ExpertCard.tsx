@@ -391,7 +391,9 @@ export default function ExpertCard({ expert }: ExpertCardProps) {
                 color: jobSeekerColors.primary,
                 fontWeight: 500
               }}>
-                <Box component="span" sx={{ fontWeight: 600 }}>حقوق درخواستی:</Box> {convertSalaryToPersian(expert.expectedSalary)} تومان
+                <Box component="span" sx={{ fontWeight: 600 }}>حقوق درخواستی:</Box> {
+                  expert.expectedSalary === 'توافقی' ? 'توافقی' : `${convertSalaryToPersian(expert.expectedSalary)} تومان`
+                }
               </Typography>
             )}
           </Box>
