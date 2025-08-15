@@ -146,12 +146,20 @@ const convertToPersianNumber = (num: number): string => {
 const convertSalaryToPersian = (salary: string): string => {
   if (!salary) return '';
   
-  // تبدیل "30 to 50" به "۳۰ تا ۵۰"
+  // اگر توافقی باشد
+  if (salary === 'Negotiable' || salary === 'توافقی') return 'توافقی';
+  
+  // اگر بیش از 50 میلیون باشد
+  if (salary === 'More than 50' || salary.includes('More than')) {
+    return 'بیش از ۵۰ میلیون تومان';
+  }
+  
+  // تبدیل "30 to 50" به "۳۰ تا ۵۰ میلیون تومان"
   return salary
     .replace(/\s+to\s+/g, ' تا ')
     .replace(/\d+/g, (match) => {
       return match.replace(/\d/g, (digit) => ['۰', '۱', '۲', '۳', '۴', '۵', '۶', '۷', '۸', '۹'][parseInt(digit)]);
-    });
+    }) + ' میلیون تومان';
 };
 
 // تابع تبدیل مهارت‌های API به آرایه رشته
@@ -182,6 +190,14 @@ export default function JobSeekerResumeAdCard({ resumeAd, onUpdate }: JobSeekerR
 
   // دریافت مهارت‌ها و رزومه کاربر از API
   useEffect(() => {
+    // اگر در صفحه اصلی هستیم (صفحه هوم)، نیازی به دریافت اطلاعات API نیست
+    // تشخیص صفحه اصلی با وجود resumeAd.advertisement
+    if (resumeAd.advertisement && typeof resumeAd.advertisement !== 'string') {
+      // احتمالا در حالت نمایش در صفحه اصلی هستیم - بدون درخواست API
+      setLoading(false);
+      return;
+    }
+
     const fetchData = async () => {
       try {
         const [skillsResponse, resumeResponse, availableSkillsResponse] = await Promise.all([
@@ -212,7 +228,7 @@ export default function JobSeekerResumeAdCard({ resumeAd, onUpdate }: JobSeekerR
     };
 
     fetchData();
-  }, []);
+  }, [resumeAd.advertisement]);
 
   // تابع کلیک بر روی دکمه مشاهده رزومه
   const handleViewResume = () => {
@@ -233,8 +249,8 @@ export default function JobSeekerResumeAdCard({ resumeAd, onUpdate }: JobSeekerR
   // نمایش فقط 3 مهارت اول
   const topSkills = skills.slice(0, 3);
 
-  // در حالت لودینگ، اسکلتون نمایش بده
-  if (loading) {
+  // فقط وقتی اسکلتون را نمایش بده که در صفحه اصلی نباشیم (به عنوان کارت معمولی)
+  if (loading && typeof resumeAd.advertisement === 'string') {
     return <ResumeAdCardSkeleton />;
   }
 
@@ -518,9 +534,10 @@ export default function JobSeekerResumeAdCard({ resumeAd, onUpdate }: JobSeekerR
                 fontWeight: 500
               }}>
                 <Box component="span" sx={{ fontWeight: 600 }}>حقوق درخواستی:</Box> {
-                  resumeAd.salary === 'توافقی' || resume?.expected_salary === 'توافقی' 
+                  resumeAd.salary === 'توافقی' || resume?.expected_salary === 'توافقی' || 
+                  resumeAd.salary === 'Negotiable' || resume?.expected_salary === 'Negotiable'
                     ? 'توافقی' 
-                    : `${convertSalaryToPersian(resumeAd.salary || resume?.expected_salary || '')} میلیون تومان`
+                    : convertSalaryToPersian(resumeAd.salary || resume?.expected_salary || '')
                 }
               </Typography>
             </Box>

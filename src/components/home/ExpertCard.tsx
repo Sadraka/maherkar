@@ -32,7 +32,15 @@ const convertToPersianNumber = (num: number): string => {
 const convertSalaryToPersian = (salary: string): string => {
   if (!salary) return '';
   
-  // تبدیل "30 to 50" به "۳۰ تا ۵۰"
+  // اگر توافقی باشد
+  if (salary === 'Negotiable' || salary === 'توافقی') return 'توافقی';
+  
+  // اگر بیش از 50 میلیون باشد
+  if (salary === 'More than 50' || salary.includes('More than')) {
+    return 'بیش از ۵۰ میلیون تومان';
+  }
+  
+  // تبدیل "30 to 50" به "۳۰ تا ۵۰ میلیون تومان"
   return salary
     .replace(/\s+to\s+/g, ' تا ')
     .replace(/\d+/g, (match) => {
@@ -392,7 +400,7 @@ export default function ExpertCard({ expert }: ExpertCardProps) {
                 fontWeight: 500
               }}>
                 <Box component="span" sx={{ fontWeight: 600 }}>حقوق درخواستی:</Box> {
-                  expert.expectedSalary === 'توافقی' ? 'توافقی' : `${convertSalaryToPersian(expert.expectedSalary)} تومان`
+                  expert.expectedSalary === 'توافقی' || expert.expectedSalary === 'Negotiable' ? 'توافقی' : convertSalaryToPersian(expert.expectedSalary)
                 }
               </Typography>
             )}
