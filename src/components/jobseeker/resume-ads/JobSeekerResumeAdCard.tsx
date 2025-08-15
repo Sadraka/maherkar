@@ -587,12 +587,16 @@ export default function JobSeekerResumeAdCard({ resumeAd, onUpdate }: JobSeekerR
           </Box>
           
           {/* نمایش نوع اشتراک */}
-          {typeof resumeAd.advertisement === 'object' && resumeAd.advertisement.subscription?.plan?.name === 'ladder' && (
+          {typeof resumeAd.advertisement === 'object' && resumeAd.advertisement.subscription?.plan?.name && (
             <Box sx={{
               position: 'absolute',
               top: 0,
               right: 0,
-              bgcolor: '#E53935', // رنگ نردبان
+              bgcolor: 
+                resumeAd.advertisement.subscription.plan.name === 'ladder' ? '#E53935' : // رنگ نردبان
+                resumeAd.advertisement.subscription.plan.name === 'urgent' ? '#FF9800' : // رنگ فوری
+                resumeAd.advertisement.subscription.plan.name === 'basic' ? '#4CAF50' : // رنگ پایه
+                '#4CAF50', // رنگ پیش‌فرض
               color: 'white',
               fontSize: '0.7rem',
               fontWeight: 'bold',
@@ -601,7 +605,9 @@ export default function JobSeekerResumeAdCard({ resumeAd, onUpdate }: JobSeekerR
               borderRadius: '0 0 0 8px',
               zIndex: 2
             }}>
-              نردبان
+              {resumeAd.advertisement.subscription.plan.name === 'ladder' ? 'نردبان' : 
+               resumeAd.advertisement.subscription.plan.name === 'urgent' ? 'فوری' : 
+               resumeAd.advertisement.subscription.plan.name === 'basic' ? 'پایه' : ''}
             </Box>
           )}
 

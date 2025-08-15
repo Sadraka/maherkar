@@ -33,200 +33,6 @@ export default function Experts() {
   const resumeAdsData: ResumeAdType[] = [
     {
       id: "1",
-      title: "توسعه‌دهنده فرانت‌اند ارشد",
-      status: "A", // تایید شده 'A' = تایید شده، 'P' = در انتظار، 'R' = رد شده
-      description: "توسعه‌دهنده با تجربه در زمینه فرانت‌اند و تسلط به فریم‌ورک‌های مدرن",
-      job_seeker_detail: {
-        id: 101,
-        full_name: 'علی راد',
-        phone: '09123456789',
-        profile_picture: 'https://randomuser.me/api/portraits/men/32.jpg',
-        user_type: 'jobseeker',
-        status: 'active',
-        joined_date: '2023-10-15',
-        last_updated: '2024-05-20',
-        is_active: true,
-        is_admin: false
-      },
-      location_detail: {
-        id: 1,
-        name: 'تبریز',
-        province: { id: 1, name: 'آذربایجان شرقی' }
-      },
-      industry_detail: {
-        id: 1,
-        name: 'فناوری اطلاعات'
-      },
-      salary: '20 to 30',
-      job_type: 'FT',
-      degree: 'MA',
-      gender: 'M',
-      soldier_status: 'CO',
-      job_seeker: 101,
-      resume: 1001,
-      industry: 1,
-      advertisement: {
-        id: 'ad1',
-        subscription: {
-          id: 'sub1',
-          plan: {
-            name: 'premium',
-            price: 1000000
-          },
-          subscription_status: 'active'
-        }
-      },
-      location: 1,
-      created_at: '2023-10-15',
-      updated_at: '2024-05-20'
-    },
-    {
-      id: "2",
-      title: "طراح رابط کاربری و تجربه کاربری",
-      status: "A", // تایید شده
-      description: "طراح خلاق با 6 سال تجربه در طراحی UI/UX و تمرکز بر تجربه کاربری",
-      job_seeker_detail: {
-        id: 102,
-        full_name: 'سارا احمدی',
-        phone: '09123456788',
-        profile_picture: 'https://randomuser.me/api/portraits/women/44.jpg',
-        user_type: 'jobseeker',
-        status: 'active',
-        joined_date: '2023-09-10',
-        last_updated: '2024-06-01',
-        is_active: true,
-        is_admin: false
-      },
-      location_detail: {
-        id: 2,
-        name: 'اصفهان',
-        province: { id: 2, name: 'اصفهان' }
-      },
-      industry_detail: {
-        id: 2,
-        name: 'طراحی و هنر'
-      },
-      salary: '15 to 20',
-      job_type: 'RE',
-      degree: 'BA',
-      gender: 'F',
-      job_seeker: 102,
-      resume: 1002,
-      industry: 2,
-      advertisement: {
-        id: 'ad2',
-        subscription: {
-          id: 'sub2',
-          plan: {
-            name: 'basic',
-            price: 500000
-          },
-          subscription_status: 'active'
-        }
-      },
-      location: 2,
-      created_at: '2023-09-10',
-      updated_at: '2024-06-01'
-    },
-    {
-      id: "3",
-      title: "برنامه‌نویس بک‌اند",
-      status: "A", // تایید شده
-      description: "برنامه‌نویس بک‌اند با تسلط به Node.js و Express",
-      job_seeker_detail: {
-        id: 103,
-        full_name: 'محمد کریمی',
-        phone: '09123456787',
-        profile_picture: 'https://randomuser.me/api/portraits/men/22.jpg',
-        user_type: 'jobseeker',
-        status: 'active',
-        joined_date: '2024-01-05',
-        last_updated: '2024-05-10',
-        is_active: true,
-        is_admin: false
-      },
-      location_detail: {
-        id: 3,
-        name: 'شیراز',
-        province: { id: 3, name: 'فارس' }
-      },
-      industry_detail: {
-        id: 1,
-        name: 'فناوری اطلاعات'
-      },
-      salary: 'Negotiable',
-      job_type: 'FT',
-      degree: 'BA',
-      gender: 'M',
-      soldier_status: 'PE',
-      job_seeker: 103,
-      resume: 1003,
-      industry: 1,
-      advertisement: {
-        id: 'ad3',
-        subscription: {
-          id: 'sub3',
-          plan: {
-            name: 'basic',
-            price: 500000
-          },
-          subscription_status: 'active'
-        }
-      },
-      location: 3,
-      created_at: '2024-01-05',
-      updated_at: '2024-05-10'
-    },
-    {
-      id: "4",
-      title: "متخصص دیجیتال مارکتینگ",
-      status: "A", // تایید شده
-      description: "متخصص دیجیتال مارکتینگ با تجربه در SEO و تبلیغات آنلاین",
-      job_seeker_detail: {
-        id: 104,
-        full_name: 'نازنین رضایی',
-        phone: '09123456786',
-        profile_picture: 'https://randomuser.me/api/portraits/women/62.jpg',
-        user_type: 'jobseeker',
-        status: 'active',
-        joined_date: '2023-12-15',
-        last_updated: '2024-06-12',
-        is_active: true,
-        is_admin: false
-      },
-      location_detail: {
-        id: 4,
-        name: 'مشهد',
-        province: { id: 4, name: 'خراسان رضوی' }
-      },
-      industry_detail: {
-        id: 3,
-        name: 'تبلیغات و بازاریابی'
-      },
-      salary: '10 to 15',
-      job_type: 'PT',
-      degree: 'BA',
-      gender: 'F',
-      job_seeker: 104,
-      resume: 1004,
-      industry: 3,
-      advertisement: {
-        id: 'ad4',
-        subscription: {
-          id: 'sub4',
-          plan: {
-            name: 'premium',
-            price: 1000000
-          },
-          subscription_status: 'active'
-        }
-      },
-      location: 4,
-      created_at: '2023-12-15',
-      updated_at: '2024-06-12'
-    },
-    {
-      id: "5",
       title: "مهندس DevOps",
       status: "A", // تایید شده
       description: "مهندس DevOps با تخصص در Docker و AWS",
@@ -275,55 +81,7 @@ export default function Experts() {
       updated_at: '2024-04-12'
     },
     {
-      id: "6",
-      title: "گرافیست و طراح",
-      status: "A", // تایید شده
-      description: "گرافیست با تجربه در طراحی لوگو و هویت بصری",
-      job_seeker_detail: {
-        id: 106,
-        full_name: 'مریم موسوی',
-        phone: '09123456784',
-        profile_picture: 'https://randomuser.me/api/portraits/women/24.jpg',
-        user_type: 'jobseeker',
-        status: 'active',
-        joined_date: '2024-02-10',
-        last_updated: '2024-05-28',
-        is_active: true,
-        is_admin: false
-      },
-      location_detail: {
-        id: 1,
-        name: 'تبریز',
-        province: { id: 1, name: 'آذربایجان شرقی' }
-      },
-      industry_detail: {
-        id: 2,
-        name: 'طراحی و هنر'
-      },
-      salary: 'Negotiable',
-      job_type: 'RE',
-      degree: 'BA',
-      gender: 'F',
-      job_seeker: 106,
-      resume: 1006,
-      industry: 2,
-      advertisement: {
-        id: 'ad6',
-        subscription: {
-          id: 'sub6',
-          plan: {
-            name: 'basic',
-            price: 500000
-          },
-          subscription_status: 'active'
-        }
-      },
-      location: 1,
-      created_at: '2024-02-10',
-      updated_at: '2024-05-28'
-    },
-    {
-      id: "7",
+      id: "2",
       title: "مدیر محصول دیجیتال",
       status: "A", // تایید شده
       description: "مدیر محصول با 5 سال تجربه در تیم‌های چابک و توسعه محصولات نرم‌افزاری",
@@ -370,6 +128,248 @@ export default function Experts() {
       location: 5,
       created_at: '2023-11-18',
       updated_at: '2024-06-05'
+    },
+    {
+      id: "3",
+      title: "متخصص دیجیتال مارکتینگ",
+      status: "A", // تایید شده
+      description: "متخصص دیجیتال مارکتینگ با تجربه در SEO و تبلیغات آنلاین",
+      job_seeker_detail: {
+        id: 104,
+        full_name: 'نازنین رضایی',
+        phone: '09123456786',
+        profile_picture: 'https://randomuser.me/api/portraits/women/62.jpg',
+        user_type: 'jobseeker',
+        status: 'active',
+        joined_date: '2023-12-15',
+        last_updated: '2024-06-12',
+        is_active: true,
+        is_admin: false
+      },
+      location_detail: {
+        id: 4,
+        name: 'مشهد',
+        province: { id: 4, name: 'خراسان رضوی' }
+      },
+      industry_detail: {
+        id: 3,
+        name: 'تبلیغات و بازاریابی'
+      },
+      salary: '10 to 15',
+      job_type: 'PT',
+      degree: 'BA',
+      gender: 'F',
+      job_seeker: 104,
+      resume: 1004,
+      industry: 3,
+      advertisement: {
+        id: 'ad4',
+        subscription: {
+          id: 'sub4',
+          plan: {
+            name: 'urgent',
+            price: 1000000
+          },
+          subscription_status: 'active'
+        }
+      },
+      location: 4,
+      created_at: '2023-12-15',
+      updated_at: '2024-06-12'
+    },
+    {
+      id: "4",
+      title: "توسعه‌دهنده فرانت‌اند ارشد",
+      status: "A", // تایید شده 'A' = تایید شده، 'P' = در انتظار، 'R' = رد شده
+      description: "توسعه‌دهنده با تجربه در زمینه فرانت‌اند و تسلط به فریم‌ورک‌های مدرن",
+      job_seeker_detail: {
+        id: 101,
+        full_name: 'علی راد',
+        phone: '09123456789',
+        profile_picture: 'https://randomuser.me/api/portraits/men/32.jpg',
+        user_type: 'jobseeker',
+        status: 'active',
+        joined_date: '2023-10-15',
+        last_updated: '2024-05-20',
+        is_active: true,
+        is_admin: false
+      },
+      location_detail: {
+        id: 1,
+        name: 'تبریز',
+        province: { id: 1, name: 'آذربایجان شرقی' }
+      },
+      industry_detail: {
+        id: 1,
+        name: 'فناوری اطلاعات'
+      },
+      salary: '20 to 30',
+      job_type: 'FT',
+      degree: 'MA',
+      gender: 'M',
+      soldier_status: 'CO',
+      job_seeker: 101,
+      resume: 1001,
+      industry: 1,
+      advertisement: {
+        id: 'ad1',
+        subscription: {
+          id: 'sub1',
+          plan: {
+            name: 'urgent',
+            price: 1000000
+          },
+          subscription_status: 'active'
+        }
+      },
+      location: 1,
+      created_at: '2023-10-15',
+      updated_at: '2024-05-20'
+    },
+    {
+      id: "5",
+      title: "برنامه‌نویس بک‌اند",
+      status: "A", // تایید شده
+      description: "برنامه‌نویس بک‌اند با تسلط به Node.js و Express",
+      job_seeker_detail: {
+        id: 103,
+        full_name: 'محمد کریمی',
+        phone: '09123456787',
+        profile_picture: 'https://randomuser.me/api/portraits/men/22.jpg',
+        user_type: 'jobseeker',
+        status: 'active',
+        joined_date: '2024-01-05',
+        last_updated: '2024-05-10',
+        is_active: true,
+        is_admin: false
+      },
+      location_detail: {
+        id: 3,
+        name: 'شیراز',
+        province: { id: 3, name: 'فارس' }
+      },
+      industry_detail: {
+        id: 1,
+        name: 'فناوری اطلاعات'
+      },
+      salary: 'Negotiable',
+      job_type: 'FT',
+      degree: 'BA',
+      gender: 'M',
+      soldier_status: 'PE',
+      job_seeker: 103,
+      resume: 1003,
+      industry: 1,
+      advertisement: {
+        id: 'ad3',
+        subscription: {
+          id: 'sub3',
+          plan: {
+            name: 'basic',
+            price: 500000
+          },
+          subscription_status: 'active'
+        }
+      },
+      location: 3,
+      created_at: '2024-01-05',
+      updated_at: '2024-05-10'
+    },
+    {
+      id: "6",
+      title: "طراح رابط کاربری و تجربه کاربری",
+      status: "A", // تایید شده
+      description: "طراح خلاق با 6 سال تجربه در طراحی UI/UX و تمرکز بر تجربه کاربری",
+      job_seeker_detail: {
+        id: 102,
+        full_name: 'سارا احمدی',
+        phone: '09123456788',
+        profile_picture: 'https://randomuser.me/api/portraits/women/44.jpg',
+        user_type: 'jobseeker',
+        status: 'active',
+        joined_date: '2023-09-10',
+        last_updated: '2024-06-01',
+        is_active: true,
+        is_admin: false
+      },
+      location_detail: {
+        id: 2,
+        name: 'اصفهان',
+        province: { id: 2, name: 'اصفهان' }
+      },
+      industry_detail: {
+        id: 2,
+        name: 'طراحی و هنر'
+      },
+      salary: '15 to 20',
+      job_type: 'RE',
+      degree: 'BA',
+      gender: 'F',
+      job_seeker: 102,
+      resume: 1002,
+      industry: 2,
+      advertisement: {
+        id: 'ad2',
+        subscription: {
+          id: 'sub2',
+          plan: {
+            name: 'basic',
+            price: 500000
+          },
+          subscription_status: 'active'
+        }
+      },
+      location: 2,
+      created_at: '2023-09-10',
+      updated_at: '2024-06-01'
+    },
+    {
+      id: "7",
+      title: "گرافیست و طراح",
+      status: "A", // تایید شده
+      description: "گرافیست با تجربه در طراحی لوگو و هویت بصری",
+      job_seeker_detail: {
+        id: 106,
+        full_name: 'مریم موسوی',
+        phone: '09123456784',
+        profile_picture: 'https://randomuser.me/api/portraits/women/24.jpg',
+        user_type: 'jobseeker',
+        status: 'active',
+        joined_date: '2024-02-10',
+        last_updated: '2024-05-28',
+        is_active: true,
+        is_admin: false
+      },
+      location_detail: {
+        id: 1,
+        name: 'تبریز',
+        province: { id: 1, name: 'آذربایجان شرقی' }
+      },
+      industry_detail: {
+        id: 2,
+        name: 'طراحی و هنر'
+      },
+      salary: 'Negotiable',
+      job_type: 'RE',
+      degree: 'BA',
+      gender: 'F',
+      job_seeker: 106,
+      resume: 1006,
+      industry: 2,
+      advertisement: {
+        id: 'ad6',
+        subscription: {
+          id: 'sub6',
+          plan: {
+            name: 'basic',
+            price: 500000
+          },
+          subscription_status: 'active'
+        }
+      },
+      location: 1,
+      created_at: '2024-02-10',
+      updated_at: '2024-05-28'
     },
   ];
 
