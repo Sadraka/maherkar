@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { apiGet } from '@/lib/axios';
 import ExpertCard, { ExpertType } from '@/components/home/ExpertCard';
 import ResumeAdCardSkeleton from './ResumeAdCardSkeleton';
+import { getJobTypeText, getSalaryText, getDegreeText, getGenderText, getSoldierStatusText } from '@/lib/jobUtils';
 
 // تابع پردازش URL تصویر پروفایل
 const processProfilePicture = (profilePicture?: string): string => {
@@ -197,11 +198,11 @@ const convertResumeAdToExpert = (resumeAd: ResumeAdType, skills: string[], resum
     isVerified: true, // فرض می‌کنیم کاربران آگهی‌دهنده تایید شده‌اند
     industry: resumeAd.industry_detail?.name,
     experienceYears: resume?.years_of_experience, // سال‌های تجربه واقعی از رزومه
-    preferredJobType: resumeAd.job_type || resume?.preferred_job_type,
-    expectedSalary: resumeAd.salary || resume?.expected_salary,
-    degree: resumeAd.degree || resume?.degree,
-    gender: resumeAd.gender || resume?.gender,
-    soldierStatus: resumeAd.soldier_status || resume?.soldier_status,
+    preferredJobType: getJobTypeText(resumeAd.job_type) || getJobTypeText(resume?.preferred_job_type) || 'تمام وقت',
+    expectedSalary: getSalaryText(resumeAd.salary || resume?.expected_salary),
+    degree: getDegreeText(resumeAd.degree || resume?.degree),
+    gender: getGenderText(resumeAd.gender || resume?.gender),
+    soldierStatus: getSoldierStatusText(resumeAd.soldier_status || resume?.soldier_status),
     website: resume?.website,
     linkedinProfile: resume?.linkedin_profile,
     availability: resume?.availability,

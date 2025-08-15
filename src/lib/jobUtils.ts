@@ -2,10 +2,16 @@
 
 export const getJobTypeText = (jobType?: string) => {
   const typeMap: Record<string, string> = {
+    // مقادیر کوتاه (آگهی رزومه)
     'FT': 'تمام وقت',
     'PT': 'پاره وقت',
     'RE': 'دورکاری',
-    'IN': 'کارآموزی'
+    'IN': 'کارآموزی',
+    // مقادیر طولانی (رزومه)
+    'Full-Time': 'تمام وقت',
+    'Part-Time': 'پاره وقت',
+    'Remote': 'دورکاری',
+    'Internship': 'کارآموزی'
   };
   return jobType ? typeMap[jobType] || jobType : 'نامشخص';
 };
@@ -60,30 +66,48 @@ export const getSalaryText = (salary?: string) => {
 
 export const getDegreeText = (degree?: string) => {
   const degreeMap: Record<string, string> = {
+    // مقادیر کوتاه (آگهی رزومه)
     'BD': 'زیر دیپلم',
     'DI': 'دیپلم',
     'AS': 'فوق دیپلم',
     'BA': 'لیسانس',
     'MA': 'فوق لیسانس',
-    'DO': 'دکترا'
+    'DO': 'دکترا',
+    // مقادیر طولانی (رزومه)
+    'Below Diploma': 'زیر دیپلم',
+    'Diploma': 'دیپلم',
+    'Associate': 'فوق دیپلم',
+    'Bachelor': 'لیسانس',
+    'Master': 'فوق لیسانس',
+    'Doctorate': 'دکترا'
   };
   return degree ? degreeMap[degree] || degree : 'نامشخص';
 };
 
 export const getGenderText = (gender?: string) => {
   const genderMap: Record<string, string> = {
+    // مقادیر کوتاه (آگهی رزومه)
     'M': 'آقا',
     'F': 'خانم',
-    'N': 'مهم نیست'
+    'N': 'مهم نیست',
+    // مقادیر طولانی (رزومه)
+    'Male': 'آقا',
+    'Female': 'خانم'
   };
   return gender ? genderMap[gender] || gender : 'نامشخص';
 };
 
 export const getSoldierStatusText = (status?: string) => {
   const statusMap: Record<string, string> = {
+    // مقادیر کوتاه (آگهی رزومه)
     'CO': 'پایان خدمت',
     'EE': 'معافیت تحصیلی',
-    'NS': 'مهم نیست'
+    'NS': 'مهم نیست',
+    // مقادیر طولانی (رزومه)
+    'Completed': 'پایان خدمت',
+    'Permanent Exemption': 'معافیت دائم',
+    'Educational Exemption': 'معافیت تحصیلی',
+    'Not Completed': 'نااتمام'
   };
   return status ? statusMap[status] || status : 'نامشخص';
 };

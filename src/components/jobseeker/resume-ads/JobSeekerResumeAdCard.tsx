@@ -22,6 +22,7 @@ import WorkOutlineIcon from '@mui/icons-material/WorkOutline';
 import HistoryIcon from '@mui/icons-material/History';
 import AuthRequiredModal from '@/components/common/AuthRequiredModal';
 import ResumeAdCardSkeleton from './ResumeAdCardSkeleton';
+import { getJobTypeText, getSalaryText, getDegreeText, getGenderText, getSoldierStatusText } from '@/lib/jobUtils';
 
 // تایپ مهارت از بک‌اند
 type SkillType = {
@@ -155,25 +156,7 @@ const convertToPersianNumber = (num: number): string => {
   return num.toString().replace(/\d/g, (match) => persianDigits[parseInt(match)]);
 };
 
-// تابع برای تبدیل اعداد حقوق به فارسی و اصلاح فرمت
-const convertSalaryToPersian = (salary: string): string => {
-  if (!salary) return '';
-  
-  // اگر توافقی باشد
-  if (salary === 'Negotiable' || salary === 'توافقی') return 'توافقی';
-  
-  // اگر بیش از 50 میلیون باشد
-  if (salary === 'More than 50' || salary.includes('More than')) {
-    return 'بیش از ۵۰ میلیون تومان';
-  }
-  
-  // تبدیل "30 to 50" به "۳۰ تا ۵۰ میلیون تومان"
-  return salary
-    .replace(/\s+to\s+/g, ' تا ')
-    .replace(/\d+/g, (match) => {
-      return match.replace(/\d/g, (digit) => ['۰', '۱', '۲', '۳', '۴', '۵', '۶', '۷', '۸', '۹'][parseInt(digit)]);
-    }) + ' میلیون تومان';
-};
+
 
 // تابع تبدیل مهارت‌های API به آرایه رشته
 const convertSkillsToStringArray = (skills: SkillType[], availableSkills: any[] = []): string[] => {
@@ -461,11 +444,7 @@ export default function JobSeekerResumeAdCard({ resumeAd, onUpdate }: JobSeekerR
                 mr: 0,
                 ml: { xs: 1.2, sm: 1.5 }
               }}>
-                {resumeAd.job_type === 'FT' ? 'تمام وقت' : 
-                  resumeAd.job_type === 'PT' ? 'پاره وقت' :
-                  resumeAd.job_type === 'RE' ? 'دورکاری' :
-                  resumeAd.job_type === 'IN' ? 'کارآموزی' :
-                  resume?.preferred_job_type || "تمام وقت"}
+                {getJobTypeText(resumeAd.job_type) || resume?.preferred_job_type || "تمام وقت"}
               </Typography>
             </Box>
 
@@ -571,10 +550,7 @@ export default function JobSeekerResumeAdCard({ resumeAd, onUpdate }: JobSeekerR
               fontWeight: 500
             }}>
               <Box component="span" sx={{ fontWeight: 600 }}>حقوق درخواستی:</Box> {
-                resumeAd.salary === 'توافقی' || resume?.expected_salary === 'توافقی' || 
-                resumeAd.salary === 'Negotiable' || resume?.expected_salary === 'Negotiable'
-                  ? 'توافقی' 
-                  : convertSalaryToPersian(resumeAd.salary || resume?.expected_salary || '')
+                getSalaryText(resumeAd.salary || resume?.expected_salary)
               }
             </Typography>
           </Box>
