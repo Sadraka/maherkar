@@ -460,7 +460,7 @@ export default function ExpertCard({ expert }: ExpertCardProps) {
               fontWeight: 'bold',
               px: 1.5,
               py: 0.5,
-              borderRadius: 0.5,
+              borderRadius: 1.8,
               zIndex: 10,
               minWidth: '45px',
               boxShadow: '0 2px 4px rgba(0,0,0,0.15)',
