@@ -98,10 +98,14 @@ interface ResumeAdCardProps {
 
 
 // تابع تبدیل مهارت‌های API به آرایه رشته
-const convertSkillsToStringArray = (skills: SkillType[]): string[] => {
+const convertSkillsToStringArray = (skills: SkillType[], availableSkills: any[] = []): string[] => {
   return skills.map(skill => {
     if (typeof skill.skill === 'object' && skill.skill?.name) {
       return skill.skill.name;
+    } else if (typeof skill.skill === 'number') {
+      // اگر skill یک ID است، از availableSkills نام را پیدا کن
+      const foundSkill = availableSkills.find(s => s.id === skill.skill);
+      return foundSkill?.name || 'مهارت نامشخص';
     }
     return 'مهارت نامشخص';
   });
@@ -147,14 +151,16 @@ export default function ResumeAdCard({ resumeAd, onUpdate }: ResumeAdCardProps) 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [skillsResponse, resumeResponse] = await Promise.all([
+        const [skillsResponse, resumeResponse, availableSkillsResponse] = await Promise.all([
           apiGet('/resumes/skills/'),
-          apiGet('/resumes/resumes/')
+          apiGet('/resumes/resumes/'),
+          apiGet('/industries/skills/')
         ]);
 
-        // پردازش مهارت‌ها
+        // پردازش مهارت‌ها با availableSkills
         const skillsData = skillsResponse.data as SkillType[];
-        const skillNames = convertSkillsToStringArray(skillsData);
+        const availableSkills = Array.isArray(availableSkillsResponse.data) ? availableSkillsResponse.data : [];
+        const skillNames = convertSkillsToStringArray(skillsData, availableSkills);
         setSkills(skillNames);
 
         // پردازش رزومه

@@ -473,12 +473,14 @@ export default function ResumePreviewStep({ resumeInfo }: ResumePreviewStepProps
             <Box sx={{ 
               display: 'flex', 
               flexDirection: { xs: 'column', sm: 'row' },
-              alignItems: { xs: 'flex-start', sm: 'center' }, 
+              alignItems: { xs: 'stretch', sm: 'center' }, 
               gap: { xs: 1.5, sm: 2 },
               p: { xs: 1.5, sm: 2 },
               border: `1px solid ${alpha(jobSeekerColors.primary, 0.1)}`,
               borderRadius: 1,
-              backgroundColor: alpha(jobSeekerColors.primary, 0.02)
+              backgroundColor: alpha(jobSeekerColors.primary, 0.02),
+              overflow: 'hidden',
+              wordBreak: 'break-word'
             }}>
               <Box sx={{ 
                 display: 'flex', 
@@ -490,17 +492,27 @@ export default function ResumePreviewStep({ resumeInfo }: ResumePreviewStepProps
                   fontSize: { xs: 24, sm: 32 }, 
                   color: jobSeekerColors.primary 
                 }} />
-                <Box sx={{ flex: 1 }}>
+                <Box sx={{ 
+                  flex: 1, 
+                  minWidth: 0,
+                  overflow: 'hidden'
+                }}>
                   <Typography variant="body1" sx={{ 
                     fontWeight: 600,
                     color: 'text.primary',
-                    fontSize: { xs: '0.8rem', sm: '0.9rem' }
+                    fontSize: { xs: '0.8rem', sm: '0.9rem' },
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                    whiteSpace: 'nowrap'
                   }}>
                     {getFileNameFromUrl(cv)}
                   </Typography>
                   <Typography variant="body2" sx={{ 
                     color: 'text.secondary',
-                    fontSize: { xs: '0.7rem', sm: '0.75rem' }
+                    fontSize: { xs: '0.7rem', sm: '0.75rem' },
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                    whiteSpace: 'nowrap'
                   }}>
                     فایل PDF رزومه شما که در آگهی نمایش داده خواهد شد
                   </Typography>
