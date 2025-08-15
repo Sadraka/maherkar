@@ -339,7 +339,24 @@ export default function JobSeekerResumeAdCard({ resumeAd, onUpdate }: JobSeekerR
                 {resumeAd.job_seeker_detail?.full_name ? resumeAd.job_seeker_detail.full_name.charAt(0).toUpperCase() : ''}
               </Avatar>
               
-
+              {/* نمایش وضعیت آگهی (فقط اگر در انتظار تایید یا رد شده باشد) */}
+              {resumeAd.status !== 'A' && (
+                <Box
+                  sx={{
+                    position: 'absolute',
+                    bottom: -2,
+                    right: -2,
+                    borderRadius: '50%',
+                    width: 16,
+                    height: 16,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    bgcolor: resumeAd.status === 'P' ? 'warning.main' : 'error.main',
+                    border: '1px solid white',
+                  }}
+                />
+              )}
             </Box>
             
             <Box sx={{ display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
@@ -353,6 +370,23 @@ export default function JobSeekerResumeAdCard({ resumeAd, onUpdate }: JobSeekerR
                   {resumeAd.job_seeker_detail?.full_name || 'کاربر ماهرکار'}
                 </Typography>
                 
+                {/* نمایش وضعیت آگهی با متن (فقط اگر در انتظار تایید یا رد شده باشد) */}
+                {resumeAd.status !== 'A' && (
+                  <Typography
+                    variant="caption"
+                    sx={{
+                      fontSize: '0.65rem',
+                      fontWeight: 'bold',
+                      color: 'white',
+                      bgcolor: resumeAd.status === 'P' ? 'warning.main' : 'error.main',
+                      borderRadius: 1,
+                      px: 0.5,
+                      py: 0.1,
+                    }}
+                  >
+                    {resumeAd.status === 'P' ? 'در انتظار تایید' : 'رد شده'}
+                  </Typography>
+                )}
               </Box>
               
               <Typography variant="body2" color="text.secondary" sx={{
@@ -585,31 +619,6 @@ export default function JobSeekerResumeAdCard({ resumeAd, onUpdate }: JobSeekerR
             </Button>
           </Box>
           {/* نمایش نوع اشتراک */}
-          {/* نمایش وضعیت آگهی (فقط اگر در انتظار تایید یا رد شده باشد) */}
-          {resumeAd.status !== 'A' && (
-            <Box sx={{
-              position: 'absolute',
-              top: 8,
-              left: 8,
-              bgcolor: resumeAd.status === 'P' ? 'warning.main' : 'error.main',
-              color: 'white',
-              fontSize: '0.7rem',
-              fontWeight: 'bold',
-              px: 1.5,
-              py: 0.5,
-              borderRadius: 0.5,
-              zIndex: 10,
-              minWidth: '45px',
-              boxShadow: '0 2px 4px rgba(0,0,0,0.15)',
-              textAlign: 'center',
-              pointerEvents: 'none',
-              transform: 'none !important',
-              transition: 'none !important'
-            }}>
-              {resumeAd.status === 'P' ? 'در انتظار تایید' : 'رد شده'}
-            </Box>
-          )}
-
           {(() => {
             // بررسی subscription_detail از API واقعی
             const subscriptionDetail = (resumeAd as any).subscription_detail;
