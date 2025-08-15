@@ -170,10 +170,14 @@ export default function ExpertCard({ expert }: ExpertCardProps) {
               fontWeight: 'bold',
               px: 1.5,
               py: 0.5,
-              borderRadius: '0 0 0 8px',
+              borderTopRightRadius: 0,
+              borderBottomLeftRadius: 8,
+              borderTopLeftRadius: 0,
+              borderBottomRightRadius: 0,
               zIndex: 2,
               minWidth: '45px',
-              boxShadow: '0 2px 4px rgba(0,0,0,0.15)'
+              boxShadow: '0 2px 4px rgba(0,0,0,0.15)',
+              textAlign: 'center'
             }}>
               {expert.subscription_type}
             </Box>
