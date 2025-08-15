@@ -6,7 +6,6 @@ import {
   Container,
   Button,
   useTheme,
-  Grid,
   useMediaQuery,
   Card,
   CardContent,
@@ -15,6 +14,7 @@ import {
   Stack,
   Chip
 } from '@mui/material';
+
 import { useJobSeekerTheme } from '@/contexts/JobSeekerThemeContext';
 import { JobSeekerResumeAdCard } from '@/components/jobseeker/resume-ads';
 import { ResumeAdType } from '@/components/jobseeker/resume-ads/JobSeekerResumeAdCard';
@@ -614,34 +614,30 @@ export default function Experts() {
           ) : (
             // نمایش کارت‌های واقعی بعد از بارگذاری
             <>
-                              {resumeAdsData
+              <Box 
+                sx={{
+                  display: 'grid',
+                  gridTemplateColumns: {
+                    xs: '1fr',
+                    sm: 'repeat(2, 1fr)',
+                    md: 'repeat(3, 1fr)',
+                    lg: 'repeat(4, 1fr)',
+                  },
+                  gap: { xs: 2, sm: 2.5, md: 3 }
+                }}>
+                {resumeAdsData
                   .filter(resumeAd => resumeAd.status === "A") // فقط آگهی‌های تایید شده
                   .slice(0, visibleExperts)
                   .map((resumeAd) => (
-                  <Box key={resumeAd.id} sx={{
-                    width: {
-                      xs: '100%',
-                      sm: 'calc(50% - 20px)',
-                      md: 'calc(33.33% - 24px)',
-                      lg: 'calc(25% - 24px)'
-                    },
-                    height: { xs: 'auto', sm: '345px' }
-                  }}>
-                    <JobSeekerResumeAdCard resumeAd={resumeAd} onUpdate={() => console.log('بروزرسانی کارت')} />
-                  </Box>
+                    <Box key={resumeAd.id} sx={{ height: '100%' }}>
+                      <JobSeekerResumeAdCard resumeAd={resumeAd} onUpdate={() => console.log('بروزرسانی کارت')} />
+                    </Box>
                 ))}
 
-              {/* کارت ثبت رزومه - همیشه آخرین کارت */}
-              <Box sx={{
-                width: {
-                  xs: '100%',
-                  sm: 'calc(50% - 20px)',
-                  md: 'calc(33.33% - 24px)',
-                  lg: 'calc(25% - 24px)'
-                },
-                height: { xs: 'auto', sm: '345px' }
-              }}>
-                <AddResumeCard onClick={() => console.log('ثبت رزومه جدید')} />
+                {/* کارت ثبت رزومه - همیشه آخرین کارت */}
+                <Box sx={{ height: '100%' }}>
+                  <AddResumeCard onClick={() => console.log('ثبت رزومه جدید')} />
+                </Box>
               </Box>
             </>
           )}

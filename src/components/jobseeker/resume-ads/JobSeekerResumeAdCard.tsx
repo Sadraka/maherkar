@@ -283,8 +283,6 @@ export default function JobSeekerResumeAdCard({ resumeAd, onUpdate }: JobSeekerR
     <>
       <Card
         sx={{
-          display: 'flex',
-          flexDirection: 'column',
           borderRadius: { xs: 1.5, sm: 2 },
           border: `1px solid ${jobSeekerColors.bgLight}`,
           boxShadow: '0 3px 8px rgba(0,0,0,0.05)',
@@ -294,7 +292,9 @@ export default function JobSeekerResumeAdCard({ resumeAd, onUpdate }: JobSeekerR
           transition: 'transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out',
           width: { xs: '100%', sm: '100%', md: '100%' },
           mx: 'auto',
-          height: '100%', 
+          height: '100%',
+          display: 'flex',
+          flexDirection: 'column',
           '&:hover': {
             transform: 'translateY(-4px)',
             boxShadow: '0 6px 16px rgba(0,0,0,0.1)',
@@ -306,7 +306,8 @@ export default function JobSeekerResumeAdCard({ resumeAd, onUpdate }: JobSeekerR
           pb: { xs: "6px !important", sm: "8px !important" },
           display: 'flex',
           flexDirection: 'column',
-          height: '100%'
+          height: '100%',
+          flexGrow: 1
         }}>
           {/* هدر کارت - آواتار و نام */}
           <Box sx={{

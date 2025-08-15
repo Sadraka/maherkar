@@ -128,8 +128,6 @@ export default function ExpertCard({ expert }: ExpertCardProps) {
     <>
       <Card
         sx={{
-          display: 'flex',
-          flexDirection: 'column',
           borderRadius: { xs: 1.5, sm: 2 },
           border: `1px solid ${jobSeekerColors.bgLight}`,
           boxShadow: '0 3px 8px rgba(0,0,0,0.05)',
@@ -140,6 +138,8 @@ export default function ExpertCard({ expert }: ExpertCardProps) {
           width: { xs: '100%', sm: '100%', md: '100%' },
           mx: 'auto',
           height: '100%', // مثل JobCard
+          display: 'flex',
+          flexDirection: 'column',
           '&:hover': {
             transform: 'translateY(-4px)',
             boxShadow: '0 6px 16px rgba(0,0,0,0.1)',
@@ -151,7 +151,8 @@ export default function ExpertCard({ expert }: ExpertCardProps) {
           pb: { xs: "6px !important", sm: "8px !important" },
           display: 'flex',
           flexDirection: 'column',
-          height: '100%'
+          height: '100%',
+          flexGrow: 1
         }}>
           {/* هدر کارت - آواتار و نام */}
           <Box sx={{
