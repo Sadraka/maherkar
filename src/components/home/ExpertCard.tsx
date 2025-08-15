@@ -376,8 +376,9 @@ export default function ExpertCard({ expert }: ExpertCardProps) {
               {expert.skills.length > 3 && (
                 <Typography variant="body2" sx={{
                   fontSize: { xs: '0.7rem', sm: '0.75rem' },
-                  color: theme.palette.text.secondary,
-                  mt: 0.2
+                  color: jobSeekerColors.primary,
+                  mt: 0.2,
+                  fontWeight: 500
                 }}>
                   +{convertToPersianNumber(expert.skills.length - 3)} مهارت دیگر
                 </Typography>
