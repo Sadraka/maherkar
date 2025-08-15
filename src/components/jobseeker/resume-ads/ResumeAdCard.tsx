@@ -152,7 +152,7 @@ const convertResumeAdToExpert = (resumeAd: ResumeAdType, skills: string[], resum
   
   // بررسی اطلاعات اشتراک از subscription_detail (API واقعی)
   if ((resumeAd as any).subscription_detail?.plan?.name) {
-    const planName = (resumeAd as any).subscription_detail.plan.name;
+    const planName = (resumeAd as any).subscription_detail.plan.name.toLowerCase();
     if (planName === 'ladder' || planName === 'نردبان') {
       subscription_type = 'نردبان';
     } else if (planName === 'urgent' || planName === 'فوری') {

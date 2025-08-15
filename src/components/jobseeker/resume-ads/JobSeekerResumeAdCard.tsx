@@ -615,36 +615,69 @@ export default function JobSeekerResumeAdCard({ resumeAd, onUpdate }: JobSeekerR
               مشاهده رزومه
             </Button>
           </Box>
-          {/* نمایش نوع اشتراک - فقط برای صفحه اصلی */}
-          {typeof resumeAd.advertisement === 'object' && 
-           resumeAd.advertisement.subscription?.plan?.name && 
-           resumeAd.advertisement.subscription.plan.name !== 'basic' && (
-            <Box sx={{
-              position: 'absolute',
-              top: 8,
-              right: 8,
-              bgcolor: 
-                resumeAd.advertisement.subscription.plan.name === 'ladder' ? '#E53935' : // رنگ نردبان
-                resumeAd.advertisement.subscription.plan.name === 'urgent' ? '#FF9800' : // رنگ فوری
-                '#4CAF50', // رنگ پیش‌فرض
-              color: 'white',
-              fontSize: '0.75rem',
-              fontWeight: 'bold',
-              px: 1.5,
-              py: 0.5,
-              borderRadius: 0.5,
-              zIndex: 10,
-              minWidth: '45px',
-              boxShadow: '0 2px 4px rgba(0,0,0,0.15)',
-              textAlign: 'center',
-              pointerEvents: 'none',
-              transform: 'none !important',
-              transition: 'none !important'
-            }}>
-              {resumeAd.advertisement.subscription.plan.name === 'ladder' ? 'نردبان' : 
-               resumeAd.advertisement.subscription.plan.name === 'urgent' ? 'فوری' : ''}
-            </Box>
-          )}
+          {/* نمایش نوع اشتراک */}
+          {(() => {
+            // بررسی subscription_detail از API واقعی
+            const subscriptionDetail = (resumeAd as any).subscription_detail;
+            const planName = subscriptionDetail?.plan?.name?.toLowerCase();
+            
+            // بررسی advertisement.subscription برای داده‌های فیک صفحه اصلی
+            const adSubscription = typeof resumeAd.advertisement === 'object' ? resumeAd.advertisement.subscription : null;
+            const adPlanName = adSubscription?.plan?.name?.toLowerCase();
+            
+            // تعیین نوع اشتراک
+            let subscriptionType = '';
+            let bgColor = '#4CAF50';
+            
+            if (planName) {
+              if (planName === 'نردبان' || planName === 'ladder') {
+                subscriptionType = 'نردبان';
+                bgColor = '#E53935';
+              } else if (planName === 'فوری' || planName === 'urgent') {
+                subscriptionType = 'فوری';
+                bgColor = '#FF9800';
+              } else if (planName !== 'پایه' && planName !== 'basic') {
+                subscriptionType = planName;
+                bgColor = '#4CAF50';
+              }
+            } else if (adPlanName) {
+              if (adPlanName === 'نردبان' || adPlanName === 'ladder') {
+                subscriptionType = 'نردبان';
+                bgColor = '#E53935';
+              } else if (adPlanName === 'فوری' || adPlanName === 'urgent') {
+                subscriptionType = 'فوری';
+                bgColor = '#FF9800';
+              } else if (adPlanName !== 'پایه' && adPlanName !== 'basic') {
+                subscriptionType = adPlanName;
+                bgColor = '#4CAF50';
+              }
+            }
+            
+            // فقط اگر نوع اشتراک غیر از پایه باشد نمایش بده
+            return subscriptionType && subscriptionType !== 'پایه' && subscriptionType !== 'basic' ? (
+              <Box sx={{
+                position: 'absolute',
+                top: 8,
+                right: 8,
+                bgcolor: bgColor,
+                color: 'white',
+                fontSize: '0.75rem',
+                fontWeight: 'bold',
+                px: 1.5,
+                py: 0.5,
+                borderRadius: 0.5,
+                zIndex: 10,
+                minWidth: '45px',
+                boxShadow: '0 2px 4px rgba(0,0,0,0.15)',
+                textAlign: 'center',
+                pointerEvents: 'none',
+                transform: 'none !important',
+                transition: 'none !important'
+              }}>
+                {subscriptionType}
+              </Box>
+            ) : null;
+          })()}
 
         </CardContent>
       </Card>
