@@ -73,17 +73,37 @@ const ResumeAdsSearchAndSort: React.FC<ResumeAdsSearchAndSortProps> = ({
   const [subscriptionFilter, setSubscriptionFilter] = useState<string>('all');
   const [showFilters, setShowFilters] = useState(false);
 
-  // تابع بررسی نوع اشتراک - همان منطق کارت
+  // تابع بررسی نوع اشتراک - بهبود یافته
   const isSpecialSubscription = (resumeAd: any): boolean => {
-    // بررسی بر اساس نام طرح در advertisement.subscription
-    if (resumeAd.advertisement?.subscription?.plan?.name) {
-      const planName = resumeAd.advertisement.subscription.plan.name.toLowerCase();
-      // فقط طرح‌های نردبان، ویژه، vip، یا ladder را به عنوان special در نظر بگیر
-      if (planName.includes('نردبان') || planName.includes('ویژه') || planName.includes('vip') || planName.includes('ladder')) {
+    // بررسی بر اساس subscription_detail (API واقعی)
+    if (resumeAd.subscription_detail?.plan?.name) {
+      const planName = resumeAd.subscription_detail.plan.name.toLowerCase();
+      if (planName.includes('نردبان') || planName.includes('ladder')) {
         return true;
       }
-      // طرح‌های پایه را special در نظر نگیر
-      if (planName.includes('پایه') || planName.includes('base') || planName.includes('basic')) {
+      if (planName.includes('فوری') || planName.includes('urgent')) {
+        return true;
+      }
+      if (planName.includes('پایه') || planName.includes('basic')) {
+        return false;
+      }
+    }
+    
+    // بررسی بر اساس subscription_status در subscription_detail
+    if (resumeAd.subscription_detail?.subscription_status) {
+      return resumeAd.subscription_detail.subscription_status === 'special';
+    }
+    
+    // بررسی بر اساس نام طرح در advertisement.subscription (برای داده‌های فیک)
+    if (resumeAd.advertisement?.subscription?.plan?.name) {
+      const planName = resumeAd.advertisement.subscription.plan.name.toLowerCase();
+      if (planName.includes('نردبان') || planName.includes('ladder')) {
+        return true;
+      }
+      if (planName.includes('فوری') || planName.includes('urgent')) {
+        return true;
+      }
+      if (planName.includes('پایه') || planName.includes('basic')) {
         return false;
       }
     }
@@ -124,11 +144,16 @@ const ResumeAdsSearchAndSort: React.FC<ResumeAdsSearchAndSortProps> = ({
     // فیلتر بر اساس نوع اشتراک
     if (subscriptionFilter !== 'all') {
       filtered = filtered.filter(resumeAd => {
-        const isSpecial = isSpecialSubscription(resumeAd);
+        // بررسی subscription_detail (API واقعی)
+        const planName = resumeAd.subscription_detail?.plan?.name?.toLowerCase() || 
+                        resumeAd.advertisement?.subscription?.plan?.name?.toLowerCase() || '';
+        
         if (subscriptionFilter === 'basic') {
-          return !isSpecial;
-        } else if (subscriptionFilter === 'special' || subscriptionFilter === 'ladder') {
-          return isSpecial;
+          return planName.includes('پایه') || planName.includes('basic') || planName === '';
+        } else if (subscriptionFilter === 'special') {
+          return planName.includes('فوری') || planName.includes('urgent');
+        } else if (subscriptionFilter === 'ladder') {
+          return planName.includes('نردبان') || planName.includes('ladder');
         }
         return true;
       });

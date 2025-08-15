@@ -187,6 +187,7 @@ const ResumeAdsGrid: React.FC<ResumeAdsGridProps> = ({
     switch (subscription) {
       case 'ladder': return 'نردبان';
       case 'basic': return 'پایه';
+      case 'special': return 'فوری';
       default: return subscription;
     }
   };
