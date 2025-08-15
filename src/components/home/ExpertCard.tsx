@@ -63,6 +63,7 @@ export type ExpertType = {
   avatar: string; // از profile.profile_picture
   bio?: string; // از profile.bio
   status?: 'P' | 'A' | 'R'; // وضعیت آگهی (P: در انتظار، A: تایید شده، R: رد شده)
+  subscription_type?: string; // نوع اشتراک (نردبان، فوری، پایه)
 
   // اطلاعات مکان
   location: string; // از profile.location (City)
@@ -154,6 +155,33 @@ export default function ExpertCard({ expert }: ExpertCardProps) {
           height: '100%',
           flexGrow: 1
         }}>
+          {/* نمایش نوع اشتراک - فقط برای نردبان و فوری */}
+          {expert.subscription_type && expert.subscription_type !== 'پایه' && (
+            <Box sx={{
+              position: 'absolute',
+              top: 0,
+              right: 0,
+              bgcolor: 
+                expert.subscription_type === 'نردبان' ? '#E53935' : // رنگ نردبان
+                expert.subscription_type === 'فوری' ? '#FF9800' : // رنگ فوری
+                '#4CAF50', // رنگ پیش‌فرض
+              color: 'white',
+              fontSize: '0.7rem',
+              fontWeight: 'bold',
+              px: 1,
+              py: 0.3,
+              borderRadius: '0 0 0 8px',
+              zIndex: 2,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              minWidth: '60px',
+              boxShadow: '0 2px 4px rgba(0,0,0,0.2)'
+            }}>
+              {expert.subscription_type}
+            </Box>
+          )}
+
           {/* هدر کارت - آواتار و نام */}
           <Box sx={{
             display: 'flex',

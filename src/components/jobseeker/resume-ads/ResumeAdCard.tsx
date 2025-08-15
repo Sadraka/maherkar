@@ -106,7 +106,17 @@ export type ResumeAdType = {
   job_seeker: number;
   resume: number;
   industry: number;
-  advertisement: string;
+  advertisement: string | {
+    id: string;
+    subscription?: {
+      id: string;
+      plan?: {
+        name: string;
+        price: number;
+      };
+      subscription_status?: string;
+    };
+  };
   location: number;
 
   // تاریخ‌ها
@@ -137,6 +147,23 @@ const convertSkillsToStringArray = (skills: SkillType[], availableSkills: any[] 
 
 // تابع تبدیل ResumeAdType به ExpertType
 const convertResumeAdToExpert = (resumeAd: ResumeAdType, skills: string[], resume?: ResumeType): ExpertType => {
+  // تعیین نوع اشتراک بر اساس اطلاعات آگهی
+  let subscription_type = undefined;
+  
+  if (resumeAd.advertisement && typeof resumeAd.advertisement === 'string') {
+    // اگر اطلاعات اشتراک موجود نیست، مقدار پیش‌فرض را استفاده می‌کنیم
+    subscription_type = 'پایه';
+  } else if (resumeAd.advertisement && typeof resumeAd.advertisement === 'object') {
+    // تعیین نوع اشتراک بر اساس نام طرح
+    if (resumeAd.advertisement.subscription?.plan?.name === 'ladder') {
+      subscription_type = 'نردبان';
+    } else if (resumeAd.advertisement.subscription?.plan?.name === 'urgent') {
+      subscription_type = 'فوری';
+    } else if (resumeAd.advertisement.subscription?.plan?.name === 'basic') {
+      subscription_type = 'پایه';
+    }
+  }
+  
   return {
     id: parseInt(resumeAd.id) || 0,
     resumeId: resumeAd.resume || 0, // استفاده از شناسه رزومه برای لینک مشاهده رزومه
@@ -148,6 +175,7 @@ const convertResumeAdToExpert = (resumeAd: ResumeAdType, skills: string[], resum
     avatar: processProfilePicture(resumeAd.job_seeker_detail?.profile_picture),
     bio: resume?.bio || resumeAd.description,
     status: resumeAd.status,
+    subscription_type: subscription_type, // اضافه کردن نوع اشتراک
     location: resumeAd.location_detail?.name || 'موقعیت نامشخص',
     skills: skills, // مهارت‌های واقعی از API
     isVerified: true, // فرض می‌کنیم کاربران آگهی‌دهنده تایید شده‌اند

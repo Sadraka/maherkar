@@ -586,8 +586,10 @@ export default function JobSeekerResumeAdCard({ resumeAd, onUpdate }: JobSeekerR
             </Typography>
           </Box>
           
-          {/* نمایش نوع اشتراک */}
-          {typeof resumeAd.advertisement === 'object' && resumeAd.advertisement.subscription?.plan?.name && (
+          {/* نمایش نوع اشتراک - فقط برای نردبان و فوری */}
+          {typeof resumeAd.advertisement === 'object' && 
+           resumeAd.advertisement.subscription?.plan?.name && 
+           resumeAd.advertisement.subscription.plan.name !== 'basic' && (
             <Box sx={{
               position: 'absolute',
               top: 0,
@@ -595,7 +597,6 @@ export default function JobSeekerResumeAdCard({ resumeAd, onUpdate }: JobSeekerR
               bgcolor: 
                 resumeAd.advertisement.subscription.plan.name === 'ladder' ? '#E53935' : // رنگ نردبان
                 resumeAd.advertisement.subscription.plan.name === 'urgent' ? '#FF9800' : // رنگ فوری
-                resumeAd.advertisement.subscription.plan.name === 'basic' ? '#4CAF50' : // رنگ پایه
                 '#4CAF50', // رنگ پیش‌فرض
               color: 'white',
               fontSize: '0.7rem',
@@ -603,11 +604,15 @@ export default function JobSeekerResumeAdCard({ resumeAd, onUpdate }: JobSeekerR
               px: 1,
               py: 0.3,
               borderRadius: '0 0 0 8px',
-              zIndex: 2
+              zIndex: 2,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              minWidth: '60px',
+              boxShadow: '0 2px 4px rgba(0,0,0,0.2)'
             }}>
               {resumeAd.advertisement.subscription.plan.name === 'ladder' ? 'نردبان' : 
-               resumeAd.advertisement.subscription.plan.name === 'urgent' ? 'فوری' : 
-               resumeAd.advertisement.subscription.plan.name === 'basic' ? 'پایه' : ''}
+               resumeAd.advertisement.subscription.plan.name === 'urgent' ? 'فوری' : ''}
             </Box>
           )}
 
