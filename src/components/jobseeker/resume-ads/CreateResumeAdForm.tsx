@@ -1044,7 +1044,7 @@ export default function CreateResumeAdForm({
                   rules={{ 
                     required: 'عنوان آگهی رزومه الزامی است', 
                     minLength: { value: 3, message: 'عنوان باید حداقل 3 حرف باشد' },
-                    maxLength: { value: 255, message: 'عنوان نباید بیش از 255 کاراکتر باشد' }
+                    maxLength: { value: 80, message: 'عنوان نباید بیش از 80 کاراکتر باشد' }
                   }}
                   render={({ field }) => (
                     <TextField
@@ -1052,8 +1052,17 @@ export default function CreateResumeAdForm({
                       fullWidth
                       placeholder="مثال: برنامه‌نویس React با ۳ سال تجربه"
                       error={Boolean(formErrors.title)}
-                      helperText={formErrors.title?.message || `${(field.value?.length || 0).toString().replace(/\d/g, (d) => '۰۱۲۳۴۵۶۷۸۹'[Number(d)])} / ۲۵۵ کاراکتر`}
+                      helperText={formErrors.title?.message || `${(field.value?.length || 0).toString().replace(/\d/g, (d) => '۰۱۲۳۴۵۶۷۸۹'[Number(d)])} / ۵۰ کاراکتر`}
                       variant="outlined"
+                      inputProps={{
+                        maxLength: 50,
+                      }}
+                      onChange={(e) => {
+                        // محدود کردن ورودی به 50 کاراکتر
+                        if (e.target.value.length <= 50) {
+                          field.onChange(e);
+                        }
+                      }}
                       sx={{ 
                         '& .MuiOutlinedInput-root': { 
                           borderRadius: '6px',
@@ -1066,7 +1075,8 @@ export default function CreateResumeAdForm({
                           padding: { xs: '8px 14px', sm: '16.5px 14px' }
                         },
                         '& .MuiFormHelperText-root': {
-                          fontSize: { xs: '0.75rem', sm: '0.75rem' }
+                          fontSize: { xs: '0.75rem', sm: '0.75rem' },
+                          visibility: field.value?.length > 0 ? 'visible' : 'hidden' // نمایش فقط در زمان تایپ
                         }
                       }}
                     />
@@ -1103,6 +1113,15 @@ export default function CreateResumeAdForm({
                       error={Boolean(formErrors.description)}
                       helperText={formErrors.description?.message || `${(field.value?.length || 0).toString().replace(/\d/g, (d) => '۰۱۲۳۴۵۶۷۸۹'[Number(d)])} / ۱۰۰۰ کاراکتر`}
                       variant="outlined"
+                      inputProps={{
+                        maxLength: 1000,
+                      }}
+                      onChange={(e) => {
+                        // محدود کردن ورودی به 1000 کاراکتر
+                        if (e.target.value.length <= 1000) {
+                          field.onChange(e);
+                        }
+                      }}
                       sx={{ 
                         '& .MuiOutlinedInput-root': { 
                           borderRadius: '6px',
@@ -1115,7 +1134,8 @@ export default function CreateResumeAdForm({
                           padding: { xs: '8px 14px', sm: '16.5px 14px' }
                         },
                         '& .MuiFormHelperText-root': {
-                          fontSize: { xs: '0.75rem', sm: '0.75rem' }
+                          fontSize: { xs: '0.75rem', sm: '0.75rem' },
+                          visibility: field.value?.length > 0 ? 'visible' : 'hidden' // نمایش فقط در زمان تایپ
                         }
                       }}
                     />
