@@ -460,14 +460,14 @@ export default function ExpertCard({ expert }: ExpertCardProps) {
               fontWeight: 'bold',
               px: 1.5,
               py: 0.5,
-              borderRadius: 1.8,
+              borderRadius: 0.5,
               zIndex: 10,
               minWidth: '45px',
               boxShadow: '0 2px 4px rgba(0,0,0,0.15)',
               textAlign: 'center',
-              pointerEvents: 'none', // جلوگیری از واکنش به hover
-              transform: 'none !important', // جلوگیری از تغییر موقعیت
-              transition: 'none !important' // جلوگیری از انیمیشن
+              pointerEvents: 'none',
+              transform: 'none !important',
+              transition: 'none !important'
             }}>
               {expert.subscription_type}
             </Box>

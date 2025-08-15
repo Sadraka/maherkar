@@ -223,14 +223,7 @@ export default function JobSeekerResumeAdCard({ resumeAd, onUpdate }: JobSeekerR
       return;
     }
     
-    // برای API واقعی - بررسی اگر مهارت‌ها از قبل موجود هستند
-    if ((resumeAd as any).skills && Array.isArray((resumeAd as any).skills)) {
-      setSkills((resumeAd as any).skills.map((skill: any) => 
-        typeof skill === 'string' ? skill : skill.name || skill.skill?.name || 'مهارت نامشخص'
-      ));
-      setLoading(false);
-      return;
-    }
+
 
     const fetchData = async () => {
       try {
@@ -622,55 +615,36 @@ export default function JobSeekerResumeAdCard({ resumeAd, onUpdate }: JobSeekerR
               مشاهده رزومه
             </Button>
           </Box>
-          {/* نمایش نوع اشتراک - داخل کارت */}
-          {(() => {
-            let subscriptionType = null;
-            let planName = null;
-            
-            // بررسی داده‌های فیک صفحه اصلی
-            if (typeof resumeAd.advertisement === 'object' && resumeAd.advertisement.subscription?.plan?.name) {
-              planName = resumeAd.advertisement.subscription.plan.name;
-            }
-            // بررسی API واقعی
-            else if ((resumeAd as any).subscription_detail?.plan?.name) {
-              planName = (resumeAd as any).subscription_detail.plan.name;
-            }
-            
-            // تعیین متن نمایشی
-            if (planName === 'ladder') {
-              subscriptionType = 'نردبان';
-            } else if (planName === 'urgent') {
-              subscriptionType = 'فوری';
-            }
-            
-            // نمایش فقط اگر نردبان یا فوری باشد
-            return subscriptionType && (
-              <Box sx={{
-                position: 'absolute',
-                top: 8,
-                right: 8,
-                bgcolor: 
-                  planName === 'ladder' ? '#E53935' : // رنگ نردبان
-                  planName === 'urgent' ? '#FF9800' : // رنگ فوری
-                  '#4CAF50', // رنگ پیش‌فرض
-                color: 'white',
-                fontSize: '0.75rem',
-                fontWeight: 'bold',
-                px: 1.5,
-                py: 0.5,
-                borderRadius: 1.8,
-                zIndex: 10,
-                minWidth: '45px',
-                boxShadow: '0 2px 4px rgba(0,0,0,0.15)',
-                textAlign: 'center',
-                pointerEvents: 'none', // جلوگیری از واکنش به hover
-                transform: 'none !important', // جلوگیری از تغییر موقعیت
-                transition: 'none !important' // جلوگیری از انیمیشن
-              }}>
-                {subscriptionType}
-              </Box>
-            );
-          })()}
+          {/* نمایش نوع اشتراک - فقط برای صفحه اصلی */}
+          {typeof resumeAd.advertisement === 'object' && 
+           resumeAd.advertisement.subscription?.plan?.name && 
+           resumeAd.advertisement.subscription.plan.name !== 'basic' && (
+            <Box sx={{
+              position: 'absolute',
+              top: 8,
+              right: 8,
+              bgcolor: 
+                resumeAd.advertisement.subscription.plan.name === 'ladder' ? '#E53935' : // رنگ نردبان
+                resumeAd.advertisement.subscription.plan.name === 'urgent' ? '#FF9800' : // رنگ فوری
+                '#4CAF50', // رنگ پیش‌فرض
+              color: 'white',
+              fontSize: '0.75rem',
+              fontWeight: 'bold',
+              px: 1.5,
+              py: 0.5,
+              borderRadius: 0.5,
+              zIndex: 10,
+              minWidth: '45px',
+              boxShadow: '0 2px 4px rgba(0,0,0,0.15)',
+              textAlign: 'center',
+              pointerEvents: 'none',
+              transform: 'none !important',
+              transition: 'none !important'
+            }}>
+              {resumeAd.advertisement.subscription.plan.name === 'ladder' ? 'نردبان' : 
+               resumeAd.advertisement.subscription.plan.name === 'urgent' ? 'فوری' : ''}
+            </Box>
+          )}
 
         </CardContent>
       </Card>
