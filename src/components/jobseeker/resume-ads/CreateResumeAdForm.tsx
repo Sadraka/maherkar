@@ -114,6 +114,7 @@ type MinimalResume = {
   website?: string | null;
   linkedin_profile?: string | null;
   availability?: string | null;
+  cv?: string | null;
 };
 
 /**
@@ -468,7 +469,8 @@ export default function CreateResumeAdForm({
             educations: educations,
             experiences: experiences,
             skills: skills,
-            availability: r?.availability ?? null
+            availability: r?.availability ?? null,
+            cv: r?.cv ?? null
           });
         }
         

@@ -24,6 +24,9 @@ import BusinessIcon from '@mui/icons-material/Business';
 import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
 import LocationOnIcon from '@mui/icons-material/LocationOn';
 import StarIcon from '@mui/icons-material/Star';
+import AttachFileIcon from '@mui/icons-material/AttachFile';
+import DownloadIcon from '@mui/icons-material/Download';
+import PersonIcon from '@mui/icons-material/Person';
 
 import { JOB_SEEKER_THEME } from '@/constants/colors';
 
@@ -110,6 +113,17 @@ const getEmploymentTypeText = (type: string): string => {
   return typeMap[type] || type;
 };
 
+// تابع دریافت نام فایل از URL
+const getFileNameFromUrl = (url: string): string => {
+  try {
+    const withoutQuery = url.split('?')[0];
+    const name = withoutQuery.substring(withoutQuery.lastIndexOf('/') + 1);
+    return decodeURIComponent(name || 'resume.pdf');
+  } catch {
+    return 'resume.pdf';
+  }
+};
+
 /**
  * تایپ‌های مورد نیاز
  */
@@ -165,11 +179,422 @@ interface ResumeInfo {
   website?: string | null;
   linkedin_profile?: string | null;
   availability?: string | null;
+  cv?: string | null; // فایل PDF رزومه
 }
 
 interface ResumePreviewStepProps {
   resumeInfo: ResumeInfo | null;
 }
+
+/**
+ * کامپوننت کارت تجربه کاری (مطابق با ExperiencesForm)
+ */
+const ExperienceCard = ({ experience, jobSeekerColors }: { experience: Experience; jobSeekerColors: any }) => {
+  const employmentTypeOptions = [
+    { value: 'full_time', label: 'تمام وقت' },
+    { value: 'part_time', label: 'پاره وقت' },
+    { value: 'contractual', label: 'قراردادی' }
+  ];
+
+  return (
+    <Paper 
+      elevation={0} 
+      sx={{ 
+        border: `1px solid ${alpha(jobSeekerColors.primary, 0.2)}`,
+        borderRadius: 2,
+        overflow: 'hidden',
+        background: '#ffffff',
+        boxShadow: 'none'
+      }}
+    >
+      <Box sx={{ 
+        background: '#ffffff',
+        p: { xs: 1.5, sm: 2 }
+      }}>
+        {/* Desktop Layout */}
+        <Box sx={{ 
+          display: { xs: 'none', sm: 'flex' }, 
+          justifyContent: 'space-between', 
+          alignItems: 'flex-start', 
+          mb: 1 
+        }}>
+          <Box sx={{ flex: 1 }}>
+            {/* خط اول: عنوان و شرکت */}
+            <Box sx={{ 
+              display: 'flex', 
+              flexDirection: 'row',
+              alignItems: 'center', 
+              gap: 3, 
+              mb: 1 
+            }}>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75 }}>
+                <WorkIcon sx={{ fontSize: 16, color: jobSeekerColors.primary }} />
+                <Typography variant="h5" sx={{ 
+                  fontWeight: 700, 
+                  color: jobSeekerColors.primary,
+                  fontSize: '1.1rem'
+                }}>
+                  {experience.title}
+                </Typography>
+              </Box>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75 }}>
+                <BusinessIcon sx={{ fontSize: 16, color: jobSeekerColors.primary }} />
+                <Typography variant="h6" sx={{ 
+                  fontWeight: 600, 
+                  color: 'text.primary',
+                  fontSize: '0.95rem'
+                }}>
+                  {experience.company}
+                </Typography>
+              </Box>
+            </Box>
+            
+            {/* خط دوم: chips و تاریخ */}
+            <Box sx={{ 
+              display: 'flex', 
+              flexDirection: 'row',
+              alignItems: 'center',
+              gap: 1.5, 
+              flexWrap: 'wrap' 
+            }}>
+              {/* Chips Section */}
+              <Box sx={{ 
+                display: 'flex', 
+                flexWrap: 'wrap', 
+                gap: 0.75,
+                flexDirection: 'row'
+              }}>
+                <Chip 
+                  label={employmentTypeOptions.find(opt => opt.value === experience.employment_type)?.label || experience.employment_type}
+                  size="small"
+                  sx={{ 
+                    bgcolor: alpha(jobSeekerColors.primary, 0.15),
+                    color: jobSeekerColors.primary,
+                    fontWeight: 600,
+                    fontSize: '0.7rem',
+                    height: '22px',
+                    '& .MuiChip-label': {
+                      px: 1.25
+                    }
+                  }}
+                />
+                {experience.location && (
+                  <Chip 
+                    label={experience.location.name}
+                    size="small"
+                    variant="outlined"
+                    sx={{ 
+                      borderColor: alpha(jobSeekerColors.primary, 0.3),
+                      color: jobSeekerColors.primary,
+                      fontWeight: 500,
+                      fontSize: '0.7rem',
+                      height: '22px',
+                      '& .MuiChip-label': {
+                        px: 1.25
+                      }
+                    }}
+                  />
+                )}
+                {experience.is_current && (
+                  <Chip 
+                    label="شغل فعلی"
+                    size="small"
+                    color="success"
+                    sx={{ 
+                      fontWeight: 600,
+                      fontSize: '0.7rem',
+                      height: '22px',
+                      '& .MuiChip-label': {
+                        px: 1.25
+                      }
+                    }}
+                  />
+                )}
+              </Box>
+
+              {/* Date Section */}
+              <Box sx={{ 
+                display: 'flex', 
+                alignItems: 'center', 
+                gap: 0.75,
+                color: 'text.secondary',
+                fontSize: '0.75rem'
+              }}>
+                <CalendarTodayIcon sx={{ fontSize: 14, color: jobSeekerColors.primary }} />
+                <Typography variant="body2" sx={{ fontWeight: 500 }}>
+                  {formatDate(experience.start_date)} 
+                  {experience.end_date ? ` تا ${formatDate(experience.end_date)}` : ' تاکنون'}
+                </Typography>
+              </Box>
+            </Box>
+
+            {/* Description Section */}
+            {experience.description && (
+              <Box sx={{ mt: 1 }}>
+                <Typography variant="body2" sx={{ 
+                  fontWeight: 600,
+                  color: jobSeekerColors.primary,
+                  mb: 0.25,
+                  fontSize: '0.7rem'
+                }}>
+                  توضیحات:
+                </Typography>
+                <Typography variant="body2" sx={{ 
+                  whiteSpace: 'pre-line',
+                  lineHeight: 1.3,
+                  color: 'text.secondary',
+                  fontSize: '0.7rem'
+                }}>
+                  {experience.description}
+                </Typography>
+              </Box>
+            )}
+          </Box>
+        </Box>
+
+        {/* Mobile Layout */}
+        <Box sx={{ 
+          display: { xs: 'block', sm: 'none' }
+        }}>
+          {/* خط اول: عنوان و شرکت */}
+          <Box sx={{ 
+            display: 'flex', 
+            flexDirection: 'column',
+            alignItems: 'flex-start', 
+            gap: 1, 
+            mb: 1 
+          }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75 }}>
+              <WorkIcon sx={{ fontSize: 16, color: jobSeekerColors.primary }} />
+              <Typography variant="h5" sx={{ 
+                fontWeight: 700, 
+                color: jobSeekerColors.primary,
+                fontSize: '0.95rem'
+              }}>
+                {experience.title}
+              </Typography>
+            </Box>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75 }}>
+              <BusinessIcon sx={{ fontSize: 16, color: jobSeekerColors.primary }} />
+              <Typography variant="h6" sx={{ 
+                fontWeight: 600, 
+                color: 'text.primary',
+                fontSize: '0.85rem'
+              }}>
+                {experience.company}
+              </Typography>
+            </Box>
+          </Box>
+          
+          {/* خط دوم: chips و تاریخ */}
+          <Box sx={{ 
+            display: 'flex', 
+            flexDirection: 'column',
+            alignItems: 'flex-start',
+            gap: 1, 
+            flexWrap: 'wrap' 
+          }}>
+            {/* Chips Section */}
+            <Box sx={{ 
+              display: 'flex', 
+              flexWrap: 'wrap', 
+              gap: 0.75,
+              flexDirection: 'column'
+            }}>
+              <Chip 
+                label={employmentTypeOptions.find(opt => opt.value === experience.employment_type)?.label || experience.employment_type}
+                size="small"
+                sx={{ 
+                  bgcolor: alpha(jobSeekerColors.primary, 0.15),
+                  color: jobSeekerColors.primary,
+                  fontWeight: 600,
+                  fontSize: '0.7rem',
+                  height: '22px',
+                  '& .MuiChip-label': {
+                    px: 1.25
+                  }
+                }}
+              />
+              {experience.location && (
+                <Chip 
+                  label={experience.location.name}
+                  size="small"
+                  variant="outlined"
+                  sx={{ 
+                    borderColor: alpha(jobSeekerColors.primary, 0.3),
+                    color: jobSeekerColors.primary,
+                    fontWeight: 500,
+                    fontSize: '0.7rem',
+                    height: '22px',
+                    '& .MuiChip-label': {
+                      px: 1.25
+                    }
+                  }}
+                />
+              )}
+              {experience.is_current && (
+                <Chip 
+                  label="شغل فعلی"
+                  size="small"
+                  color="success"
+                  sx={{ 
+                    fontWeight: 600,
+                    fontSize: '0.7rem',
+                    height: '22px',
+                    '& .MuiChip-label': {
+                      px: 1.25
+                    }
+                  }}
+                />
+              )}
+            </Box>
+
+            {/* Date Section */}
+            <Box sx={{ 
+              display: 'flex', 
+              alignItems: 'center', 
+              gap: 0.75,
+              color: 'text.secondary',
+              fontSize: '0.75rem'
+            }}>
+              <CalendarTodayIcon sx={{ fontSize: 14, color: jobSeekerColors.primary }} />
+              <Typography variant="body2" sx={{ fontWeight: 500 }}>
+                {formatDate(experience.start_date)} 
+                {experience.end_date ? ` تا ${formatDate(experience.end_date)}` : ' تاکنون'}
+              </Typography>
+            </Box>
+          </Box>
+
+          {/* Description Section */}
+          {experience.description && (
+            <Box sx={{ mt: 1 }}>
+              <Typography variant="body2" sx={{ 
+                fontWeight: 600,
+                color: jobSeekerColors.primary,
+                mb: 0.25,
+                fontSize: '0.7rem'
+              }}>
+                توضیحات:
+              </Typography>
+              <Typography variant="body2" sx={{ 
+                whiteSpace: 'pre-line',
+                lineHeight: 1.3,
+                color: 'text.secondary',
+                fontSize: '0.7rem'
+              }}>
+                {experience.description}
+              </Typography>
+            </Box>
+          )}
+        </Box>
+      </Box>
+    </Paper>
+  );
+};
+
+/**
+ * کامپوننت کارت تحصیلات (مطابق با EducationForm)
+ */
+const EducationCard = ({ education, jobSeekerColors }: { education: Education; jobSeekerColors: any }) => {
+  return (
+    <Paper 
+      elevation={0} 
+      sx={{ 
+        border: `1px solid ${alpha(jobSeekerColors.primary, 0.2)}`,
+        borderRadius: 2,
+        overflow: 'hidden',
+        background: '#ffffff',
+        boxShadow: 'none'
+      }}
+    >
+      <Box sx={{ 
+        background: '#ffffff',
+        p: { xs: 1.5, sm: 2 }
+      }}>
+        <Box sx={{ 
+          display: 'flex', 
+          flexDirection: { xs: 'column', sm: 'row' },
+          justifyContent: 'space-between',
+          alignItems: { xs: 'flex-start', sm: 'center' },
+          gap: 1,
+          mb: 1
+        }}>
+          <Box>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75, mb: 0.5 }}>
+              <SchoolIcon sx={{ fontSize: 16, color: jobSeekerColors.primary }} />
+              <Typography variant="h6" sx={{ 
+                fontWeight: 700, 
+                color: jobSeekerColors.primary,
+                fontSize: { xs: '0.9rem', sm: '1rem' }
+              }}>
+                {getDegreeText(education.degree)}
+              </Typography>
+            </Box>
+            <Typography variant="body1" sx={{ 
+              fontWeight: 600, 
+              color: 'text.primary',
+              fontSize: { xs: '0.8rem', sm: '0.9rem' },
+              mb: 0.5
+            }}>
+              {education.field_of_study}
+            </Typography>
+            <Typography variant="body2" sx={{ 
+              color: 'text.secondary',
+              fontSize: '0.75rem'
+            }}>
+              {education.institution}
+            </Typography>
+          </Box>
+          
+          <Box sx={{ 
+            display: 'flex', 
+            flexDirection: 'column',
+            alignItems: { xs: 'flex-start', sm: 'flex-end' },
+            gap: 0.5
+          }}>
+            <Typography variant="caption" sx={{ 
+              color: 'text.secondary',
+              fontSize: '0.7rem',
+              fontWeight: 500
+            }}>
+              {convertToPersianNumbers(education.start_year)} 
+              {education.end_year ? ` - ${convertToPersianNumbers(education.end_year)}` : ' - ادامه دارد'}
+            </Typography>
+            {education.is_current && (
+              <Chip 
+                label="در حال تحصیل"
+                size="small"
+                color="info"
+                sx={{ fontSize: '0.6rem', height: '18px' }}
+              />
+            )}
+          </Box>
+        </Box>
+
+        {education.grade && (
+          <Typography variant="body2" sx={{ 
+            color: 'text.secondary',
+            fontSize: '0.75rem',
+            mb: 0.5
+          }}>
+            <strong>معدل:</strong> {convertToPersianNumbers(education.grade)}
+          </Typography>
+        )}
+
+        {education.description && (
+          <Typography variant="body2" sx={{ 
+            color: 'text.secondary',
+            fontSize: '0.75rem',
+            lineHeight: 1.4,
+            whiteSpace: 'pre-line'
+          }}>
+            {education.description}
+          </Typography>
+        )}
+      </Box>
+    </Paper>
+  );
+};
 
 /**
  * کامپوننت نمایش مرحله پیش‌نمایش رزومه
@@ -188,7 +613,7 @@ export default function ResumePreviewStep({ resumeInfo }: ResumePreviewStepProps
     );
   }
 
-  const { experiences = [], educations = [], skills = [] } = resumeInfo;
+  const { experiences = [], educations = [], skills = [], cv } = resumeInfo;
 
   return (
     <Box dir="rtl">
@@ -268,119 +693,22 @@ export default function ResumePreviewStep({ resumeInfo }: ResumePreviewStepProps
             </Alert>
           ) : (
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-              {experiences.slice(0, 3).map((experience, index) => (
-                <Card 
+              {experiences.slice(0, 5).map((experience, index) => (
+                <ExperienceCard 
                   key={experience.id || index} 
-                  elevation={0}
-                  sx={{ 
-                    border: `1px solid ${alpha(jobSeekerColors.primary, 0.1)}`,
-                    borderRadius: 1.5
-                  }}
-                >
-                  <CardContent sx={{ p: { xs: 1.5, sm: 2 } }}>
-                    <Box sx={{ 
-                      display: 'flex', 
-                      flexDirection: { xs: 'column', sm: 'row' },
-                      justifyContent: 'space-between',
-                      alignItems: { xs: 'flex-start', sm: 'center' },
-                      gap: 1,
-                      mb: 1
-                    }}>
-                      <Box>
-                        <Typography variant="subtitle1" sx={{ 
-                          fontWeight: 700, 
-                          color: jobSeekerColors.primary,
-                          fontSize: { xs: '0.9rem', sm: '1rem' }
-                        }}>
-                          {experience.title}
-                        </Typography>
-                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mt: 0.5 }}>
-                          <BusinessIcon sx={{ fontSize: 14, color: 'text.secondary' }} />
-                          <Typography variant="body2" sx={{ color: 'text.secondary', fontSize: '0.8rem' }}>
-                            {experience.company}
-                          </Typography>
-                        </Box>
-                      </Box>
-                      
-                      <Box sx={{ 
-                        display: 'flex', 
-                        flexDirection: { xs: 'row', sm: 'column' },
-                        gap: 0.5,
-                        alignItems: { xs: 'center', sm: 'flex-end' }
-                      }}>
-                        <Chip 
-                          label={getEmploymentTypeText(experience.employment_type)}
-                          size="small"
-                          sx={{ 
-                            bgcolor: alpha(jobSeekerColors.primary, 0.1),
-                            color: jobSeekerColors.primary,
-                            fontSize: '0.7rem',
-                            height: '20px'
-                          }}
-                        />
-                        {experience.is_current && (
-                          <Chip 
-                            label="شغل فعلی"
-                            size="small"
-                            color="success"
-                            sx={{ fontSize: '0.7rem', height: '20px' }}
-                          />
-                        )}
-                      </Box>
-                    </Box>
-
-                    <Box sx={{ 
-                      display: 'flex', 
-                      flexDirection: { xs: 'column', sm: 'row' },
-                      gap: 1,
-                      alignItems: { xs: 'flex-start', sm: 'center' },
-                      color: 'text.secondary',
-                      fontSize: '0.75rem'
-                    }}>
-                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                        <CalendarTodayIcon sx={{ fontSize: 12 }} />
-                        <Typography variant="caption">
-                          {formatDate(experience.start_date)} 
-                          {experience.end_date ? ` تا ${formatDate(experience.end_date)}` : ' تاکنون'}
-                        </Typography>
-                      </Box>
-                      
-                      {experience.location && (
-                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                          <LocationOnIcon sx={{ fontSize: 12 }} />
-                          <Typography variant="caption">
-                            {experience.location.name}
-                          </Typography>
-                        </Box>
-                      )}
-                    </Box>
-
-                    {experience.description && (
-                      <Typography variant="body2" sx={{ 
-                        mt: 1,
-                        color: 'text.secondary',
-                        fontSize: '0.75rem',
-                        lineHeight: 1.4,
-                        display: '-webkit-box',
-                        WebkitLineClamp: 2,
-                        WebkitBoxOrient: 'vertical',
-                        overflow: 'hidden'
-                      }}>
-                        {experience.description}
-                      </Typography>
-                    )}
-                  </CardContent>
-                </Card>
+                  experience={experience} 
+                  jobSeekerColors={jobSeekerColors}
+                />
               ))}
               
-              {experiences.length > 3 && (
+              {experiences.length > 5 && (
                 <Typography variant="body2" sx={{ 
                   textAlign: 'center',
                   color: 'text.secondary',
                   fontStyle: 'italic',
                   mt: 1
                 }}>
-                  و {convertToPersianNumbers(experiences.length - 3)} تجربه دیگر...
+                  و {convertToPersianNumbers(experiences.length - 5)} تجربه دیگر...
                 </Typography>
               )}
             </Box>
@@ -445,99 +773,22 @@ export default function ResumePreviewStep({ resumeInfo }: ResumePreviewStepProps
             </Alert>
           ) : (
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-              {educations.slice(0, 3).map((education, index) => (
-                <Card 
+              {educations.slice(0, 5).map((education, index) => (
+                <EducationCard 
                   key={education.id || index} 
-                  elevation={0}
-                  sx={{ 
-                    border: `1px solid ${alpha(jobSeekerColors.primary, 0.1)}`,
-                    borderRadius: 1.5
-                  }}
-                >
-                  <CardContent sx={{ p: { xs: 1.5, sm: 2 } }}>
-                    <Box sx={{ 
-                      display: 'flex', 
-                      flexDirection: { xs: 'column', sm: 'row' },
-                      justifyContent: 'space-between',
-                      alignItems: { xs: 'flex-start', sm: 'center' },
-                      gap: 1,
-                      mb: 1
-                    }}>
-                      <Box>
-                        <Typography variant="subtitle1" sx={{ 
-                          fontWeight: 700, 
-                          color: jobSeekerColors.primary,
-                          fontSize: { xs: '0.9rem', sm: '1rem' }
-                        }}>
-                          {getDegreeText(education.degree)} {education.field_of_study}
-                        </Typography>
-                        <Typography variant="body2" sx={{ 
-                          color: 'text.secondary',
-                          fontSize: '0.8rem',
-                          mt: 0.5
-                        }}>
-                          {education.institution}
-                        </Typography>
-                      </Box>
-                      
-                      <Box sx={{ 
-                        display: 'flex', 
-                        alignItems: 'center',
-                        gap: 0.5
-                      }}>
-                        <Typography variant="caption" sx={{ 
-                          color: 'text.secondary',
-                          fontSize: '0.7rem'
-                        }}>
-                          {convertToPersianNumbers(education.start_year)} 
-                          {education.end_year ? ` - ${convertToPersianNumbers(education.end_year)}` : ' - ادامه دارد'}
-                        </Typography>
-                        {education.is_current && (
-                          <Chip 
-                            label="در حال تحصیل"
-                            size="small"
-                            color="info"
-                            sx={{ fontSize: '0.6rem', height: '18px' }}
-                          />
-                        )}
-                      </Box>
-                    </Box>
-
-                    {education.grade && (
-                      <Typography variant="body2" sx={{ 
-                        color: 'text.secondary',
-                        fontSize: '0.75rem',
-                        mb: 0.5
-                      }}>
-                        معدل: {convertToPersianNumbers(education.grade)}
-                      </Typography>
-                    )}
-
-                    {education.description && (
-                      <Typography variant="body2" sx={{ 
-                        color: 'text.secondary',
-                        fontSize: '0.75rem',
-                        lineHeight: 1.4,
-                        display: '-webkit-box',
-                        WebkitLineClamp: 2,
-                        WebkitBoxOrient: 'vertical',
-                        overflow: 'hidden'
-                      }}>
-                        {education.description}
-                      </Typography>
-                    )}
-                  </CardContent>
-                </Card>
+                  education={education} 
+                  jobSeekerColors={jobSeekerColors}
+                />
               ))}
               
-              {educations.length > 3 && (
+              {educations.length > 5 && (
                 <Typography variant="body2" sx={{ 
                   textAlign: 'center',
                   color: 'text.secondary',
                   fontStyle: 'italic',
                   mt: 1
                 }}>
-                  و {convertToPersianNumbers(educations.length - 3)} مدرک دیگر...
+                  و {convertToPersianNumbers(educations.length - 5)} مدرک دیگر...
                 </Typography>
               )}
             </Box>
@@ -607,7 +858,7 @@ export default function ResumePreviewStep({ resumeInfo }: ResumePreviewStepProps
               gap: 1,
               alignItems: 'center'
             }}>
-              {skills.slice(0, 10).map((skill, index) => {
+              {skills.slice(0, 15).map((skill, index) => {
                 const skillName = typeof skill.skill === 'object' ? skill.skill?.name : 'مهارت نامشخص';
                 const levelInfo = getSkillLevelText(skill.level);
                 
@@ -645,18 +896,120 @@ export default function ResumePreviewStep({ resumeInfo }: ResumePreviewStepProps
                 );
               })}
               
-              {skills.length > 10 && (
+              {skills.length > 15 && (
                 <Typography variant="body2" sx={{ 
                   color: 'text.secondary',
                   fontStyle: 'italic',
                   fontSize: '0.75rem'
                 }}>
-                  و {convertToPersianNumbers(skills.length - 10)} مهارت دیگر...
+                  و {convertToPersianNumbers(skills.length - 15)} مهارت دیگر...
                 </Typography>
               )}
             </Box>
           )}
         </Paper>
+
+        {/* بخش فایل رزومه PDF */}
+        {cv && (
+          <Paper 
+            elevation={0} 
+            sx={{ 
+              p: { xs: 2, sm: 3 }, 
+              borderRadius: 2,
+              border: `1px solid ${alpha(jobSeekerColors.primary, 0.2)}`,
+              background: '#ffffff'
+            }}
+          >
+            <Box sx={{ 
+              display: 'flex', 
+              justifyContent: 'space-between', 
+              alignItems: 'center', 
+              mb: 2 
+            }}>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                <AttachFileIcon sx={{ 
+                  fontSize: { xs: 24, md: 28 }, 
+                  color: jobSeekerColors.primary 
+                }} />
+                <Typography variant="h6" sx={{ 
+                  fontSize: { xs: '1rem', md: '1.2rem' },
+                  color: jobSeekerColors.primary,
+                  fontWeight: 700
+                }}>
+                  فایل رزومه (PDF)
+                </Typography>
+              </Box>
+              <Button
+                variant="outlined"
+                size="small"
+                startIcon={<EditIcon />}
+                onClick={() => router.push('/jobseeker/resume')}
+                sx={{
+                  borderColor: jobSeekerColors.primary,
+                  color: jobSeekerColors.primary,
+                  fontSize: '0.75rem',
+                  px: 2,
+                  py: 0.5,
+                  '&:hover': {
+                    borderColor: jobSeekerColors.dark,
+                    backgroundColor: alpha(jobSeekerColors.primary, 0.05)
+                  }
+                }}
+              >
+                ویرایش
+              </Button>
+            </Box>
+
+            <Box sx={{ 
+              display: 'flex', 
+              alignItems: 'center', 
+              gap: 2,
+              p: 2,
+              border: `1px solid ${alpha(jobSeekerColors.primary, 0.1)}`,
+              borderRadius: 1,
+              backgroundColor: alpha(jobSeekerColors.primary, 0.02)
+            }}>
+              <PersonIcon sx={{ 
+                fontSize: 32, 
+                color: jobSeekerColors.primary 
+              }} />
+              <Box sx={{ flex: 1 }}>
+                <Typography variant="body1" sx={{ 
+                  fontWeight: 600,
+                  color: 'text.primary',
+                  fontSize: '0.9rem'
+                }}>
+                  {getFileNameFromUrl(cv)}
+                </Typography>
+                <Typography variant="body2" sx={{ 
+                  color: 'text.secondary',
+                  fontSize: '0.75rem'
+                }}>
+                  فایل PDF رزومه شما که در آگهی نمایش داده خواهد شد
+                </Typography>
+              </Box>
+              <Button
+                variant="outlined"
+                size="small"
+                startIcon={<DownloadIcon />}
+                onClick={() => window.open(cv, '_blank')}
+                sx={{
+                  borderColor: jobSeekerColors.primary,
+                  color: jobSeekerColors.primary,
+                  fontSize: '0.75rem',
+                  px: 2,
+                  py: 0.5,
+                  '&:hover': {
+                    borderColor: jobSeekerColors.dark,
+                    backgroundColor: alpha(jobSeekerColors.primary, 0.05)
+                  }
+                }}
+              >
+                مشاهده
+              </Button>
+            </Box>
+          </Paper>
+        )}
       </Box>
     </Box>
   );
