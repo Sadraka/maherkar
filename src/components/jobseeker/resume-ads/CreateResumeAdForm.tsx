@@ -1052,73 +1052,14 @@ export default function CreateResumeAdForm({
                       fullWidth
                       placeholder="مثال: برنامه‌نویس React با ۳ سال تجربه"
                       error={Boolean(formErrors.title)}
-                      helperText={formErrors.title?.message || `${(field.value?.length || 0).toString().replace(/\d/g, (d) => '۰۱۲۳۴۵۶۷۸۹'[Number(d)])} / ۵۰ کاراکتر`}
+                      helperText={formErrors.title?.message || `${(field.value?.length || 0).toString().replace(/\d/g, (d) => '۰۱۲۳۴۵۶۷۸۹'[Number(d)])} / ۸۰ کاراکتر`}
                       variant="outlined"
                       inputProps={{
-                        maxLength: 50,
+                        maxLength: 80,
                       }}
                       onChange={(e) => {
-                        // محدود کردن ورودی به 50 کاراکتر
-                        if (e.target.value.length <= 50) {
-                          field.onChange(e);
-                        }
-                      }}
-                      sx={{ 
-                        '& .MuiOutlinedInput-root': { 
-                          borderRadius: '6px',
-                          '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-                            borderColor: JOB_SEEKER_THEME.primary
-                          }
-                        },
-                        '& .MuiInputBase-input': {
-                          fontSize: { xs: '0.8rem', sm: '1rem' },
-                          padding: { xs: '8px 14px', sm: '16.5px 14px' }
-                        },
-                        '& .MuiFormHelperText-root': {
-                          fontSize: { xs: '0.75rem', sm: '0.75rem' },
-                          visibility: field.value?.length > 0 ? 'visible' : 'hidden' // نمایش فقط در زمان تایپ
-                        }
-                      }}
-                    />
-                  )}
-                />
-              </Box>
-
-              {/* توضیحات آگهی */}
-              <Box>
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
-                  <Typography variant="body2" fontWeight="medium" sx={{
-                    fontSize: { xs: '0.7rem', sm: '0.875rem' },
-                    lineHeight: { xs: 1.1, sm: 1.3 },
-                    mb: { xs: 0.5, sm: 1 },
-                    color: JOB_SEEKER_THEME.primary,
-                    fontWeight: 600
-                  }}>
-                    توضیحات آگهی (اختیاری)
-                  </Typography>
-                </Box>
-                <Controller
-                  name="description"
-                  control={control}
-                  rules={{ 
-                    maxLength: { value: 1000, message: 'توضیحات نباید بیش از 1000 کاراکتر باشد' } 
-                  }}
-                  render={({ field }) => (
-                    <TextField
-                      {...field}
-                      fullWidth
-                      multiline
-                      rows={4}
-                      placeholder="توضیحات تکمیلی درباره آگهی رزومه خود، مهارت‌های خاص، تجربیات مهم یا انتظارات خود را بنویسید..."
-                      error={Boolean(formErrors.description)}
-                      helperText={formErrors.description?.message || `${(field.value?.length || 0).toString().replace(/\d/g, (d) => '۰۱۲۳۴۵۶۷۸۹'[Number(d)])} / ۱۰۰۰ کاراکتر`}
-                      variant="outlined"
-                      inputProps={{
-                        maxLength: 1000,
-                      }}
-                      onChange={(e) => {
-                        // محدود کردن ورودی به 1000 کاراکتر
-                        if (e.target.value.length <= 1000) {
+                        // محدود کردن ورودی به 80 کاراکتر
+                        if (e.target.value.length <= 80) {
                           field.onChange(e);
                         }
                       }}
@@ -1547,6 +1488,65 @@ export default function CreateResumeAdForm({
                     />
                   </Box>
                 </Box>
+              </Box>
+
+              {/* توضیحات آگهی */}
+              <Box sx={{ mt: 4 }}>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
+                  <Typography variant="body2" fontWeight="medium" sx={{
+                    fontSize: { xs: '0.7rem', sm: '0.875rem' },
+                    lineHeight: { xs: 1.1, sm: 1.3 },
+                    mb: { xs: 0.5, sm: 1 },
+                    color: JOB_SEEKER_THEME.primary,
+                    fontWeight: 600
+                  }}>
+                    توضیحات آگهی (اختیاری)
+                  </Typography>
+                </Box>
+                <Controller
+                  name="description"
+                  control={control}
+                  rules={{ 
+                    maxLength: { value: 1000, message: 'توضیحات نباید بیش از 1000 کاراکتر باشد' } 
+                  }}
+                  render={({ field }) => (
+                    <TextField
+                      {...field}
+                      fullWidth
+                      multiline
+                      rows={4}
+                      placeholder="توضیحات تکمیلی درباره آگهی رزومه خود، مهارت‌های خاص، تجربیات مهم یا انتظارات خود را بنویسید..."
+                      error={Boolean(formErrors.description)}
+                      helperText={formErrors.description?.message || `${(field.value?.length || 0).toString().replace(/\d/g, (d) => '۰۱۲۳۴۵۶۷۸۹'[Number(d)])} / ۱۰۰۰ کاراکتر`}
+                      variant="outlined"
+                      inputProps={{
+                        maxLength: 1000,
+                      }}
+                      onChange={(e) => {
+                        // محدود کردن ورودی به 1000 کاراکتر
+                        if (e.target.value.length <= 1000) {
+                          field.onChange(e);
+                        }
+                      }}
+                      sx={{ 
+                        '& .MuiOutlinedInput-root': { 
+                          borderRadius: '6px',
+                          '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                            borderColor: JOB_SEEKER_THEME.primary
+                          }
+                        },
+                        '& .MuiInputBase-input': {
+                          fontSize: { xs: '0.8rem', sm: '1rem' },
+                          padding: { xs: '8px 14px', sm: '16.5px 14px' }
+                        },
+                        '& .MuiFormHelperText-root': {
+                          fontSize: { xs: '0.75rem', sm: '0.75rem' },
+                          visibility: field.value?.length > 0 ? 'visible' : 'hidden' // نمایش فقط در زمان تایپ
+                        }
+                      }}
+                    />
+                  )}
+                />
               </Box>
 
               {/* Action Buttons */}
