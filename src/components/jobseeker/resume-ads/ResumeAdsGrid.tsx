@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { Box, Typography, Skeleton, Card, CardContent, useTheme, useMediaQuery } from '@mui/material';
-import ResumeAdCard from './ResumeAdCard';
+import { JobSeekerResumeAdCard } from './index';
 import EmptyResumeAdsState from './EmptyResumeAdsState';
 
 interface ResumeAdsGridProps {
