@@ -28,7 +28,8 @@ import StarIcon from '@mui/icons-material/Star';
 import { JOB_SEEKER_THEME } from '@/constants/colors';
 
 // تابع تبدیل اعداد انگلیسی به فارسی
-const convertToPersianNumbers = (num: number | string): string => {
+const convertToPersianNumbers = (num: number | string | undefined): string => {
+  if (num === undefined || num === null) return '';
   const persianNumbers = ['۰', '۱', '۲', '۳', '۴', '۵', '۶', '۷', '۸', '۹'];
   return num.toString().replace(/[0-9]/g, (d) => persianNumbers[parseInt(d)]);
 };
@@ -489,7 +490,7 @@ export default function ResumePreviewStep({ resumeInfo }: ResumePreviewStepProps
                           fontSize: '0.7rem'
                         }}>
                           {convertToPersianNumbers(education.start_year)} 
-                          {education.end_date ? ` - ${convertToPersianNumbers(education.end_year || '')}` : ' - ادامه دارد'}
+                          {education.end_year ? ` - ${convertToPersianNumbers(education.end_year)}` : ' - ادامه دارد'}
                         </Typography>
                         {education.is_current && (
                           <Chip 
