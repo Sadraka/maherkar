@@ -333,7 +333,7 @@ const ResumeAdsGrid: React.FC<ResumeAdsGridProps> = ({
     >
       {resumeAds.map((resumeAd, index) => (
         <Box key={resumeAd.id} sx={{ height: '100%' }}>
-          <ResumeAdCard resumeAd={resumeAd} onUpdate={handleRefresh} />
+          <JobSeekerResumeAdCard resumeAd={resumeAd} onUpdate={handleRefresh} />
         </Box>
       ))}
     </Box>
