@@ -175,8 +175,10 @@ export default function ResumePreviewStep({ resumeInfo }: ResumePreviewStepProps
         >
           <Box sx={{ 
             display: 'flex', 
+            flexDirection: { xs: 'column', sm: 'row' },
             justifyContent: 'space-between', 
-            alignItems: 'center', 
+            alignItems: { xs: 'flex-start', sm: 'center' }, 
+            gap: { xs: 1.5, sm: 0 },
             mb: 2 
           }}>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
@@ -200,9 +202,11 @@ export default function ResumePreviewStep({ resumeInfo }: ResumePreviewStepProps
               sx={{
                 borderColor: jobSeekerColors.primary,
                 color: jobSeekerColors.primary,
-                fontSize: '0.75rem',
-                px: 2,
+                fontSize: { xs: '0.7rem', sm: '0.75rem' },
+                px: { xs: 1.5, sm: 2 },
                 py: 0.5,
+                minWidth: { xs: 'auto', sm: 'auto' },
+                alignSelf: { xs: 'flex-start', sm: 'center' },
                 '&:hover': {
                   borderColor: jobSeekerColors.dark,
                   backgroundColor: alpha(jobSeekerColors.primary, 0.05)
@@ -254,8 +258,10 @@ export default function ResumePreviewStep({ resumeInfo }: ResumePreviewStepProps
         >
           <Box sx={{ 
             display: 'flex', 
+            flexDirection: { xs: 'column', sm: 'row' },
             justifyContent: 'space-between', 
-            alignItems: 'center', 
+            alignItems: { xs: 'flex-start', sm: 'center' }, 
+            gap: { xs: 1.5, sm: 0 },
             mb: 2 
           }}>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
@@ -279,9 +285,11 @@ export default function ResumePreviewStep({ resumeInfo }: ResumePreviewStepProps
               sx={{
                 borderColor: jobSeekerColors.primary,
                 color: jobSeekerColors.primary,
-                fontSize: '0.75rem',
-                px: 2,
+                fontSize: { xs: '0.7rem', sm: '0.75rem' },
+                px: { xs: 1.5, sm: 2 },
                 py: 0.5,
+                minWidth: { xs: 'auto', sm: 'auto' },
+                alignSelf: { xs: 'flex-start', sm: 'center' },
                 '&:hover': {
                   borderColor: jobSeekerColors.dark,
                   backgroundColor: alpha(jobSeekerColors.primary, 0.05)
@@ -333,8 +341,10 @@ export default function ResumePreviewStep({ resumeInfo }: ResumePreviewStepProps
         >
           <Box sx={{ 
             display: 'flex', 
+            flexDirection: { xs: 'column', sm: 'row' },
             justifyContent: 'space-between', 
-            alignItems: 'center', 
+            alignItems: { xs: 'flex-start', sm: 'center' }, 
+            gap: { xs: 1.5, sm: 0 },
             mb: 2 
           }}>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
@@ -358,9 +368,11 @@ export default function ResumePreviewStep({ resumeInfo }: ResumePreviewStepProps
               sx={{
                 borderColor: jobSeekerColors.primary,
                 color: jobSeekerColors.primary,
-                fontSize: '0.75rem',
-                px: 2,
+                fontSize: { xs: '0.7rem', sm: '0.75rem' },
+                px: { xs: 1.5, sm: 2 },
                 py: 0.5,
+                minWidth: { xs: 'auto', sm: 'auto' },
+                alignSelf: { xs: 'flex-start', sm: 'center' },
                 '&:hover': {
                   borderColor: jobSeekerColors.dark,
                   backgroundColor: alpha(jobSeekerColors.primary, 0.05)
@@ -409,8 +421,10 @@ export default function ResumePreviewStep({ resumeInfo }: ResumePreviewStepProps
           >
             <Box sx={{ 
               display: 'flex', 
+              flexDirection: { xs: 'column', sm: 'row' },
               justifyContent: 'space-between', 
-              alignItems: 'center', 
+              alignItems: { xs: 'flex-start', sm: 'center' }, 
+              gap: { xs: 1.5, sm: 0 },
               mb: 2 
             }}>
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
@@ -434,9 +448,11 @@ export default function ResumePreviewStep({ resumeInfo }: ResumePreviewStepProps
                 sx={{
                   borderColor: jobSeekerColors.primary,
                   color: jobSeekerColors.primary,
-                  fontSize: '0.75rem',
-                  px: 2,
+                  fontSize: { xs: '0.7rem', sm: '0.75rem' },
+                  px: { xs: 1.5, sm: 2 },
                   py: 0.5,
+                  minWidth: { xs: 'auto', sm: 'auto' },
+                  alignSelf: { xs: 'flex-start', sm: 'center' },
                   '&:hover': {
                     borderColor: jobSeekerColors.dark,
                     backgroundColor: alpha(jobSeekerColors.primary, 0.05)
@@ -449,31 +465,39 @@ export default function ResumePreviewStep({ resumeInfo }: ResumePreviewStepProps
 
             <Box sx={{ 
               display: 'flex', 
-              alignItems: 'center', 
-              gap: 2,
-              p: 2,
+              flexDirection: { xs: 'column', sm: 'row' },
+              alignItems: { xs: 'flex-start', sm: 'center' }, 
+              gap: { xs: 1.5, sm: 2 },
+              p: { xs: 1.5, sm: 2 },
               border: `1px solid ${alpha(jobSeekerColors.primary, 0.1)}`,
               borderRadius: 1,
               backgroundColor: alpha(jobSeekerColors.primary, 0.02)
             }}>
-              <PersonIcon sx={{ 
-                fontSize: 32, 
-                color: jobSeekerColors.primary 
-              }} />
-              <Box sx={{ flex: 1 }}>
-                <Typography variant="body1" sx={{ 
-                  fontWeight: 600,
-                  color: 'text.primary',
-                  fontSize: '0.9rem'
-                }}>
-                  {getFileNameFromUrl(cv)}
-                </Typography>
-                <Typography variant="body2" sx={{ 
-                  color: 'text.secondary',
-                  fontSize: '0.75rem'
-                }}>
-                  فایل PDF رزومه شما که در آگهی نمایش داده خواهد شد
-                </Typography>
+              <Box sx={{ 
+                display: 'flex', 
+                alignItems: 'center', 
+                gap: { xs: 1, sm: 2 },
+                flex: 1 
+              }}>
+                <PersonIcon sx={{ 
+                  fontSize: { xs: 24, sm: 32 }, 
+                  color: jobSeekerColors.primary 
+                }} />
+                <Box sx={{ flex: 1 }}>
+                  <Typography variant="body1" sx={{ 
+                    fontWeight: 600,
+                    color: 'text.primary',
+                    fontSize: { xs: '0.8rem', sm: '0.9rem' }
+                  }}>
+                    {getFileNameFromUrl(cv)}
+                  </Typography>
+                  <Typography variant="body2" sx={{ 
+                    color: 'text.secondary',
+                    fontSize: { xs: '0.7rem', sm: '0.75rem' }
+                  }}>
+                    فایل PDF رزومه شما که در آگهی نمایش داده خواهد شد
+                  </Typography>
+                </Box>
               </Box>
               <Button
                 variant="outlined"
@@ -483,9 +507,11 @@ export default function ResumePreviewStep({ resumeInfo }: ResumePreviewStepProps
                 sx={{
                   borderColor: jobSeekerColors.primary,
                   color: jobSeekerColors.primary,
-                  fontSize: '0.75rem',
-                  px: 2,
+                  fontSize: { xs: '0.7rem', sm: '0.75rem' },
+                  px: { xs: 1.5, sm: 2 },
                   py: 0.5,
+                  minWidth: { xs: 'auto', sm: 'auto' },
+                  alignSelf: { xs: 'flex-start', sm: 'center' },
                   '&:hover': {
                     borderColor: jobSeekerColors.dark,
                     backgroundColor: alpha(jobSeekerColors.primary, 0.05)
