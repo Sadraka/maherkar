@@ -43,8 +43,12 @@ export default function ResumeAdCardSkeleton() {
           <Box sx={{ position: 'relative', mr: { xs: 1, sm: 1.5 } }}>
             <Skeleton
               variant="circular"
-              width={{ xs: 45, sm: 55 }}
-              height={{ xs: 45, sm: 55 }}
+              width={55}
+              height={55}
+              sx={{
+                width: { xs: 45, sm: 55 },
+                height: { xs: 45, sm: 55 }
+              }}
             />
           </Box>
           <Box sx={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', width: '100%' }}>

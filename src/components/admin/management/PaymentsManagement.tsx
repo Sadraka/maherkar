@@ -188,7 +188,7 @@ const PaymentsManagement: React.FC = () => {
       
       // Handle different response structures
       const data = response.data as any;
-      let allPayments = [];
+      let allPayments: PaymentRecord[] = [];
       
       if (data?.results) {
         // اگر backend pagination را پشتیبانی می‌کند
@@ -201,7 +201,7 @@ const PaymentsManagement: React.FC = () => {
       }
 
       // Frontend فیلترینگ (اگر backend آن را انجام نداد)
-      let filteredPayments = allPayments;
+      let filteredPayments: PaymentRecord[] = allPayments;
       
       // فیلتر بر اساس نوع کاربر
       if (userTypeFilter) {

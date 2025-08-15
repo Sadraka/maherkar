@@ -29,6 +29,7 @@ import {
   faBullhorn
 } from '@fortawesome/free-solid-svg-icons';
 import { JobSeekerResumeAdCard } from '@/components/jobseeker/resume-ads';
+import { ResumeAdType } from '@/components/jobseeker/resume-ads/JobSeekerResumeAdCard';
 
 // تعریف interface برای رزومه
 interface Resume {
@@ -49,21 +50,7 @@ interface Resume {
   created_at: string;
 }
 
-// تعریف interface برای آگهی رزومه
-interface ResumeAd {
-  id: string;
-  title: string;
-  industry?: {
-    id: number;
-    name: string;
-  };
-  location?: {
-    id: number;
-    name: string;
-  };
-  status: string;
-  created_at: string;
-}
+
 
 // تعریف interface برای state ارور
 interface ErrorState {
@@ -393,9 +380,9 @@ export default function JobSeekerDashboard() {
             ) : resumeAdsData && resumeAdsData.length > 0 ? (
               // نمایش آگهی‌های رزومه فعال و تایید شده
               resumeAdsData
-                .filter((resumeAd: ResumeAd) => resumeAd.status === 'A') // فقط آگهی‌های تایید شده
+                .filter((resumeAd: ResumeAdType) => resumeAd.status === 'A') // فقط آگهی‌های تایید شده
                 .slice(0, 6)
-                .map((resumeAd: ResumeAd, index: number) => (
+                .map((resumeAd: ResumeAdType, index: number) => (
                   <Box key={resumeAd.id || index} sx={{ height: '100%' }}>
                     <JobSeekerResumeAdCard 
                       resumeAd={resumeAd} 

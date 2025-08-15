@@ -259,7 +259,7 @@ const SubscriptionsManagement: React.FC = () => {
       }));
 
       // Frontend فیلترینگ (اگر backend آن را انجام نداد)
-      let filteredSubscriptions = formattedSubscriptions;
+      let filteredSubscriptions: SubscriptionRecord[] = formattedSubscriptions;
       
       // فیلتر بر اساس نوع کاربر
       if (userTypeFilter) {
