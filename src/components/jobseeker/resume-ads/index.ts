@@ -6,4 +6,7 @@ export { default as CreateResumeAdForm } from './CreateResumeAdForm';
 export { default as ResumeAdsList } from './ResumeAdsList';
 export { default as ResumeAdDetail } from './ResumeAdDetail';
 export { default as ResumePreviewStep } from './ResumePreviewStep';
+export { default as ExperiencePreviewCard } from './ExperiencePreviewCard';
+export { default as EducationPreviewCard } from './EducationPreviewCard';
+export { default as SkillsPreviewCard } from './SkillsPreviewCard';
 export { default as JobSeekerSubscriptionPlanSelector } from './JobSeekerSubscriptionPlanSelector';
