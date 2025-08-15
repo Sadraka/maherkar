@@ -73,18 +73,22 @@ const ResumeAdsSearchAndSort: React.FC<ResumeAdsSearchAndSortProps> = ({
   const [subscriptionFilter, setSubscriptionFilter] = useState<string>('all');
   const [showFilters, setShowFilters] = useState(false);
 
-  // تابع بررسی نوع اشتراک
+  // تابع بررسی نوع اشتراک - همان منطق کارت
   const isSpecialSubscription = (resumeAd: any): boolean => {
+    // بررسی بر اساس نام طرح در advertisement.subscription
     if (resumeAd.advertisement?.subscription?.plan?.name) {
       const planName = resumeAd.advertisement.subscription.plan.name.toLowerCase();
+      // فقط طرح‌های نردبان، ویژه، vip، یا ladder را به عنوان special در نظر بگیر
       if (planName.includes('نردبان') || planName.includes('ویژه') || planName.includes('vip') || planName.includes('ladder')) {
         return true;
       }
+      // طرح‌های پایه را special در نظر نگیر
       if (planName.includes('پایه') || planName.includes('base') || planName.includes('basic')) {
         return false;
       }
     }
     
+    // بررسی بر اساس subscription_status در advertisement.subscription
     if (resumeAd.advertisement?.subscription?.subscription_status) {
       return resumeAd.advertisement.subscription.subscription_status === 'special';
     }
@@ -117,282 +121,378 @@ const ResumeAdsSearchAndSort: React.FC<ResumeAdsSearchAndSortProps> = ({
       filtered = filtered.filter(resumeAd => resumeAd.status === statusFilter);
     }
 
-    // فیلتر نوع اشتراک
+    // فیلتر بر اساس نوع اشتراک
     if (subscriptionFilter !== 'all') {
-      if (subscriptionFilter === 'special') {
-        filtered = filtered.filter(resumeAd => isSpecialSubscription(resumeAd));
-      } else if (subscriptionFilter === 'basic') {
-        filtered = filtered.filter(resumeAd => !isSpecialSubscription(resumeAd));
-      }
+      filtered = filtered.filter(resumeAd => {
+        const isSpecial = isSpecialSubscription(resumeAd);
+        if (subscriptionFilter === 'basic') {
+          return !isSpecial;
+        } else if (subscriptionFilter === 'special' || subscriptionFilter === 'ladder') {
+          return isSpecial;
+        }
+        return true;
+      });
     }
 
     // مرتب‌سازی بر اساس تاریخ ایجاد (جدیدترین اول)
-    filtered.sort((a, b) => {
-      const dateA = new Date(a.created_at).getTime();
-      const dateB = new Date(b.created_at).getTime();
-      return dateB - dateA;
-    });
-
-    return filtered;
+    return filtered.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
   }, [resumeAds, searchQuery, statusFilter, subscriptionFilter]);
 
-  // اعمال تغییرات
+  // ارسال نتایج فیلتر شده به کامپوننت والد
   React.useEffect(() => {
     onFilteredResumeAdsChange(filteredResumeAds);
-    onSearchStateChange?.(searchQuery, filteredResumeAds.length > 0);
-    onSearchQueryChange?.(searchQuery);
-    onFiltersChange?.(statusFilter, subscriptionFilter);
-  }, [filteredResumeAds, searchQuery, statusFilter, subscriptionFilter, onFilteredResumeAdsChange, onSearchStateChange, onSearchQueryChange, onFiltersChange]);
+  }, [filteredResumeAds, onFilteredResumeAdsChange]);
 
-  // تابع پاک کردن جستجو
+  // ارسال وضعیت جستجو به کامپوننت والد
+  React.useEffect(() => {
+    if (onSearchStateChange) {
+      onSearchStateChange(searchQuery, filteredResumeAds.length > 0);
+    }
+  }, [searchQuery, filteredResumeAds.length, onSearchStateChange]);
+
+  // ارسال تغییرات جستجو به کامپوننت والد
+  React.useEffect(() => {
+    if (onSearchQueryChange) {
+      onSearchQueryChange(searchQuery);
+    }
+  }, [searchQuery, onSearchQueryChange]);
+
+  // ارسال تغییرات فیلترها به کامپوننت والد
+  React.useEffect(() => {
+    if (onFiltersChange) {
+      onFiltersChange(statusFilter, subscriptionFilter);
+    }
+  }, [statusFilter, subscriptionFilter, onFiltersChange]);
+
+  // پاک کردن جستجو
   const handleClearSearch = () => {
     setSearchQuery('');
   };
 
-  // تابع پاک کردن همه فیلترها
-  const handleClearAllFilters = () => {
-    setSearchQuery('');
-    setStatusFilter('all');
-    setSubscriptionFilter('all');
-  };
-
-  // بررسی وجود فیلتر فعال
-  const hasActiveFilters = searchQuery.trim() || statusFilter !== 'all' || subscriptionFilter !== 'all';
-
-  // تبدیل اعداد به فارسی
-  const toPersianNumbers = (num: number): string => {
-    const persianNumbers = ['۰', '۱', '۲', '۳', '۴', '۵', '۶', '۷', '۸', '۹'];
-    return num.toString().replace(/\d/g, (d) => persianNumbers[parseInt(d)]);
+  // تبدیل وضعیت به متن فارسی
+  const getStatusText = (status: string) => {
+    switch (status) {
+      case 'P': return 'در انتظار بررسی';
+      case 'A': return 'تایید شده';
+      case 'R': return 'رد شده';
+      default: return status;
+    }
   };
 
   return (
-    <Box sx={{ mb: 4 }}>
-      {/* نمایش تعداد نتایج */}
-      <Box sx={{ 
-        display: 'flex', 
-        justifyContent: 'space-between', 
-        alignItems: 'center', 
-        mb: 2,
-        flexDirection: { xs: 'column', sm: 'row' },
-        gap: { xs: 1, sm: 0 }
-      }}>
-        <Typography 
-          variant="body2" 
-          color="text.secondary"
-          sx={{ fontSize: { xs: '0.8rem', sm: '0.875rem' } }}
+    <Box
+      sx={{
+        mb: 4,
+        backgroundColor: 'transparent',
+        borderRadius: 0,
+        border: 'none',
+        boxShadow: 'none'
+      }}
+    >
+      {/* دکمه نمایش/مخفی کردن جستجو و فیلترها */}
+      <Box sx={{ display: 'flex', justifyContent: 'center', mb: 2 }}>
+        <Button
+          variant="outlined"
+          size="small"
+          onClick={() => setShowFilters(!showFilters)}
+          startIcon={<FilterListIcon />}
+          endIcon={showFilters ? <ExpandLessIcon /> : <ExpandMoreIcon />}
+          sx={{
+            borderRadius: 2,
+            borderColor: JOB_SEEKER_THEME.primary,
+            color: JOB_SEEKER_THEME.primary,
+            '&:hover': {
+              borderColor: JOB_SEEKER_THEME.dark,
+              backgroundColor: `${JOB_SEEKER_THEME.primary}10`
+            }
+          }}
         >
-          {filteredResumeAds.length > 0 
-            ? `${toPersianNumbers(filteredResumeAds.length)} آگهی رزومه یافت شد`
-            : 'هیچ آگهی رزومه‌ای یافت نشد'
-          }
-        </Typography>
-
-        {/* دکمه نمایش/مخفی کردن فیلترها در موبایل */}
-        {(isMobile || isTablet) && (
-          <Button
-            variant="outlined"
-            size="small"
-            startIcon={<FilterListIcon />}
-            endIcon={showFilters ? <ExpandLessIcon /> : <ExpandMoreIcon />}
-            onClick={() => setShowFilters(!showFilters)}
-            sx={{
-              borderColor: JOB_SEEKER_THEME.primary,
-              color: JOB_SEEKER_THEME.primary,
-              '&:hover': {
-                borderColor: JOB_SEEKER_THEME.dark,
-                backgroundColor: `${JOB_SEEKER_THEME.primary}10`
-              }
-            }}
-          >
-            فیلترها
-          </Button>
-        )}
+          {showFilters ? 'مخفی کردن جستجو و فیلترها' : 'نمایش جستجو و فیلترها'}
+        </Button>
       </Box>
 
-      {/* فیلدهای جستجو و فیلتر */}
-      <Collapse in={!isMobile && !isTablet ? true : showFilters} timeout="auto">
-        <Box sx={{ 
-          display: 'flex', 
-          flexDirection: { xs: 'column', md: 'row' },
-          gap: 2,
-          alignItems: { xs: 'stretch', md: 'flex-end' },
-          mb: 2
-        }}>
-          {/* جستجو */}
-          <Box sx={{ flex: { xs: 1, md: 2 } }}>
-            <TextField
-              fullWidth
-              size="small"
-              placeholder="جستجو در عنوان، نام، مکان یا صنعت..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              InputProps={{
-                startAdornment: <SearchIcon sx={{ color: 'text.secondary', mr: 1 }} />,
-                endAdornment: searchQuery && (
-                  <IconButton
-                    size="small"
-                    onClick={handleClearSearch}
-                    sx={{ p: 0.5 }}
-                  >
-                    <ClearIcon fontSize="small" />
-                  </IconButton>
-                ),
-                sx: {
-                  backgroundColor: 'white',
-                  '& .MuiOutlinedInput-notchedOutline': {
-                    borderColor: `${JOB_SEEKER_THEME.primary}40`,
-                  },
-                  '&:hover .MuiOutlinedInput-notchedOutline': {
-                    borderColor: `${JOB_SEEKER_THEME.primary}60`,
-                  },
-                  '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-                    borderColor: JOB_SEEKER_THEME.primary,
-                  }
-                }
-              }}
-            />
-          </Box>
-
-          {/* فیلتر وضعیت */}
-          <FormControl size="small" sx={{ minWidth: { xs: '100%', md: 140 } }}>
-            <InputLabel sx={{ 
-              color: 'text.secondary',
-              '&.Mui-focused': {
-                color: JOB_SEEKER_THEME.primary,
-              }
-            }}>
-              وضعیت
-            </InputLabel>
-            <Select
-              value={statusFilter}
-              label="وضعیت"
-              onChange={(e) => setStatusFilter(e.target.value)}
-              sx={{
-                backgroundColor: 'white',
-                '& .MuiOutlinedInput-notchedOutline': {
-                  borderColor: `${JOB_SEEKER_THEME.primary}40`,
-                },
-                '&:hover .MuiOutlinedInput-notchedOutline': {
-                  borderColor: `${JOB_SEEKER_THEME.primary}60`,
-                },
-                '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-                  borderColor: JOB_SEEKER_THEME.primary,
-                }
-              }}
-            >
-              <MenuItem value="all">همه وضعیت‌ها</MenuItem>
-              <MenuItem value="P">در انتظار بررسی</MenuItem>
-              <MenuItem value="A">تایید شده</MenuItem>
-              <MenuItem value="R">رد شده</MenuItem>
-            </Select>
-          </FormControl>
-
-          {/* فیلتر نوع اشتراک */}
-          <FormControl size="small" sx={{ minWidth: { xs: '100%', md: 140 } }}>
-            <InputLabel sx={{ 
-              color: 'text.secondary',
-              '&.Mui-focused': {
-                color: JOB_SEEKER_THEME.primary,
-              }
-            }}>
-              نوع اشتراک
-            </InputLabel>
-            <Select
-              value={subscriptionFilter}
-              label="نوع اشتراک"
-              onChange={(e) => setSubscriptionFilter(e.target.value)}
-              sx={{
-                backgroundColor: 'white',
-                '& .MuiOutlinedInput-notchedOutline': {
-                  borderColor: `${JOB_SEEKER_THEME.primary}40`,
-                },
-                '&:hover .MuiOutlinedInput-notchedOutline': {
-                  borderColor: `${JOB_SEEKER_THEME.primary}60`,
-                },
-                '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-                  borderColor: JOB_SEEKER_THEME.primary,
-                }
-              }}
-            >
-              <MenuItem value="all">همه اشتراک‌ها</MenuItem>
-              <MenuItem value="basic">پایه</MenuItem>
-              <MenuItem value="special">ویژه</MenuItem>
-            </Select>
-          </FormControl>
-
-          {/* دکمه پاک کردن همه فیلترها */}
-          {hasActiveFilters && (
-            <Tooltip title="پاک کردن همه فیلترها">
-              <IconButton
-                onClick={handleClearAllFilters}
+      {/* جستجو و فیلترها */}
+      <Collapse in={showFilters}>
+        <Box sx={{ mb: 3 }}>
+          {/* کنترل‌های جستجو و فیلتر */}
+          <Box
+            sx={{
+              display: 'grid',
+              gridTemplateColumns: {
+                xs: '1fr',
+                sm: '1fr auto',
+                md: '1fr auto auto'
+              },
+              gap: { xs: 2, sm: 2.5, md: 3 },
+              alignItems: 'center',
+              mb: 3
+            }}
+          >
+            {/* فیلد جستجو */}
+            <Box sx={{ position: 'relative' }}>
+              <TextField
+                fullWidth
+                placeholder="جستجو در عنوان، نام، مکان، صنعت..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                InputProps={{
+                  startAdornment: (
+                    <SearchIcon
+                      sx={{
+                        color: JOB_SEEKER_THEME.primary,
+                        mr: 1.5,
+                        fontSize: { xs: '1.3rem', sm: '1.5rem' }
+                      }}
+                    />
+                  ),
+                  endAdornment: searchQuery && (
+                    <IconButton
+                      size="small"
+                      onClick={handleClearSearch}
+                      sx={{ 
+                        mr: -0.5,
+                        color: 'text.secondary',
+                        '&:hover': {
+                          color: JOB_SEEKER_THEME.primary,
+                          backgroundColor: `${JOB_SEEKER_THEME.primary}10`
+                        }
+                      }}
+                    >
+                      <ClearIcon fontSize="small" />
+                    </IconButton>
+                  )
+                }}
                 sx={{
-                  backgroundColor: 'white',
-                  border: `1px solid ${JOB_SEEKER_THEME.primary}40`,
-                  color: JOB_SEEKER_THEME.primary,
-                  '&:hover': {
-                    backgroundColor: `${JOB_SEEKER_THEME.primary}10`,
-                    borderColor: `${JOB_SEEKER_THEME.primary}60`,
+                  '& .MuiOutlinedInput-root': {
+                    borderRadius: 2,
+                    backgroundColor: '#fff',
+                    '& fieldset': {
+                      borderColor: '#E0E0E0',
+                      borderWidth: 1
+                    },
+                    '&:hover fieldset': {
+                      borderColor: JOB_SEEKER_THEME.primary,
+                      borderWidth: 1
+                    },
+                    '&.Mui-focused fieldset': {
+                      borderColor: JOB_SEEKER_THEME.primary,
+                      borderWidth: 2
+                    }
+                  }
+                }}
+              />
+            </Box>
+
+            {/* فیلترهای وضعیت و نوع اشتراک */}
+            <Box sx={{ 
+              display: 'grid', 
+              gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr', md: '1fr 1fr' },
+              gap: 2
+            }}>
+              {/* فیلتر وضعیت */}
+              <FormControl
+                size="medium"
+                sx={{
+                  minWidth: { xs: '100%', sm: 150, md: 170 },
+                  '& .MuiOutlinedInput-root': {
+                    borderRadius: 2,
+                    backgroundColor: '#fff',
+                    '& fieldset': {
+                      borderColor: '#E0E0E0',
+                      borderWidth: 1
+                    },
+                    '&:hover fieldset': {
+                      borderColor: JOB_SEEKER_THEME.primary,
+                      borderWidth: 1
+                    },
+                    '&.Mui-focused fieldset': {
+                      borderColor: JOB_SEEKER_THEME.primary,
+                      borderWidth: 2
+                    }
                   },
-                  width: 40,
-                  height: 40
+                  '& .MuiInputLabel-root': {
+                    color: 'text.secondary',
+                    '&.Mui-focused': {
+                      color: JOB_SEEKER_THEME.primary
+                    }
+                  }
                 }}
               >
-                <ClearIcon />
-              </IconButton>
-            </Tooltip>
+                <InputLabel>وضعیت</InputLabel>
+                <Select
+                  value={statusFilter}
+                  onChange={(e) => setStatusFilter(e.target.value)}
+                  label="وضعیت"
+                >
+                  <MenuItem value="all">همه</MenuItem>
+                  <MenuItem value="P">در انتظار بررسی</MenuItem>
+                  <MenuItem value="A">تایید شده</MenuItem>
+                  <MenuItem value="R">رد شده</MenuItem>
+                </Select>
+              </FormControl>
+
+              {/* فیلتر نوع اشتراک */}
+              <FormControl
+                size="medium"
+                sx={{
+                  minWidth: { xs: '100%', sm: 150, md: 170 },
+                  '& .MuiOutlinedInput-root': {
+                    borderRadius: 2,
+                    backgroundColor: '#fff',
+                    '& fieldset': {
+                      borderColor: '#E0E0E0',
+                      borderWidth: 1
+                    },
+                    '&:hover fieldset': {
+                      borderColor: JOB_SEEKER_THEME.primary,
+                      borderWidth: 1
+                    },
+                    '&.Mui-focused fieldset': {
+                      borderColor: JOB_SEEKER_THEME.primary,
+                      borderWidth: 2
+                    }
+                  },
+                  '& .MuiInputLabel-root': {
+                    color: 'text.secondary',
+                    '&.Mui-focused': {
+                      color: JOB_SEEKER_THEME.primary
+                    }
+                  }
+                }}
+              >
+                <InputLabel>نوع اشتراک</InputLabel>
+                <Select
+                  value={subscriptionFilter}
+                  onChange={(e) => setSubscriptionFilter(e.target.value)}
+                  label="نوع اشتراک"
+                >
+                  <MenuItem value="all">همه</MenuItem>
+                  <MenuItem value="basic">پایه</MenuItem>
+                  <MenuItem value="special">ویژه</MenuItem>
+                  <MenuItem value="ladder">نردبان</MenuItem>
+                </Select>
+              </FormControl>
+            </Box>
+          </Box>
+
+          {/* نمایش فیلترهای فعال */}
+          {(searchQuery.trim() || statusFilter !== 'all' || subscriptionFilter !== 'all') && (
+            <Box sx={{ 
+              display: 'flex', 
+              flexWrap: 'wrap', 
+              gap: 1.5, 
+              mb: 2,
+              p: 2,
+              backgroundColor: 'rgba(255, 255, 255, 0.7)',
+              borderRadius: 2,
+              border: '1px solid #f0f0f0'
+            }}>
+              <Typography 
+                variant="body2" 
+                sx={{ 
+                  fontWeight: 600, 
+                  color: 'text.secondary',
+                  mr: 1,
+                  display: 'flex',
+                  alignItems: 'center'
+                }}
+              >
+                فیلترهای فعال:
+              </Typography>
+              
+              {searchQuery.trim() && (
+                <Chip
+                  label={`جستجو: "${searchQuery}"`}
+                  onDelete={() => setSearchQuery('')}
+                  size="small"
+                  sx={{
+                    backgroundColor: JOB_SEEKER_THEME.primary,
+                    color: 'white',
+                    '& .MuiChip-deleteIcon': {
+                      color: 'rgba(255, 255, 255, 0.8)',
+                      '&:hover': {
+                        color: 'white'
+                      }
+                    }
+                  }}
+                />
+              )}
+              
+              {statusFilter !== 'all' && (
+                <Chip
+                  label={`وضعیت: ${getStatusText(statusFilter)}`}
+                  onDelete={() => setStatusFilter('all')}
+                  size="small"
+                  sx={{
+                    backgroundColor: JOB_SEEKER_THEME.primary,
+                    color: 'white',
+                    '& .MuiChip-deleteIcon': {
+                      color: 'rgba(255, 255, 255, 0.8)',
+                      '&:hover': {
+                        color: 'white'
+                      }
+                    }
+                  }}
+                />
+              )}
+              
+              {subscriptionFilter !== 'all' && (
+                <Chip
+                  label={`اشتراک: ${
+                    subscriptionFilter === 'basic' ? 'پایه' : 
+                    subscriptionFilter === 'special' ? 'ویژه' : 'نردبان'
+                  }`}
+                  onDelete={() => setSubscriptionFilter('all')}
+                  size="small"
+                  sx={{
+                    backgroundColor: JOB_SEEKER_THEME.primary,
+                    color: 'white',
+                    '& .MuiChip-deleteIcon': {
+                      color: 'rgba(255, 255, 255, 0.8)',
+                      '&:hover': {
+                        color: 'white'
+                      }
+                    }
+                  }}
+                />
+              )}
+            </Box>
           )}
+
+          {/* نمایش تعداد نتایج */}
+          <Box sx={{ 
+            display: 'flex', 
+            justifyContent: 'center', 
+            alignItems: 'center',
+            p: 2,
+            backgroundColor: 'rgba(255, 255, 255, 0.9)',
+            borderRadius: 2,
+            border: '1px solid #f0f0f0'
+          }}>
+            <Typography 
+              variant="body2" 
+              color="text.secondary"
+              sx={{ 
+                fontSize: { xs: '0.8rem', sm: '0.875rem' },
+                fontWeight: 500
+              }}
+            >
+              {filteredResumeAds.length > 0 
+                ? `${convertToPersianNumbers(filteredResumeAds.length)} آگهی رزومه یافت شد`
+                : 'هیچ آگهی رزومه‌ای یافت نشد'
+              }
+            </Typography>
+          </Box>
         </Box>
       </Collapse>
-
-      {/* نمایش فیلترهای فعال */}
-      {hasActiveFilters && (
-        <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, mb: 2 }}>
-          {searchQuery.trim() && (
-            <Chip
-              label={`جستجو: "${searchQuery}"`}
-              onDelete={() => setSearchQuery('')}
-              size="small"
-              sx={{
-                backgroundColor: `${JOB_SEEKER_THEME.primary}15`,
-                color: JOB_SEEKER_THEME.primary,
-                '& .MuiChip-deleteIcon': {
-                  color: JOB_SEEKER_THEME.primary
-                }
-              }}
-            />
-          )}
-          {statusFilter !== 'all' && (
-            <Chip
-              label={`وضعیت: ${statusFilter === 'P' ? 'در انتظار بررسی' : statusFilter === 'A' ? 'تایید شده' : 'رد شده'}`}
-              onDelete={() => setStatusFilter('all')}
-              size="small"
-              sx={{
-                backgroundColor: `${JOB_SEEKER_THEME.primary}15`,
-                color: JOB_SEEKER_THEME.primary,
-                '& .MuiChip-deleteIcon': {
-                  color: JOB_SEEKER_THEME.primary
-                }
-              }}
-            />
-          )}
-          {subscriptionFilter !== 'all' && (
-            <Chip
-              label={`اشتراک: ${subscriptionFilter === 'basic' ? 'پایه' : 'ویژه'}`}
-              onDelete={() => setSubscriptionFilter('all')}
-              size="small"
-              sx={{
-                backgroundColor: `${JOB_SEEKER_THEME.primary}15`,
-                color: JOB_SEEKER_THEME.primary,
-                '& .MuiChip-deleteIcon': {
-                  color: JOB_SEEKER_THEME.primary
-                }
-              }}
-            />
-          )}
-        </Box>
-      )}
     </Box>
   );
+};
+
+// تبدیل اعداد به فارسی
+const convertToPersianNumbers = (num: number): string => {
+  const persianNumbers = ['۰', '۱', '۲', '۳', '۴', '۵', '۶', '۷', '۸', '۹'];
+  return num.toString().replace(/\d/g, (d) => persianNumbers[parseInt(d)]);
 };
 
 export default ResumeAdsSearchAndSort;

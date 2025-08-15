@@ -25,7 +25,8 @@ import {
   Card,
   CardContent,
   Divider,
-  Chip
+  Chip,
+  Autocomplete
 } from '@mui/material';
 import { alpha } from '@mui/material/styles';
 
@@ -78,6 +79,11 @@ export default function SkillsForm() {
   const router = useRouter();
   const theme = useTheme();
   const jobseekerColors = JOB_SEEKER_THEME;
+  
+  // بررسی وجود router
+  if (!router) {
+    console.error('Router is not available');
+  }
   const [skills, setSkills] = useState<Skill[]>([]);
   const [availableSkills, setAvailableSkills] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
@@ -622,44 +628,62 @@ export default function SkillsForm() {
                      انتخاب مهارت *
                    </Typography>
                  </Box>
-                 <Controller
-                   name="skill_id"
-                   control={control}
-                   rules={{ required: 'انتخاب مهارت الزامی است' }}
-                   render={({ field }) => (
-                     <FormControl fullWidth error={Boolean(formErrors.skill_id)}>
-                       <Select
-                         {...field}
-                         displayEmpty
-                         input={<OutlinedInput sx={selectStyles} />}
-                         renderValue={() => {
-                           const selectedSkill = availableSkills.find(s => s.id === field.value);
-                           return (
-                             <Box component="div" sx={{ display: 'flex', justifyContent: 'center', width: '100%' }}>
-                               {selectedSkill ? selectedSkill.name : 'انتخاب مهارت'}
-                             </Box>
-                           );
-                         }}
-                         MenuProps={menuPropsRTL}
-                         IconComponent={(props: any) => (
-                           <KeyboardArrowDownIcon {...props} sx={{ color: jobseekerColors.primary }} />
-                         )}
-                       >
-                         <MenuItem value={0} disabled>انتخاب مهارت</MenuItem>
-                         {availableSkills.map((skill) => (
-                           <MenuItem key={skill.id} value={skill.id}>
-                             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                               <Typography>{skill.name}</Typography>
-                             </Box>
-                           </MenuItem>
-                         ))}
-                       </Select>
-                       {formErrors.skill_id && (
-                         <FormHelperText>{formErrors.skill_id.message}</FormHelperText>
-                       )}
-                     </FormControl>
-                   )}
-                 />
+                                 <Controller
+                  name="skill_id"
+                  control={control}
+                  rules={{ required: 'انتخاب مهارت الزامی است' }}
+                  render={({ field }) => (
+                    <Autocomplete
+                      options={availableSkills}
+                      getOptionLabel={(option) => option.name || ''}
+                      value={availableSkills.find(skill => skill.id === field.value) || null}
+                      onChange={(event, newValue) => {
+                        field.onChange(newValue ? newValue.id : 0);
+                      }}
+                      renderInput={(params) => (
+                        <TextField
+                          {...params}
+                          placeholder="جستجو و انتخاب مهارت..."
+                          error={Boolean(formErrors.skill_id)}
+                          helperText={formErrors.skill_id?.message}
+                          sx={{
+                            ...selectStyles,
+                            '& .MuiOutlinedInput-root': {
+                              ...selectStyles['& .MuiOutlinedInput-root'],
+                              '& .MuiAutocomplete-input': {
+                                textAlign: 'center',
+                                '&::placeholder': {
+                                  textAlign: 'center',
+                                  opacity: 1
+                                }
+                              }
+                            }
+                          }}
+                        />
+                      )}
+                      renderOption={(props, option) => (
+                        <Box component="li" {...props} sx={{ 
+                          display: 'flex', 
+                          alignItems: 'center', 
+                          gap: 1,
+                          justifyContent: 'center',
+                          textAlign: 'center'
+                        }}>
+                          <Typography>{option.name}</Typography>
+                        </Box>
+                      )}
+                      noOptionsText="مهارتی یافت نشد"
+                      sx={{
+                        '& .MuiAutocomplete-popupIndicator': {
+                          color: jobseekerColors.primary
+                        },
+                        '& .MuiAutocomplete-clearIndicator': {
+                          color: jobseekerColors.primary
+                        }
+                      }}
+                    />
+                  )}
+                />
                </Box>
 
               {/* سطح مهارت */}
