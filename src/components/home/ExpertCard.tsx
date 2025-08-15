@@ -132,16 +132,14 @@ export default function ExpertCard({ expert }: ExpertCardProps) {
           borderRadius: { xs: 1.5, sm: 2 },
           border: `1px solid ${jobSeekerColors.bgLight}`,
           boxShadow: '0 3px 8px rgba(0,0,0,0.05)',
-          overflow: 'hidden',
+          overflow: 'visible',
           position: 'relative',
           backgroundColor: theme.palette.background.paper,
           transition: 'transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out',
-          width: { xs: '100%', sm: '100%', md: '100%' },
-          mx: 'auto',
-          height: '100%', // مثل JobCard
+          width: '100%',
+          height: '100%',
           display: 'flex',
           flexDirection: 'column',
-          zIndex: 0,
           '&:hover': {
             transform: 'translateY(-4px)',
             boxShadow: '0 6px 16px rgba(0,0,0,0.1)',
@@ -154,39 +152,8 @@ export default function ExpertCard({ expert }: ExpertCardProps) {
           display: 'flex',
           flexDirection: 'column',
           height: '100%',
-          flexGrow: 1,
-          position: 'relative',
-          zIndex: 1
+          flexGrow: 1
         }}>
-          {/* نمایش نوع اشتراک - فقط برای نردبان و فوری */}
-          {expert.subscription_type && expert.subscription_type !== 'پایه' && (
-            <Box sx={{
-              position: 'absolute',
-              top: 0,
-              right: 0,
-              bgcolor: 
-                expert.subscription_type === 'نردبان' ? '#E53935' : // رنگ نردبان
-                expert.subscription_type === 'فوری' ? '#FF9800' : // رنگ فوری
-                '#4CAF50', // رنگ پیش‌فرض
-              color: 'white',
-              fontSize: '0.75rem',
-              fontWeight: 'bold',
-              px: 1.5,
-              py: 0.5,
-              borderTopRightRadius: 0,
-              borderBottomLeftRadius: 8,
-              borderTopLeftRadius: 0,
-              borderBottomRightRadius: 0,
-              zIndex: 9,
-              minWidth: '45px',
-              boxShadow: '0 2px 4px rgba(0,0,0,0.15)',
-              textAlign: 'center',
-              transform: 'translateX(0)'
-            }}>
-              {expert.subscription_type}
-            </Box>
-          )}
-
           {/* هدر کارت - آواتار و نام */}
           <Box sx={{
             display: 'flex',
@@ -478,6 +445,34 @@ export default function ExpertCard({ expert }: ExpertCardProps) {
               مشاهده رزومه
             </Button>
           </Box>
+          {/* نمایش نوع اشتراک - درون کارت */}
+          {expert.subscription_type && expert.subscription_type !== 'پایه' && (
+            <Box sx={{
+              position: 'absolute',
+              top: 0,
+              right: 0,
+              bgcolor: 
+                expert.subscription_type === 'نردبان' ? '#E53935' : // رنگ نردبان
+                expert.subscription_type === 'فوری' ? '#FF9800' : // رنگ فوری
+                '#4CAF50', // رنگ پیش‌فرض
+              color: 'white',
+              fontSize: '0.75rem',
+              fontWeight: 'bold',
+              px: 1.5,
+              py: 0.5,
+              borderTopRightRadius: 8,
+              borderBottomLeftRadius: 8,
+              borderTopLeftRadius: 0,
+              borderBottomRightRadius: 0,
+              zIndex: 1,
+              minWidth: '45px',
+              boxShadow: '0 2px 4px rgba(0,0,0,0.15)',
+              textAlign: 'center'
+            }}>
+              {expert.subscription_type}
+            </Box>
+          )}
+
         </CardContent>
       </Card>
       

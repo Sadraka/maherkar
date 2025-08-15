@@ -623,13 +623,14 @@ export default function Experts() {
                     md: 'repeat(3, 1fr)',
                     lg: 'repeat(4, 1fr)',
                   },
-                  gap: { xs: 2, sm: 2.5, md: 3 }
+                  gap: { xs: 2, sm: 2.5, md: 3 },
+                  overflow: 'visible'
                 }}>
                 {resumeAdsData
                   .filter(resumeAd => resumeAd.status === "A") // فقط آگهی‌های تایید شده
                   .slice(0, visibleExperts)
                   .map((resumeAd) => (
-                    <Box key={resumeAd.id} sx={{ height: '100%' }}>
+                    <Box key={resumeAd.id} sx={{ height: '100%', overflow: 'visible', position: 'relative' }}>
                       <JobSeekerResumeAdCard resumeAd={resumeAd} onUpdate={() => console.log('بروزرسانی کارت')} />
                     </Box>
                 ))}

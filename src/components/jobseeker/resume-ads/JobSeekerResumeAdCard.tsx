@@ -286,16 +286,14 @@ export default function JobSeekerResumeAdCard({ resumeAd, onUpdate }: JobSeekerR
           borderRadius: { xs: 1.5, sm: 2 },
           border: `1px solid ${jobSeekerColors.bgLight}`,
           boxShadow: '0 3px 8px rgba(0,0,0,0.05)',
-          overflow: 'hidden',
+          overflow: 'visible',
           position: 'relative',
           backgroundColor: theme.palette.background.paper,
           transition: 'transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out',
-          width: { xs: '100%', sm: '100%', md: '100%' },
-          mx: 'auto',
+          width: '100%',
           height: '100%',
           display: 'flex',
           flexDirection: 'column',
-          zIndex: 0,
           '&:hover': {
             transform: 'translateY(-4px)',
             boxShadow: '0 6px 16px rgba(0,0,0,0.1)',
@@ -308,9 +306,7 @@ export default function JobSeekerResumeAdCard({ resumeAd, onUpdate }: JobSeekerR
           display: 'flex',
           flexDirection: 'column',
           height: '100%',
-          flexGrow: 1,
-          position: 'relative',
-          zIndex: 1
+          flexGrow: 1
         }}>
           {/* هدر کارت - آواتار و نام */}
           <Box sx={{
@@ -589,37 +585,7 @@ export default function JobSeekerResumeAdCard({ resumeAd, onUpdate }: JobSeekerR
             </Typography>
           </Box>
           
-          {/* نمایش نوع اشتراک - فقط برای نردبان و فوری */}
-          {typeof resumeAd.advertisement === 'object' && 
-           resumeAd.advertisement.subscription?.plan?.name && 
-           resumeAd.advertisement.subscription.plan.name !== 'basic' && (
-            <Box sx={{
-              position: 'absolute',
-              top: 0,
-              right: 0,
-              bgcolor: 
-                resumeAd.advertisement.subscription.plan.name === 'ladder' ? '#E53935' : // رنگ نردبان
-                resumeAd.advertisement.subscription.plan.name === 'urgent' ? '#FF9800' : // رنگ فوری
-                '#4CAF50', // رنگ پیش‌فرض
-              color: 'white',
-              fontSize: '0.75rem',
-              fontWeight: 'bold',
-              px: 1.5,
-              py: 0.5,
-              borderTopRightRadius: 0,
-              borderBottomLeftRadius: 8,
-              borderTopLeftRadius: 0,
-              borderBottomRightRadius: 0,
-              zIndex: 9,
-              minWidth: '45px',
-              boxShadow: '0 2px 4px rgba(0,0,0,0.15)',
-              textAlign: 'center',
-              transform: 'translateX(0)'
-            }}>
-              {resumeAd.advertisement.subscription.plan.name === 'ladder' ? 'نردبان' : 
-               resumeAd.advertisement.subscription.plan.name === 'urgent' ? 'فوری' : ''}
-            </Box>
-          )}
+
 
           {/* فضای خالی بین محتوا و دکمه */}
           <Box sx={{ flexGrow: 1 }} />
@@ -647,6 +613,37 @@ export default function JobSeekerResumeAdCard({ resumeAd, onUpdate }: JobSeekerR
               مشاهده رزومه
             </Button>
           </Box>
+          {/* نمایش نوع اشتراک - درون کارت */}
+          {typeof resumeAd.advertisement === 'object' && 
+           resumeAd.advertisement.subscription?.plan?.name && 
+           resumeAd.advertisement.subscription.plan.name !== 'basic' && (
+            <Box sx={{
+              position: 'absolute',
+              top: 0,
+              right: 0,
+              bgcolor: 
+                resumeAd.advertisement.subscription.plan.name === 'ladder' ? '#E53935' : // رنگ نردبان
+                resumeAd.advertisement.subscription.plan.name === 'urgent' ? '#FF9800' : // رنگ فوری
+                '#4CAF50', // رنگ پیش‌فرض
+              color: 'white',
+              fontSize: '0.75rem',
+              fontWeight: 'bold',
+              px: 1.5,
+              py: 0.5,
+              borderTopRightRadius: 8,
+              borderBottomLeftRadius: 8,
+              borderTopLeftRadius: 0,
+              borderBottomRightRadius: 0,
+              zIndex: 1,
+              minWidth: '45px',
+              boxShadow: '0 2px 4px rgba(0,0,0,0.15)',
+              textAlign: 'center'
+            }}>
+              {resumeAd.advertisement.subscription.plan.name === 'ladder' ? 'نردبان' : 
+               resumeAd.advertisement.subscription.plan.name === 'urgent' ? 'فوری' : ''}
+            </Box>
+          )}
+
         </CardContent>
       </Card>
       
