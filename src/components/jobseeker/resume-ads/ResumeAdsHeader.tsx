@@ -2,7 +2,6 @@ import React from 'react';
 import { Typography, Box, Button } from '@mui/material';
 import Link from 'next/link';
 import CampaignIcon from '@mui/icons-material/Campaign';
-import AddIcon from '@mui/icons-material/Add';
 import { JOB_SEEKER_THEME } from '@/constants/colors';
 
 /**
@@ -57,7 +56,6 @@ const ResumeAdsHeader = () => {
         <Button
           variant="contained"
           size="large"
-          startIcon={<AddIcon />}
           sx={{
             backgroundColor: JOB_SEEKER_THEME.primary,
             color: 'white',
