@@ -1,7 +1,7 @@
 'use client';
 
-import React from 'react';
-import { Controller } from 'react-hook-form';
+import React, { useState, useEffect } from 'react';
+import { Controller, useWatch } from 'react-hook-form';
 import {
   Box,
   Typography,
@@ -11,6 +11,7 @@ import {
   MenuItem,
   FormHelperText,
   InputAdornment,
+  TextField,
   type MenuProps
 } from '@mui/material';
 import SchoolIcon from '@mui/icons-material/School';
@@ -70,7 +71,19 @@ const availabilityOptions = [
 
 export default function AdditionalResumeFields({ control, formErrors, selectStyles, menuPropsRTL }: AdditionalResumeFieldsProps) {
   const jobseekerColors = JOB_SEEKER_THEME;
+  
+  // نظارت بر تغییرات فیلد سابقه کاری
+  const experienceValue = useWatch({
+    control,
+    name: 'experience',
+    defaultValue: ''
+  });
+  
+  // بررسی اینکه آیا سابقه کاری بیشتر از 6 سال انتخاب شده است
+  const showYearsInput = experienceValue === 'Six or More';
+  
   const toPersianDigits = (value: string): string => value.replace(/\d/g, (d) => '۰۱۲۳۴۵۶۷۸۹'[Number(d)]);
+  const persianToEnglish = (s: string) => s.replace(/[۰-۹]/g, (d) => String('0123456789'['۰۱۲۳۴۵۶۷۸۹'.indexOf(d)]));
 
   return (
     <>
@@ -184,6 +197,67 @@ export default function AdditionalResumeFields({ control, formErrors, selectStyl
               </FormControl>
             )}
           />
+          
+          {/* فیلد سال سابقه کاری (عددی) - فقط وقتی "بیشتر از 6 سال" انتخاب شده است فعال می‌شود */}
+          <Box sx={{ mt: 2 }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
+              <WorkIcon sx={{ color: jobseekerColors.primary, fontSize: 20 }} />
+              <Typography variant="body2" fontWeight="medium" sx={{
+                fontSize: { xs: '0.7rem', sm: '0.875rem' },
+                lineHeight: { xs: 1.1, sm: 1.3 },
+                color: jobseekerColors.primary,
+                fontWeight: 600
+              }}>
+                سال سابقه کاری (عدد دقیق)
+              </Typography>
+            </Box>
+            <Controller
+              name="years_of_experience_numeric"
+              control={control}
+              rules={{
+                min: { value: showYearsInput ? 6 : 0, message: showYearsInput ? 'حداقل ۶ (برای سابقه بیشتر از 6 سال)' : 'حداقل ۰' },
+                max: { value: 99, message: 'حداکثر ۹۹' }
+              }}
+              render={({ field }) => (
+                <TextField
+                  {...field}
+                  fullWidth
+                  type="text"
+                  placeholder={showYearsInput ? "مثال: ۸" : "غیرفعال - ابتدا سابقه کاری را انتخاب کنید"}
+                  error={Boolean(formErrors.years_of_experience_numeric)}
+                  helperText={formErrors.years_of_experience_numeric?.message || (showYearsInput ? '' : 'برای فعال‌سازی، گزینه «بیشتر از 6 سال» را انتخاب کنید')}
+                  variant="outlined"
+                  inputProps={{ inputMode: 'numeric', pattern: '[0-9۰-۹]*', maxLength: 2 }}
+                  sx={{ 
+                    '& .MuiOutlinedInput-root': { 
+                      borderRadius: '6px',
+                      '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                        borderColor: jobseekerColors.primary,
+                        borderWidth: '2px'
+                      }
+                    },
+                    '& .MuiInputLabel-root.Mui-focused': {
+                      color: jobseekerColors.primary
+                    }
+                  }}
+                  value={field.value === '' ? '' : toPersianDigits(String(field.value))}
+                  onChange={(e) => {
+                    if (!showYearsInput) return; // اگر فیلد غیرفعال است، تغییرات را نادیده بگیر
+                    
+                    const raw = e.target.value;
+                    const normalized = persianToEnglish(raw).replace(/[^0-9]/g, '');
+                    if (normalized === '') { field.onChange(''); return; }
+                    let n = Number(normalized);
+                    if (Number.isNaN(n)) { field.onChange(''); return; }
+                    if (n < 6 && showYearsInput) n = 6;
+                    if (n > 99) n = 99;
+                    field.onChange(n);
+                  }}
+                  disabled={!showYearsInput} // فیلد فقط وقتی فعال باشد که "بیشتر از 6 سال" انتخاب شده باشد
+                />
+              )}
+            />
+          </Box>
         </Box>
       </Box>
 
