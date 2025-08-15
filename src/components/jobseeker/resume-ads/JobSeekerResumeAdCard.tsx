@@ -607,10 +607,11 @@ export default function JobSeekerResumeAdCard({ resumeAd, onUpdate }: JobSeekerR
               borderBottomLeftRadius: 8,
               borderTopLeftRadius: 0,
               borderBottomRightRadius: 0,
-              zIndex: 2,
+              zIndex: 9,
               minWidth: '45px',
               boxShadow: '0 2px 4px rgba(0,0,0,0.15)',
-              textAlign: 'center'
+              textAlign: 'center',
+              transform: 'translateX(0)'
             }}>
               {resumeAd.advertisement.subscription.plan.name === 'ladder' ? 'نردبان' : 
                resumeAd.advertisement.subscription.plan.name === 'urgent' ? 'فوری' : ''}
