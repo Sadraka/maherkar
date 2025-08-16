@@ -47,12 +47,12 @@ import {
   GENDER_CHOICES,
   SOLDIER_STATUS_CHOICES,
   DEGREE_CHOICES,
-  SALARY_CHOICES,
   JOB_TYPE_CHOICES,
   NewResumeOrderRequest,
   NewResumeOrderResponse,
   PaymentRequestResponse
 } from '@/types';
+import { getSalaryText } from '@/lib/jobUtils';
 
 /**
  * تایپ استان برای TypeScript
@@ -308,8 +308,14 @@ export default function CreateResumeAdForm({
     ...Object.entries(SOLDIER_STATUS_CHOICES).map(([value, label]) => ({ value, label }))
   ];
   const salaryOptions = [
-    ...Object.entries(SALARY_CHOICES).map(([value, label]) => ({ value, label }))
-  ];
+    { value: '5 to 10' },
+    { value: '10 to 15' },
+    { value: '15 to 20' },
+    { value: '20 to 30' },
+    { value: '30 to 50' },
+    { value: 'More than 50' },
+    { value: 'Negotiable' }
+  ] as const;
 
   // تنظیمات مشترک منوی کشویی
   const menuPropsRTL: Partial<MenuProps> = {
@@ -1126,40 +1132,7 @@ export default function CreateResumeAdForm({
               pointerEvents: !hasResume ? 'none' : 'auto'
             }}>
 
-              {/* توضیحات آگهی رزومه */}
-              {resumeInfo && (
-                <Alert 
-                  severity="success" 
-                  icon={false}
-                  sx={{ 
-                    mb: 2,
-                    '& .MuiAlert-message': {
-                      width: '100%',
-                      padding: '12px 16px'
-                    }
-                  }}
-                >
-                  <Box >
-                    <Typography variant="body2" sx={{ 
-                      color: 'text.secondary', 
-                      lineHeight: 1.6,
-                      fontSize: { xs: '0.75rem', sm: '0.875rem' },
-                      display: { xs: 'none', sm: 'block' }
-                    }}>
-                      اطلاعات شخصی شما شامل مهارت‌ها، تجربیات و تحصیلات به‌طور خودکار در آگهی شما نمایش داده خواهد شد.
-                      برای ویرایش اطلاعات شخصی، به بخش "اطلاعات شخصی" مراجعه کنید.
-                    </Typography>
-                    <Typography variant="body2" sx={{ 
-                      color: 'text.secondary', 
-                      lineHeight: 1.6,
-                      fontSize: '0.75rem',
-                      display: { xs: 'block', sm: 'none' }
-                    }}>
-                      اطلاعات شخصی شما به‌طور خودکار در آگهی نمایش داده می‌شود.
-                    </Typography>
-                  </Box>
-                </Alert>
-              )}
+
               
               {/* عنوان آگهی */}
               <Box>
@@ -1628,14 +1601,14 @@ export default function CreateResumeAdForm({
                             input={<OutlinedInput sx={selectStyles} />}
                             renderValue={() => {
                               const selected = salaryOptions.find(o => o.value === field.value);
-                              return <Box component="div" sx={{ display: 'flex', justifyContent: 'center', width: '100%' }}>{selected ? selected.label : 'انتخاب حقوق'}</Box>;
+                              return <Box component="div" sx={{ display: 'flex', justifyContent: 'center', width: '100%' }}>{selected ? getSalaryText(selected.value) : 'انتخاب حقوق'}</Box>;
                             }}
                             MenuProps={menuPropsRTL}
                             startAdornment={<InputAdornment position="start" sx={{ position: 'absolute', right: '10px' }}><AttachMoneyIcon fontSize="small" sx={{ color: jobSeekerColors.primary }} /></InputAdornment>}
                             IconComponent={(props: any) => <KeyboardArrowDownIcon {...props} sx={{ color: jobSeekerColors.primary }} />}
                           >
                             <MenuItem value="">انتخاب حقوق</MenuItem>
-                            {salaryOptions.map(opt => <MenuItem key={opt.value} value={opt.value}>{opt.label}</MenuItem>)}
+                            {salaryOptions.map(opt => <MenuItem key={opt.value} value={opt.value}>{getSalaryText(opt.value)}</MenuItem>)}
                           </Select>
                         </FormControl>
                       )}
