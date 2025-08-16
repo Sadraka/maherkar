@@ -16,15 +16,39 @@ const ResumeAdsHeader = ({ showCreateButton = true }: ResumeAdsHeaderProps) => {
     <Box sx={{ 
       mb: 4, 
       display: 'flex', 
-      flexDirection: { xs: 'column', sm: 'row' },
+      flexDirection: { xs: 'column', md: 'row' },
       justifyContent: 'space-between',
-      alignItems: { xs: 'stretch', sm: 'center' },
+      alignItems: { xs: 'flex-end', md: 'center' },
       gap: 2,
       direction: 'rtl'
     }}>
-      {/* دکمه ثبت آگهی رزومه جدید - سمت چپ */}
+      {/* عنوان و توضیح - سمت راست */}
+      <Box sx={{ 
+        flex: 1,
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'flex-end',
+        textAlign: 'right'
+      }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 1 }}>
+          <Typography 
+            variant="h4" 
+            component="h1" 
+            fontWeight="bold" 
+            sx={{ 
+              fontSize: { xs: '1.5rem', md: '2rem' },
+              color: JOB_SEEKER_THEME.primary
+            }}
+          >
+            آگهی‌های رزومه من
+          </Typography>
+        </Box>
+
+      </Box>
+      
+      {/* دکمه ثبت آگهی رزومه جدید - پایین متن در موبایل، سمت چپ در دسکتاپ */}
       {showCreateButton && (
-        <Box sx={{ flexShrink: 0 }}>
+        <Box sx={{ flexShrink: 0, width: { xs: '100%', md: 'auto' } }}>
           <Link href="/jobseeker/resume-ads/create" style={{ textDecoration: 'none' }}>
             <Button
               variant="contained"
@@ -47,8 +71,9 @@ const ResumeAdsHeader = ({ showCreateButton = true }: ResumeAdsHeaderProps) => {
                   transform: 'translateY(-1px)'
                 },
                 transition: 'all 0.3s ease',
-                width: { xs: '100%', sm: 'auto' },
-                minWidth: { sm: 200 }
+                width: { xs: '100%', md: 'auto' },
+                minWidth: { md: 200 },
+                mt: { xs: 2, md: 0 }
               }}
             >
               ثبت آگهی رزومه جدید
@@ -56,44 +81,6 @@ const ResumeAdsHeader = ({ showCreateButton = true }: ResumeAdsHeaderProps) => {
           </Link>
         </Box>
       )}
-
-      {/* عنوان و توضیح - سمت راست */}
-      <Box sx={{ 
-        flex: 1,
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: { xs: 'flex-start', sm: 'flex-end' },
-        textAlign: { xs: 'left', sm: 'right' }
-      }}>
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 1 }}>
-          <CampaignIcon sx={{ 
-            fontSize: { xs: 32, md: 42 }, 
-            color: JOB_SEEKER_THEME.primary,
-            transform: 'translateY(-2px)'
-          }} />
-          <Typography 
-            variant="h4" 
-            component="h1" 
-            fontWeight="bold" 
-            sx={{ 
-              fontSize: { xs: '1.5rem', md: '2rem' },
-              color: JOB_SEEKER_THEME.primary
-            }}
-          >
-            آگهی‌های رزومه من
-          </Typography>
-        </Box>
-        <Typography 
-          variant="body1" 
-          color="text.secondary" 
-          sx={{ 
-            fontSize: { xs: '0.9rem', md: '1rem' },
-            maxWidth: { xs: '100%', sm: '400px' }
-          }}
-        >
-          مدیریت و بررسی آگهی‌های رزومه خود و مشاهده وضعیت آن‌ها
-        </Typography>
-      </Box>
     </Box>
   );
 };

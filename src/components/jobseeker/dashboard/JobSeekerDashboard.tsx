@@ -278,6 +278,7 @@ export default function JobSeekerDashboard() {
                 boxShadow: '0 4px 18px rgba(10,155,84,0.25)',
                 gridColumn: { xs: '1 / -1', md: 'auto' }, // در موبایل تمام عرض را بگیرد
                 minHeight: { xs: 100, sm: 120 }, // همان ارتفاع کارت‌های دیگر
+                order: { xs: -1, md: 0 }, // در موبایل اول نمایش داده شود
                 '&:hover': {
                   boxShadow: '0 6px 24px rgba(10,155,84,0.35)',
                   transform: 'translateY(-2px)'
@@ -285,7 +286,7 @@ export default function JobSeekerDashboard() {
               }}
             >
               <Link
-                href={hasResume ? "/jobseeker/resume-ads/create" : "/jobseeker/resume/create"}
+                href="/jobseeker/resume-ads/create"
                 style={{
                   display: 'flex',
                   alignItems: 'center',
@@ -298,7 +299,7 @@ export default function JobSeekerDashboard() {
                 }}
               >
                 <Typography fontWeight="bold" sx={{ fontSize: { xs: '1.2rem', sm: '1.3rem', md: '1.4rem' }, color: '#ffffff', textAlign: 'center', lineHeight: 1.8 }}>
-                  {hasResume ? 'ایجاد آگهی رزومه' : 'ایجاد رزومه'}
+                  {'ایجاد آگهی رزومه'}
                 </Typography>
               </Link>
             </Paper>
