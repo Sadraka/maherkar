@@ -261,6 +261,7 @@ const ResumeAdsSearchAndSort: React.FC<ResumeAdsSearchAndSortProps> = ({
             borderRadius: 2,
             borderColor: JOB_SEEKER_THEME.primary,
             color: JOB_SEEKER_THEME.primary,
+            width: { xs: '100%', md: 'auto' },
             '&:hover': {
               borderColor: JOB_SEEKER_THEME.dark,
               backgroundColor: `${JOB_SEEKER_THEME.primary}10`

@@ -18,17 +18,16 @@ const ResumeAdsHeader = ({ showCreateButton = true }: ResumeAdsHeaderProps) => {
       display: 'flex', 
       flexDirection: { xs: 'column', md: 'row' },
       justifyContent: 'space-between',
-      alignItems: { xs: 'flex-end', md: 'center' },
-      gap: 2,
-      direction: 'rtl'
+      alignItems: { xs: 'flex-start', md: 'center' },
+      gap: 2
     }}>
       {/* عنوان و توضیح - سمت راست */}
       <Box sx={{ 
         flex: 1,
         display: 'flex',
         flexDirection: 'column',
-        alignItems: 'flex-end',
-        textAlign: 'right'
+        alignItems: 'flex-start',
+        textAlign: 'left'
       }}>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 1 }}>
           <Typography 
