@@ -1945,43 +1945,7 @@ export default function UserMenu({ user: propUser, isLoggedIn: propIsLoggedIn }:
                                     })}
                                 </Box>
 
-                                {/* دکمه خروج برای کارجو - فقط در حالت موبایل */}
-                                <Box sx={{ 
-                                    px: 1, 
-                                    pt: 2, 
-                                    pb: 2,
-                                    borderTop: '1px solid', 
-                                    borderColor: 'divider', 
-                                    flexShrink: 0 
-                                }}>
-                                    <ListItemButton
-                                        onClick={() => {
-                                            console.log('Logout clicked');
-                                            authLogout();
-                                            handleClose();
-                                        }}
-                                        sx={{
-                                            borderRadius: 2,
-                                            color: 'error.main',
-                                            cursor: 'pointer',
-                                            '&:hover': {
-                                                bgcolor: 'error.light',
-                                                color: 'error.contrastText',
-                                            },
-                                        }}
-                                    >
-                                        <ListItemIcon sx={{ minWidth: 36, color: 'inherit' }}>
-                                            <FontAwesomeIcon icon={faSignOutAlt} style={{ fontSize: '1rem' }} />
-                                        </ListItemIcon>
-                                        <ListItemText
-                                            primary="خروج از حساب"
-                                            primaryTypographyProps={{
-                                                fontSize: '0.9rem',
-                                                fontWeight: 'medium',
-                                            }}
-                                        />
-                                    </ListItemButton>
-                                </Box>
+
                             </>
                         )}
 

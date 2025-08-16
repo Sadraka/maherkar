@@ -183,7 +183,7 @@ export default function JobSeekerDashboard() {
               {profileData?.user?.full_name || user?.full_name || user?.username || 'کارجو'}
             </Box>
           </Typography>
-          <Typography sx={{ position: 'relative', zIndex: 1, color: JOB_SEEKER_THEME.primary, fontWeight: 500, fontSize: { xs: '0.85rem', sm: '0.95rem', md: '1rem' }, whiteSpace: { xs: 'normal', sm: 'nowrap' }, overflow: 'visible', textOverflow: 'clip', letterSpacing: '0.015em', textShadow: '0 1px 3px rgba(10,155,84,0.25)', alignSelf: { xs: 'center', sm: 'flex-end' }, textAlign: { xs: 'center', sm: 'left' } }}>
+          <Typography sx={{ position: 'relative', zIndex: 1, color: JOB_SEEKER_THEME.primary, fontWeight: 500, fontSize: { xs: '0.75rem', sm: '0.95rem', md: '1rem' }, whiteSpace: 'nowrap', overflow: 'visible', textOverflow: 'clip', letterSpacing: '0.015em', textShadow: '0 1px 3px rgba(10,155,84,0.25)', alignSelf: { xs: 'center', sm: 'flex-end' }, textAlign: { xs: 'center', sm: 'left' } }}>
             با ماهرکار، فقط با چند کلیک <Box component="span" sx={{ color: JOB_SEEKER_THEME.contrast, fontWeight: 'bold' }}>بهترین</Box> شغل رو پیدا کن
           </Typography>
         </Box>
