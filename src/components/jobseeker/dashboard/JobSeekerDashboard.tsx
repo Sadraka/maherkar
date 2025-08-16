@@ -197,6 +197,7 @@ export default function JobSeekerDashboard() {
               sm: 'repeat(2, 1fr)', 
               md: 'repeat(3, 1fr)' 
             }, 
+            gridTemplateRows: { xs: 'auto auto', sm: 'auto auto', md: 'auto' },
             gap: { xs: 2, sm: 3, md: 4 } 
           }}>
             {/* کارت درخواست‌های ارسالی */}
@@ -275,6 +276,8 @@ export default function JobSeekerDashboard() {
                 height: '100%',
                 transition: 'all 0.25s ease',
                 boxShadow: '0 4px 18px rgba(10,155,84,0.25)',
+                gridColumn: { xs: '1 / -1', md: 'auto' }, // در موبایل تمام عرض را بگیرد
+                minHeight: { xs: 100, sm: 120 }, // همان ارتفاع کارت‌های دیگر
                 '&:hover': {
                   boxShadow: '0 6px 24px rgba(10,155,84,0.35)',
                   transform: 'translateY(-2px)'
@@ -294,7 +297,7 @@ export default function JobSeekerDashboard() {
                   textDecoration: 'none'
                 }}
               >
-                <Typography fontWeight="bold" sx={{ fontSize: { xs: '0.9rem', sm: '1.1rem', md: '1.25rem' }, color: '#ffffff', textAlign: 'center', lineHeight: 1.8 }}>
+                <Typography fontWeight="bold" sx={{ fontSize: { xs: '1.2rem', sm: '1.3rem', md: '1.4rem' }, color: '#ffffff', textAlign: 'center', lineHeight: 1.8 }}>
                   {hasResume ? 'ایجاد آگهی رزومه' : 'ایجاد رزومه'}
                 </Typography>
               </Link>
