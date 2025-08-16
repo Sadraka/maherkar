@@ -1140,9 +1140,22 @@ export default function CreateResumeAdForm({
                   }}
                 >
                   <Box >
-                    <Typography variant="body2" sx={{ color: 'text.secondary', lineHeight: 1.6 }}>
+                    <Typography variant="body2" sx={{ 
+                      color: 'text.secondary', 
+                      lineHeight: 1.6,
+                      fontSize: { xs: '0.75rem', sm: '0.875rem' },
+                      display: { xs: 'none', sm: 'block' }
+                    }}>
                       اطلاعات شخصی شما شامل مهارت‌ها، تجربیات و تحصیلات به‌طور خودکار در آگهی شما نمایش داده خواهد شد.
                       برای ویرایش اطلاعات شخصی، به بخش "اطلاعات شخصی" مراجعه کنید.
+                    </Typography>
+                    <Typography variant="body2" sx={{ 
+                      color: 'text.secondary', 
+                      lineHeight: 1.6,
+                      fontSize: '0.75rem',
+                      display: { xs: 'block', sm: 'none' }
+                    }}>
+                      اطلاعات شخصی شما به‌طور خودکار در آگهی نمایش داده می‌شود.
                     </Typography>
                   </Box>
                 </Alert>
